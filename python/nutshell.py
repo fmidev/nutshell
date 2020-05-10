@@ -20,6 +20,9 @@ Simple query using configuration file and product definition::
       -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png 
 
 
+
+
+
 Using NutShell within python
 ============================
 
@@ -273,7 +276,9 @@ class ProductServer:
             filename_latest = product_info.filename_latest()
             #cache_dir_dyn = product_server.get_dynamic_cache_dir(product_info)
             #cache_dir = product_server.get_cache_dir(product_info)
-            cache_root = product_server.CACHE_ROOT
+            #cache_root = product_server.CACHE_ROOT
+            cache_root = Path(product_server.CACHE_ROOT)
+            cache_root = str(cache_root.absolute())
             time_dir = product_server.get_time_dir(product_info)
             prod_dir = product_server.get_product_dir(product_info)
       
@@ -369,7 +374,9 @@ class ProductServer:
     
     
     def get_generator_dir(self, product_info):
-        return self.PRODUCT_ROOT+os.sep+product_info.ID.replace('.', os.sep)
+        path = Path(self.PRODUCT_ROOT, *product_info.ID.split('.'))
+        return str(path.absolute())
+        #return self.PRODUCT_ROOT+os.sep+product_info.ID.replace('.', os.sep)
 
    
 
@@ -405,7 +412,7 @@ class ProductServer:
                     status = int(task.error_info.split(' ')[0])
                     task.status = HTTPStatus(status)
                 except ValueError:
-                    log.warn('Not HTTP error code: {0} '.format(status))
+                    log.warn('Not HTTP error code: {0} '.format(task.status))
                     task.status = HTTPStatus.CONFLICT
         if (stderr):
             stderr = stderr.decode(encoding='UTF-8')
@@ -421,7 +428,7 @@ class ProductServer:
         input_info = self.InputInfo(product_info)
         
         if (not input_info.script.exists()):
-            log.debug("no input script: {0]".format(input_info.script))         
+            log.debug("No input script: {0}".format(input_info.script))         
             return input_info   
         
         # TODO generalize (how)
@@ -634,7 +641,7 @@ if __name__ == '__main__':
     #print()
     #logger = logging.getLogger(__name__ + str(++product_server.counter))
     logger = logging.getLogger('NutShell')
-    logger.setLevel(3)
+    logger.setLevel(30)
     #logger.debug("parsing arguments")
     
     parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
@@ -648,12 +655,14 @@ if __name__ == '__main__':
         exit(1)
     
     if (options.VERBOSE):
-        if (options.VERBOSE in nutils.VERBOSITY_LEVELS):
-            options.VERBOSE = nutils.VERBOSITY_LEVELS[options.VERBOSE]
-            logger.setLevel(options.VERBOSE)
+        options.LOG_LEVEL = "INFO"
+        
+    if (options.LOG_LEVEL):
+        if hasattr(logging, options.LOG_LEVEL):
+            #nutils.VERBOSITY_LEVELS[options.VERBOSE]
+            logger.setLevel(getattr(logging, options.LOG_LEVEL))
         else:
-            logger.setLevel(10 * int(options.VERBOSE))
-        #print(options)
+            logger.setLevel(int(options.LOG_LEVEL))
     
     logger.debug(options)   
     
