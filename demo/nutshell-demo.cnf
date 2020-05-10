@@ -7,7 +7,7 @@
 CACHE_ROOT='./demo/cache'
 
 # Root of product generator (script) directories
-PRODUCT_ROOT='./demo/generators'
+PRODUCT_ROOT='./demo/products'
 
 # Top-level directory for HTTP server (optional).
 HTML_ROOT='./html'
