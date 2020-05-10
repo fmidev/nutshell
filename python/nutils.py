@@ -91,7 +91,7 @@ def set_entries(obj, entries={}, lenient = True):
 
 #VERBOSITY_LEVELS=[(0,"NOTSET"), (0,"DEBUG"),(0,"INFO"),(0,"WARNING"), (0,"ERROR"), (0,"CRITICAL") ]
 
-VERBOSITY_LEVELS={"NOTSET": 0, "DEBUG":10, "INFO":20, "WARNING":30, "ERROR":40, "CRITICAL":50 }
+#VERBOSITY_LEVELS={"NOTSET": 0, "DEBUG":10, "INFO":20, "WARNING":30, "ERROR":40, "CRITICAL":50 }
 
 
 

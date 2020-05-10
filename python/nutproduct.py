@@ -72,14 +72,20 @@ class ProductInfo:
         if (not parser):
             parser = argparse.ArgumentParser()
 
-        verbose_keys = '|'.join(nutshell.nutils.VERBOSITY_LEVELS.keys())
+        
+        #verbose_keys = '|'.join(nutshell.nutils.VERBOSITY_LEVELS.keys())
         #Out[70]: 'NOTSET,CRITICAL,INFO,WARNING,ERROR,DEBUG'
 
-        parser.add_argument("-v", "--verbose", metavar=verbose_keys,
-                            dest="VERBOSE",
-                            #type=int,
-                            default=5,
+        parser.add_argument("-l", "--log_level", metavar='DEBUG|INFO|ERROR|CRITICAL',
+                            dest="LOG_LEVEL",
+                            type=str,
+                            default="",
                             help="Print status messages to stdout")
+ 
+        parser.add_argument("-v", "--verbose",
+                            dest="VERBOSE",
+                            action="store_true",
+                            help="Same as --log_level 0 : print all status messages")
 
         parser.add_argument("-f", "--product_filename", metavar="<filename>",
                             dest="OUTFILE",
@@ -314,9 +320,7 @@ if __name__ == '__main__':
         parser.print_help()
         exit(1)
 
-    if (options.VERBOSE > 10):
-        print(options)
-
+    
     product_info = ProductInfo()
 
     if (options.OUTFILE):

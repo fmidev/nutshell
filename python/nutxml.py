@@ -1,6 +1,6 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
-"""Utilities for main modules of NutShell"""
+"""Utilities for main modules of NutShell """
 
 __version__ = '0.2'
 __author__ = 'Markus.Peura@fmi.fi'

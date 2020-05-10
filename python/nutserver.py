@@ -9,6 +9,7 @@ The next paragraph is a code sample::
     response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
 
 
+
 """
 __version__ = '0.1'
 __author__ = 'Markus.Peura@fmi.fi'
@@ -393,12 +394,14 @@ if __name__ == '__main__':
         exit(1)
       
     if (options.VERBOSE):
-        if (options.VERBOSE in nutils.VERBOSITY_LEVELS):
-            options.VERBOSE = nutils.VERBOSITY_LEVELS[options.VERBOSE]
-            product_server.logger.setLevel(options.VERBOSE)
+        options.LOG_LEVEL = "LOG"
+        
+    if (options.LOG_LEVEL):
+        if hasattr(logging, options.LOG_LEVEL):
+            product_server.logger.setLevel(getattr(logging, options.LOG_LEVEL))
         else:
-            product_server.logger.setLevel(10 * int(options.VERBOSE))  
-  
+            product_server.logger.setLevel(int(options.LOG_LEVEL))
+    
     conf = ("nutshell/nutshell.cnf", False) # lenient, skip silently if missing
     if (options.CONF):
         conf = (options.CONF, True) # strict, explicit 
