@@ -131,8 +131,11 @@
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="NutHandler.parse_url"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutserver.NutHandler.parse_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; splitquery(&#39;/path?query&#39;) --&gt; &#39;/path&#39;, &#39;query&#39;.</span>
-<span class="sd">            If query returned also when None        </span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">            Uses urllib.parse.splitquery(&#39;/path?query&#39;) to obtain &#39;/path&#39;, &#39;query&#39;</span>
+<span class="sd">            </span>
+<span class="sd">            Note: query is returned also when None.        </span>
+<span class="sd">            </span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># </span>
         <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span>
         <span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">query</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">splitquery</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
