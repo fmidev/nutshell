@@ -75,6 +75,9 @@
 <span class="sd">      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png </span>
 
 
+
+
+
 <span class="sd">Using NutShell within python</span>
 <span class="sd">============================</span>
 
@@ -174,8 +177,8 @@
     <span class="c1"># HTTP Server Options (forward defs HTTP server, so perhaps later moved to NutServer )</span>
     <span class="n">HTTP_PORT</span> <span class="o">=</span> <span class="mi">8088</span>
     <span class="n">HTTP_NAME</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="n">HTTP_PATH_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;nutshell/&#39;</span> <span class="c1"># todo</span>
-    <span class="n">HTML_ROOT</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span> <span class="c1"># todo</span>
+    <span class="n">HTTP_PATH_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;nutshell/&#39;</span> <span class="c1"># TODO</span>
+    <span class="n">HTML_ROOT</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span> 
     <span class="n">HTML_TEMPLATE</span> <span class="o">=</span> <span class="s1">&#39;template.html&#39;</span> 
 
     <span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
@@ -328,7 +331,9 @@
             <span class="n">filename_latest</span> <span class="o">=</span> <span class="n">product_info</span><span class="o">.</span><span class="n">filename_latest</span><span class="p">()</span>
             <span class="c1">#cache_dir_dyn = product_server.get_dynamic_cache_dir(product_info)</span>
             <span class="c1">#cache_dir = product_server.get_cache_dir(product_info)</span>
-            <span class="n">cache_root</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">CACHE_ROOT</span>
+            <span class="c1">#cache_root = product_server.CACHE_ROOT</span>
+            <span class="n">cache_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">CACHE_ROOT</span><span class="p">)</span>
+            <span class="n">cache_root</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_root</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
             <span class="n">time_dir</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">get_time_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
             <span class="n">prod_dir</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">get_product_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
       
@@ -378,7 +383,20 @@
          <span class="n">info</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
                 
          <span class="k">return</span> <span class="n">info</span>
+
     
+<div class="viewcode-block" id="ProductServer.init_path"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.init_path">[docs]</a>    <span class="k">def</span> <span class="nf">init_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">check_existence</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Expand relative path to absolute, optionally check that exists. &quot;&quot;&quot;</span> 
+        <span class="c1">#if (hasattr(self, dirname)):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">))</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  {0} =&gt;  {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">check_existence</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="n">FileNotFoundError</span><span class="p">(</span><span class="n">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="c1"># TODO -&gt; Path obj</span></div>
+        <span class="c1">#else:</span>
+        <span class="c1">#     raise KeyError   </span>
+            
+        
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conffile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;NutShell2&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">conffile</span><span class="p">):</span>
@@ -386,8 +404,11 @@
         <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="c1"># discarded</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
-
-
+        <span class="c1">#self._init_dir(&#39;PRODUCT_ROOT&#39;)</span>
+        <span class="c1">#self._init_dir(&#39;CACHE_ROOT&#39;)</span>
+        <span class="c1"># self._init_dir(&#39;HTML_ROOT&#39;) # not here!</span>
+        <span class="c1"># self._init_dir(&#39;HTML_ROOT&#39;+&#39;/&#39;+&#39;HTML_TEMPLATE&#39;) # not here!</span>
+        
     <span class="k">def</span> <span class="nf">read_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conffile</span> <span class="o">=</span> <span class="s1">&#39;nutshell.cnf&#39;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">conffile</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;reading conf file {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conffile</span><span class="p">))</span>
@@ -424,7 +445,9 @@
     
     
     <span class="k">def</span> <span class="nf">get_generator_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ROOT</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ROOT</span><span class="p">,</span> <span class="o">*</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
+        <span class="c1">#return self.PRODUCT_ROOT+os.sep+product_info.ID.replace(&#39;.&#39;, os.sep)</span>
 
    
 
@@ -460,7 +483,7 @@
                     <span class="n">status</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">error_info</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">task</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Not HTTP error code: {0} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Not HTTP error code: {0} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
                     <span class="n">task</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">CONFLICT</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">stderr</span><span class="p">):</span>
             <span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
@@ -476,7 +499,7 @@
         <span class="n">input_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">InputInfo</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">input_info</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;no input script: {0]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>         
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No input script: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>         
             <span class="k">return</span> <span class="n">input_info</span>   
         
         <span class="c1"># TODO generalize (how)</span>
@@ -689,7 +712,7 @@
     <span class="c1">#print()</span>
     <span class="c1">#logger = logging.getLogger(__name__ + str(++product_server.counter))</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;NutShell&#39;</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
     <span class="c1">#logger.debug(&quot;parsing arguments&quot;)</span>
     
     <span class="n">parser</span> <span class="o">=</span> <span class="n">ProductServer</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">()</span> <span class="c1"># ProductInfo.get_arg_parser(parser)</span>
@@ -703,12 +726,14 @@
         <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span> <span class="ow">in</span> <span class="n">nutils</span><span class="o">.</span><span class="n">VERBOSITY_LEVELS</span><span class="p">):</span>
-            <span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">VERBOSITY_LEVELS</span><span class="p">[</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">]</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span>
+        
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+            <span class="c1">#nutils.VERBOSITY_LEVELS[options.VERBOSE]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">))</span>
-        <span class="c1">#print(options)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
     
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>   
     
@@ -798,6 +823,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../overall_scheme.html">Overall Scheme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-main.html">NutShell main modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell.html">NutShell support modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
 </ul>
 
           <div role="search">

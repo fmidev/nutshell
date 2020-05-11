@@ -216,6 +216,12 @@ directives determine how the product is generated.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="nutshell.nutshell.ProductServer.init_path">
+<code class="descclassname">ProductServer.</code><code class="descname">init_path</code><span class="sig-paren">(</span><em>dirname</em>, <em>check_existence=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.init_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.init_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand relative path to absolute, optionally check that exists.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="nutshell.nutshell.ProductServer.make_request">
 <code class="descclassname">ProductServer.</code><code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, actions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>&#8221; Return path or log
@@ -264,8 +270,8 @@ params &#8211; attempted new state.</dd>
 <dl class="staticmethod">
 <dt id="nutshell.nutserver.NutHandler.parse_url">
 <em class="property">static </em><code class="descname">parse_url</code><span class="sig-paren">(</span><em>url</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutserver.html#NutHandler.parse_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutserver.NutHandler.parse_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uses urllib.parse.splitquery(&#8216;/path?query&#8217;) to obtain &#8216;/path&#8217;, &#8216;query&#8217;</p>
-<p>Note: query is returned also when None.</p>
+<dd><p>splitquery(&#8216;/path?query&#8217;) &#8211;&gt; &#8216;/path&#8217;, &#8216;query&#8217;.
+If query returned also when None</p>
 </dd></dl>
 
 <dl class="staticmethod">
@@ -320,6 +326,7 @@ params &#8211; attempted new state.</dd>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell.html">NutShell support modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a></li>
 </ul>
 
           <div role="search">

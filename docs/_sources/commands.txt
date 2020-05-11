@@ -1,0 +1,31 @@
+.. NutShell documentation, description
+
+
+   
+Commands
+========
+
+Request
+-------
+
+=====  =====  =======
+A      B      A and B
+=====  =====  =======
+MAKE   False  False
+DELETE True   False  False
+False  True   False
+True   True   True
+=====  =====  =======
+
+
+Directives
+----------
+
+Built-in directives
+
+====== ==================================================
+LOG    Save log 
+LINK   Link file to short directory
+LATEST Link file with `$TIMESTAMP` replaced with 'LATEST'
+====== ==================================================
+

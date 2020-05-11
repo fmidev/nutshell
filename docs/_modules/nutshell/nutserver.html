@@ -64,6 +64,7 @@
 <span class="sd">    response = server.make_request(&quot;201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png&quot;, &quot;MAKE&quot;)</span>
 
 
+
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
@@ -130,11 +131,8 @@
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="NutHandler.parse_url"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutserver.NutHandler.parse_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">            Uses urllib.parse.splitquery(&#39;/path?query&#39;) to obtain &#39;/path&#39;, &#39;query&#39;</span>
-<span class="sd">            </span>
-<span class="sd">            Note: query is returned also when None.        </span>
-<span class="sd">            </span>
+        <span class="sd">&quot;&quot;&quot; splitquery(&#39;/path?query&#39;) --&gt; &#39;/path&#39;, &#39;query&#39;.</span>
+<span class="sd">            If query returned also when None        </span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># </span>
         <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span>
         <span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">query</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">splitquery</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
@@ -451,12 +449,14 @@
         <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
       
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span> <span class="ow">in</span> <span class="n">nutils</span><span class="o">.</span><span class="n">VERBOSITY_LEVELS</span><span class="p">):</span>
-            <span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">VERBOSITY_LEVELS</span><span class="p">[</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">]</span>
-            <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span>
+        
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+            <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">))</span>  
-  
+            <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
+    
     <span class="n">conf</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;nutshell/nutshell.cnf&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="c1"># lenient, skip silently if missing</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">CONF</span><span class="p">):</span>
         <span class="n">conf</span> <span class="o">=</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">CONF</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span> <span class="c1"># strict, explicit </span>
@@ -474,6 +474,11 @@
             <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;conf: {0}={1} [{2}] {3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">t</span> <span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="p">)</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">product_server</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">t</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
+    <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;PRODUCT_ROOT&#39;</span><span class="p">)</span>
+    <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;CACHE_ROOT&#39;</span><span class="p">)</span>
+    <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;HTML_ROOT&#39;</span><span class="p">)</span> <span class="c1"># not here!</span>
+    <span class="c1">#product_server.init_path(&#39;HTML_ROOT&#39;+&#39;/&#39;+&#39;HTML_TEMPLATE&#39;) # not here!</span>
+
     <span class="c1">#if (options.VERBOSE &gt; 6):</span>
     <span class="c1">#    nutils.print_dict(product_server.get_status())</span>
     <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_status</span><span class="p">())</span> 
@@ -486,7 +491,6 @@
         <span class="k">print</span> <span class="p">(</span><span class="n">product</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
         <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
                     
-
     <span class="c1"># TODO if (file not exits options.HTTM_TEMPLATE):</span>
     
     <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Proceed to start the server.&quot;</span><span class="p">)</span>
@@ -509,6 +513,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../overall_scheme.html">Overall Scheme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-main.html">NutShell main modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell.html">NutShell support modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
 </ul>
 
           <div role="search">
