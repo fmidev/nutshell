@@ -122,8 +122,8 @@ class ProductServer:
     # HTTP Server Options (forward defs HTTP server, so perhaps later moved to NutServer )
     HTTP_PORT = 8088
     HTTP_NAME = ''
-    HTTP_PATH_PREFIX = 'nutshell/' # todo
-    HTML_ROOT = '.' # todo
+    HTTP_PATH_PREFIX = 'nutshell/' # TODO
+    HTML_ROOT = '.' 
     HTML_TEMPLATE = 'template.html' 
 
     stdout = subprocess.PIPE
@@ -328,7 +328,20 @@ class ProductServer:
          info.returncode = 0
                 
          return info
+
     
+    def init_path(self, dirname, check_existence=False):
+        """ Expand relative path to absolute, optionally check that exists. """ 
+        #if (hasattr(self, dirname)):
+        path = Path(getattr(self, dirname)).absolute()
+        self.logger.warn('  {0} =>  {1}'.format(dirname, path))
+        if (check_existence) and not (path.exists()):
+            raise FileNotFoundError(__name__ + str(path))
+        setattr(self, dirname, str(path)) # TODO -> Path obj
+        #else:
+        #     raise KeyError   
+            
+        
     def __init__(self, conffile = ''): 
         self.logger = logging.getLogger("NutShell2")
         if (conffile):
@@ -336,8 +349,11 @@ class ProductServer:
         if __name__ == '__main__':
             self.stdout = os.sys.stdout # discarded
             self.stderr = os.sys.stderr
-
-
+        #self._init_dir('PRODUCT_ROOT')
+        #self._init_dir('CACHE_ROOT')
+        # self._init_dir('HTML_ROOT') # not here!
+        # self._init_dir('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
+        
     def read_conf(self, conffile = 'nutshell.cnf', strict=True):
         if (os.path.exists(conffile)):
             self.logger.debug("reading conf file {0} ".format(conffile))
@@ -655,7 +671,7 @@ if __name__ == '__main__':
         exit(1)
     
     if (options.VERBOSE):
-        options.LOG_LEVEL = "INFO"
+        options.LOG_LEVEL = "DEBUG"
         
     if (options.LOG_LEVEL):
         if hasattr(logging, options.LOG_LEVEL):

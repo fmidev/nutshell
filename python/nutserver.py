@@ -394,7 +394,7 @@ if __name__ == '__main__':
         exit(1)
       
     if (options.VERBOSE):
-        options.LOG_LEVEL = "LOG"
+        options.LOG_LEVEL = "DEBUG"
         
     if (options.LOG_LEVEL):
         if hasattr(logging, options.LOG_LEVEL):
@@ -418,6 +418,11 @@ if __name__ == '__main__':
             t = type(value)
             product_server.logger.info("conf: {0}={1} [{2}] {3}".format(k, value, t , v) )
             setattr(product_server, k, t(v))
+
+    product_server.init_path('PRODUCT_ROOT')
+    product_server.init_path('CACHE_ROOT')
+    product_server.init_path('HTML_ROOT') # not here!
+    #product_server.init_path('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
 
     #if (options.VERBOSE > 6):
     #    nutils.print_dict(product_server.get_status())
