@@ -436,7 +436,6 @@ if __name__ == '__main__':
         print (product.log)
         exit(0)
                     
-
     # TODO if (file not exits options.HTTM_TEMPLATE):
     
     product_server.logger.info("Proceed to start the server.")
