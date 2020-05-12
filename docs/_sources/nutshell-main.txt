@@ -4,6 +4,10 @@
 Using NutShell
 ====================================
 
+
+Clicking on this internal hyperlink will take us to the `Overall scheme`_
+
+
 NutShell
 --------
 .. automodule:: nutshell.nutshell
