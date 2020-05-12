@@ -10,7 +10,7 @@ Three interfaces of using NutShell
 
 Product requests can be sent to NutShell in three different ways:
 
-- The simplest way is to use the **command line**.
+# The simplest way is to use the **command line**.
   For details, see :ref:`command-line-usage`
 
 These options are illustrated in the image below.
