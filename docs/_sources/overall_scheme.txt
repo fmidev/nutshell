@@ -29,9 +29,23 @@ invoked minimally as follows:
 Upon success, ``response.returncode`` is nonzero and the generated
 or existing product file is available on disk in ``response.path``.
 
-Finally, one my start **HTTP server** module ``nutshell.httpd``, accessible through
-a URL of type ``http://<SERVER>:<PORT>/?<REQUESTS>``.
+Finally, one my start **HTTP server** module ``nutshell.httpd`` essentially by invoking::
 
+  python3  -m nutshell.httpd -c nutshell.cnf
+
+Then, the service is accessible through a URL of type ``http://<SERVER>:<PORT>/?<REQUESTS>`` ,
+on local host as ``http://127.0.0.1:8088/nutshell/server`` for example.
+The port can be set in configuration file or on command line. 
+
+Further, typically services are installed by super-user in system level startup directories -- consult
+your admin for details.
+
+Clicking on this internal hyperlink will take us to the target_
+below.
+
+.. _target:
+
+The hyperlink target above points to this paragraph.
 
 .. image:: img/nutshell-scheme-dot.png
 

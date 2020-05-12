@@ -80,8 +80,18 @@ invoked minimally as follows:</p>
 </div>
 <p>Upon success, <code class="docutils literal"><span class="pre">response.returncode</span></code> is nonzero and the generated
 or existing product file is available on disk in <code class="docutils literal"><span class="pre">response.path</span></code>.</p>
-<p>Finally, one my start <strong>HTTP server</strong> module <code class="docutils literal"><span class="pre">nutshell.httpd</span></code>, accessible through
-a URL of type <code class="docutils literal"><span class="pre">http://&lt;SERVER&gt;:&lt;PORT&gt;/?&lt;REQUESTS&gt;</span></code>.</p>
+<p>Finally, one my start <strong>HTTP server</strong> module <code class="docutils literal"><span class="pre">nutshell.httpd</span></code> essentially by invoking:</p>
+<div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell.cnf
+</pre></div>
+</div>
+<p>Then, the service is accessible through a URL of type <code class="docutils literal"><span class="pre">http://&lt;SERVER&gt;:&lt;PORT&gt;/?&lt;REQUESTS&gt;</span></code> ,
+on local host as <code class="docutils literal"><span class="pre">http://127.0.0.1:8088/nutshell/server</span></code> for example.
+The port can be set in configuration file or on command line.</p>
+<p>Further, typically services are installed by super-user in system level startup directories &#8211; consult
+your admin for details.</p>
+<p>Clicking on this internal hyperlink will take us to the <a class="reference internal" href="#target">target</a>
+below.</p>
+<p id="target">The hyperlink target above points to this paragraph.</p>
 <img alt="_images/nutshell-scheme-dot.png" src="_images/nutshell-scheme-dot.png" />
 <ul class="simple">
 <li>query form</li>
