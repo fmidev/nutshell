@@ -43,7 +43,7 @@ Further, typically services are installed by super-user in system level startup 
 your admin for details.
 
 
-Clicking on this internal hyperlink will take us to the `Overall scheme`_ or  `Using NutShell`_
+Clicking on this internal hyperlink will take us to the :ref:`Overall scheme`  or  :ref:`Using NutShell`
 below.
 
 .. _status-codes:
