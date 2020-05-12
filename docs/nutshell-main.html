@@ -135,98 +135,40 @@ on operations. Especially:</p>
 <dt id="nutshell.nutshell.ProductServer">
 <em class="property">class </em><code class="descclassname">nutshell.nutshell.</code><code class="descname">ProductServer</code><span class="sig-paren">(</span><em>conffile=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Service designed for generating image and data products served as files</p>
-<dl class="class">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest">
-<em class="property">class </em><code class="descname">ProductRequest</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>actions=None</em>, <em>directives=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.ProductRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Container for storing information on requested product and server side resources derived thereof.</p>
-<dl class="attribute">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.generator_path">
-<code class="descname">generator_path</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.generator_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>System-side full path to a dynamic directory and the generated product file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.path">
-<code class="descname">path</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.path" title="Permalink to this definition">¶</a></dt>
-<dd><p>System-side full path to the generated file, the product.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.path_static">
-<code class="descname">path_static</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.path_static" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional: System-side full path to the generated product file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.path_tmp">
-<code class="descname">path_tmp</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.path_tmp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional: Actual object (for example, python Image in the future)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.product_info">
-<code class="descname">product_info</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.product_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>System-side directory containing script () for generating the product</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.product_server">
-<code class="descname">product_server</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.product_server" title="Permalink to this definition">¶</a></dt>
-<dd><p>Specification of a product instance.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nutshell.nutshell.ProductServer.ProductRequest.set_status">
-<code class="descname">set_status</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.ProductRequest.set_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.ProductRequest.set_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set success or failure status using http.HTTPStatus codes.
-This is always logged.</p>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.ensure_output_dir">
-<code class="descclassname">ProductServer.</code><code class="descname">ensure_output_dir</code><span class="sig-paren">(</span><em>outdir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.ensure_output_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.ensure_output_dir" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ensure_output_dir</code><span class="sig-paren">(</span><em>outdir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.ensure_output_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.ensure_output_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a writable directory, if non-existent</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="nutshell.nutshell.ProductServer.get_arg_parser">
-<em class="property">classmethod </em><code class="descclassname">ProductServer.</code><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.get_arg_parser" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.get_arg_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populates parser with options of this class</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.get_input_list">
-<code class="descclassname">ProductServer.</code><code class="descname">get_input_list</code><span class="sig-paren">(</span><em>product_info</em>, <em>directives</em>, <em>log</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.get_input_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.get_input_list" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_input_list</code><span class="sig-paren">(</span><em>product_info</em>, <em>directives</em>, <em>log</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.get_input_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.get_input_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used for reading dynamic input configuration generated by input.sh.
 directives determine how the product is generated.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.get_product_dir">
-<code class="descclassname">ProductServer.</code><code class="descname">get_product_dir</code><span class="sig-paren">(</span><em>product_info</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.get_product_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.get_product_dir" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_product_dir</code><span class="sig-paren">(</span><em>product_info</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.get_product_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.get_product_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns directory containing product generator script (generate.sh) and possible configurations etc</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutshell.ProductServer.handle_request">
-<code class="descclassname">ProductServer.</code><code class="descname">handle_request</code><span class="sig-paren">(</span><em>pr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.handle_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.handle_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>&#8221; Return path or log
-&#8216;MAKE&#8217;   - return the product, if in cache, else generate it and return
-&#8216;DELETE&#8217; - delete the product in cache
-&#8216;INPUTS&#8217; - generate and store the product, also regenerate even if already exists</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="nutshell.nutshell.ProductServer.init_path">
-<code class="descclassname">ProductServer.</code><code class="descname">init_path</code><span class="sig-paren">(</span><em>dirname</em>, <em>check_existence=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.init_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.init_path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">init_path</code><span class="sig-paren">(</span><em>dirname</em>, <em>check_existence=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.init_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.init_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Expand relative path to absolute, optionally check that exists.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.make_request">
-<code class="descclassname">ProductServer.</code><code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, actions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, actions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>&#8221; Return path or log
 &#8216;MAKE&#8217;   - return the product, if in cache, else generate it and return
 &#8216;DELETE&#8217; - delete the product in cache
@@ -235,7 +177,7 @@ directives determine how the product is generated.</p>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.run_generator">
-<code class="descclassname">ProductServer.</code><code class="descname">run_generator</code><span class="sig-paren">(</span><em>product_request</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.run_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.run_generator" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run_generator</code><span class="sig-paren">(</span><em>product_request</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.run_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.run_generator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run shell script to generate a product.</p>
 <blockquote>
 <div>stdout and stderr are used for output.</div></blockquote>
