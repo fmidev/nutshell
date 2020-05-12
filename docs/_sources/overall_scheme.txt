@@ -46,6 +46,15 @@ your admin for details.
 Clicking on this internal hyperlink will take us to the :ref:`Overall scheme`  or  :ref:`Using NutShell`
 below.
 
+.. _my-reference-label:
+
+Section to cross-reference
+--------------------------
+
+This is the text of the section.
+
+It refers to the section itself, see :ref:`my-reference-label`.
+
 .. _status-codes:
 
 The hyperlink target above points to this paragraph.
