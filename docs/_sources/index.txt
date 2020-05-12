@@ -17,7 +17,7 @@ Contents:
    commands
    conf-file
    generators	      
-   
+   nutshell-variables
 		
 
 		  

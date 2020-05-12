@@ -1,3 +1,7 @@
 .. NutShell documentation, description
 
    
+	   
+.. image:: img/nutshell-variables-dot.png
+	   
+  

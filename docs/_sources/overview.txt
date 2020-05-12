@@ -14,13 +14,7 @@ These options are illustrated in the image below.
 
 .. image:: img/nutshell-scheme-dot.png
 
-	   
-- query form
-- error messages 
-- product info
-- input info
-- server status
-
+	 
 	   
 .. image:: img/nutshell-variables-dot.png
 	   
