@@ -63,14 +63,12 @@
 <h2>Three interfaces of using NutShell<a class="headerlink" href="#three-interfaces-of-using-nutshell" title="Permalink to this headline">¶</a></h2>
 <p>Product requests can be sent to NutShell in three different ways.
 These options are illustrated in the image below.
-The simplest way is to use the command line, calling Python module
-<code class="docutils literal"><span class="pre">nutshell.nutshell</span></code>, giving configuration file and desired product
-as parameters:</p>
+The simplest way is to use the <strong>command line</strong>, calling Python module
+<code class="docutils literal"><span class="pre">nutshell.nutshell</span></code>. For details, see <a class="reference internal" href="nutshell-main.html#command-line-usage"><span>Command line usage</span></a></p>
+<p>giving configuration file and desired product as parameters:</p>
 <div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell -c demo/nutshell-demo.cnf -p 201708121600_image.pattern_SIZE=100,100.png
 </pre></div>
 </div>
-<p><code class="docutils literal"><span class="pre">--make</span> <span class="pre">--product</span> <span class="pre">&lt;product&gt;</span></code>,
-<code class="docutils literal"><span class="pre">--make</span> <span class="pre">--product</span> <span class="pre">&lt;product&gt;</span></code>,</p>
 <p>Secondly, within a <strong>Python program</strong> or Python interpreter NutShell can be applied as a library,
 invoked minimally as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nutshell.nutshell</span>
