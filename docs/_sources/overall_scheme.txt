@@ -37,7 +37,7 @@ Then, the service is accessible through a URL of type ``http://<SERVER>:<PORT>/?
 on local host as ``http://127.0.0.1:8088/nutshell/server`` for example.
 The port can be set in configuration file or on command line. 
 
-More details in `status-codes`_
+More details in status-codes_
 
 Further, typically services are installed by super-user in system level startup directories -- consult
 your admin for details.
@@ -46,7 +46,7 @@ your admin for details.
 Clicking on this internal hyperlink will take us to the target_
 below.
 
-.. _target:
+.. _status-codes: MIKA
 
 The hyperlink target above points to this paragraph.
 
