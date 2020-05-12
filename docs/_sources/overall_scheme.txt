@@ -8,11 +8,14 @@ Overall Scheme
 Three interfaces of using NutShell
 ----------------------------------
 
-Product requests can be sent to NutShell in three different ways.
-These options are illustrated in the image below.
-The simplest way is to use the **command line**, calling Python module
-``nutshell.nutshell``. For details, see :ref:`command-line-usage`
+Product requests can be sent to NutShell in three different ways:
 
+- The simplest way is to use the **command line**.
+  For details, see :ref:`command-line-usage`
+
+These options are illustrated in the image below.
+
+, calling Python module``nutshell.nutshell``.
 giving configuration file and desired product as parameters::
 
   python3 -m nutshell.nutshell -c demo/nutshell-demo.cnf -p 201708121600_image.pattern_SIZE=100,100.png
