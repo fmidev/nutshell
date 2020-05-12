@@ -43,7 +43,7 @@ Further, typically services are installed by super-user in system level startup 
 your admin for details.
 
 
-Clicking on this internal hyperlink will take us to the `Directives`_ or  `Using NutShell`_
+Clicking on this internal hyperlink will take us to the Directives_ or  `Using NutShell`_
 below.
 
 .. _status-codes:
