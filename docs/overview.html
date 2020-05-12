@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Product generators &mdash; NutShell 0.2 documentation</title>
+    <title>Interfaces &mdash; NutShell 0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -51,59 +51,23 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="product-generators">
-<h1>Product generators<a class="headerlink" href="#product-generators" title="Permalink to this headline">¶</a></h1>
-<p>In NutShell, a <em>product generator</em> is a shell script that computes something with given parameters and
-saves the result as a file in a given path. As a precondition, for computation
-the generator may need <em>product inputs</em> and request NutShell to compute them first. In this sense,
-NutShell functions like <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>, where respective inputs are called <em>dependencies</em>.</p>
-<p>Each product generator has a unique id consisting of lowercase literals and periods, for example: <code class="docutils literal"><span class="pre">test.image.product</span></code>.
-Certain directory names will derived from product id, replacing periods with slashes. For example: <code class="docutils literal"><span class="pre">test/image/product</span></code>.</p>
-<p>The generator has script has a fixed name, <code class="docutils literal"><span class="pre">generate.sh</span></code> .</p>
-<div class="section" id="setting-up-product-generators">
-<h2>Setting up product generators<a class="headerlink" href="#setting-up-product-generators" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="interfaces">
+<h1>Interfaces<a class="headerlink" href="#interfaces" title="Permalink to this headline">¶</a></h1>
+<p>Product requests can be sent to NutShell in three different ways:</p>
 <ol class="arabic simple">
-<li>Move to product generator root directory, <code class="docutils literal"><span class="pre">GENERATOR_ROOT</span></code> (See <a class="reference internal" href="conf-file.html#configuration-file"><span>Configuration file</span></a>)</li>
-<li>Create shell script file <code class="docutils literal"><span class="pre">generate.sh</span></code> with execution permission.</li>
-<li>Preferably, use <strong>bash</strong>, starting the script with <code class="docutils literal"><span class="pre">#!/bin/bash</span></code></li>
-<li>Edit the script such that it finally writes its result in path <code class="docutils literal"><span class="pre">$OUTDIR/$OUTFILE</span></code></li>
+<li>The simply using the <strong>command line</strong>. For details, see <a class="reference internal" href="nutshell-main.html#command-line-usage"><span>Command line usage</span></a></li>
+<li>Most flexibly as a library inside your <strong>Python program</strong>. For details, see <span class="xref std std-ref">using-nutshell-api</span></li>
+<li>Providing access to others via a <strong>Web server</strong>.  For details, see <span class="xref std std-ref">nutshell-http-server</span></li>
 </ol>
-<div class="section" id="user-defined-variables">
-<h3>User-defined variables<a class="headerlink" href="#user-defined-variables" title="Permalink to this headline">¶</a></h3>
+<p>These options are illustrated in the image below.</p>
+<img alt="_images/nutshell-scheme-dot.png" src="_images/nutshell-scheme-dot.png" />
 <ul class="simple">
-<li>Must not be any of <a class="reference internal" href="#variables"><span>Variable parsing scheme</span></a> (below)</li>
-<li>Must not contain underscores</li>
-<li>Should be short, to keeping resulting filenames reasonably short.</li>
+<li>query form</li>
+<li>error messages</li>
+<li>product info</li>
+<li>input info</li>
+<li>server status</li>
 </ul>
-<p>It is recommended that variables contain default values. In <strong>bash</strong>, they can be set for example
-as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre>if [ &quot;$WIDTH&quot; == &#39;&#39; ]; then
-   WIDTH=&#39;640&#39;
-fi
-if [ &quot;$HEIGHT&quot; == &#39;&#39; ]; then
-   HEIGHT=$WIDTH
-fi
-</pre></div>
-</div>
-<p>or more compactly:</p>
-<div class="highlight-python"><div class="highlight"><pre>WIDTH=${WIDTH:-&#39;640&#39;}
-HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
-</pre></div>
-</div>
-</div>
-<div class="section" id="input-queries">
-<h3>Input queries<a class="headerlink" href="#input-queries" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic simple">
-<li>Create shell script file <code class="docutils literal"><span class="pre">input.sh</span></code> with execution permission.</li>
-</ol>
-<ul class="simple">
-<li>Must not be any of <a class="reference internal" href="#variables"><span>Variable parsing scheme</span></a> (below)</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="section" id="variable-parsing-scheme">
-<span id="variables"></span><h1>Variable parsing scheme<a class="headerlink" href="#variable-parsing-scheme" title="Permalink to this headline">¶</a></h1>
 <img alt="_images/nutshell-variables-dot.png" src="_images/nutshell-variables-dot.png" />
 </div>
 
@@ -149,7 +113,7 @@ HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/nutshell-generators.txt"
+              <a href="_sources/overview.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

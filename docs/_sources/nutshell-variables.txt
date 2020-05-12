@@ -1,11 +1,3 @@
 .. NutShell documentation, description
 
    
-Variable parsing scheme
-=======================
-
-
-	   
-.. image:: img/nutshell-variables-dot.png
-	   
-  

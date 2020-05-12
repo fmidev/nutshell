@@ -1,9 +1,12 @@
 .. NutShell documentation, description
 
 
+.. _commands:
    
 Commands
 ========
+
+.. _request:
 
 Request
 -------
@@ -12,9 +15,11 @@ Request
 ====== ==================================================
 MAKE   Generate file, if it does not exist
 DELETE Delete file
-TEST    
+CHECK   
 ====== ==================================================
 
+
+.. _directives:
 
 Directives
 ----------

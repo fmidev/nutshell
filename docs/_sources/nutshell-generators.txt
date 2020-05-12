@@ -15,17 +15,48 @@ Certain directory names will derived from product id, replacing periods with sla
 The generator has script has a fixed name, ``generate.sh`` .
 
 Setting up product generators
-=============================
+-----------------------------
 
-#. Move to product generator root directory, ```` 
-
+#. Move to product generator root directory, ``GENERATOR_ROOT`` (See :ref:`configuration-file`)
+#. Create shell script file ``generate.sh`` with execution permission.
+#. Preferably, use **bash**, starting the script with ``#!/bin/bash`` 
+#. Edit the script such that it finally writes its result in path ``$OUTDIR/$OUTFILE``
 	   
+User-defined variables
+''''''''''''''''''''''
 
+- Must not be any of :ref:`variables` (below)
+- Must not contain underscores
+- Should be short, to keeping resulting filenames reasonably short.
 
+It is recommended that variables contain default values. In **bash**, they can be set for example
+as follows::
+
+  if [ "$WIDTH" == '' ]; then
+     WIDTH='640'
+  fi
+  if [ "$HEIGHT" == '' ]; then
+     HEIGHT=$WIDTH
+  fi
+
+or more compactly::
+  
+  WIDTH=${WIDTH:-'640'}
+  HEIGHT=${HEIGHT:-"$WIDTH"}  # double hyphens to allow expansion
+
+  
+
+Input queries
+'''''''''''''
+
+#. Create shell script file ``input.sh`` with execution permission.
+
+- Must not be any of :ref:`variables` (below)
+
+.. _variables:
 
 Variable parsing scheme
 =======================
-
 
 	   
 .. image:: img/nutshell-variables-dot.png
