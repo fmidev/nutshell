@@ -13,7 +13,7 @@ these it not a prequisite.
 
 NutProduct
 ----------
-.. automodule:: nutshell.nutproduct
+.. automodule:: nutshell.product
    :members:
       
 Nutils

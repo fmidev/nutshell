@@ -62,15 +62,21 @@
 <p>These modules help the main functionalities, NutShell and NutServer.
 API programmers may use these in development, yet mastering
 these it not a prequisite.</p>
-<div class="section" id="module-nutshell.nutproduct">
-<span id="nutproduct"></span><h2>NutProduct<a class="headerlink" href="#module-nutshell.nutproduct" title="Permalink to this headline">¶</a></h2>
-<p>Information container of a product generated with nutshell.ProductServer</p>
+<div class="section" id="module-nutshell.product">
+<span id="nutproduct"></span><h2>NutProduct<a class="headerlink" href="#module-nutshell.product" title="Permalink to this headline">¶</a></h2>
+<p>Product generator service appicable on the command line or as a library</p>
+<div class="section" id="variable-parsing">
+<h3>Variable parsing<a class="headerlink" href="#variable-parsing" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/nutshell-variables-dot.png" src="_images/nutshell-variables-dot.png" />
+</div>
+<div class="section" id="code-documentation">
+<h3>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="nutshell.nutproduct.ProductInfo">
-<em class="property">class </em><code class="descclassname">nutshell.nutproduct.</code><code class="descname">ProductInfo</code><span class="sig-paren">(</span><em>product=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info">
+<em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stores basic product information: product id, timestamp (if applicable)
 file format, and specific product parameters.</p>
-<p>Technically independent of environment.
+<p>Technically independent of environment and other classes.
 Does not store local information or configurations (system side paths etc.).</p>
 <dl class="docutils">
 <dt>Attributes:</dt>
@@ -79,47 +85,38 @@ next &#8211; attempted new state
 message &#8211; explanation of why the specific transition is not allowed</dd>
 </dl>
 <dl class="classmethod">
-<dt id="nutshell.nutproduct.ProductInfo.get_arg_parser">
-<em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.get_arg_parser" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.get_arg_parser">
+<em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_arg_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populates parser with options of this class</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.get_param_env">
-<code class="descname">get_param_env</code><span class="sig-paren">(</span><em>env=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.get_param_env"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.get_param_env" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.get_param_env">
+<code class="descname">get_param_env</code><span class="sig-paren">(</span><em>env=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_param_env"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_param_env" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append or create dict with TIMESTAMP and params</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.parse_filename">
-<code class="descname">parse_filename</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.parse_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.parse_filename" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.parse_filename">
+<code class="descname">parse_filename</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.parse_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.parse_filename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive product parameters from a filename.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.set">
-<code class="descname">set</code><span class="sig-paren">(</span><em>product</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.set" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configure a product.</p>
-<p>Arguments:
-product &#8211; a product ID string or a filename
-kwargs  &#8211; keyword arguments completing the product definition</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.set_format">
-<code class="descname">set_format</code><span class="sig-paren">(</span><em>extension</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.set_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.set_format" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.set_format">
+<code class="descname">set_format</code><span class="sig-paren">(</span><em>extension</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_format" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets file format (png, txt, pgm.gz, txt.zip, ...).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.set_id">
-<code class="descname">set_id</code><span class="sig-paren">(</span><em>product_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.set_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.set_id" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.set_id">
+<code class="descname">set_id</code><span class="sig-paren">(</span><em>product_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the product ID string consisting of alphanumeric chars and periods.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.set_parameter">
-<code class="descname">set_parameter</code><span class="sig-paren">(</span><em>key</em>, <em>value=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.set_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.set_parameter" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.set_parameter">
+<code class="descname">set_parameter</code><span class="sig-paren">(</span><em>key</em>, <em>value=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set any parameter, including FORMAT, excluding TIMESTAMP and ID</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
@@ -132,14 +129,23 @@ value &#8211; the value of the parameter, possibly not</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.set_parameters">
-<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.set_parameters">
+<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a dictionary of parameters, set values.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.nutproduct.ProductInfo.set_timestamp">
-<code class="descname">set_timestamp</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutproduct.html#ProductInfo.set_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutproduct.ProductInfo.set_timestamp" title="Permalink to this definition">¶</a></dt>
+<dt id="nutshell.product.Info.set_product">
+<code class="descname">set_product</code><span class="sig-paren">(</span><em>product_desc</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_product"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure a product.</p>
+<p>Arguments:
+product_desc &#8211; a product ID string or a filename
+kwargs  &#8211; keyword arguments completing the product definition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.product.Info.set_timestamp">
+<code class="descname">set_timestamp</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set UTC time in numeric format &#8216;%Y%m%d%H%M&#8217; or its punctuated variants.</p>
 <p>Essentially, the timestamp will be stored as a string of 
 12 digits, &#8220;202003291845&#8221; for example.</p>
@@ -152,6 +158,56 @@ Consequently, possible _time <a href="#id1"><span class="problematic" id="id2">z
 
 </dd></dl>
 
+<dl class="class">
+<dt id="nutshell.product.Request">
+<em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Request</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>actions=None</em>, <em>directives=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for storing information on requested product and server side resources derived thereof.</p>
+<dl class="attribute">
+<dt id="nutshell.product.Request.path">
+<code class="descname">path</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>System-side full path to a dynamic directory and the generated product file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Request.path_static">
+<code class="descname">path_static</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.path_static" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: System-side full path to the generated product file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Request.path_tmp">
+<code class="descname">path_tmp</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.path_tmp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: Actual object (for example, python Image in the future)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Request.product_info">
+<code class="descname">product_info</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Request.product_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specification of a product instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Request.product_server">
+<code class="descname">product_server</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Request.product_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Server assigned for manufacturing this product</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Request.script">
+<code class="descname">script</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.script" title="Permalink to this definition">¶</a></dt>
+<dd><p>System-side directory containing script () for generating the product</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.product.Request.set_status">
+<code class="descname">set_status</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Request.set_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Request.set_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set success or failure status using http.HTTPStatus codes.
+This is always logged.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 <div class="section" id="module-nutshell.nutils">
 <span id="nutils"></span><h2>Nutils<a class="headerlink" href="#module-nutshell.nutils" title="Permalink to this headline">¶</a></h2>
@@ -228,7 +284,11 @@ Consequently, possible _time <a href="#id1"><span class="problematic" id="id2">z
 <li class="toctree-l1"><a class="reference internal" href="overall_scheme.html">Overall Scheme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-main.html">NutShell main modules</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Using NutShell</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutproduct">NutProduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.product">NutProduct</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#variable-parsing">Variable parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-documentation">Code documentation</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutils">Nutils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutxml">Nutxml</a></li>
 </ul>
