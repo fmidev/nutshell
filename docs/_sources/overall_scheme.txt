@@ -46,7 +46,7 @@ your admin for details.
 Clicking on this internal hyperlink will take us to the target_
 below.
 
-.. _status-codes: MIKA
+.. _status-codes:
 
 The hyperlink target above points to this paragraph.
 
