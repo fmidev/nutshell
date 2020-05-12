@@ -1,7 +1,8 @@
 .. NutShell documentation, description
 
 
-
+.. _nutshell-variables:
+   
 NutShell Variables
 ==================
 

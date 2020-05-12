@@ -1,8 +1,9 @@
 .. NutShell documentation, description
 
+
    
-Interfaces
-==========
+Overview
+========
 
 Product requests can be sent to NutShell in three different ways:
 
