@@ -162,7 +162,7 @@ directives determine how the product is generated.</p>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.init_path">
-<code class="descname">init_path</code><span class="sig-paren">(</span><em>dirname</em>, <em>check_existence=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.init_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.init_path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">init_path</code><span class="sig-paren">(</span><em>dirname</em>, <em>verify=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.init_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.init_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Expand relative path to absolute, optionally check that exists.</p>
 </dd></dl>
 
@@ -188,66 +188,18 @@ params &#8211; attempted new state.</dd>
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="nutshell.nutshell.ProductServer.run_task">
+<code class="descname">run_task</code><span class="sig-paren">(</span><em>task</em>, <em>log</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.run_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.run_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs a task object containing task.script and task.stdout</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
 </div>
-<div class="section" id="module-nutshell.nutserver">
-<span id="nutserver"></span><h2>NutServer<a class="headerlink" href="#module-nutshell.nutserver" title="Permalink to this headline">¶</a></h2>
-<p>NutShell HTTP server support.</p>
-<p>The next paragraph is a code sample:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nutshell.nutshell</span> <span class="kn">as</span> <span class="nn">nuts</span>
-
-<span class="n">server</span> <span class="o">=</span> <span class="n">nuts</span><span class="o">.</span><span class="n">ProductServer</span><span class="p">(</span><span class="s1">&#39;nutshell/nutshell.cnf&#39;</span><span class="p">)</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="s2">&quot;201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png&quot;</span><span class="p">,</span> <span class="s2">&quot;MAKE&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="class">
-<dt id="nutshell.nutserver.NutHandler">
-<em class="property">class </em><code class="descclassname">nutshell.nutserver.</code><code class="descname">NutHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutserver.html#NutHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutserver.NutHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forwards a HTTP request to  nutshell.ProductServer instance</p>
-<dl class="staticmethod">
-<dt id="nutshell.nutserver.NutHandler.get_html_template">
-<em class="property">static </em><code class="descname">get_html_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutserver.html#NutHandler.get_html_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutserver.NutHandler.get_html_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read HTML template dir and return it for modifications.</p>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="nutshell.nutserver.NutHandler.parse_url">
-<em class="property">static </em><code class="descname">parse_url</code><span class="sig-paren">(</span><em>url</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutserver.html#NutHandler.parse_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutserver.NutHandler.parse_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>splitquery(&#8216;/path?query&#8217;) &#8211;&gt; &#8216;/path&#8217;, &#8216;query&#8217;.
-If query returned also when None</p>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="nutshell.nutserver.NutHandler.send_to_stream">
-<em class="property">static </em><code class="descname">send_to_stream</code><span class="sig-paren">(</span><em>s</em>, <em>product_request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutserver.html#NutHandler.send_to_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutserver.NutHandler.send_to_stream" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send to stream</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="nutshell.nutserver.run_http">
-<code class="descclassname">nutshell.nutserver.</code><code class="descname">run_http</code><span class="sig-paren">(</span><em>product_server</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutserver.html#run_http"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutserver.run_http" title="Permalink to this definition">¶</a></dt>
-<dd><p>A function just for me.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>my_arg</strong> &#8211; The first of my arguments.</li>
-<li><strong>my_other_arg</strong> &#8211; The second of my arguments.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A message (just for me, of course).</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="nutserver">
+<h2>NutServer<a class="headerlink" href="#nutserver" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -268,7 +220,7 @@ If query returned also when None</p>
 <li class="toctree-l3"><a class="reference internal" href="#code-documentation">Code documentation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutserver">NutServer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nutserver">NutServer</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell.html">Using NutShell</a></li>
