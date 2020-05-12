@@ -1,11 +1,18 @@
 
-"""NutShell HTTP server support.
+"""NutShell HTTP server
 
 Server can be started with command::
 
-    python3  -m nutshell.httpd -c nutshell/nutshell.cnf
+    python3  -m nutshell.httpd -c nutshell.cnf
 
+	   
+- query form
+- error messages 
+- product info
+- input info
+- server status
 
+	  
 
 
 """

@@ -3,6 +3,8 @@
 """
 Product generator service appicable on the command line or as a library
 
+.. _command-line-usage:
+
 Command line usage
 ==================
 
