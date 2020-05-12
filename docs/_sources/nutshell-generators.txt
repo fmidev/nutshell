@@ -1,0 +1,34 @@
+.. NutShell documentation, description
+
+   
+Product generators
+==================
+
+In NutShell, a *product generator* is a shell script that computes something with given parameters and
+saves the result as a file in a given path. As a precondition, for computation
+the generator may need *product inputs* and request NutShell to compute them first. In this sense,
+NutShell functions like ``make`` and ``Makefile``, where respective inputs are called *dependencies*.
+
+Each product generator has a unique id consisting of lowercase literals and periods, for example: ``test.image.product``.
+Certain directory names will derived from product id, replacing periods with slashes. For example: ``test/image/product``.
+
+The generator has script has a fixed name, ``generate.sh`` .
+
+Setting up product generators
+=============================
+
+#. Move to product generator root directory, ```` 
+
+	   
+
+
+
+Variable parsing scheme
+=======================
+
+
+	   
+.. image:: img/nutshell-variables-dot.png
+	   
+  
+
