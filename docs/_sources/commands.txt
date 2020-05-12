@@ -8,14 +8,12 @@ Commands
 Request
 -------
 
-=====  =====  =======
-A      B      A and B
-=====  =====  =======
-MAKE   False  False
-DELETE True   False  False
-False  True   False
-True   True   True
-=====  =====  =======
+
+====== ==================================================
+MAKE   Generate file, if it does not exist
+DELETE Delete file
+TEST    
+====== ==================================================
 
 
 Directives
