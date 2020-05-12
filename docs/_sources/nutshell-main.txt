@@ -1,7 +1,7 @@
 .. NutShell documentation 
 
 
-NutShell main modules
+Using NutShell
 ====================================
 
 NutShell
