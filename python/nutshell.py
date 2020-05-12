@@ -21,6 +21,7 @@ Simple query using configuration file and product definition::
 
 
 
+More details in `Overall Scheme`_
 
 
 Using NutShell within python
