@@ -1,12 +1,10 @@
 
 """NutShell HTTP server support.
 
-The next paragraph is a code sample::
+Server can be started with command::
 
-    import nutshell.nutshell as nuts
+    python3  -m nutshell.httpd -c nutshell/nutshell.cnf
 
-    server = nuts.ProductServer('nutshell/nutshell.cnf')
-    response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
 
 
 
@@ -35,7 +33,8 @@ logging.basicConfig(format='%(levelname)s\t %(name)s:%(funcName)s: %(message)s')
 
 from . import nutils
 from . import nutxml    # HTML utils
-from . import nutproduct
+#from . import nutproduct
+from . import product
 from . import nutshell
 
 HTTPStatus = nutshell.HTTPStatus
@@ -191,7 +190,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         product_name = querydata.get('product', None)
         product_info = None 
         if (product_name):
-            product_info = nutproduct.ProductInfo(product_name)
+            product_info = product.Info(product_name)
             service_request = querydata.get('request', ["MAKE"])
             directives      = querydata['directives']
         else:
@@ -327,7 +326,7 @@ def run_http(product_server):
     httpd = http.server.HTTPServer((product_server.HTTP_NAME, int(product_server.HTTP_PORT)), NutHandler)
 
     #if (options.VERBOSE > 1):
-    print(( 'Starting NutServer (port={0}, root={1})'.format(product_server.HTTP_PORT, NutHandler.directory) ))
+    print(( 'Starting server (port={0}, root={1})'.format(product_server.HTTP_PORT, NutHandler.directory) ))
     nutils.print_dict(nutils.get_entries(httpd))
 
     try:
@@ -431,9 +430,9 @@ if __name__ == '__main__':
     # Testing only. Use nutshell.py for command-line use
     if (options.MAKE):
         product_server.logger.info("Making product: {0}".format(options.MAKE) )
-        product_info = nutproduct.ProductInfo(options.MAKE)
-        product = product_server.make_request(product_info, ['MAKE'])
-        print (product.log)
+        product_info = product.ProductInfo(options.MAKE)
+        prod = product_server.make_request(product_info, ['MAKE'])
+        print (prod.log)
         exit(0)
                     
     # TODO if (file not exits options.HTTM_TEMPLATE):

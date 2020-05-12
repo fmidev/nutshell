@@ -37,13 +37,11 @@ Simple example::
     response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
 
     # Results:
-    # - error code returned by script (generate.sh)  
     print("Return code: {0} ".format(response.returncode))
-    # -   
-    print("Status (HTTP code): {0}: {0} ".format(response.status))
-    print("File path: {0} ".format(response.returncode))
+    print("Status (HTTP code): {0}:  ".format(response.status))
+    print("File path: {0} ".format(response.path))
 
-    # Further processing, image example
+    # Example: further processing (image data)
     from PIL import Image
     file = Image.open(response.path)
     print(file.info)
@@ -65,10 +63,12 @@ Code   Enum Name
 References:
 - https://docs.python.org/3/library/http.html
 
+Code documentation
+==================
 
 """
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'Markus.Peura@fmi.fi'
 
 import os
@@ -87,8 +87,9 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
 from . import nutils
-from . import nutproduct
+#from . import nutproduct
 
+from . import product as nprod
 
 
 
@@ -106,7 +107,7 @@ def parse_timestamp2(timestamp, result = {}):
 
 
 
-ProductInfo = nutproduct.ProductInfo
+#ProductInfo = nutproduct.ProductInfo
 
 
 class ProductServer:
@@ -140,7 +141,7 @@ class ProductServer:
     def get_arg_parser(cls, parser = None):
         """Populates parser with options of this class"""
 
-        parser = nutproduct.ProductInfo.get_arg_parser(parser)
+        parser = nprod.Info.get_arg_parser(parser)
         # parser = argparse.ArgumentParser()
  
         parser.add_argument("-c", "--conf", dest="CONF",
@@ -178,164 +179,12 @@ class ProductServer:
         return parser    
 
     
-        
-    class ProductRequest:
-        """Container for storing information on requested product and server side resources derived thereof.
-        """
-
-        """Server assigned for manufacturing this product"""
-        product_server = None
-
-        """Specification of a product instance."""
-        product_info = None
-
-        """System-side directory containing script () for generating the product"""
-        generator_path = ''
-
-        """System-side full path to a dynamic directory and the generated product file."""
-        path = ''
-        
-        """System-side full path to the generated file, the product."""
-        path_static = ''        
-        
-        """Optional: System-side full path to the generated product file."""
-        path_tmp = ''
-     
-        """Optional: Actual object (for example, python Image in the future) """
-        product = None
-        
-        # Later, use (dir + file) object
-        inputs = {}
-        
-        actions = []
-        directives = []
-        
-        # Nutshell native log output
-        log = None
-        
-        # Std output of the generation
-        stdout = None
-        
-        # Error output of the generation
-        stderr = None
-        
-        # Return code of the generation
-        returncode = 0
-
-        # Status, defined using HTTP status codes
-        status = HTTPStatus.OK
-
-        sid = 0
-        
-        builtin_directives = ("LOG", "LATEST", "LINK")        
-
-        def set_status(self, status):
-            """Set success or failure status using http.HTTPStatus codes.
-            This is always logged.
-            """
-            self.log.debug(status)
-            self.status = status
-        
-        def __init__(self, product_server, product_info, actions=None, directives=None, log=None):
-
-            self.sid = (++ProductServer.counter)
-
-            # Consider stripping 'product_'
-            self.product_server = product_server
-
-            if (type(product_info) == str):
-                self.product_info = ProductInfo(product_info)
-            else:        
-                self.product_info = product_info
-
-            if log:
-                self.log = log
-            else:
-                self.log = logging.getLogger("ProductRequest")
- 
-            if (actions):
-                self.actions = actions
-            else:
-                self.actions = []
-            self.log.debug('actions:' + str(actions))
-  
-            if (directives):              
-                self.directives = directives
-            else:
-                self.directives = []
-            self.log.debug('directives: ' + str(self.directives))
-
-            self.generator_path = Path(product_server.get_generator_dir(product_info), 
-                                       product_server.SHELL_GENERATOR_SCRIPT)
-            
-            self.product = None
-            self.inputs = {}
-            #self.log = nutils.Log()
-           
-            filename        = product_info.filename()
-            filename_latest = product_info.filename_latest()
-            #cache_dir_dyn = product_server.get_dynamic_cache_dir(product_info)
-            #cache_dir = product_server.get_cache_dir(product_info)
-            #cache_root = product_server.CACHE_ROOT
-            cache_root = Path(product_server.CACHE_ROOT)
-            cache_root = str(cache_root.absolute())
-            time_dir = product_server.get_time_dir(product_info)
-            prod_dir = product_server.get_product_dir(product_info)
-      
-      
-            # Target path. Will be cleared (to None) if product generation fails.
-            self.path_relative = Path(time_dir, prod_dir, filename)
-            self.path =        Path(cache_root, time_dir, prod_dir, filename)
-            self.path_tmp =    Path(cache_root, time_dir, prod_dir, 'tmp', filename)  
-            self.path_static = Path(cache_root, prod_dir, filename)
-            self.path_latest = Path(cache_root, prod_dir, filename_latest)
-            
-            self.set_status( HTTPStatus.NO_CONTENT)  #204 # No content
-            self.returncode = -1
-            
-            # self.path_tmp = self.cache_dir+os.sep+self.out_file_tmp
-   
-    class _InputInfo:
-        
-        inputs = None
-        
-        # Std output of the generation
-        stdout = None
-        
-        # Error output of the generation
-        stderr = None
-
-        #
-        log = None
-        
-        returncode = 0
-        #def __init__(self, product_info):
-        #    self.gdir = self.get_generator_dir(product_info)
-        #    self.inputs = {}
-        #    self.log = Log()
-    
-    def InputInfo(self, product_info, log = None):
-         info = self._InputInfo() 
-
-         info.script = Path(self.get_generator_dir(product_info),
-                            self.SHELL_INPUT_SCRIPT)
-         info.inputs = {}
-         if (log):
-             info.log = log
-         else:
-             info.log = logging.getLogger("InputInfo"+__name__)  #nutils.Log()
-        
-         info.returncode = 0
-                
-         return info
-
-    
-    def init_path(self, dirname, check_existence=False):
+    def init_path(self, dirname, verify=False):
         """ Expand relative path to absolute, optionally check that exists. """ 
         #if (hasattr(self, dirname)):
         path = Path(getattr(self, dirname)).absolute()
         self.logger.warn('  {0} =>  {1}'.format(dirname, path))
-        if (check_existence) and not (path.exists()):
+        if (verify) and not (path.exists()):
             raise FileNotFoundError(__name__ + str(path))
         setattr(self, dirname, str(path)) # TODO -> Path obj
         #else:
@@ -381,7 +230,7 @@ class ProductServer:
             if (timestamp == 'LATEST'):
                 return ''
             else:
-                timevars = nutproduct.parse_timestamp(timestamp)
+                timevars = nprod.parse_timestamp2(timestamp)
                 # print timevars
                 return self.TIME_DIR_SYNTAX.format(**timevars) # + os.sep
         else:
@@ -407,8 +256,20 @@ class ProductServer:
             os.umask(original_umask)
         return outdir
 
-
-    def run_process(self, p, task, log):
+    def run_task(self, task, log):
+        """Runs a task object containing task.script and task.stdout"""
+        
+        
+        p = subprocess.Popen(str(task.script),
+                             cwd=str(task.script.parent),
+                             stdout=subprocess.PIPE, # always
+                             stderr=task.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
+                             shell=True,
+                             env=task.env)
+                             
+ # >       return self.run_process(p, task, log)
+ # <  def run_process(self, p, task, log):
+ 
         if (not p):
             log.warn('No process') 
             task.returncode = -1
@@ -441,36 +302,39 @@ class ProductServer:
         directives determine how the product is generated. 
         """
 
-        input_info = self.InputInfo(product_info)
+        #input_info = self.InputInfo(product_info)
+        input_query = nprod.InputQuery(self, product_info)
         
-        if (not input_info.script.exists()):
-            log.debug("No input script: {0}".format(input_info.script))         
-            return input_info   
+        if (not input_query.script.exists()):
+            log.debug("No input script: {0}".format(input_query.script))         
+            return input_query   
         
         # TODO generalize (how)
-        env = product_info.get_param_env()
-        log.debug(env)
+        #env = product_info.get_param_env()
+        log.debug(input_query.env)
         
-        p = subprocess.Popen(str(input_info.script),
-                             cwd=str(input_info.script.parent),
-                             stdout=subprocess.PIPE, # always
-                             stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
-                             shell=True,
-                             env=env)
+        self.run_task(input_query, log)
+        
+#        p = subprocess.Popen(str(input_query.script),
+#                             cwd=str(input_query.script.parent),
+#                             stdout=subprocess.PIPE, # always
+#                             stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
+#                             shell=True,
+#                             env=input_query.env)
+#
+#        self.run_process(p, input_query, log)  # log    
 
-        self.run_process(p, input_info, log)  # log    
-
-        if (input_info.returncode == 0): 
+        if (input_query.returncode == 0): 
             #log.warning("inputsss")
-            nutils.read_conf_text(input_info.stdout.split('\n'), input_info.inputs)
-            log.info(input_info.inputs)
+            nutils.read_conf_text(input_query.stdout.split('\n'), input_query.inputs)
+            log.info(input_query.inputs)
         else:
-            log.warning("executing failed with error code={0}: {1} ".format(p.returncode, input_info.script))
-            log.warning(input_info.error_info)
+            log.warning("executing failed with error code={0}: {1} ".format(input_query.returncode, input_query.script))
+            log.warning(input_query.error_info)
         #    else:
         #        log.critical("input script reported no error info")
                        
-        return input_info
+        return input_query
     
 
          
@@ -487,18 +351,22 @@ class ProductServer:
         if (params == None):
             params = {}
 
+
         product_request.log.info('run_generator: ' + product_request.product_info.ID)
         product_request.log.debug(params)
     
-        p = subprocess.Popen(str(product_request.generator_path), #'./'+self.SHELL_GENERATOR_SCRIPT,
-                             cwd=str(product_request.generator_path.parent),
-                             stdout=subprocess.PIPE,  #self.stdout,
-                             stderr=subprocess.STDOUT, # Use same stream as stdout, be it os.stdout or subprocess.STDOUT
-                             shell=True,
-                             env=params)
-              
-        self.run_process(p, product_request, product_request.log)              
-        if (p.returncode != 0):
+        product_request.env = params
+        self.run_task(product_request, product_request.log)
+
+#        p = subprocess.Popen(str(product_request.script), #'./'+self.SHELL_GENERATOR_SCRIPT,
+#                             cwd=str(product_request.script.parent),
+#                             stdout=subprocess.PIPE,  #self.stdout,
+#                             stderr=subprocess.STDOUT, # Use same stream as stdout, be it os.stdout or subprocess.STDOUT
+#                             shell=True,
+#                             env=params)
+#              
+#        self.run_process(p, product_request, product_request.log)              
+        if (product_request.returncode != 0):
             if (product_request.stdout):
                 log_file = Path(str(product_request.path)+'.stdout.log')
                 product_request.log.warn('Writing STDOUT log: {0}'.format(log_file))            
@@ -508,7 +376,7 @@ class ProductServer:
                 product_request.log.warn('Writing STDERR log: {0}'.format(log_file))            
                 log_file.write_text(product_request.stderr)
             
-        return p.returncode
+        return product_request.returncode
 
 
     def make_request(self, product_info, actions = ['MAKE'], directives = None, log = None):
@@ -517,11 +385,10 @@ class ProductServer:
         'DELETE' - delete the product in cache
         'INPUTS' - generate and store the product, also regenerate even if already exists
         """
-        product_request = self.ProductRequest(self, product_info, actions, directives, log)
-        return self.handle_request(product_request)
-        
-        
-    def handle_request(self, pr):
+        #product_request = self.ProductRequest(self, product_info, actions, directives, log)
+        pr = nprod.Request(self, product_info, actions, directives, log)
+#        return self.handle_request(product_request)
+#   def handle_request(self, pr):
         """" Return path or log
         'MAKE'   - return the product, if in cache, else generate it and return
         'DELETE' - delete the product in cache
@@ -549,10 +416,10 @@ class ProductServer:
 
         # only check at this point
         #if (os.path.exists(pr.generator_script)):
-        if (pr.generator_path.exists()):
-            pr.log.debug('Generator script ok: {0}'.format(pr.generator_path))
+        if (pr.script.exists()):
+            pr.log.debug('Generator script ok: {0}'.format(pr.script))
         else:
-            pr.log.warning('Generator script not found: {0}'.format(pr.generator_path))
+            pr.log.warning('Generator script not found: {0}'.format(pr.script))
             # Consider case of copied valid product (without local generator)            
             pr.path = ''
             pr.set_status(HTTPStatus.NOT_IMPLEMENTED) # Not Implemented
@@ -591,7 +458,7 @@ class ProductServer:
             for i in pr.inputs:
                 #pr.log.info('INPUTFILE: ' + i)
                 input = pr.inputs[i] # <filename>.h5
-                input_prod_info = nutproduct.ProductInfo(input)
+                input_prod_info = nprod.Info(input)
                 pr.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
                 r = self.make_request(input_prod_info, ['MAKE'], [], pr.log.getChild("input[{0}]".format(i)))
                 if (r.path):
@@ -657,7 +524,8 @@ if __name__ == '__main__':
     #print()
     #logger = logging.getLogger(__name__ + str(++product_server.counter))
     logger = logging.getLogger('NutShell')
-    logger.setLevel(30)
+    #logger.setLevel(30)
+    logger.setLevel(logging.INFO)
     #logger.debug("parsing arguments")
     
     parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
@@ -669,6 +537,7 @@ if __name__ == '__main__':
     if (not options):
         parser.print_help()
         exit(1)
+
     
     if (options.VERBOSE):
         options.LOG_LEVEL = "DEBUG"
@@ -684,12 +553,12 @@ if __name__ == '__main__':
     
     product_server.verbosity = int(options.VERBOSE)
     product_server.logger = logger # NEW
-    product_info = nutproduct.ProductInfo()
+    product_info = nprod.Info()
 
     if (options.PRODUCT):
         product_info.parse_filename(options.PRODUCT)
     else:
-        logger.warning("product not defined")
+        logger.warning('Product not defined')
     
         
 
