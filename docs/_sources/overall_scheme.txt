@@ -11,6 +11,8 @@ these it not a prequisite.
 
 .. image:: img/nutshell-scheme-dot.png
 
+.. image:: img/nutshell-variables-dot.png
+	   
 - query form
 - error messages 
 - product info
