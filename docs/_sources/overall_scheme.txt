@@ -19,20 +19,19 @@ as parameters::
 ``--make --product <product>``,
 ``--make --product <product>``,
 
-Secondly, NutShell can be applied as a library, invoked within a Python program
-or interpreter, minimally:
+Secondly, within a **Python program** or Python interpreter NutShell can be applied as a library,
+invoked minimally as follows:
 
 >>> import nutshell.nutshell
 >>> server = nutshell.nutshell.ProductServer('nutshell/nutshell.cnf')
 >>> response = server.make_request("201708121600_image.pattern_SIZE=100,100.png")
 
-Then, upon success, ``response.returncode`` is nonzero and the generated
-or existing product can be loaded as a file pointed to by ``response.path``.
+Upon success, ``response.returncode`` is nonzero and the generated
+or existing product file is available on disk in ``response.path``.
 
+Finally, one my start **HTTP server** module ``nutshell.httpd``, accessible through
+a URL of type ``http://<SERVER>:<PORT>/?<REQUESTS>``.
 
-These modules help the main functionalities, NutShell and NutServer.
-API programmers may use these in development, yet mastering
-these it not a prequisite.
 
 .. image:: img/nutshell-scheme-dot.png
 

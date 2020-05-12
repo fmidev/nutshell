@@ -71,18 +71,17 @@ as parameters:</p>
 </div>
 <p><code class="docutils literal"><span class="pre">--make</span> <span class="pre">--product</span> <span class="pre">&lt;product&gt;</span></code>,
 <code class="docutils literal"><span class="pre">--make</span> <span class="pre">--product</span> <span class="pre">&lt;product&gt;</span></code>,</p>
-<p>Secondly, NutShell can be applied as a library, invoked within a Python program
-or interpreter, minimally:</p>
+<p>Secondly, within a <strong>Python program</strong> or Python interpreter NutShell can be applied as a library,
+invoked minimally as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nutshell.nutshell</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">nutshell</span><span class="o">.</span><span class="n">ProductServer</span><span class="p">(</span><span class="s1">&#39;nutshell/nutshell.cnf&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="s2">&quot;201708121600_image.pattern_SIZE=100,100.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Then, upon success, <code class="docutils literal"><span class="pre">response.returncode</span></code> is nonzero and the generated
-or existing product can be loaded as a file pointed to by <code class="docutils literal"><span class="pre">response.path</span></code>.</p>
-<p>These modules help the main functionalities, NutShell and NutServer.
-API programmers may use these in development, yet mastering
-these it not a prequisite.</p>
+<p>Upon success, <code class="docutils literal"><span class="pre">response.returncode</span></code> is nonzero and the generated
+or existing product file is available on disk in <code class="docutils literal"><span class="pre">response.path</span></code>.</p>
+<p>Finally, one my start <strong>HTTP server</strong> module <code class="docutils literal"><span class="pre">nutshell.httpd</span></code>, accessible through
+a URL of type <code class="docutils literal"><span class="pre">http://&lt;SERVER&gt;:&lt;PORT&gt;/?&lt;REQUESTS&gt;</span></code>.</p>
 <img alt="_images/nutshell-scheme-dot.png" src="_images/nutshell-scheme-dot.png" />
 <ul class="simple">
 <li>query form</li>
