@@ -1,7 +1,13 @@
 .. NutShell documentation, description
 
+
+
+NutShell Variables
+==================
+
+Variable parsing scheme
+-----------------------
    
-	   
 .. image:: img/nutshell-variables-dot.png
 	   
   
