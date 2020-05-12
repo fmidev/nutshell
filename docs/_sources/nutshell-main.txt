@@ -12,7 +12,7 @@ NutShell
       
 NutServer
 ---------
-.. automodule:: nutshell.nutserver
+.. automodule:: nutshell.httpd
    :members:
 
 
