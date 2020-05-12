@@ -92,13 +92,11 @@
 <span class="sd">    response = server.make_request(&quot;201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png&quot;, &quot;MAKE&quot;)</span>
 
 <span class="sd">    # Results:</span>
-<span class="sd">    # - error code returned by script (generate.sh)  </span>
 <span class="sd">    print(&quot;Return code: {0} &quot;.format(response.returncode))</span>
-<span class="sd">    # -   </span>
-<span class="sd">    print(&quot;Status (HTTP code): {0}: {0} &quot;.format(response.status))</span>
-<span class="sd">    print(&quot;File path: {0} &quot;.format(response.returncode))</span>
+<span class="sd">    print(&quot;Status (HTTP code): {0}:  &quot;.format(response.status))</span>
+<span class="sd">    print(&quot;File path: {0} &quot;.format(response.path))</span>
 
-<span class="sd">    # Further processing, image example</span>
+<span class="sd">    # Example: further processing (image data)</span>
 <span class="sd">    from PIL import Image</span>
 <span class="sd">    file = Image.open(response.path)</span>
 <span class="sd">    print(file.info)</span>

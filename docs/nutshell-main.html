@@ -90,13 +90,11 @@
 <span class="n">response</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="s2">&quot;201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png&quot;</span><span class="p">,</span> <span class="s2">&quot;MAKE&quot;</span><span class="p">)</span>
 
 <span class="c1"># Results:</span>
-<span class="c1"># - error code returned by script (generate.sh)  </span>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Return code: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
-<span class="c1"># -   </span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Status (HTTP code): {0}: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;File path: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Status (HTTP code): {0}:  &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;File path: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
 
-<span class="c1"># Further processing, image example</span>
+<span class="c1"># Example: further processing (image data)</span>
 <span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
 <span class="nb">file</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
