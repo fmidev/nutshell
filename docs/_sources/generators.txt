@@ -55,11 +55,5 @@ Input queries
 
 .. _variables:
 
-Variable parsing scheme
-=======================
-
-	   
-.. image:: img/nutshell-variables-dot.png
-	   
   
 
