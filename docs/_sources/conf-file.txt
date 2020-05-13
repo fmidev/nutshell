@@ -36,3 +36,12 @@ A configration file might look like this: ::
   HTTP_PREFIX='nutshell/'
 
 
+Configuration file may contain relative paths, which are expanded
+with respect to working directory upon invocation. So for example::
+
+  cd /some/dir/
+  python3 -m nutshell.nutshell -c ./another/dir/nutshell.cnf
+
+will expand the above ``NUTSHELL_DIR`` as  ``/some/dir/python``,
+(not with respect to the configuration directory, ie. to ``/some/dir/another/dir/python``).
+Whenever possible, absolute paths should be used.
