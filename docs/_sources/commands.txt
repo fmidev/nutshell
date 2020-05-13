@@ -50,6 +50,6 @@ Built-in directives
 ``STATUS`` After making a product file, return a status page instead
 ``LOG``    Save log 
 ``LINK``   Link file to short directory
-``LATEST`` Link file with ``$TIMESTAMP`` replaced with ``'LATEST'`
-========== ========================================================
+``LATEST`` Link file with ``$TIMESTAMP`` replaced with ``'LATEST'``
+========== =========================================================
 
