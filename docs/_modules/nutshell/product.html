@@ -469,7 +469,9 @@
             <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;ProductRequest&quot;</span><span class="p">)</span>
         
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_generator_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">),</span>
-                           <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_GENERATOR_SCRIPT</span><span class="p">),</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span> <span class="c1"># ! env dropped </span>
+                         <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_GENERATOR_SCRIPT</span><span class="p">),</span> 
+                         <span class="bp">None</span><span class="p">,</span> 
+                         <span class="n">log</span><span class="p">)</span> <span class="c1"># ! env dropped, added later </span>
         
         <span class="c1"># Consider stripping &#39;product_&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">product_server</span> <span class="o">=</span> <span class="n">product_server</span>
@@ -549,10 +551,10 @@
     <span class="c1">#    self.inputs = {}</span>
     <span class="c1">#    self.log = Log()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">env</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_generator_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">),</span>
-                           <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_INPUT_SCRIPT</span><span class="p">),</span> <span class="n">env</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>        
+                           <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_INPUT_SCRIPT</span><span class="p">))</span>        
         
         <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">product_info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
@@ -561,7 +563,8 @@
         <span class="c1">#                   product_server.SHELL_INPUT_SCRIPT)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span>
 
 <span class="c1">#        if (log):</span>
 <span class="c1">#            self.log = log</span>

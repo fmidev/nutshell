@@ -386,7 +386,8 @@
         <span class="c1">#env = product_info.get_param_env()</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="n">input_query</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+        <span class="n">input_query</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="c1">#self.run_task(input_query, log)</span>
         
 <span class="c1">#        p = subprocess.Popen(str(input_query.script),</span>
 <span class="c1">#                             cwd=str(input_query.script.parent),</span>
@@ -541,7 +542,8 @@
         <span class="c1"># MAIN</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">):</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">run_generator</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>
+            <span class="c1">#self.run_generator(pr, pr.env)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator failed&quot;</span><span class="p">)</span>
