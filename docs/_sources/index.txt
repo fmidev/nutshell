@@ -9,7 +9,7 @@ Welcome to NutShell's documentation!
 ====================================
 
 
-NutShell is a Python based facility designed for generating product files: images, data files and text files.
+NutShell is a Python-based facility for generating product files: images, data files and text files.
 NutShell suits to generation of real time products as well as to regenerating products on-demand
 from archived data.
 
@@ -29,9 +29,9 @@ declaration script (``input.sh``).
 Otherwise product generators can be designed independently from NutShell. For example, no libraries or
 other dependencies beyond production itself are required.
 
-NutShell is suited to collecting programming efforts of several developers and researchers using
-different languages and interfaces. It has been originally designed for weather radar products [Peura2008]_,
-but suits well for all kinds of on-demand product generation.
+NutShell provides a platform for collecting programming efforts of developers and researchers using
+different languages and interfaces. It has been originally developed for generating weather radar products [Peura2008]_,
+but suits to product computation more generally.
 
 =========
 Contents
