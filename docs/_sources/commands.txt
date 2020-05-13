@@ -12,11 +12,11 @@ Request
 -------
 
 
-====== ==================================================
-MAKE   Generate file, if it does not exist
-DELETE Delete file
-CHECK   
-====== ==================================================
+========== ===========================================================
+``MAKE``   Generate file, if it does not exist (default request)
+``DELETE`` Delete file
+``CHECK``  Check existence and permissions of directories and scripts
+========== ===========================================================
 
 
 .. _directives:
@@ -46,9 +46,10 @@ defined below.
 Built-in directives
 '''''''''''''''''''
 
-====== ====================================================
-LOG    Save log 
-LINK   Link file to short directory
-LATEST Link file with ``$TIMESTAMP`` replaced with 'LATEST'
-====== ====================================================
+========== =========================================================
+``STATUS`` After making a product file, return a status page instead
+``LOG``    Save log 
+``LINK``   Link file to short directory
+``LATEST`` Link file with ``$TIMESTAMP`` replaced with ``'LATEST'`
+========== ========================================================
 
