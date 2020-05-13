@@ -53,18 +53,34 @@ Simple example::
 Status codes
 ============
 
-NutShell recycles HTTP status codes in communicating success or failure
-on operations. Especially:
+NutShell recycles some standard HTTP status codes [1]_ [2]_ for 
+communicating success or failure on operations. 
+Many of those codes can be also used by the generator scripts
+in describing errors or other exceptional conditions back 
+to the hosting system, NutShell. 
+ 
+Useful HTTP codes
+-----------------
 
-=====  ============
-Code   Enum Name
-=====  ============
-102    PROCESSING
-200    OK
-=====  ============
+==== ========================== ========== ==========
+Code  Standard Enum Name        NutShell   Comment
+==== ========================== ========== ==========
+102  PROCESSING                 x          
+200  OK                         x          Request completed successfully
+404  Not Found                  x          Document not found
+405  Method Not Allowed         x 
+409  Conflict                              Contradicting parameters 
+413  Payload Too Large                     Parameters imply expensive computation
+415  Unsupported Media Type                Unsupported file format
+416  Range Not Satisfiable                 Parameter underflow or overflow
+425  Too Early                             Input data not arrived
+501  Not Implemented            x          Product generator not found
+503  Service Unavailable        x          Busy, come back later
+==== ========================== ========== ==========
 
-References:
-- https://docs.python.org/3/library/http.html
+
+.. [1] https://docs.python.org/3/library/http.html
+.. [2] https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 Code documentation
 ==================
@@ -92,7 +108,7 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 from . import nutils
 #from . import nutproduct
 
-from . import product as nprod
+from . import product #as nprod
 
 
 
@@ -144,7 +160,7 @@ class ProductServer:
     def get_arg_parser(cls, parser = None):
         """Populates parser with options of this class"""
 
-        parser = nprod.Info.get_arg_parser(parser)
+        parser = product.Info.get_arg_parser(parser)
         # parser = argparse.ArgumentParser()
  
         parser.add_argument("-c", "--conf", dest="CONF",
@@ -190,7 +206,7 @@ class ProductServer:
         if (verify) and not (path.exists()):
             raise FileNotFoundError(__name__ + str(path))
         setattr(self, dirname, str(path)) # TODO -> Path obj
-        #else:
+#        #else:
         #     raise KeyError   
             
         
@@ -201,8 +217,8 @@ class ProductServer:
         if __name__ == '__main__':
             self.stdout = os.sys.stdout # discarded
             self.stderr = os.sys.stderr
-        #self._init_dir('PRODUCT_ROOT')
-        #self._init_dir('CACHE_ROOT')
+        # self._init_dir('PRODUCT_ROOT')
+        # self._init_dir('CACHE_ROOT')
         # self._init_dir('HTML_ROOT') # not here!
         # self._init_dir('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
         
@@ -233,7 +249,7 @@ class ProductServer:
             if (timestamp == 'LATEST'):
                 return ''
             else:
-                timevars = nprod.parse_timestamp2(timestamp)
+                timevars = product.parse_timestamp2(timestamp)
                 # print timevars
                 return self.TIME_DIR_SYNTAX.format(**timevars) # + os.sep
         else:
@@ -259,76 +275,63 @@ class ProductServer:
             os.umask(original_umask)
         return outdir
 
-    def run_task(self, task, log):
-        """Runs a task object containing task.script and task.stdout"""
-        
-        
-        p = subprocess.Popen(str(task.script),
-                             cwd=str(task.script.parent),
-                             stdout=subprocess.PIPE, # always
-                             stderr=task.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
-                             shell=True,
-                             env=task.env)
-                             
- # >       return self.run_process(p, task, log)
- # <  def run_process(self, p, task, log):
- 
-        if (not p):
-            log.warn('No process') 
-            task.returncode = -1
-            task.status = HTTPStatus.NOT_FOUND
-            return
-
-        stdout,stderr = p.communicate()
-        task.returncode = p.returncode        
-
-        if (stdout):
-            stdout = stdout.decode(encoding='UTF-8')
-            if (p.returncode != 0):
-                lines = stdout.strip().split('\n')
-                task.error_info = lines.pop()
-                log.warn(task.error_info)
-                try:             
-                    status = int(task.error_info.split(' ')[0])
-                    task.status = HTTPStatus(status)
-                except ValueError:
-                    log.warn('Not HTTP error code: {0} '.format(task.status))
-                    task.status = HTTPStatus.CONFLICT
-        if (stderr):
-            stderr = stderr.decode(encoding='UTF-8')
-        task.stdout = stdout  
-        task.stderr = stderr
-        
+#    def run_task(self, task, log):
+#        """Runs a task object containing task.script and task.stdout"""
+#        
+#        
+#        p = subprocess.Popen(str(task.script),
+#                             cwd=str(task.script.parent),
+#                             stdout=subprocess.PIPE, # always
+#                             stderr=task.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
+#                             shell=True,
+#                             env=task.env)
+# 
+#        if (not p):
+#            log.warn('No process') 
+#            task.returncode = -1
+#            task.status = HTTPStatus.NOT_FOUND
+#            return
+#
+#        stdout,stderr = p.communicate()
+#        task.returncode = p.returncode        
+#
+#        if (stdout):
+#            stdout = stdout.decode(encoding='UTF-8')
+#            if (p.returncode != 0):
+#                lines = stdout.strip().split('\n')
+#                task.error_info = lines.pop()
+#                log.warn(task.error_info)
+#                try:             
+#                    status = int(task.error_info.split(' ')[0])
+#                    task.status = HTTPStatus(status)
+#                except ValueError:
+#                    log.warn('Not HTTP error code: {0} '.format(task.status))
+#                    task.status = HTTPStatus.CONFLICT
+#        if (stderr):
+#            stderr = stderr.decode(encoding='UTF-8')
+#        task.stdout = stdout  
+#        task.stderr = stderr
+#        
                    
     def get_input_list(self, product_info, directives, log):
         """ Used for reading dynamic input configuration generated by input.sh.
         directives determine how the product is generated. 
         """
 
-        #input_info = self.InputInfo(product_info)
-        input_query = nprod.InputQuery(self, product_info)
+        # TODO: directives
+
+        input_query = product.InputQuery(self, product_info) # TODO: directives
         
         if (not input_query.script.exists()):
             log.debug("No input script: {0}".format(input_query.script))         
             return input_query   
         
         # TODO generalize (how)
-        #env = product_info.get_param_env()
         log.debug(input_query.env)
         
-        self.run_task(input_query, log)
-        
-#        p = subprocess.Popen(str(input_query.script),
-#                             cwd=str(input_query.script.parent),
-#                             stdout=subprocess.PIPE, # always
-#                             stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
-#                             shell=True,
-#                             env=input_query.env)
-#
-#        self.run_process(p, input_query, log)  # log    
-
+        input_query.run()
+     
         if (input_query.returncode == 0): 
-            #log.warning("inputsss")
             nutils.read_conf_text(input_query.stdout.split('\n'), input_query.inputs)
             log.info(input_query.inputs)
         else:
@@ -341,45 +344,37 @@ class ProductServer:
     
 
          
-    def run_generator(self, product_request, params=None):
-        """ Run shell script to generate a product. 
-        
-         stdout and stderr are used for output.
-        
-        Attributes:
-          product_request -- state at beginning of transition.
-          params -- attempted new state.
-        """
-
-        if (params == None):
-            params = {}
-
-
-        product_request.log.info('run_generator: ' + product_request.product_info.ID)
-        product_request.log.debug(params)
-    
-        product_request.env = params
-        self.run_task(product_request, product_request.log)
-
-#        p = subprocess.Popen(str(product_request.script), #'./'+self.SHELL_GENERATOR_SCRIPT,
-#                             cwd=str(product_request.script.parent),
-#                             stdout=subprocess.PIPE,  #self.stdout,
-#                             stderr=subprocess.STDOUT, # Use same stream as stdout, be it os.stdout or subprocess.STDOUT
-#                             shell=True,
-#                             env=params)
-#              
-#        self.run_process(p, product_request, product_request.log)              
-        if (product_request.returncode != 0):
-            if (product_request.stdout):
-                log_file = Path(str(product_request.path)+'.stdout.log')
-                product_request.log.warn('Writing STDOUT log: {0}'.format(log_file))            
-                log_file.write_text(product_request.stdout)
-            if (product_request.stderr):
-                log_file = Path(str(product_request.path)+'.stderr.log')
-                product_request.log.warn('Writing STDERR log: {0}'.format(log_file))            
-                log_file.write_text(product_request.stderr)
-            
-        return product_request.returncode
+#    def run_generator(self, product_request, params=None):
+#        """ Run shell script to generate a product. 
+#        
+#         stdout and stderr are used for output.
+#        
+#        Attributes:
+#          product_request -- state at beginning of transition.
+#          params -- attempted new state.
+#        """
+#
+#        if (params == None):
+#            params = {}
+#
+#
+#        product_request.log.info('run_generator: ' + product_request.product_info.ID)
+#        product_request.log.debug(params)
+#    
+#        product_request.env = params
+#        self.run_task(product_request, product_request.log)
+#
+#        if (product_request.returncode != 0):
+#            if (product_request.stdout):
+#                log_file = Path(str(product_request.path)+'.stdout.log')
+#                product_request.log.warn('Writing STDOUT log: {0}'.format(log_file))            
+#                log_file.write_text(product_request.stdout)
+#            if (product_request.stderr):
+#                log_file = Path(str(product_request.path)+'.stderr.log')
+#                product_request.log.warn('Writing STDERR log: {0}'.format(log_file))            
+#                log_file.write_text(product_request.stderr)
+#            
+#        return product_request.returncode
 
 
     def make_request(self, product_info, actions = ['MAKE'], directives = None, log = None):
@@ -389,28 +384,22 @@ class ProductServer:
         'INPUTS' - generate and store the product, also regenerate even if already exists
         """
         #product_request = self.ProductRequest(self, product_info, actions, directives, log)
-        pr = nprod.Request(self, product_info, actions, directives, log)
-#        return self.handle_request(product_request)
-#   def handle_request(self, pr):
-        """" Return path or log
-        'MAKE'   - return the product, if in cache, else generate it and return
-        'DELETE' - delete the product in cache
-        'INPUTS' - generate and store the product, also regenerate even if already exists
-        """
+        # Consider rename to Generator        
+        pr = product.Request(self, product_info, actions, directives, log)
         
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
             if ('DELETE' in pr.actions):
-                pr.log.info('Deleting...')
-                pr.path.unlink()
+                #pr.log.info('Deleting...')
+                pr.remove_files()
                 pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
             elif ('MAKE' in pr.actions): # PATH_ONLY
                 if (pr.path.stat().st_size > 0):
-                    pr.product = pr.path
+                    pr.product_obj = pr.path
                     pr.log.info('Non-empty result file found: ' + str(pr.path))
                     pr.set_status(HTTPStatus.OK)
                 else:
-                    pr.product = '' # BUSY
+                    pr.product_obj  = '' # BUSY
                     pr.log.warning('BUSY') # TODO riase (prevent deletion)
                     pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
                 return pr
@@ -430,16 +419,16 @@ class ProductServer:
         
 
         # TODO: if not stream?
-        params = {}
+        pr.env = {}
         if ('MAKE' in pr.actions):
             pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
             self.ensure_output_dir(pr.path_tmp.parent)
             self.ensure_output_dir(pr.path.parent)
 
             # what about true ENV?
-            params = pr.product_info.get_param_env() # {})
-            params['OUTDIR']  = str(pr.path_tmp.parent)
-            params['OUTFILE'] = pr.path.name
+            pr.env = pr.product_info.get_param_env() # {})
+            pr.env['OUTDIR']  = str(pr.path_tmp.parent)
+            pr.env['OUTFILE'] = pr.path.name
             #os.mknod(pr.path) # = touch
             pr.path.touch()
             
@@ -449,10 +438,10 @@ class ProductServer:
             if (input_info.returncode == 0):
                 pr.inputs = input_info.inputs
             else:
-                #         pr.log.warn('Not HTTP error code: {0} '.format(status))
-                pr.set_status(HTTPStatus.CONFLICT)
-                pr.log.info('Removing: {0} '.format(pr.path))
-                pr.path.unlink()
+                #pr.set_status(HTTPStatus.CONFLICT)
+                pr.set_status(HTTPStatus.PRECONDITION_FAILED)
+                #pr.log.info('Removing: {0} '.format(pr.path))
+                pr.remove_files()
                 return pr
 
         if ('MAKE' in pr.actions): 
@@ -461,7 +450,7 @@ class ProductServer:
             for i in pr.inputs:
                 #pr.log.info('INPUTFILE: ' + i)
                 input = pr.inputs[i] # <filename>.h5
-                input_prod_info = nprod.Info(input)
+                input_prod_info = product.Info(input)
                 pr.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
                 r = self.make_request(input_prod_info, ['MAKE'], [], pr.log.getChild("input[{0}]".format(i)))
                 if (r.path):
@@ -472,20 +461,24 @@ class ProductServer:
             # warn if  none succeeded?
             pr.inputs = inputs
             #pr.log.extend2(pr.inputs , 'INPUTPATH: ')
-            params['INPUTKEYS'] = ','.join(pr.inputs.keys())
-            params.update(pr.inputs)
+            pr.env['INPUTKEYS'] = ','.join(pr.inputs.keys())
+            pr.env.update(pr.inputs)
 
         # MAIN
         if ('MAKE' in pr.actions):
-            pr.log.info('Generating: {0}'.format(pr.path))
-            self.run_generator(pr, params)
+            pr.log.info('Generating:  {0}'.format(pr.path))
+            pr.log.info('Environment: {0}'.format(pr.env))
+            #self.run_generator(pr, pr.env)
+            pr.run()
 
             if (pr.returncode != 0):
-                pr.log.error("generator failed")
+                pr.log.error("generator failed (retrun code={0}".format(pr.returncode))
+                pr.remove_files()
                 return pr
                 
             if (pr.path_tmp.stat().st_size == 0):
-                pr.log.error("generator failed")
+                pr.log.error("generator failed (empty file intact)")
+                pr.remove_files()
                 return pr
             
             pr.log.debug("Final move from tmp")
@@ -556,7 +549,7 @@ if __name__ == '__main__':
     
     product_server.verbosity = int(options.VERBOSE)
     product_server.logger = logger # NEW
-    product_info = nprod.Info()
+    product_info = product.Info()
 
     if (options.PRODUCT):
         product_info.parse_filename(options.PRODUCT)

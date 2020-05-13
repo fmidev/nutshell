@@ -171,15 +171,20 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # NOTE: use plus, otherways collapses to root
         system_path = nutshell.Path(s.directory + basepath) 
         s.log.info("system_path: {0}".format(system_path))
-        #if (os.path.exists(system_path)):
         if (system_path.exists()):
+            # TODO: if empty product, allow generation
+            #  503  Service Unavailable x  Busy, come back later
             os.chdir(s.directory) # !!
             s.log.info("File found, forwarding to standard handler") #  -> {0} ".format(system_path))
             http.server.SimpleHTTPRequestHandler.do_GET(s)
             return
-
-        if (basepath.find('/cache/') == 0) and system_path.suffix and not querydata:
+            
+        #s.log.error("PRDOCUT? {0}".format(system_path.suffix))
+        #s.log.error("PRDOCUT? {0}".format(querydata))
+        # system_path.suffix == format extension, so smells like a filename
+        if (basepath.find('/cache/') == 0) and system_path.suffix and (s.path.find('?') == -1):
             # and file not found (above)
+            s.log.error("PRDOCUT? {0}".format(system_path.suffix))
             url =  "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
             NutHandler.redirect(s, url)
             return 
