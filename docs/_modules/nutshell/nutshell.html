@@ -108,8 +108,14 @@
 <span class="sd">Status codes</span>
 <span class="sd">============</span>
 
-<span class="sd">NutShell recycles HTTP status codes [1]_ [2]_ in communicating success or failure</span>
-<span class="sd">on operations. Especially:</span>
+<span class="sd">NutShell recycles some standard HTTP status codes [1]_ [2]_ for </span>
+<span class="sd">communicating success or failure on operations. </span>
+<span class="sd">Many of those codes can be also used by the generator scripts</span>
+<span class="sd">in describing errors or other exceptional conditions back </span>
+<span class="sd">to the hosting system, NutShell. </span>
+<span class="sd"> </span>
+<span class="sd">Useful HTTP codes</span>
+<span class="sd">-----------------</span>
 
 <span class="sd">==== ========================== ========== ==========</span>
 <span class="sd">Code  Standard Enum Name        NutShell   Comment</span>
@@ -156,7 +162,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">nutils</span>
 <span class="c1">#from . import nutproduct</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">product</span> <span class="k">as</span> <span class="n">nprod</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">product</span> <span class="c1">#as nprod</span>
 
 
 
@@ -208,7 +214,7 @@
 <div class="viewcode-block" id="ProductServer.get_arg_parser"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.get_arg_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Populates parser with options of this class&quot;&quot;&quot;</span>
 
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">nprod</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
         <span class="c1"># parser = argparse.ArgumentParser()</span>
  
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;--conf&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;CONF&quot;</span><span class="p">,</span>
@@ -297,7 +303,7 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">==</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">):</span>
                 <span class="k">return</span> <span class="s1">&#39;&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">timevars</span> <span class="o">=</span> <span class="n">nprod</span><span class="o">.</span><span class="n">parse_timestamp2</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                <span class="n">timevars</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">parse_timestamp2</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
                 <span class="c1"># print timevars</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIME_DIR_SYNTAX</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">timevars</span><span class="p">)</span> <span class="c1"># + os.sep</span>
         <span class="k">else</span><span class="p">:</span>
@@ -370,7 +376,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#input_info = self.InputInfo(product_info)</span>
-        <span class="n">input_query</span> <span class="o">=</span> <span class="n">nprod</span><span class="o">.</span><span class="n">InputQuery</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">)</span>
+        <span class="n">input_query</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">InputQuery</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
             <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No input script: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>         
@@ -453,14 +459,7 @@
 <span class="sd">        &#39;INPUTS&#39; - generate and store the product, also regenerate even if already exists</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#product_request = self.ProductRequest(self, product_info, actions, directives, log)</span>
-        <span class="n">pr</span> <span class="o">=</span> <span class="n">nprod</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
-<span class="c1">#        return self.handle_request(product_request)</span>
-<span class="c1">#   def handle_request(self, pr):</span>
-        <span class="sd">&quot;&quot;&quot;&quot; Return path or log</span>
-<span class="sd">        &#39;MAKE&#39;   - return the product, if in cache, else generate it and return</span>
-<span class="sd">        &#39;DELETE&#39; - delete the product in cache</span>
-<span class="sd">        &#39;INPUTS&#39; - generate and store the product, also regenerate even if already exists</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>  
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File exists: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
@@ -470,11 +469,11 @@
                 <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">ACCEPTED</span><span class="p">)</span>  <span class="c1">#202 # Accepted</span>
             <span class="k">elif</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">):</span> <span class="c1"># PATH_ONLY</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">pr</span><span class="o">.</span><span class="n">product</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span>
+                    <span class="n">pr</span><span class="o">.</span><span class="n">product_obj</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span>
                     <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Non-empty result file found: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
                     <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">pr</span><span class="o">.</span><span class="n">product</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># BUSY</span>
+                    <span class="n">pr</span><span class="o">.</span><span class="n">product_obj</span>  <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># BUSY</span>
                     <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;BUSY&#39;</span><span class="p">)</span> <span class="c1"># TODO riase (prevent deletion)</span>
                     <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">ACCEPTED</span><span class="p">)</span>  <span class="c1">#202 # Accepted</span>
                 <span class="k">return</span> <span class="n">pr</span>
@@ -494,16 +493,16 @@
         
 
         <span class="c1"># TODO: if not stream?</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">):</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Ensuring cache dir for: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
 
             <span class="c1"># what about true ENV?</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">()</span> <span class="c1"># {})</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">&#39;OUTDIR&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">&#39;OUTFILE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">()</span> <span class="c1"># {})</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;OUTDIR&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;OUTFILE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span>
             <span class="c1">#os.mknod(pr.path) # = touch</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
             
@@ -525,7 +524,7 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
                 <span class="c1">#pr.log.info(&#39;INPUTFILE: &#39; + i)</span>
                 <span class="nb">input</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># &lt;filename&gt;.h5</span>
-                <span class="n">input_prod_info</span> <span class="o">=</span> <span class="n">nprod</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+                <span class="n">input_prod_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Make input: {0} ({1})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">input_prod_info</span><span class="o">.</span><span class="n">ID</span><span class="p">))</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">input_prod_info</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="p">[],</span> <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;input[{0}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
@@ -536,13 +535,13 @@
             <span class="c1"># warn if  none succeeded?</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
             <span class="c1">#pr.log.extend2(pr.inputs , &#39;INPUTPATH: &#39;)</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">&#39;INPUTKEYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;INPUTKEYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
 
         <span class="c1"># MAIN</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">):</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">run_generator</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_generator</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator failed&quot;</span><span class="p">)</span>
@@ -620,7 +619,7 @@
     
     <span class="n">product_server</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
     <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span> <span class="c1"># NEW</span>
-    <span class="n">product_info</span> <span class="o">=</span> <span class="n">nprod</span><span class="o">.</span><span class="n">Info</span><span class="p">()</span>
+    <span class="n">product_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
         <span class="n">product_info</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
