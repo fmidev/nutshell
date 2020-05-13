@@ -57,3 +57,9 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+Original areas were presented in ERAD 2008 conference [Peura2008]_.
+
+.. [Peura2008] Markus Peura, *On-demand processing architecture for radar image products*,
+    Proceedings of the fifth European Conference on Radar in Meteorology and Hydrology (ERAD2008),
+    Helsinki, Finland, Finnish Meteorological Institute, June 2008
+    `pdf <erad2008-0004-extended.pdf>`_
