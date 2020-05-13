@@ -46,12 +46,11 @@ defined below.
 Built-in directives
 '''''''''''''''''''
 
-========== =========================================================
-``STATUS`` Also after successful generation of a product file,
-           return the status page (HTML)
+========== ============================================================
+``STATUS`` Also after successful ``MAKE`` return the status page (HTML)
 ``NICE``   Generate a product with lower CPU priority
 ``LOG``    Save log 
 ``LINK``   Link file to short directory
 ``LATEST`` Link file with ``$TIMESTAMP`` replaced with ``'LATEST'``
-========== =========================================================
+========== ============================================================
 
