@@ -146,10 +146,6 @@
 <span class="sd">    Technically independent of environment and other classes.</span>
 <span class="sd">    Does not store local information or configurations (system side paths etc.).</span>
 
-<span class="sd">    Attributes:</span>
-<span class="sd">        previous -- state at beginning of transition</span>
-<span class="sd">        next -- attempted new state</span>
-<span class="sd">        message -- explanation of why the specific transition is not allowed</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -330,7 +326,7 @@
                     <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1"># FORMAT)</span>
 
     <span class="k">def</span> <span class="nf">filename_latest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">body</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LATEST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span>
@@ -340,7 +336,7 @@
                     <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1">#FORMAT)</span>
 
 
 <div class="viewcode-block" id="Info.get_param_env"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.get_param_env">[docs]</a>    <span class="k">def</span> <span class="nf">get_param_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -404,7 +400,7 @@
 
         <span class="k">return</span> <span class="n">parser</span></div></div>
 
-        
+<span class="c1"># Consider renaming to Generator (generator =&gt; shell)</span>
 <div class="viewcode-block" id="Request"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Request">[docs]</a><span class="k">class</span> <span class="nc">Request</span><span class="p">(</span><span class="n">generator</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Container for storing information on requested product and server side resources derived thereof.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -436,18 +432,7 @@
     
     <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">directives</span> <span class="o">=</span> <span class="p">[]</span>
-    
-<span class="c1">#    # </span>
-<span class="c1">#    log = None</span>
-<span class="c1">#    </span>
-<span class="c1">#    # Std output of the generation</span>
-<span class="c1">#    stdout = None</span>
-<span class="c1">#    </span>
-<span class="c1">#    # Error output of the generation</span>
-<span class="c1">#    stderr = None</span>
-<span class="c1">#    </span>
-<span class="c1">#    # Return code of the generation</span>
-<span class="c1">#    returncode = 0</span>
+
 
     <span class="c1"># Status, defined using HTTP status codes</span>
     <span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span>
@@ -462,6 +447,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="Request.remove_files"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Request.remove_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the existing (even empty) files, log as info().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_static</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_tmp</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing file {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span> </div>
+
     
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directives</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
@@ -480,16 +474,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">product_info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>        
             <span class="bp">self</span><span class="o">.</span><span class="n">product_info</span> <span class="o">=</span> <span class="n">product_info</span>
-
-        <span class="c1">#if log:</span>
-        <span class="c1">#    self.log = log</span>
-        <span class="c1">#else:</span>
-        <span class="c1">#    self.log = logging.getLogger(&quot;ProductRequest&quot;)</span>
- 
- 
-        <span class="c1"># generator_path</span>
-        <span class="c1">#self.script = Path(product_server.get_generator_dir(self.product_info), </span>
-        <span class="c1">#                           product_server.SHELL_GENERATOR_SCRIPT)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">actions</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span>
@@ -532,32 +516,14 @@
     
     <span class="n">inputs</span> <span class="o">=</span> <span class="bp">None</span>
     
-<span class="c1">#    # Std output of the generation</span>
-<span class="c1">#    stdout = None</span>
-<span class="c1">#    </span>
-<span class="c1">#    # Error output of the generation</span>
-<span class="c1">#    stderr = None</span>
-<span class="c1">#</span>
-<span class="c1">#    #</span>
-<span class="c1">#    log = None</span>
-<span class="c1">#    </span>
-<span class="c1">#    script = None</span>
-<span class="c1">#</span>
-<span class="c1">#    env = None</span>
-<span class="c1">#    </span>
-<span class="c1">#    returncode = 0</span>
-    <span class="c1">#def __init__(self, product_info):</span>
-    <span class="c1">#    self.gdir = self.get_generator_dir(product_info)</span>
-    <span class="c1">#    self.inputs = {}</span>
-    <span class="c1">#    self.log = Log()</span>
-
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">product_info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_generator_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">),</span>
                            <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_INPUT_SCRIPT</span><span class="p">))</span>        
         
-        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">product_info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
         
         <span class="c1">#self.script = Path(product_server.get_generator_dir(product_info),</span>
         <span class="c1">#                   product_server.SHELL_INPUT_SCRIPT)</span>
@@ -565,11 +531,6 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span>
-
-<span class="c1">#        if (log):</span>
-<span class="c1">#            self.log = log</span>
-<span class="c1">#        else:</span>
-<span class="c1">#            self.log = logging.getLogger(&quot;InputInfo&quot;+__name__)  #nutils.Log()</span>
      
         <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
                 

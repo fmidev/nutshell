@@ -155,12 +155,6 @@ including compression</td>
 file format, and specific product parameters.</p>
 <p>Technically independent of environment and other classes.
 Does not store local information or configurations (system side paths etc.).</p>
-<dl class="docutils">
-<dt>Attributes:</dt>
-<dd>previous &#8211; state at beginning of transition
-next &#8211; attempted new state
-message &#8211; explanation of why the specific transition is not allowed</dd>
-</dl>
 <dl class="classmethod">
 <dt id="nutshell.product.Info.get_arg_parser">
 <em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_arg_parser" title="Permalink to this definition">¶</a></dt>
@@ -267,6 +261,12 @@ Consequently, possible _time <a href="#id1"><span class="problematic" id="id2">z
 <dt id="nutshell.product.Request.product_server">
 <code class="descname">product_server</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Request.product_server" title="Permalink to this definition">¶</a></dt>
 <dd><p>Server assigned for manufacturing this product</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.product.Request.remove_files">
+<code class="descname">remove_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Request.remove_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Request.remove_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the existing (even empty) files, log as info().</p>
 </dd></dl>
 
 <dl class="method">
