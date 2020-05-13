@@ -108,18 +108,25 @@
 <span class="sd">Status codes</span>
 <span class="sd">============</span>
 
-<span class="sd">NutShell recycles HTTP status codes in communicating success or failure</span>
+<span class="sd">NutShell recycles HTTP status codes [1]_ in communicating success or failure</span>
 <span class="sd">on operations. Especially:</span>
 
-<span class="sd">=====  ============</span>
-<span class="sd">Code   Enum Name</span>
-<span class="sd">=====  ============</span>
-<span class="sd">102    PROCESSING</span>
-<span class="sd">200    OK</span>
-<span class="sd">=====  ============</span>
+<span class="sd">==== ====================================</span>
+<span class="sd">Code Standard Enum Name</span>
+<span class="sd">==== ====================================</span>
+<span class="sd">102  PROCESSING</span>
+<span class="sd">200  OK</span>
+<span class="sd">404  Not Found</span>
+<span class="sd">405  Method Not Allowed</span>
+<span class="sd">409  Conflict</span>
+<span class="sd">415  Unsupported Media Type</span>
+<span class="sd">416  Range Not Satisfiable</span>
+<span class="sd">425  Too Early</span>
+<span class="sd">501  Not Implemented</span>
+<span class="sd">===  ====================================</span>
 
-<span class="sd">References:</span>
-<span class="sd">- https://docs.python.org/3/library/http.html</span>
+
+<span class="sd">.. [1] https://docs.python.org/3/library/http.html</span>
 
 <span class="sd">Code documentation</span>
 <span class="sd">==================</span>
