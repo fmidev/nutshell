@@ -32,8 +32,9 @@ other dependencies beyond production itself are required.
 NutShell is suited to collecting programming efforts of several developers and researchers using
 different languages and interfaces. It has been originally designed for weather radar products, but suits well for all kinds of on-demand product generation.
 
-
-Contents:
+=========
+Contents
+=========
 
 .. toctree::
    :maxdepth: 3
