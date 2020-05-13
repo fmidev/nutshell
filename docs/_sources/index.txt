@@ -30,7 +30,8 @@ Otherwise product generators can be designed independently from NutShell. For ex
 other dependencies beyond production itself are required.
 
 NutShell is suited to collecting programming efforts of several developers and researchers using
-different languages and interfaces. It has been originally designed for weather radar products, but suits well for all kinds of on-demand product generation.
+different languages and interfaces. It has been originally designed for weather radar products [Peura2008]_,
+but suits well for all kinds of on-demand product generation.
 
 =========
 Contents
@@ -57,9 +58,12 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-Original areas were presented in ERAD 2008 conference [Peura2008]_.
 
-.. [Peura2008] Markus Peura, *On-demand processing architecture for radar image products*,
+References
+==========
+
+.. [Peura2008] Markus Peura,
+    `*On-demand processing architecture for radar image products*, <erad2008-0004-extended.pdf>`_
     Proceedings of the fifth European Conference on Radar in Meteorology and Hydrology (ERAD2008),
     Helsinki, Finland, Finnish Meteorological Institute, June 2008
-    `pdf <erad2008-0004-extended.pdf>`_
+
