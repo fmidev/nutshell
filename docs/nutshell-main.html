@@ -109,41 +109,68 @@
 on operations. Especially:</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col width="5%" />
+<col width="33%" />
+<col width="13%" />
+<col width="49%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Code</th>
 <th class="head">Standard Enum Name</th>
+<th class="head">NutShell</th>
+<th class="head">Comment</th>
 </tr>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>102</td>
 <td>PROCESSING</td>
+<td>x</td>
+<td>&nbsp;</td>
 </tr>
 <tr class="row-odd"><td>200</td>
 <td>OK</td>
+<td>x</td>
+<td>Request completed successfully</td>
 </tr>
 <tr class="row-even"><td>404</td>
 <td>Not Found</td>
+<td>x</td>
+<td>Document not found</td>
 </tr>
 <tr class="row-odd"><td>405</td>
 <td>Method Not Allowed</td>
+<td>x</td>
+<td>&nbsp;</td>
 </tr>
 <tr class="row-even"><td>409</td>
 <td>Conflict</td>
+<td>&nbsp;</td>
+<td>Contradicting parameters</td>
 </tr>
-<tr class="row-odd"><td>415</td>
+<tr class="row-odd"><td>413</td>
+<td>Payload Too Large</td>
+<td>&nbsp;</td>
+<td>Parameters imply expensive computation</td>
+</tr>
+<tr class="row-even"><td>415</td>
 <td>Unsupported Media Type</td>
+<td>&nbsp;</td>
+<td>Unsupported file format</td>
 </tr>
-<tr class="row-even"><td>416</td>
+<tr class="row-odd"><td>416</td>
 <td>Range Not Satisfiable</td>
+<td>&nbsp;</td>
+<td>Parameter underflow or overflow</td>
 </tr>
-<tr class="row-odd"><td>425</td>
+<tr class="row-even"><td>425</td>
 <td>Too Early</td>
+<td>&nbsp;</td>
+<td>Input data not arrived</td>
 </tr>
-<tr class="row-even"><td>501</td>
+<tr class="row-odd"><td>501</td>
 <td>Not Implemented</td>
+<td>x</td>
+<td>Product generator not found</td>
 </tr>
 </tbody>
 </table>

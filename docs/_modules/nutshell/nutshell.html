@@ -111,19 +111,20 @@
 <span class="sd">NutShell recycles HTTP status codes [1]_ in communicating success or failure</span>
 <span class="sd">on operations. Especially:</span>
 
-<span class="sd">==== ====================================</span>
-<span class="sd">Code  Standard Enum Name</span>
-<span class="sd">==== ====================================</span>
-<span class="sd">102  PROCESSING</span>
-<span class="sd">200  OK</span>
-<span class="sd">404  Not Found</span>
-<span class="sd">405  Method Not Allowed</span>
-<span class="sd">409  Conflict</span>
-<span class="sd">415  Unsupported Media Type</span>
-<span class="sd">416  Range Not Satisfiable</span>
-<span class="sd">425  Too Early</span>
-<span class="sd">501  Not Implemented</span>
-<span class="sd">==== ====================================</span>
+<span class="sd">==== ========================== ========== ==========</span>
+<span class="sd">Code  Standard Enum Name        NutShell   Comment</span>
+<span class="sd">==== ========================== ========== ==========</span>
+<span class="sd">102  PROCESSING                 x          </span>
+<span class="sd">200  OK                         x          Request completed successfully</span>
+<span class="sd">404  Not Found                  x          Document not found</span>
+<span class="sd">405  Method Not Allowed         x </span>
+<span class="sd">409  Conflict                              Contradicting parameters </span>
+<span class="sd">413  Payload Too Large                     Parameters imply expensive computation</span>
+<span class="sd">415  Unsupported Media Type                Unsupported file format</span>
+<span class="sd">416  Range Not Satisfiable                 Parameter underflow or overflow</span>
+<span class="sd">425  Too Early                             Input data not arrived</span>
+<span class="sd">501  Not Implemented            x          Product generator not found</span>
+<span class="sd">==== ========================== ========== ==========</span>
 
 
 <span class="sd">.. [1] https://docs.python.org/3/library/http.html</span>
