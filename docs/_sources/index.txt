@@ -3,6 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
+
+Welcome to NutShell's documentation!
+====================================
+
+
 NutShell is a Python based facility designed for generating product files: images, data files and text files.
 The product generation scheme resembles that of ``make`` and ``Makefile``:
 if a product ("target") needs inputs ("dependencies"), they are generated first. 
@@ -28,9 +34,6 @@ NutShell is suited to collecting programming efforts of several developers and r
 different languages and interfaces. '
 It has been originally designed for weather radar products, but suits well for all kinds of on-demand product generation.
 
-
-Welcome to NutShell's documentation!
-====================================
 
 Contents:
 
