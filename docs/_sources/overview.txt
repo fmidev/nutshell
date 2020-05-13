@@ -15,8 +15,5 @@ These options are illustrated in the image below.
 
 .. image:: img/nutshell-scheme-dot.png
 
-	 
-	   
-.. image:: img/nutshell-variables-dot.png
 	   
   
