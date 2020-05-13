@@ -57,25 +57,24 @@
   <div class="section" id="welcome-to-nutshell-s-documentation">
 <h1>Welcome to NutShell&#8217;s documentation!<a class="headerlink" href="#welcome-to-nutshell-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>NutShell is a Python based facility designed for generating product files: images, data files and text files.
-The product generation scheme resembles that of <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>:
-if a product (&#8220;target&#8221;) needs inputs (&#8220;dependencies&#8221;), they are generated first.
 NutShell suits to generation of real time products as well as to regenerating products on-demand
 from archived data.</p>
-<p>The applied <em>product generators</em> are organized systematically in a directory tree.
+<p>The product generation scheme resembles that of <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>:
+if a product (or &#8220;target&#8221;) needs inputs (&#8220;dependencies&#8221;), they are generated first.
+The applied <em>product generators</em> are organized systematically in a directory tree.
 Each product has an ID of type <code class="docutils literal"><span class="pre">my.data.prod</span></code> that is mapped to path component <code class="docutils literal"><span class="pre">my/test/prod/</span></code> .
-Hence, a product generator can be tracked to &#8211; and essentially identified with &#8211; such a
-subdirectory containing generator script with a standard name (<code class="docutils literal"><span class="pre">generate.sh</span></code>).</p>
-<p>The scripts can and should be designed so that they can be executed off-line, ie. independently of
-NutShell. Upon <em>product request</em>, NutShell tracks and executes a respective product generator script,
+Hence, a product generator can be tracked to &#8211; and in a way also identified with &#8211; a unique
+subdirectory, which also contains a <em>generator script</em> with a fixed name (<code class="docutils literal"><span class="pre">generate.sh</span></code>).</p>
+<p>The generator scripts can and should be designed so that they can be executed off-line, ie. independently of
+NutShell. Upon <em>product request</em>, NutShell finds and executes a respective product generator script,
 communicating parameters &#8211; file paths and product parameters among others &#8211; as environment variables
-to the script. This is &#8220;the amount of interface&#8221; any script should handle.
+to the script. This is &#8220;the amount of interface&#8221; a script is required to handle.
 In addition, the product generator can query its desired inputs from NutShell using input
-declaration script (<code class="docutils literal"><span class="pre">input.sh</span></code>).</p>
-<p>Otherwise product generators can be designed independently from NutShell. For example, no libraries or
+declaration script (<code class="docutils literal"><span class="pre">input.sh</span></code>).
+Otherwise product generators can be designed independently from NutShell. For example, no libraries or
 other dependencies beyond production itself are required.</p>
 <p>NutShell is suited to collecting programming efforts of several developers and researchers using
-different languages and interfaces. &#8216;
-It has been originally designed for weather radar products, but suits well for all kinds of on-demand product generation.</p>
+different languages and interfaces. It has been originally designed for weather radar products, but suits well for all kinds of on-demand product generation.</p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
