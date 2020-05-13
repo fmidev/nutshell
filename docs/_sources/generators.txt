@@ -51,9 +51,8 @@ Input queries
 
 #. Create shell script file ``input.sh`` with execution permission.
 
-- Must not be any of :ref:`variables` (below)
+- Must not be any of :ref:`system variables`
 
-.. _variables:
 
   
 
