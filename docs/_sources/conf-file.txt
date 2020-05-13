@@ -42,6 +42,6 @@ with respect to working directory upon invocation. So for example::
   cd /some/dir/
   python3 -m nutshell.nutshell -c ./another/dir/nutshell.cnf
 
-will expand the above ``NUTSHELL_DIR`` as  ``/some/dir/python``,
-(not with respect to the configuration directory, ie. to ``/some/dir/another/dir/python``).
+will yield ``NUTSHELL_DIR=/some/dir/python``, hence
+not with respect to the configuration directory, ie. to ``/some/dir/another/dir/python``.
 Whenever possible, absolute paths should be used.
