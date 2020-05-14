@@ -70,7 +70,7 @@
     <span class="k">return</span> <span class="n">result</span>
 
 
-<div class="viewcode-block" id="read_conf_text"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.read_conf_text">[docs]</a><span class="k">def</span> <span class="nf">read_conf_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">regexp</span><span class="o">=</span><span class="s1">&#39;^([A-Za-z][\w]*)=([^#]*)(#.*)?&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_conf_text"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.read_conf_text">[docs]</a><span class="k">def</span> <span class="nf">read_conf_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">regexp</span><span class="o">=</span><span class="s1">&#39;^([A-Za-z][\w]*)=([^#]*)(#.*)?&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Read plain-text configuration file consisting of &lt;key&gt;=&lt;value&gt; pairs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -92,26 +92,26 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="dict_str"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.dict_str">[docs]</a><span class="k">def</span> <span class="nf">dict_str</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;  {0}=&quot;{1}&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="dict_str"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.dict_str">[docs]</a><span class="k">def</span> <span class="nf">dict_str</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;  {0}=&quot;{1}&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert a dictionary to a string.&quot;&quot;&quot;</span>
     <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="n">format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">s</span></div>
 
-<div class="viewcode-block" id="debug_dict"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.debug_dict">[docs]</a><span class="k">def</span> <span class="nf">debug_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<div class="viewcode-block" id="debug_dict"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.debug_dict">[docs]</a><span class="k">def</span> <span class="nf">debug_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;dictionary to a string.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  {0}=&quot;{1}&quot;</span><span class="se">\t</span><span class="s1"># &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="print_dict"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.print_dict">[docs]</a><span class="k">def</span> <span class="nf">print_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;  {0}=&quot;{1}&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="print_dict"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.print_dict">[docs]</a><span class="k">def</span> <span class="nf">print_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;  {0}=&quot;{1}&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Dump a dictionary to stdout.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">d</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span> <span class="n">dict_str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">format</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="get_entries"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.get_entries">[docs]</a><span class="k">def</span> <span class="nf">get_entries</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="get_entries"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.get_entries">[docs]</a><span class="k">def</span> <span class="nf">get_entries</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Gets member values as a dictionary</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>
@@ -131,7 +131,7 @@
     <span class="n">link</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>  
 
 <span class="c1"># Test</span>
-<div class="viewcode-block" id="set_entries"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.set_entries">[docs]</a><span class="k">def</span> <span class="nf">set_entries</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">entries</span><span class="o">=</span><span class="p">{},</span> <span class="n">lenient</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="set_entries"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.set_entries">[docs]</a><span class="k">def</span> <span class="nf">set_entries</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">entries</span><span class="o">=</span><span class="p">{},</span> <span class="n">lenient</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Given a dictionary, sets corresponding member values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">members</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="c1"># or: limit to [&quot;CACHE_ROOT&quot;, ...]</span>
@@ -156,7 +156,7 @@
 	
 
 <span class="mi">0</span>
-<div class="viewcode-block" id="Log"><a class="viewcode-back" href="../../nutshell.html#nutshell.nutils.Log">[docs]</a><span class="k">class</span> <span class="nc">Log</span><span class="p">:</span>
+<div class="viewcode-block" id="Log"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.Log">[docs]</a><span class="k">class</span> <span class="nc">Log</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Logging utility</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -246,11 +246,11 @@
           <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-main.html">Using NutShell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../nutshell.html">Product requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../conf-file.html">Configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
 </ul>
 
           <div role="search">

@@ -47,11 +47,11 @@ Contents
 
    overview
    nutshell-main
-   nutshell
    commands
    conf-file
    generators	      
    variables
+   nutshell-code
 		
 
 		  

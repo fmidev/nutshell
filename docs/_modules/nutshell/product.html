@@ -136,7 +136,7 @@
 
 
 
-<div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">:</span>
+<div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Stores basic product information: product id, timestamp (if applicable)</span>
 <span class="sd">    file format, and specific product parameters.</span>
 <span class="sd">    </span>
@@ -169,14 +169,14 @@
 
     <span class="n">prodRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Info.set_id"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.set_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_id</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_id"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the product ID string consisting of alphanumeric chars and periods.&quot;&quot;&quot;</span> 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product_id</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">product_id</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Value not accepted as product id: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_id</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Info.set_product"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.set_product">[docs]</a>    <span class="k">def</span> <span class="nf">set_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_desc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_product"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_product">[docs]</a>    <span class="k">def</span> <span class="nf">set_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_desc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Configure a product. </span>
 <span class="sd">        </span>
 <span class="sd">        Arguments:</span>
@@ -191,7 +191,7 @@
             <span class="c1"># todo warn if duplicates in kwargs?</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="Info.set_timestamp"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.set_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">set_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_timestamp"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">set_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set UTC time in numeric format &#39;%Y%m%d%H%M&#39; or its punctuated variants.</span>
 <span class="sd">        </span>
 <span class="sd">        Essentially, the timestamp will be stored as a string of </span>
@@ -207,7 +207,7 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\W&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Info.set_format"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.set_format">[docs]</a>    <span class="k">def</span> <span class="nf">set_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_format"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_format">[docs]</a>    <span class="k">def</span> <span class="nf">set_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sets file format (png, txt, pgm.gz, txt.zip, ...).&quot;&quot;&quot;</span>
         
         <span class="n">m</span> <span class="o">=</span> <span class="n">Info</span><span class="o">.</span><span class="n">compressionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
@@ -233,7 +233,7 @@
 
     <span class="c1"># NOTE: remove PARAMS!</span>
     <span class="c1"># Consider typing (int, str)</span>
-<div class="viewcode-block" id="Info.set_parameter"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.set_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_parameter"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set any parameter, including FORMAT, excluding TIMESTAMP and ID</span>
 <span class="sd">        </span>
 <span class="sd">            Arguments:</span>
@@ -253,7 +253,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
-<div class="viewcode-block" id="Info.set_parameters"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_parameters"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Given a dictionary of parameters, set values.</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -261,7 +261,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Info.parse_filename"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.parse_filename">[docs]</a>    <span class="k">def</span> <span class="nf">parse_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.parse_filename"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.parse_filename">[docs]</a>    <span class="k">def</span> <span class="nf">parse_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Derive product parameters from a filename.&quot;&quot;&quot;</span>
 
         <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -336,7 +336,7 @@
         <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1">#FORMAT)</span>
 
 
-<div class="viewcode-block" id="Info.get_param_env"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.get_param_env">[docs]</a>    <span class="k">def</span> <span class="nf">get_param_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.get_param_env"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.get_param_env">[docs]</a>    <span class="k">def</span> <span class="nf">get_param_env</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append or create dict with TIMESTAMP and params&quot;&quot;&quot;</span>
         <span class="sd">&quot;&quot;&quot; Uses PRODUCT instead of ID which is too general (example: &quot;radar.rack.comp&quot;)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">env</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
@@ -366,7 +366,7 @@
 
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Info.get_arg_parser"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Info.get_arg_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.get_arg_parser"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.get_arg_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Populates parser with options of this class&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">parser</span><span class="p">):</span>
@@ -389,16 +389,16 @@
 <span class="c1">#                            default=&quot;&quot;,</span>
 <span class="c1">#                            help=&quot;product to be handled&quot;)</span>
 
-        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;--product&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;filename&gt;&lt;id&gt;]&quot;</span><span class="p">,</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;--product&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;filename&gt;|&lt;id&gt;]&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;PRODUCT&quot;</span><span class="p">,</span>
                             <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                             <span class="n">help</span><span class="o">=</span><span class="s2">&quot;product to be handled&quot;</span><span class="p">)</span>
-
+        <span class="c1"># consider -o OUTFILE!</span>
 
         <span class="k">return</span> <span class="n">parser</span></div></div>
         
 <span class="c1"># Consider renaming to Generator (generator =&gt; shell)</span>
-<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
+<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Container for storing information on requested product and server side resources derived thereof.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -434,14 +434,14 @@
     
     <span class="n">builtin_directives</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;LOG&quot;</span><span class="p">,</span> <span class="s2">&quot;LATEST&quot;</span><span class="p">,</span> <span class="s2">&quot;LINK&quot;</span><span class="p">)</span>        
 
-<div class="viewcode-block" id="Generator.set_status"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Generator.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+<div class="viewcode-block" id="Generator.set_status"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set success or failure status using http.HTTPStatus codes.</span>
 <span class="sd">        This is always logged.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span></div>
 
-<div class="viewcode-block" id="Generator.remove_files"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Generator.remove_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Generator.remove_files"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator.remove_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove the existing (even empty) files, log as info().</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_static</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_tmp</span><span class="p">]:</span>
@@ -572,13 +572,14 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>   
     
  
-    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">OUTFILE</span><span class="p">):</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">OUTFILE</span><span class="p">)</span>
+    <span class="c1">#if (options.OUTFILE):</span>
+    <span class="c1">#    product_info.parse_filename(options.OUTFILE)</span>
 
+    <span class="c1">#if (options.PRODUCT):</span>
+    <span class="c1">#    product_info.set_id(options.PRODUCT)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
+    <span class="c1">#    product_info.parse_filename(options.PRODUCT)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;product not defined&quot;</span><span class="p">)</span>
  
@@ -613,11 +614,11 @@
           <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-main.html">Using NutShell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../nutshell.html">Product requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../conf-file.html">Configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
 </ul>
 
           <div role="search">

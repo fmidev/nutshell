@@ -108,7 +108,7 @@
 
 <span class="c1"># SimpleHTTPRequestHandler</span>
 <span class="c1"># class NutHandler(BaseHTTPServer.BaseHTTPRequestHandler):</span>
-<div class="viewcode-block" id="NutHandler"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.httpd.NutHandler">[docs]</a><span class="k">class</span> <span class="nc">NutHandler</span><span class="p">(</span><span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="NutHandler"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler">[docs]</a><span class="k">class</span> <span class="nc">NutHandler</span><span class="p">(</span><span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Forwards a HTTP request to  nutshell.ProductServer instance</span>
 <span class="sd">    </span>
 <span class="sd">        </span>
@@ -118,7 +118,7 @@
     <span class="c1">#htmlDoc = &#39;&#39;</span>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="NutHandler.get_html_template"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.httpd.NutHandler.get_html_template">[docs]</a>    <span class="k">def</span> <span class="nf">get_html_template</span><span class="p">():</span>
+<div class="viewcode-block" id="NutHandler.get_html_template"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.get_html_template">[docs]</a>    <span class="k">def</span> <span class="nf">get_html_template</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot;Read HTML template dir and return it for modifications.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
@@ -136,7 +136,7 @@
 
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="NutHandler.parse_url"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.httpd.NutHandler.parse_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NutHandler.parse_url"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.parse_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; splitquery(&#39;/path?query&#39;) --&gt; &#39;/path&#39;, &#39;query&#39;.</span>
 <span class="sd">            If query returned also when None        </span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># </span>
@@ -164,7 +164,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="NutHandler.send_to_stream"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.httpd.NutHandler.send_to_stream">[docs]</a>    <span class="k">def</span> <span class="nf">send_to_stream</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">product_request</span><span class="p">):</span>
+<div class="viewcode-block" id="NutHandler.send_to_stream"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.send_to_stream">[docs]</a>    <span class="k">def</span> <span class="nf">send_to_stream</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">product_request</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Send to stream            </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mtype</span><span class="p">,</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -377,7 +377,7 @@
      
 
 
-<div class="viewcode-block" id="run_http"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.httpd.run_http">[docs]</a><span class="k">def</span> <span class="nf">run_http</span><span class="p">(</span><span class="n">product_server</span><span class="p">):</span>
+<div class="viewcode-block" id="run_http"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.run_http">[docs]</a><span class="k">def</span> <span class="nf">run_http</span><span class="p">(</span><span class="n">product_server</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A function just for me.</span>
 
 <span class="sd">    :param my_arg: The first of my arguments.</span>
@@ -523,11 +523,11 @@
           <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-main.html">Using NutShell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../nutshell.html">Product requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../conf-file.html">Configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
 </ul>
 
           <div role="search">

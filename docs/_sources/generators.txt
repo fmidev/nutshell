@@ -5,15 +5,15 @@ Product generators
 ==================
 
 In NutShell, a *product generator* is a shell script that computes something with given parameters and
-saves the result as a file in a given path. As a precondition, for computation
-the generator may need *product inputs* and request NutShell to compute them first. In this sense,
-NutShell functions like ``make`` and ``Makefile``, where respective inputs are called *dependencies*.
+saves the result as a file in a given path. As a precondition, a generator may need
+*product inputs* and will request NutShell to compute them first. In this sense,
+NutShell functions much like ``make`` and ``Makefile``, where respective inputs are called *dependencies*.
 
 Typical Unix/Linux commands have a form like: ::
 
   command -i <input-file>  -p <parameter> -o <output-file>
 
-Much in a way ``Makefile``s do, a generator script wraps such a line to something like: ::
+Much in a way ``Makefile`` does, a generator script wraps such a line to something like: ::
 
   command -i $INPUT  -p $PARAMETER -o $OUTDIR/$OUTFILE
 
@@ -21,9 +21,9 @@ Much in a way ``Makefile``s do, a generator script wraps such a line to somethin
 Product ID's, files and directories
 -----------------------------------
 
-Each product generator has a unique *product id* consisting of lowercase literals and periods,
-for example: ``test.image.product``.
-Respective directory names will derived from product id, replacing periods with slashes, 
+Each product generator is associated with a unique *product id* consisting of lowercase literals and periods,
+for example ``test.image.product``.
+Respective directory names will be derived from the product id, replacing periods with slashes, 
 for example: ``test/image/product``.
 
 In NutShell, output files with dynamic content have syntax::

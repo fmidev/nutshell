@@ -60,22 +60,22 @@
   <div class="section" id="product-generators">
 <h1>Product generators<a class="headerlink" href="#product-generators" title="Permalink to this headline">¶</a></h1>
 <p>In NutShell, a <em>product generator</em> is a shell script that computes something with given parameters and
-saves the result as a file in a given path. As a precondition, for computation
-the generator may need <em>product inputs</em> and request NutShell to compute them first. In this sense,
-NutShell functions like <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>, where respective inputs are called <em>dependencies</em>.</p>
+saves the result as a file in a given path. As a precondition, a generator may need
+<em>product inputs</em> and will request NutShell to compute them first. In this sense,
+NutShell functions much like <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>, where respective inputs are called <em>dependencies</em>.</p>
 <p>Typical Unix/Linux commands have a form like:</p>
 <div class="highlight-python"><div class="highlight"><pre>command -i &lt;input-file&gt;  -p &lt;parameter&gt; -o &lt;output-file&gt;
 </pre></div>
 </div>
-<p>Much in a way <a href="#id1"><span class="problematic" id="id2">``</span></a>Makefile``s do, a generator script wraps such a line to something like:</p>
+<p>Much in a way <code class="docutils literal"><span class="pre">Makefile</span></code> does, a generator script wraps such a line to something like:</p>
 <div class="highlight-python"><div class="highlight"><pre>command -i $INPUT  -p $PARAMETER -o $OUTDIR/$OUTFILE
 </pre></div>
 </div>
 <div class="section" id="product-id-s-files-and-directories">
 <h2>Product ID&#8217;s, files and directories<a class="headerlink" href="#product-id-s-files-and-directories" title="Permalink to this headline">¶</a></h2>
-<p>Each product generator has a unique <em>product id</em> consisting of lowercase literals and periods,
-for example: <code class="docutils literal"><span class="pre">test.image.product</span></code>.
-Respective directory names will derived from product id, replacing periods with slashes,
+<p>Each product generator is associated with a unique <em>product id</em> consisting of lowercase literals and periods,
+for example <code class="docutils literal"><span class="pre">test.image.product</span></code>.
+Respective directory names will be derived from the product id, replacing periods with slashes,
 for example: <code class="docutils literal"><span class="pre">test/image/product</span></code>.</p>
 <p>In NutShell, output files with dynamic content have syntax:</p>
 <div class="highlight-python"><div class="highlight"><pre>&lt;TIMESTAMP&gt;_&lt;PRODUCT_ID&gt;_&lt;PARAMETERS&gt;.&lt;EXTENSION&gt;
@@ -148,7 +148,6 @@ HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
           <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-main.html">Using NutShell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nutshell.html">Product requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conf-file.html">Configuration file</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Product generators</a><ul>
@@ -161,6 +160,7 @@ HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
 </ul>
 
           <div role="search">

@@ -184,7 +184,7 @@
 <span class="c1">#ProductInfo = nutproduct.ProductInfo</span>
 
 
-<div class="viewcode-block" id="ProductServer"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer">[docs]</a><span class="k">class</span> <span class="nc">ProductServer</span><span class="p">:</span>
+<div class="viewcode-block" id="ProductServer"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer">[docs]</a><span class="k">class</span> <span class="nc">ProductServer</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Service designed for generating image and data products served as files </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -212,7 +212,7 @@
     <span class="c1">#error_code_regexp = re.compile(&quot;^\s*([0-9]+)\\.(zip|gz)$&quot;)</span>
    
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="ProductServer.get_arg_parser"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.get_arg_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.get_arg_parser"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_arg_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Populates parser with options of this class&quot;&quot;&quot;</span>
 
         <span class="n">parser</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
@@ -253,7 +253,7 @@
         <span class="k">return</span> <span class="n">parser</span>    </div>
 
     
-<div class="viewcode-block" id="ProductServer.init_path"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.init_path">[docs]</a>    <span class="k">def</span> <span class="nf">init_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.init_path"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.init_path">[docs]</a>    <span class="k">def</span> <span class="nf">init_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Expand relative path to absolute, optionally check that exists. &quot;&quot;&quot;</span> 
         <span class="c1">#if (hasattr(self, dirname)):</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">))</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
@@ -293,7 +293,7 @@
     <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
         <span class="k">return</span> <span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     
-<div class="viewcode-block" id="ProductServer.get_product_dir"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.get_product_dir">[docs]</a>    <span class="k">def</span> <span class="nf">get_product_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.get_product_dir"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_product_dir">[docs]</a>    <span class="k">def</span> <span class="nf">get_product_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns directory containing product generator script (generate.sh) and possible configurations etc&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span></div>
     
@@ -320,7 +320,7 @@
    
 
     <span class="c1"># Generalize?</span>
-<div class="viewcode-block" id="ProductServer.ensure_output_dir"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.ensure_output_dir">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.ensure_output_dir"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.ensure_output_dir">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a writable directory, if non-existent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -368,7 +368,7 @@
 <span class="c1">#        task.stderr = stderr</span>
 <span class="c1">#        </span>
                    
-<div class="viewcode-block" id="ProductServer.get_input_list"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.get_input_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.get_input_list"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_input_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Used for reading dynamic input configuration generated by input.sh.</span>
 <span class="sd">        directives determine how the product is generated. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -432,7 +432,7 @@
 <span class="c1">#        return product_request.returncode</span>
 
 
-<div class="viewcode-block" id="ProductServer.make_request"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="n">directives</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.make_request"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="n">directives</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;&quot; Return path or log</span>
 <span class="sd">        &#39;MAKE&#39;   - return the product, if in cache, else generate it and return</span>
 <span class="sd">        &#39;DELETE&#39; - delete the product in cache</span>
@@ -693,11 +693,11 @@
           <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-main.html">Using NutShell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../nutshell.html">Product requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../conf-file.html">Configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
 </ul>
 
           <div role="search">
