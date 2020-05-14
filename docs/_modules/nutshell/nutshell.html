@@ -253,14 +253,14 @@
         <span class="k">return</span> <span class="n">parser</span>    </div>
 
     
-<span class="c1">#    def init_path(self, dirname, verify=False):</span>
-<span class="c1">#        &quot;&quot;&quot; Expand relative path to absolute, optionally check that exists. &quot;&quot;&quot; </span>
-<span class="c1">#        #if (hasattr(self, dirname)):</span>
-<span class="c1">#        path = Path(getattr(self, dirname)).absolute()</span>
-<span class="c1">#        self.logger.warn(&#39;  {0} =&gt;  {1}&#39;.format(dirname, path))</span>
-<span class="c1">#        if (verify) and not (path.exists()):</span>
-<span class="c1">#            raise FileNotFoundError(__name__ + str(path))</span>
-<span class="c1">#        setattr(self, dirname, str(path)) # TODO -&gt; Path obj</span>
+<div class="viewcode-block" id="ProductServer.init_path"><a class="viewcode-back" href="../../nutshell-main.html#nutshell.nutshell.ProductServer.init_path">[docs]</a>    <span class="k">def</span> <span class="nf">init_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Expand relative path to absolute, optionally check that exists. &quot;&quot;&quot;</span> 
+        <span class="c1">#if (hasattr(self, dirname)):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">))</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;  {0} =&gt;  {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verify</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="n">FileNotFoundError</span><span class="p">(</span><span class="n">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="c1"># TODO -&gt; Path obj</span></div>
 <span class="c1">#        #else:</span>
         <span class="c1">#     raise KeyError   </span>
             
@@ -531,6 +531,11 @@
                 <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">pr</span>
                 
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator did not create desired file&quot;</span><span class="p">)</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">pr</span>
+ 
             <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator failed (empty file intact)&quot;</span><span class="p">)</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
