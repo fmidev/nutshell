@@ -1,0 +1,11 @@
+.. NutShell documentation 
+
+==============
+Using NutShell
+==============
+
+This sections explains how NutShell can be used for product queries
+from command line, Python code and HTTP requests.
+
+Instructions for setting up product generators is explained in 
+ :ref:`generators` or  

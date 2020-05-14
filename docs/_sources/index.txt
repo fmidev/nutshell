@@ -45,12 +45,12 @@ Contents
 .. toctree::
    :maxdepth: 3
 
-   overview
+   nutshell-overview
    nutshell-main
-   commands
-   conf-file
-   generators	      
-   variables
+   nutshell-commands
+   nutshell-config
+   nutshell-generators	      
+   nutshell-variables
    nutshell-code
 		
 
