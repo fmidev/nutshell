@@ -1,8 +1,6 @@
 #!/bin/bash
 
 
-#SIZE=${SIZE:-'32'}
-
 SIZE=${SIZE:-"256,256"}
 SIZE=( ${SIZE/,/ } )
 WIDTH=${WIDTH:-${SIZE[0]}}   
@@ -44,9 +42,7 @@ if [ "$PATTERN_INFO" == '' ]; then
 fi
 
 OUTDIR=${OUTDIR:-'.'}
-#OUTFILE=${OUTFILE:-"test.checkerboard_PATTERN=${PATTERN}_SIZE=${SIZE}.$FORMAT"}
-OUTFILE=${OUTFILE:-"test.checkerboard.$FORMAT"}
-
+OUTFILE=${OUTFILE:-"image.pattern.png"}
 
 #cmd="convert -size 8x8 pattern:gray50 -filter Point -resize ${WIDTH},${HEIGHT} $OUTDIR/$OUTFILE"
 cmd="convert -size ${WIDTH}x${HEIGHT} pattern:${PATTERN} $OUTDIR/$OUTFILE"
