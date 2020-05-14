@@ -2,14 +2,17 @@
 
 
 .. _commands:
-   
-Commands
-========
+
+==========================
+Commands and status codes
+==========================
+
+
 
 .. _request:
 
-Request
--------
+Requests
+========
 
 
 ========== ===========================================================
@@ -22,7 +25,7 @@ Request
 .. _directives:
 
 Directives
-----------
+==========
 
 NutShell supports *directives*, additional instructions that
 define *how* a product is computed or what kind of *additional
@@ -44,7 +47,7 @@ defined below.
 
 
 Built-in directives
-'''''''''''''''''''
+-------------------
 
 ========== ============================================================
 ``STATUS`` Also after successful ``MAKE`` return the status page (HTML)
@@ -54,3 +57,35 @@ Built-in directives
 ``LATEST`` Link file with ``$TIMESTAMP`` replaced with ``'LATEST'``
 ========== ============================================================
 
+
+Status codes
+============
+
+NutShell recycles some standard HTTP status codes [1]_ [2]_ for 
+communicating success or failure on operations. 
+Many of those codes can be also used by the generator scripts
+in describing errors or other exceptional conditions back 
+to the hosting system, NutShell. 
+ 
+Useful HTTP codes
+-----------------
+
+==== ========================== ========== ==========
+Code  Standard Enum Name        NutShell   Comment
+==== ========================== ========== ==========
+102  PROCESSING                 x          
+200  OK                         x          Request completed successfully
+404  Not Found                  x          Document not found
+405  Method Not Allowed         x 
+409  Conflict                              Contradicting parameters 
+413  Payload Too Large                     Parameters imply expensive computation
+415  Unsupported Media Type                Unsupported file format
+416  Range Not Satisfiable                 Parameter underflow or overflow
+425  Too Early                             Input data not arrived
+501  Not Implemented            x          Product generator not found
+503  Service Unavailable        x          Busy, come back later
+==== ========================== ========== ==========
+
+
+.. [1] https://docs.python.org/3/library/http.html
+.. [2] https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html

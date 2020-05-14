@@ -4,8 +4,7 @@
 Using NutShell
 ==============
 
-This sections explains how NutShell can be used for product queries
-from command line, Python code and HTTP requests.
+This sections explains product queries are made from command line, Python code and HTTP requests.
 
 Instructions for setting up product generators is explained in :ref:`generators` .  
 
@@ -14,10 +13,45 @@ Instructions for setting up product generators is explained in :ref:`generators`
 Command-line usage
 ==================
 
+Basic format for all the command line invocations is::
+
+    python3 -m nutshell.nutshell <nutshell-args>
+    
+Online help is optained with ``-h``::
+
+    python3 -m nutshell.nutshell -h
+    
+Simple query using configuration file and product definition::
+
+    python3 -m nutshell.nutshell -c nutshell/nutshell.cnf -m \\
+      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png 
+
+
 .. _nutshell-api:
 
 NutShell API
 ============
+
+Simple example::
+
+    import nutshell.nutshell
+
+    # Initialize service
+    server = nuts.ProductServer('nutshell/nutshell.cnf')
+
+    # Retrieve / generate a product
+    response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
+
+    # Results:
+    print("Return code: {0} ".format(response.returncode))
+    print("Status (HTTP code): {0}:  ".format(response.status))
+    print("File path: {0} ".format(response.path))
+
+    # Example: further processing (image data)
+    from PIL import Image
+    file = Image.open(response.path)
+    print(file.info)
+
 
 .. _http-server:
 
