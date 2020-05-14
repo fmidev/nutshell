@@ -54,9 +54,9 @@ class Task:
 
         if (self.script.exists()):
             if (False):  # TODO Exec p.stat().st_mode & 0o77
-                log.debug('Script exist, but is not executable: {0}'.format(self.script))
+                self.log.debug('Script exist, but is not executable: {0}'.format(self.script))
         else:
-            log.debug('Script does not exist: {0}'.format(self.script))
+            self.log.debug('Script does not exist: {0}'.format(self.script))
             
         self.returncode = 0
             

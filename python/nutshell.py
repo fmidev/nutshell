@@ -476,6 +476,11 @@ class ProductServer:
                 pr.remove_files()
                 return pr
                 
+            if (not pr.path_tmp.exists()):
+                pr.log.error("generator did not create desired file")
+                pr.remove_files()
+                return pr
+ 
             if (pr.path_tmp.stat().st_size == 0):
                 pr.log.error("generator failed (empty file intact)")
                 pr.remove_files()

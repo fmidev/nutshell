@@ -10,7 +10,7 @@ CACHE_ROOT='./demo/cache'
 PRODUCT_ROOT='./demo/products'
 
 # Top-level directory for HTTP server (optional).
-HTML_ROOT='./html'
+HTML_ROOT='./demo/html'
 
 # Port for HTTP server (optional).
 HTTP_PORT='8088'
