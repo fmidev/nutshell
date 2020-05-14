@@ -383,12 +383,8 @@
 
 
 <div class="viewcode-block" id="run_http"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.run_http">[docs]</a><span class="k">def</span> <span class="nf">run_http</span><span class="p">(</span><span class="n">product_server</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A function </span>
+    <span class="sd">&quot;&quot;&quot;A convenience function for starting and stopping the HTTP server.</span>
 
-<span class="sd">    :param my_arg: The first of my arguments.</span>
-<span class="sd">    :param my_other_arg: The second of my arguments.</span>
-
-<span class="sd">    :returns: A message (just for me, of course).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">NutHandler</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span> <span class="c1"># has no effect as such...</span>
     <span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span> <span class="c1"># has no effect...</span>
