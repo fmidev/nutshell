@@ -55,7 +55,13 @@
   <h1>Source code for nutshell.nutils</h1><div class="highlight"><pre>
 <span class="ch">#!/bin/python</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Utilities for handling objects and configuration files. &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utilities -- nutshell.nutils</span>
+<span class="sd">----------------------------</span>
+
+<span class="sd">Utilities for handling objects and configuration files. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
@@ -64,14 +70,16 @@
 <span class="c1">#from pathlib import Path</span>
 
 
-<span class="k">def</span> <span class="nf">read_conf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}):</span>
+<div class="viewcode-block" id="read_conf"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.read_conf">[docs]</a><span class="k">def</span> <span class="nf">read_conf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}):</span> 
+    <span class="sd">&quot;&quot;&quot;Read plain-text configuration file consisting of &lt;key&gt;=&lt;value&gt; pairs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
     <span class="n">read_conf_text</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="read_conf_text"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.read_conf_text">[docs]</a><span class="k">def</span> <span class="nf">read_conf_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">regexp</span><span class="o">=</span><span class="s1">&#39;^([A-Za-z][\w]*)=([^#]*)(#.*)?&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read plain-text configuration file consisting of &lt;key&gt;=&lt;value&gt; pairs.</span>
+    <span class="sd">&quot;&quot;&quot;Traverse array of text lines consisting of &lt;key&gt;=&lt;value&gt; pairs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">text</span><span class="p">):</span>
@@ -144,46 +152,34 @@
             <span class="c1"># print &#39;# Warning: key not found for assignment: {0}=&quot;{1}&quot;&#39;.format(i, result[i])</span>
 
 
-<span class="c1">#VERBOSITY_LEVELS=[(0,&quot;NOTSET&quot;), (0,&quot;DEBUG&quot;),(0,&quot;INFO&quot;),(0,&quot;WARNING&quot;), (0,&quot;ERROR&quot;), (0,&quot;CRITICAL&quot;) ]</span>
-
-<span class="c1">#VERBOSITY_LEVELS={&quot;NOTSET&quot;: 0, &quot;DEBUG&quot;:10, &quot;INFO&quot;:20, &quot;WARNING&quot;:30, &quot;ERROR&quot;:40, &quot;CRITICAL&quot;:50 }</span>
-
-
-
-
-
-
-	
-
-<span class="mi">0</span>
-<div class="viewcode-block" id="Log"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.Log">[docs]</a><span class="k">class</span> <span class="nc">Log</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Logging utility</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;LOG: &#39;</span>
-    
-    <span class="n">log</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;LOG: &#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Logging utility</span>
-<span class="sd">        </span>
-<span class="sd">        Attributes:</span>
-<span class="sd">        prefix: leading string attached to each line</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
-
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Logging utility</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{0}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{0}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{0}{1]={2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">))</span></div>
+<span class="c1">#class Log:</span>
+<span class="c1">#    &quot;&quot;&quot;Logging utility</span>
+<span class="c1">#    &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#    prefix = &#39;LOG: &#39;</span>
+<span class="c1">#    </span>
+<span class="c1">#    log = []</span>
+<span class="c1">#</span>
+<span class="c1">#    def __str__(self):</span>
+<span class="c1">#        return &#39;\n&#39;.join(self.log)</span>
+<span class="c1">#</span>
+<span class="c1">#    def __init__(self, prefix = &#39;LOG: &#39;):</span>
+<span class="c1">#        &quot;&quot;&quot;Logging utility</span>
+<span class="c1">#        </span>
+<span class="c1">#        Attributes:</span>
+<span class="c1">#        prefix: leading string attached to each line</span>
+<span class="c1">#        &quot;&quot;&quot;</span>
+<span class="c1">#        self.log = []</span>
+<span class="c1">#        self.prefix = prefix</span>
+<span class="c1">#</span>
+<span class="c1">#    def __call__(self, line, *args, **kwargs):</span>
+<span class="c1">#        &quot;&quot;&quot;Logging utility</span>
+<span class="c1">#        &quot;&quot;&quot;</span>
+<span class="c1">#        self.log.append(&#39;{0}{1}&#39;.format(self.prefix, line))</span>
+<span class="c1">#        for i in args:</span>
+<span class="c1">#            self.log.append(&#39;{0}{1}&#39;.format(self.prefix, i))</span>
+<span class="c1">#        for k,v in kwargs:</span>
+<span class="c1">#            self.append(&#39;{0}{1]={2}&#39;.format(self.prefix, k,v))</span>
 
 <span class="c1"># Demo</span>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

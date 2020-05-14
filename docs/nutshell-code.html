@@ -114,10 +114,8 @@ directives determine how the product is generated.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-nutshell.httpd">
-<span id="http-server-nutshell-httpd"></span><h2>HTTP Server &#8211; nutshell.httpd<a class="headerlink" href="#module-nutshell.httpd" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id1">
-<h3>HTTP Server &#8211; nutshell.httpd<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-nutshell.httpd"></span><div class="section" id="http-server-nutshell-httpd">
+<h2>HTTP Server &#8211; nutshell.httpd<a class="headerlink" href="#http-server-nutshell-httpd" title="Permalink to this headline">¶</a></h2>
 <p>Server can be started with command:</p>
 <div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell.cnf
 </pre></div>
@@ -177,11 +175,8 @@ If query returned also when None</p>
 </dd></dl>
 
 </div>
-</div>
-<div class="section" id="module-nutshell.product">
-<span id="product-definitions-and-requests-nutshell-product"></span><h2>Product definitions and requests &#8211; nutshell.product<a class="headerlink" href="#module-nutshell.product" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id2">
-<h3>Product definitions and requests &#8211; nutshell.product<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-nutshell.product"></span><div class="section" id="product-definitions-and-requests-nutshell-product">
+<h2>Product definitions and requests &#8211; nutshell.product<a class="headerlink" href="#product-definitions-and-requests-nutshell-product" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="nutshell.product.Generator">
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Generator</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>actions=None</em>, <em>directives=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Generator" title="Permalink to this definition">¶</a></dt>
@@ -313,16 +308,15 @@ Consequently, possible _time <a href="#id3"><span class="problematic" id="id4">z
 </dd></dl>
 
 </div>
-</div>
 <div class="section" id="module-nutshell.shell">
-<span id="escape-to-shell-nutshell-shell"></span><h2>Escape to shell &#8211; nutshell.shell<a class="headerlink" href="#module-nutshell.shell" title="Permalink to this headline">¶</a></h2>
-<p>Product generator service appicable on the command line or as a library</p>
-<div class="section" id="code-documentation">
-<h3>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this headline">¶</a></h3>
+<span id="escape-from-python-nutshell-shell"></span><h2>Escape from Python &#8211; nutshell.shell<a class="headerlink" href="#module-nutshell.shell" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Escape from Python &#8211; nutshell.shell<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>This module contains utilities for running shell scripts.</p>
 <dl class="class">
 <dt id="nutshell.shell.Task">
 <em class="property">class </em><code class="descclassname">nutshell.shell.</code><code class="descname">Task</code><span class="sig-paren">(</span><em>script</em>, <em>env=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/shell.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.shell.Task" title="Permalink to this definition">¶</a></dt>
-<dd><p>Something that has a script and stdin, stdout, env and log</p>
+<dd><p>Something that has a script, stdin, stdout, env, and log.</p>
 <dl class="method">
 <dt id="nutshell.shell.Task.run">
 <code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/shell.html#Task.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.shell.Task.run" title="Permalink to this definition">¶</a></dt>
@@ -335,13 +329,9 @@ Consequently, possible _time <a href="#id3"><span class="problematic" id="id4">z
 </div>
 <div class="section" id="module-nutshell.nutils">
 <span id="utilities-nutshell-nutils"></span><h2>Utilities &#8211; nutshell.nutils<a class="headerlink" href="#module-nutshell.nutils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Utilities &#8211; nutshell.nutils<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>Utilities for handling objects and configuration files.</p>
-<dl class="class">
-<dt id="nutshell.nutils.Log">
-<em class="property">class </em><code class="descclassname">nutshell.nutils.</code><code class="descname">Log</code><span class="sig-paren">(</span><em>prefix='LOG: '</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutils.html#Log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutils.Log" title="Permalink to this definition">¶</a></dt>
-<dd><p>Logging utility</p>
-</dd></dl>
-
 <dl class="function">
 <dt id="nutshell.nutils.debug_dict">
 <code class="descclassname">nutshell.nutils.</code><code class="descname">debug_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutils.html#debug_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutils.debug_dict" title="Permalink to this definition">¶</a></dt>
@@ -367,9 +357,15 @@ Consequently, possible _time <a href="#id3"><span class="problematic" id="id4">z
 </dd></dl>
 
 <dl class="function">
+<dt id="nutshell.nutils.read_conf">
+<code class="descclassname">nutshell.nutils.</code><code class="descname">read_conf</code><span class="sig-paren">(</span><em>path</em>, <em>result={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutils.html#read_conf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutils.read_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read plain-text configuration file consisting of &lt;key&gt;=&lt;value&gt; pairs.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="nutshell.nutils.read_conf_text">
 <code class="descclassname">nutshell.nutils.</code><code class="descname">read_conf_text</code><span class="sig-paren">(</span><em>text</em>, <em>result={}</em>, <em>regexp='^([A-Za-z][\\w]*)=([^#]*)(#.*)?'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutils.html#read_conf_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutils.read_conf_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read plain-text configuration file consisting of &lt;key&gt;=&lt;value&gt; pairs.</p>
+<dd><p>Traverse array of text lines consisting of &lt;key&gt;=&lt;value&gt; pairs.</p>
 </dd></dl>
 
 <dl class="function">
@@ -378,6 +374,7 @@ Consequently, possible _time <a href="#id3"><span class="problematic" id="id4">z
 <dd><p>Given a dictionary, sets corresponding member values</p>
 </dd></dl>
 
+</div>
 </div>
 <div class="section" id="module-nutshell.nutxml">
 <span id="html-utilities-nutshell-nutxml"></span><h2>HTML utilities &#8211; nutshell.nutxml<a class="headerlink" href="#module-nutshell.nutxml" title="Permalink to this headline">¶</a></h2>
@@ -412,19 +409,16 @@ Consequently, possible _time <a href="#id3"><span class="problematic" id="id4">z
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">NutShell Code</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#main-module-nutshell-nutshell">Main module &#8211; nutshell.nutshell</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.httpd">HTTP Server &#8211; nutshell.httpd</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">HTTP Server &#8211; nutshell.httpd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#http-server-nutshell-httpd">HTTP Server &#8211; nutshell.httpd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#product-definitions-and-requests-nutshell-product">Product definitions and requests &#8211; nutshell.product</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.shell">Escape from Python &#8211; nutshell.shell</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Escape from Python &#8211; nutshell.shell</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.product">Product definitions and requests &#8211; nutshell.product</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Product definitions and requests &#8211; nutshell.product</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutils">Utilities &#8211; nutshell.nutils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Utilities &#8211; nutshell.nutils</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.shell">Escape to shell &#8211; nutshell.shell</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#code-documentation">Code documentation</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutils">Utilities &#8211; nutshell.nutils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutxml">HTML utilities &#8211; nutshell.nutxml</a></li>
 </ul>
 </li>

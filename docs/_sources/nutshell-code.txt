@@ -10,18 +10,14 @@ NutShell Code
 .. automodule:: nutshell.nutshell
    :members:
       
-HTTP Server -- nutshell.httpd
------------------------------
 .. automodule:: nutshell.httpd
    :members:
 
-Product definitions and requests -- nutshell.product
-----------------------------------------------------
 .. automodule:: nutshell.product
    :members:
       
-Escape to shell -- nutshell.shell
----------------------------------
+Escape from Python -- nutshell.shell
+------------------------------------
 .. automodule:: nutshell.shell
    :members:
 
