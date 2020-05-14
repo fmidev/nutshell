@@ -54,12 +54,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="nutshell-code">
-<h1>NutShell Code<a class="headerlink" href="#nutshell-code" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-nutshell.nutshell">
-<span id="main-module-nutshell"></span><h2>Main module &#8211; NutShell<a class="headerlink" href="#module-nutshell.nutshell" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="module-nutshell.nutshell">
+<span id="nutshell-code"></span><h1>NutShell Code<a class="headerlink" href="#module-nutshell.nutshell" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="main-module-nutshell-nutshell">
-<h3>Main module &#8211; nutshell.nutshell<a class="headerlink" href="#main-module-nutshell-nutshell" title="Permalink to this headline">¶</a></h3>
+<h2>Main module &#8211; nutshell.nutshell<a class="headerlink" href="#main-module-nutshell-nutshell" title="Permalink to this headline">¶</a></h2>
 <p>This module contains ProductServer class, which receives product
 requests and forwards them to product generators. A ProductServer
 instance also manages disk resources defined in 
@@ -116,14 +114,15 @@ directives determine how the product is generated.</p>
 </dd></dl>
 
 </div>
-</div>
 <div class="section" id="module-nutshell.httpd">
 <span id="http-server-nutshell-httpd"></span><h2>HTTP Server &#8211; nutshell.httpd<a class="headerlink" href="#module-nutshell.httpd" title="Permalink to this headline">¶</a></h2>
-<p>NutShell HTTP server</p>
+<div class="section" id="id1">
+<h3>HTTP Server &#8211; nutshell.httpd<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>Server can be started with command:</p>
 <div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell.cnf
 </pre></div>
 </div>
+<p>By default, it returns a status page (HTML) containing</p>
 <ul class="simple">
 <li>query form</li>
 <li>error messages</li>
@@ -178,94 +177,11 @@ If query returned also when None</p>
 </dd></dl>
 
 </div>
+</div>
 <div class="section" id="module-nutshell.product">
 <span id="product-definitions-and-requests-nutshell-product"></span><h2>Product definitions and requests &#8211; nutshell.product<a class="headerlink" href="#module-nutshell.product" title="Permalink to this headline">¶</a></h2>
-<p><strong>Product generator helper classes.</strong></p>
-<div class="section" id="variable-parsing">
-<h3>Variable parsing<a class="headerlink" href="#variable-parsing" title="Permalink to this headline">¶</a></h3>
-<p>Parsing can be tested interactively:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nutshell.product</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="s2">&quot;201708121600_my.test.product_SIZE=300.pgm.gz&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="section" id="main-variables">
-<h4>Main variables<a class="headerlink" href="#main-variables" title="Permalink to this headline">¶</a></h4>
-<table border="1" class="docutils">
-<colgroup>
-<col width="21%" />
-<col width="39%" />
-<col width="40%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Variable</th>
-<th class="head">Description</th>
-<th class="head">Example</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">PRODUCT</span></code></td>
-<td>Product id, eg.</td>
-<td>&#8220;my.test.product&#8221;</td>
-</tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">TIMESTAMP</span></code></td>
-<td>Time attribute of a product</td>
-<td>&#8220;201708121600&#8221;</td>
-</tr>
-<tr class="row-even"><td>&#8211; <code class="docutils literal"><span class="pre">YEAR</span></code></td>
-<td>Year (4 digits)</td>
-<td>&#8220;2017&#8221;</td>
-</tr>
-<tr class="row-odd"><td>&#8211; <code class="docutils literal"><span class="pre">MONTH</span></code></td>
-<td>Month (2 digits)</td>
-<td>&#8220;08&#8221;</td>
-</tr>
-<tr class="row-even"><td>&#8211; <code class="docutils literal"><span class="pre">DAY</span></code></td>
-<td>Day (2 digits)</td>
-<td>&#8220;12&#8221;</td>
-</tr>
-<tr class="row-odd"><td>&#8211; <code class="docutils literal"><span class="pre">HOUR</span></code></td>
-<td>Hour (2 digits)</td>
-<td>&#8220;16&#8221;</td>
-</tr>
-<tr class="row-even"><td>&#8211; <code class="docutils literal"><span class="pre">MINUTE</span></code></td>
-<td>Minute (2 digits)</td>
-<td>&#8220;00&#8221;</td>
-</tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">PARAMETERS</span></code></td>
-<td>Product specific variables</td>
-<td>{&#8220;SIZE&#8221;: &#8220;300&#8221;, &#8220;NAME&#8221;: &#8220;X&#8221;}</td>
-</tr>
-<tr class="row-even"><td>&#8211; <code class="docutils literal"><span class="pre">&lt;KEY&gt;</span></code></td>
-<td>Name of a variable</td>
-<td>&#8220;300&#8221;</td>
-</tr>
-<tr class="row-odd"><td>&#8211; <code class="docutils literal"><span class="pre">&lt;KEY&gt;</span></code></td>
-<td>Name of a variable</td>
-<td>&#8220;X&#8221;</td>
-</tr>
-<tr class="row-even"><td>&#8211;  ...</td>
-<td>...</td>
-<td>...</td>
-</tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">EXTENSION</span></code></td>
-<td>File format,
-including compression</td>
-<td>&#8220;txt.gz&#8221;</td>
-</tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">FORMAT</span></code></td>
-<td>File format</td>
-<td>&#8220;txt&#8221;</td>
-</tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">COMPRESSION</span></code></td>
-<td>File compression</td>
-<td>&#8220;gz&#8221;</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="section" id="code-documentation">
-<h3>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Product definitions and requests &#8211; nutshell.product<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nutshell.product.Generator">
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Generator</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>actions=None</em>, <em>directives=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Generator" title="Permalink to this definition">¶</a></dt>
@@ -390,7 +306,7 @@ kwargs  &#8211; keyword arguments completing the product definition</p>
 <p>The numbers have to be in order year, month, day, hour, and minute.
 Non-digits will be simply removed.
 For example, 2020/03/29 18:45 is pruned to 202003291845.
-Consequently, possible _time <a href="#id2"><span class="problematic" id="id3">zones_</span></a> will be also discarded.</p>
+Consequently, possible _time <a href="#id3"><span class="problematic" id="id4">zones_</span></a> will be also discarded.</p>
 <p>Todo: support for time object, unix seconds and date string parsing.</p>
 </dd></dl>
 
@@ -401,8 +317,8 @@ Consequently, possible _time <a href="#id2"><span class="problematic" id="id3">z
 <div class="section" id="module-nutshell.shell">
 <span id="escape-to-shell-nutshell-shell"></span><h2>Escape to shell &#8211; nutshell.shell<a class="headerlink" href="#module-nutshell.shell" title="Permalink to this headline">¶</a></h2>
 <p>Product generator service appicable on the command line or as a library</p>
-<div class="section" id="id1">
-<h3>Code documentation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="code-documentation">
+<h3>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nutshell.shell.Task">
 <em class="property">class </em><code class="descclassname">nutshell.shell.</code><code class="descname">Task</code><span class="sig-paren">(</span><em>script</em>, <em>env=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/shell.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.shell.Task" title="Permalink to this definition">¶</a></dt>
@@ -495,18 +411,17 @@ Consequently, possible _time <a href="#id2"><span class="problematic" id="id3">z
 <li class="toctree-l1"><a class="reference internal" href="nutshell-generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">NutShell Code</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutshell">Main module &#8211; NutShell</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#main-module-nutshell-nutshell">Main module &#8211; nutshell.nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-module-nutshell-nutshell">Main module &#8211; nutshell.nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.httpd">HTTP Server &#8211; nutshell.httpd</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">HTTP Server &#8211; nutshell.httpd</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.httpd">HTTP Server &#8211; nutshell.httpd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-nutshell.product">Product definitions and requests &#8211; nutshell.product</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#variable-parsing">Variable parsing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#code-documentation">Code documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Product definitions and requests &#8211; nutshell.product</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-nutshell.shell">Escape to shell &#8211; nutshell.shell</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Code documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-documentation">Code documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutils">Utilities &#8211; nutshell.nutils</a></li>

@@ -56,46 +56,10 @@
 <span class="ch">#!/bin/python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">**Product generator helper classes.**</span>
 
-<span class="sd">Variable parsing</span>
-<span class="sd">================</span>
+<span class="sd">Product definitions and requests -- nutshell.product</span>
+<span class="sd">====================================================</span>
 
-<span class="sd">Parsing can be tested interactively:</span>
-
-<span class="sd">&gt;&gt;&gt; import nutshell.product</span>
-<span class="sd">&gt;&gt;&gt; p = nutshell.product.Info(&quot;201708121600_my.test.product_SIZE=300.pgm.gz&quot;)</span>
-
-
-
-<span class="sd">Main variables</span>
-<span class="sd">--------------</span>
-
-<span class="sd">=============== =========================== ==================</span>
-<span class="sd">Variable        Description                 Example  </span>
-<span class="sd">=============== =========================== ==================</span>
-<span class="sd">``PRODUCT``     Product id, eg.             &quot;my.test.product&quot;  </span>
-<span class="sd">``TIMESTAMP``\  Time attribute of a product &quot;201708121600&quot;</span>
-<span class="sd">\-- ``YEAR``    Year (4 digits)             &quot;2017&quot;</span>
-<span class="sd">\-- ``MONTH``   Month (2 digits)            &quot;08&quot;</span>
-<span class="sd">\-- ``DAY``     Day (2 digits)              &quot;12&quot;</span>
-<span class="sd">\-- ``HOUR``    Hour (2 digits)             &quot;16&quot;</span>
-<span class="sd">\-- ``MINUTE``  Minute (2 digits)           &quot;00&quot;</span>
-<span class="sd">``PARAMETERS``  Product specific variables  {&quot;SIZE&quot;: &quot;300&quot;, &quot;NAME&quot;: &quot;X&quot;}</span>
-<span class="sd">\-- ``&lt;KEY&gt;``   Name of a variable           &quot;300&quot;             </span>
-<span class="sd">\-- ``&lt;KEY&gt;``   Name of a variable           &quot;X&quot;             </span>
-<span class="sd">\--  ...        ...                         ...             </span>
-<span class="sd">``EXTENSION``   File format, </span>
-<span class="sd">                including compression       &quot;txt.gz&quot;</span>
-<span class="sd">``FORMAT``      File format                 &quot;txt&quot;</span>
-<span class="sd">``COMPRESSION`` File compression            &quot;gz&quot;</span>
-<span class="sd">=============== =========================== ==================</span>
-
-
-
-
-<span class="sd">Code documentation</span>
-<span class="sd">==================</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
