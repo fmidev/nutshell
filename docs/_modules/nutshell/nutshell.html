@@ -439,8 +439,8 @@
 <span class="sd">        &#39;INPUTS&#39; - generate and store the product, also regenerate even if already exists</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#product_request = self.ProductRequest(self, product_info, actions, directives, log)</span>
-        <span class="c1"># Consider rename to Generator        </span>
-        <span class="n">pr</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+        <span class="c1"># Consider rename to Generator</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>  
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File exists: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
@@ -495,7 +495,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1">#pr.set_status(HTTPStatus.CONFLICT)</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">PRECONDITION_FAILED</span><span class="p">)</span>
-                <span class="c1">#pr.log.info(&#39;Removing: {0} &#39;.format(pr.path))</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">pr</span>
 
@@ -522,7 +521,7 @@
         <span class="c1"># MAIN</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">):</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating:  {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
-            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Environment: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">))</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Environment: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">))</span>
             <span class="c1">#self.run_generator(pr, pr.env)</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
@@ -547,7 +546,7 @@
                 
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;LINK&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">):</span> <span class="c1">#and pr.product_info.TIMESTAMP:</span>
-                    <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LINK: {0} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="p">))</span>
+                    <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Linking: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
                     <span class="n">nutils</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
          
@@ -565,7 +564,9 @@
                     <span class="n">logfile</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="c1">#.decode(encoding=&#39;UTF-8&#39;))            </span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Saving log failed&quot;</span><span class="p">)</span>               
-                
+            
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Success: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+              
         <span class="k">return</span> <span class="n">pr</span></div></div>
     
 
@@ -649,7 +650,7 @@
             <span class="c1">#directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
             <span class="n">directives</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="c1"># whattabout comma in arg?</span>
 
-        <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;make_request&quot;</span><span class="p">))</span>
+        <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">directives</span><span class="p">)</span> <span class="c1">#, logger.getChild(&quot;make_request&quot;)</span>
         <span class="c1">#logger.debug(product_request)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="p">):</span> <span class="c1"># or (options.VERBOSE &gt; 6):</span>

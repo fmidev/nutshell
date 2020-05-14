@@ -119,10 +119,7 @@
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(message)s&#39;, datefmt=&#39;%m/%d/%Y %I:%M:%S %p&#39;)</span>
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(levelname)s %(name)s : %(message)s&#39;, datefmt=&#39;%Y%m%d%H:%M:%S&#39;)</span>
 
-<span class="c1">#from . import nutils</span>
-<span class="c1">#from . import nutproduct</span>
-
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">generator</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">shell</span>
 
 
 <span class="k">def</span> <span class="nf">parse_timestamp2</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}):</span>
@@ -401,7 +398,7 @@
         <span class="k">return</span> <span class="n">parser</span></div></div>
 
 <span class="c1"># Consider renaming to Generator (generator =&gt; shell)</span>
-<div class="viewcode-block" id="Request"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Request">[docs]</a><span class="k">class</span> <span class="nc">Request</span><span class="p">(</span><span class="n">generator</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
+<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Container for storing information on requested product and server side resources derived thereof.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -410,10 +407,6 @@
 
     <span class="n">product_info</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="sd">&quot;&quot;&quot;Specification of a product instance.&quot;&quot;&quot;</span>
-
-    <span class="c1">#generator_path = &#39;&#39;</span>
-<span class="c1">#    script = &#39;&#39;</span>
-<span class="c1">#    &quot;&quot;&quot;System-side directory containing script () for generating the product&quot;&quot;&quot;</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="sd">&quot;&quot;&quot;System-side full path to a dynamic directory and the generated product file.&quot;&quot;&quot;</span>
@@ -441,26 +434,27 @@
     
     <span class="n">builtin_directives</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;LOG&quot;</span><span class="p">,</span> <span class="s2">&quot;LATEST&quot;</span><span class="p">,</span> <span class="s2">&quot;LINK&quot;</span><span class="p">)</span>        
 
-<div class="viewcode-block" id="Request.set_status"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Request.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+<div class="viewcode-block" id="Generator.set_status"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Generator.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set success or failure status using http.HTTPStatus codes.</span>
 <span class="sd">        This is always logged.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span></div>
 
-<div class="viewcode-block" id="Request.remove_files"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Request.remove_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Generator.remove_files"><a class="viewcode-back" href="../../nutshell.html#nutshell.product.Generator.remove_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove the existing (even empty) files, log as info().</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_static</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_tmp</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">p</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing file {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing file: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
                 <span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span> </div>
 
     
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directives</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="p">:</span>
-            <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;ProductRequest&quot;</span><span class="p">)</span>
+            <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;Generator&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
         
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_generator_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">),</span>
                          <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_GENERATOR_SCRIPT</span><span class="p">),</span> 
@@ -512,7 +506,7 @@
         <span class="c1"># self.path_tmp = self.cache_dir+os.sep+self.out_file_tmp</span>
 
 
-<span class="k">class</span> <span class="nc">InputQuery</span><span class="p">(</span><span class="n">generator</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">InputQuery</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
     
     <span class="n">inputs</span> <span class="o">=</span> <span class="bp">None</span>
     

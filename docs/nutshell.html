@@ -149,6 +149,55 @@ including compression</td>
 <div class="section" id="code-documentation">
 <h3>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
+<dt id="nutshell.product.Generator">
+<em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Generator</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>actions=None</em>, <em>directives=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for storing information on requested product and server side resources derived thereof.</p>
+<dl class="attribute">
+<dt id="nutshell.product.Generator.path">
+<code class="descname">path</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Generator.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>System-side full path to a dynamic directory and the generated product file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Generator.path_static">
+<code class="descname">path_static</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Generator.path_static" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: System-side full path to the generated product file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Generator.path_tmp">
+<code class="descname">path_tmp</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Generator.path_tmp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: Actual object (for example, python Image in the future)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Generator.product_info">
+<code class="descname">product_info</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Generator.product_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specification of a product instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nutshell.product.Generator.product_server">
+<code class="descname">product_server</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Generator.product_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Server assigned for manufacturing this product</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.product.Generator.remove_files">
+<code class="descname">remove_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Generator.remove_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Generator.remove_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the existing (even empty) files, log as info().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.product.Generator.set_status">
+<code class="descname">set_status</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Generator.set_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Generator.set_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set success or failure status using http.HTTPStatus codes.
+This is always logged.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="nutshell.product.Info">
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stores basic product information: product id, timestamp (if applicable)
@@ -225,55 +274,6 @@ Non-digits will be simply removed.
 For example, 2020/03/29 18:45 is pruned to 202003291845.
 Consequently, possible _time <a href="#id1"><span class="problematic" id="id2">zones_</span></a> will be also discarded.</p>
 <p>Todo: support for time object, unix seconds and date string parsing.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="nutshell.product.Request">
-<em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Request</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>actions=None</em>, <em>directives=None</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Container for storing information on requested product and server side resources derived thereof.</p>
-<dl class="attribute">
-<dt id="nutshell.product.Request.path">
-<code class="descname">path</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.path" title="Permalink to this definition">¶</a></dt>
-<dd><p>System-side full path to a dynamic directory and the generated product file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.product.Request.path_static">
-<code class="descname">path_static</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.path_static" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional: System-side full path to the generated product file.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.product.Request.path_tmp">
-<code class="descname">path_tmp</code><em class="property"> = ''</em><a class="headerlink" href="#nutshell.product.Request.path_tmp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional: Actual object (for example, python Image in the future)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.product.Request.product_info">
-<code class="descname">product_info</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Request.product_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Specification of a product instance.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="nutshell.product.Request.product_server">
-<code class="descname">product_server</code><em class="property"> = None</em><a class="headerlink" href="#nutshell.product.Request.product_server" title="Permalink to this definition">¶</a></dt>
-<dd><p>Server assigned for manufacturing this product</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nutshell.product.Request.remove_files">
-<code class="descname">remove_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Request.remove_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Request.remove_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove the existing (even empty) files, log as info().</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nutshell.product.Request.set_status">
-<code class="descname">set_status</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Request.set_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Request.set_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set success or failure status using http.HTTPStatus codes.
-This is always logged.</p>
 </dd></dl>
 
 </dd></dl>
