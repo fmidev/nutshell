@@ -65,11 +65,11 @@ The applied <em>product generators</em> are organized systematically in a direct
 Each product has an ID of type <code class="docutils literal"><span class="pre">my.data.prod</span></code> that is associated with path component <code class="docutils literal"><span class="pre">my/test/prod/</span></code>.
 Hence, a product generator can be tracked to &#8211; and in a way also identified with &#8211; a unique
 subdirectory, which also contains a <em>generator script</em> with a fixed name (<code class="docutils literal"><span class="pre">generate.sh</span></code>).</p>
-<p>Typically, in Unix/Linux environments commands have are of type form:</p>
+<p>Typically, Unix/Linux commands have a form like:</p>
 <div class="highlight-python"><div class="highlight"><pre>command -i &lt;input-file&gt;  -p &lt;parameter&gt; -o &lt;output-file&gt;
 </pre></div>
 </div>
-<p>Essentially, generator script is a simple wrapper for such commands.</p>
+<p>Essentially, generator script is a wrapper for such commands.</p>
 <p>Upon <em>product request</em>, NutShell finds and executes a respective product generator script,
 communicating parameters &#8211; file paths and product parameters among others &#8211; as environment variables
 to the script. This is the &#8220;amount of interface&#8221; a script is required to handle.

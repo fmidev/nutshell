@@ -20,11 +20,11 @@ Each product has an ID of type ``my.data.prod`` that is associated with path com
 Hence, a product generator can be tracked to -- and in a way also identified with -- a unique
 subdirectory, which also contains a *generator script* with a fixed name (``generate.sh``).
 
-Typically, in Unix/Linux environments commands have are of type form: ::
+Typically, Unix/Linux commands have a form like: ::
 
   command -i <input-file>  -p <parameter> -o <output-file>
 
-Essentially, generator script is a simple wrapper for such commands.
+Essentially, generator script is a wrapper for such commands.
   
 Upon *product request*, NutShell finds and executes a respective product generator script,
 communicating parameters -- file paths and product parameters among others -- as environment variables
