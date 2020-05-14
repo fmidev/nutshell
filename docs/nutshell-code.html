@@ -105,10 +105,25 @@ directives determine how the product is generated.</p>
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.make_request">
 <code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, actions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>&#8221; Return path or log
-&#8216;MAKE&#8217;   - return the product, if in cache, else generate it and return
-&#8216;DELETE&#8217; - delete the product in cache
-&#8216;INPUTS&#8217; - generate and store the product, also regenerate even if already exists</p>
+<dd><p>&#8221; Main function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>product_info</strong> &#8211; description of the product (string or nutshell.product.Info)</li>
+<li><strong>actions</strong> &#8211; what should be done about the product: 
+<code class="docutils literal"><span class="pre">MAKE</span></code>, <code class="docutils literal"><span class="pre">MAKE</span></code>, and/or <code class="docutils literal"><span class="pre">CHECK</span></code>, see <a class="reference internal" href="nutshell-commands.html#commands"><span>Commands and status codes</span></a> .</li>
+<li><strong>dircetives</strong> &#8211; how the product is generated etc</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Instance of product.Generator that contains the path of 
+the file (if succefully generated) and information about the process.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -156,7 +171,7 @@ If query returned also when None</p>
 <dl class="function">
 <dt id="nutshell.httpd.run_http">
 <code class="descclassname">nutshell.httpd.</code><code class="descname">run_http</code><span class="sig-paren">(</span><em>product_server</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#run_http"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.run_http" title="Permalink to this definition">¶</a></dt>
-<dd><p>A function just for me.</p>
+<dd><p>A function</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

@@ -367,10 +367,16 @@
 
 
 <div class="viewcode-block" id="ProductServer.make_request"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="n">directives</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;&quot; Return path or log</span>
-<span class="sd">        &#39;MAKE&#39;   - return the product, if in cache, else generate it and return</span>
-<span class="sd">        &#39;DELETE&#39; - delete the product in cache</span>
-<span class="sd">        &#39;INPUTS&#39; - generate and store the product, also regenerate even if already exists</span>
+        <span class="sd">&quot;&quot;&quot;&quot; Main function.</span>
+
+<span class="sd">        :param product_info: description of the product (string or nutshell.product.Info)</span>
+<span class="sd">        :param actions: what should be done about the product: </span>
+<span class="sd">            ``MAKE``, ``MAKE``, and/or ``CHECK``, see :ref:`commands` .</span>
+<span class="sd">        :param dircetives: how the product is generated etc </span>
+
+<span class="sd">        :returns: Instance of product.Generator that contains the path of </span>
+<span class="sd">            the file (if succefully generated) and information about the process.</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#product_request = self.ProductRequest(self, product_info, actions, directives, log)</span>
         <span class="c1"># Consider rename to Generator</span>

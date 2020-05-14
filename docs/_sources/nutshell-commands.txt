@@ -17,9 +17,11 @@ Requests
 
 ========== ===========================================================
 ``MAKE``   Generate file, if it does not exist (default request)
-``DELETE`` Delete file
+``DELETE`` Delete the product file in cache dir
 ``CHECK``  Check existence and permissions of directories and scripts
+``INPUTS`` Check existence and permissions of directories and scripts
 ========== ===========================================================
+
 
 
 .. _directives:
