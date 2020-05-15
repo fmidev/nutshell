@@ -25,6 +25,7 @@ __version__ = '0.3'
 __author__ = 'Markus.Peura@fmi.fi'
 
 import os
+import time
 import subprocess # for shell escape
 
 from pathlib import Path
@@ -179,7 +180,25 @@ class ProductServer:
                        
         return input_query
     
-
+    def retrieve_inputs(self, product_generator):
+        product_generator.log.debug('Retrieving inputs for: ' + str(product_generator.path.name))
+        inputs = {}
+        for i in product_generator.inputs:
+            #product_generator.log.info('INPUTFILE: ' + i)
+            input = product_generator.inputs[i] # <filename>.h5
+            input_prod_info = product.Info(filename = input)
+            product_generator.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
+            r = self.make_request(input_prod_info, ['MAKE'], [], product_generator.log.getChild("input[{0}]".format(i)))
+            if (r.path):
+                inputs[i] = str(r.path) # sensitive
+                product_generator.log.debug('Success: ' + str(r.path))
+            else:
+                product_generator.log.warning('SKIPPED: ' + i) 
+        # warn if  none succeeded?
+        product_generator.inputs = inputs
+        #product_generator.log.extend2(product_generator.inputs , 'INPUTPATH: ')
+        product_generator.env['INPUTKEYS'] = ','.join(product_generator.inputs.keys())
+        product_generator.env.update(product_generator.inputs)
 
 
     def make_request(self, product_info, actions = ['MAKE'], directives = None, log = None):
@@ -188,7 +207,7 @@ class ProductServer:
 
         :param product_info: description of the product (string or nutshell.product.Info)
         :param actions: what should be done about the product 
-            (``MAKE``, ``DELETE``, ``CHECK`` ), see :ref:`commands` .
+            (``MAKE``, ``DELETE``, ``CHECK`` , ``RETURN``), see :ref:`commands` .
         :param directives: how the product is generated etc 
         :param log: optional logging.logger 
 
@@ -203,24 +222,31 @@ class ProductServer:
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
             if ('DELETE' in pr.actions):
-                #pr.log.info('Deleting...')
                 pr.remove_files()
                 pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
             elif ('MAKE' in pr.actions): # PATH_ONLY
-                if (pr.path.stat().st_size > 0):
+                stat = pr.path.stat()
+                if (stat.st_size > 0): # Non-empty
                     pr.product_obj = pr.path
-                    pr.log.info('Non-empty result file found: ' + str(pr.path))
+                    pr.log.info('File found: ' + str(pr.path))
                     pr.set_status(HTTPStatus.OK)
-                else:
+                    return pr
+                elif (time.time() - stat.st_mtime) > 600: # 10mins
+                    pr.log.warn("Empty file found, but over 5 mins old...")
+                else:    
                     pr.product_obj  = '' # BUSY
                     pr.log.warning('BUSY (empty file found)') # TODO riase (prevent deletion)
-                    pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
-                return pr
+                    #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
+                    pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
+                    return pr
         else:
             pr.log.debug('File not found: {0}'.format(pr.path))
+            if (product_info.TIMESTAMP == 'LATEST'):
+                pr.log.warn("LATEST-file not found, returning")
+                pr.set_status(HTTPStatus.NOT_FOUND) 
+                return pr
 
         # only check at this point
-        #if (os.path.exists(pr.generator_script)):
         if (pr.script.exists()):
             pr.log.debug('Generator script ok: {0}'.format(pr.script))
         else:
@@ -232,16 +258,16 @@ class ProductServer:
         
 
         # TODO: if not stream?
-        pr.env = {}
+        #pr.env = {}
         if ('MAKE' in pr.actions):
             pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
             self.ensure_output_dir(pr.path_tmp.parent)
             self.ensure_output_dir(pr.path.parent)
 
             # what about true ENV?
-            pr.env = pr.product_info.get_param_env() # {})
-            pr.env['OUTDIR']  = str(pr.path_tmp.parent)
-            pr.env['OUTFILE'] = pr.path.name
+            #pr.env = pr.product_info.get_param_env() # {})
+            #pr.env['OUTDIR']  = str(pr.path_tmp.parent)
+            #pr.env['OUTFILE'] = pr.path.name
             #os.mknod(pr.path) # = touch
             pr.path.touch()
             
@@ -257,24 +283,23 @@ class ProductServer:
                 return pr
 
         if ('MAKE' in pr.actions): 
-            pr.log.debug('Retrieving inputs for: ' + str(pr.path.name))
-            inputs = {}
-            for i in pr.inputs:
-                #pr.log.info('INPUTFILE: ' + i)
-                input = pr.inputs[i] # <filename>.h5
-                input_prod_info = product.Info(filename = input)
-                pr.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
-                r = self.make_request(input_prod_info, ['MAKE'], [], pr.log.getChild("input[{0}]".format(i)))
-                if (r.path):
-                    inputs[i] = str(r.path) # sensitive
-                    pr.log.debug('Success: ' + str(r.path))
-                else:
-                    pr.log.warning('SKIPPED: ' + i) 
-            # warn if  none succeeded?
-            pr.inputs = inputs
-            #pr.log.extend2(pr.inputs , 'INPUTPATH: ')
-            pr.env['INPUTKEYS'] = ','.join(pr.inputs.keys())
-            pr.env.update(pr.inputs)
+            self.retrieve_inputs(pr)
+#            pr.log.debug('Retrieving inputs for: ' + str(pr.path.name))
+#            inputs = {}
+#            for i in pr.inputs:
+#                input = pr.inputs[i] # <filename>.h5
+#                input_prod_info = product.Info(filename = input)
+#                pr.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
+#                r = self.make_request(input_prod_info, ['MAKE'], [], pr.log.getChild("input[{0}]".format(i)))
+#                if (r.path):
+#                    inputs[i] = str(r.path) # sensitive
+#                    pr.log.debug('Success: ' + str(r.path))
+#                else:
+#                    pr.log.warning('SKIPPED: ' + i) 
+#            # warn if  none succeeded?
+#            pr.inputs = inputs
+#            pr.env['INPUTKEYS'] = ','.join(pr.inputs.keys())
+#            pr.env.update(pr.inputs)
 
         # MAIN
         if ('MAKE' in pr.actions):
