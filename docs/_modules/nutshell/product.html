@@ -104,9 +104,27 @@
     <span class="sd">&quot;&quot;&quot;Stores basic product information: product id, timestamp (if applicable)</span>
 <span class="sd">    file format, and specific product parameters.</span>
 <span class="sd">    </span>
-<span class="sd">    Technically independent of environment and other classes.</span>
-<span class="sd">    Does not store local information or configurations (system side paths etc.).</span>
+<span class="sd">     :param product: product id string, requires explicit kwargs</span>
+<span class="sd">     :param product_id: product id string.</span>
+<span class="sd">     :param filename: product description presented as a filename</span>
 
+<span class="sd">     :returns: instance (possibly incomplete, to be adjusted with separate </span>
+<span class="sd">         method calls) </span>
+<span class="sd">          </span>
+<span class="sd">          </span>
+<span class="sd">      Examples of allowed calls:</span>
+<span class="sd">            &gt;&gt;&gt; p = nutshell.product.Info(filename=&quot;my.test.product&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; set(product_id=&quot;...&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; set(product_id, {args...})   # exaple: info.set(&quot;&quot;)</span>
+
+<span class="sd">        Plain string arguments are forbidden:</span>
+<span class="sd">            &gt;&gt;&gt; set(str(&lt;filename&gt;))     # example: info.set(&quot;image.product.png&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; set(str(&lt;product_id&gt;))   # example: info.set(image.product&quot;)</span>
+<span class="sd">       </span>
+<span class="sd">     This class is essential a string parser and storage for parsed variables.</span>
+<span class="sd">     This class is technically independent of server configurations </span>
+<span class="sd">     like system side paths. Especially, if does not verify that a </span>
+<span class="sd">     corresponding product generator directory and script exists.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -330,21 +348,10 @@
         <span class="k">return</span> <span class="n">env</span></div>
 
 <div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Configure a product. </span>
+        <span class="sd">&quot;&quot;&quot;Configure a product.</span>
+
+<span class="sd">        See :ref:`product.info`. Parameters equivalent at initialisation.</span>
 <span class="sd">        </span>
-<span class="sd">                </span>
-<span class="sd">        Arguments:</span>
-<span class="sd">            product_desc -- a product ID string or a filename</span>
-<span class="sd">            kwargs  -- keyword arguments completing the product definition</span>
-
-<span class="sd">        Allowed calls:</span>
-<span class="sd">            &gt;&gt;&gt; set(filename=&quot;...&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; set(product_id=&quot;...&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; set(product_id, {args...})   # exaple: info.set(&quot;&quot;)</span>
-
-<span class="sd">        Plain string arguments are forbidden:</span>
-<span class="sd">            &gt;&gt;&gt; set(str(&lt;filename&gt;))     # example: info.set(&quot;image.product.png&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; set(str(&lt;product_id&gt;))   # example: info.set(image.product&quot;)</span>
 <span class="sd">            </span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -390,6 +397,7 @@
     <span class="c1"># Todo: params</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">product_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;See :ref:`product.info`. Parameters equivalent with those of set().&quot;&quot;&quot;</span>
 
     <span class="c1">#def __call__(self):</span>
     <span class="c1">#    print(&#39;Print Something&#39;)</span>

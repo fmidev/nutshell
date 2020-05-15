@@ -114,7 +114,7 @@ directives determine how the product is generated.</p>
 <li><strong>product_info</strong> &#8211; description of the product (string or nutshell.product.Info)</li>
 <li><strong>actions</strong> &#8211; what should be done about the product: 
 <code class="docutils literal"><span class="pre">MAKE</span></code>, <code class="docutils literal"><span class="pre">MAKE</span></code>, and/or <code class="docutils literal"><span class="pre">CHECK</span></code>, see <a class="reference internal" href="nutshell-commands.html#commands"><span>Commands and status codes</span></a> .</li>
-<li><strong>dircetives</strong> &#8211; how the product is generated etc</li>
+<li><strong>directives</strong> &#8211; how the product is generated etc</li>
 </ul>
 </td>
 </tr>
@@ -237,8 +237,50 @@ This is always logged.</p>
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stores basic product information: product id, timestamp (if applicable)
 file format, and specific product parameters.</p>
-<p>Technically independent of environment and other classes.
-Does not store local information or configurations (system side paths etc.).</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param product:</th><td class="field-body"><p class="first">product id string, requires explicit kwargs</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param product_id:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">product id string.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param filename:</th><td class="field-body"><p class="first">product description presented as a filename</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>instance (possibly incomplete, to be adjusted with separate </dt>
+<dd><p class="first last">method calls)</p>
+</dd>
+<dt>Examples of allowed calls:</dt>
+<dd><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.test.product&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="p">,</span> <span class="p">{</span><span class="n">args</span><span class="o">...</span><span class="p">})</span>   <span class="c1"># exaple: info.set(&quot;&quot;)</span>
+</pre></div>
+</div>
+<dl class="last docutils">
+<dt>Plain string arguments are forbidden:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span><span class="p">))</span>     <span class="c1"># example: info.set(&quot;image.product.png&quot;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">product_id</span><span class="o">&gt;</span><span class="p">))</span>   <span class="c1"># example: info.set(image.product&quot;)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This class is essential a string parser and storage for parsed variables.
+This class is technically independent of server configurations 
+like system side paths. Especially, if does not verify that a 
+corresponding product generator directory and script exists.</p>
+</div></blockquote>
 <dl class="classmethod">
 <dt id="nutshell.product.Info.get_arg_parser">
 <em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_arg_parser" title="Permalink to this definition">¶</a></dt>
@@ -261,24 +303,7 @@ Does not store local information or configurations (system side paths etc.).</p>
 <dt id="nutshell.product.Info.set">
 <code class="descname">set</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Configure a product.</p>
-<dl class="docutils">
-<dt>Arguments:</dt>
-<dd>product_desc &#8211; a product ID string or a filename
-kwargs  &#8211; keyword arguments completing the product definition</dd>
-<dt>Allowed calls:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="p">,</span> <span class="p">{</span><span class="n">args</span><span class="o">...</span><span class="p">})</span>   <span class="c1"># exaple: info.set(&quot;&quot;)</span>
-</pre></div>
-</div>
-</dd>
-<dt>Plain string arguments are forbidden:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span><span class="p">))</span>     <span class="c1"># example: info.set(&quot;image.product.png&quot;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">product_id</span><span class="o">&gt;</span><span class="p">))</span>   <span class="c1"># example: info.set(image.product&quot;)</span>
-</pre></div>
-</div>
-</dd>
-</dl>
+<p>See <span class="xref std std-ref">product.info</span>. Parameters equivalent at initialisation.</p>
 </dd></dl>
 
 <dl class="method">
