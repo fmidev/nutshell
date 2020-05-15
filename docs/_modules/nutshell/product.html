@@ -305,9 +305,16 @@
             <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">)</span>
         <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
 
-        <span class="c1">#if (self.PARAMS):</span>
-        <span class="c1">#    body.append(&quot;_&quot;.join(self.PARAMS))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1"># FORMAT)</span>
 
+    <span class="k">def</span> <span class="nf">get_static_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
@@ -345,7 +352,17 @@
             <span class="n">env</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">env</span></div>
-
+        
+<span class="c1">#    def get_signature(self):</span>
+<span class="c1">#        body = []</span>
+<span class="c1">#        body.append(self.ID)</span>
+<span class="c1">#        if (self.PARAMETERS):</span>
+<span class="c1">#            for key,value in sorted(self.PARAMETERS.items()):</span>
+<span class="c1">#                if (value == &#39;&#39;):</span>
+<span class="c1">#                    body.append(key)</span>
+<span class="c1">#                else:</span>
+<span class="c1">#                    body.append(&quot;{0}{1}&quot;.format(key, value))</span>
+<span class="c1">#        return(&quot;_&quot;.join(body) + &#39;_&#39; + self.EXTENSION) # FORMAT)</span>
     
 <div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Configure a product.</span>
@@ -637,6 +654,7 @@
 
     <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">filename</span><span class="p">())</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_static_filename</span><span class="p">())</span>
         <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span> <span class="c1"># contains ID</span>
         <span class="c1">#print(product_info.__dict__) # contains ID</span>
         <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
