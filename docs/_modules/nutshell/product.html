@@ -146,9 +146,63 @@
     <span class="n">extensionRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^((.*)</span><span class="se">\\</span><span class="s2">.)?([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>    
 
     <span class="c1"># Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS</span>
-    <span class="n">filenameRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^(([0-9]+)_)?([^_]+)(_(.*))?</span><span class="se">\\</span><span class="s2">.([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>
+    <span class="c1">#filenameRe = re.compile(&quot;^(([0-9]+)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$&quot;)</span>
+    <span class="n">filenameRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^((LATEST|[0-9]+)_)?([^_]+)(_(.*))?</span><span class="se">\\</span><span class="s2">.([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>
 
     <span class="n">prodRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Configure a product.</span>
+
+<span class="sd">        :param product: product id string, requires explicit kwargs</span>
+<span class="sd">        :param product_id: product id string.</span>
+<span class="sd">        :param filename: product description presented as a filename</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: instance (possibly incomplete, to be adjusted with separate </span>
+<span class="sd">             method calls) </span>
+<span class="sd">    </span>
+<span class="sd">        See :ref:`product.info`. Parameters equivalent at initialisation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">product</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span> <span class="c1"># easiest</span>
+                <span class="c1"># self.log.warn</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;filename&#39; arg&quot;</span><span class="p">)</span>                
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> <span class="c1"># easiest</span>
+                <span class="c1"># self.log.warn</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument looks like a file?&quot;</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;product_id&#39; arg&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument requires explicit kwargs&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Ok...</span>
+            <span class="n">product_id</span> <span class="o">=</span> <span class="n">product</span>  <span class="c1"># Note!</span>
+            
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> 
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;both &#39;filename&#39; and &#39;product_id&#39; given&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span>  <span class="c1"># easiest</span>
+            <span class="bp">self</span><span class="o">.</span> <span class="n">_parse_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">product_id</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+  
 
 <div class="viewcode-block" id="Info.set_id"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set the product ID string consisting of alphanumeric chars and periods.&quot;&quot;&quot;</span> 
@@ -156,37 +210,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">product_id</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Value not accepted as product id: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_id</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="Info.set_product"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_product">[docs]</a>    <span class="k">def</span> <span class="nf">set_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_desc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Configure a product. </span>
-<span class="sd">        </span>
-<span class="sd">        Arguments:</span>
-<span class="sd">        product_desc -- a product ID string or a filename</span>
-<span class="sd">        kwargs  -- keyword arguments completing the product definition</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product_desc</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">product_desc</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">product_desc</span><span class="p">)</span>
-            <span class="c1"># todo warn if duplicates in kwargs?</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
-    
+   
 <div class="viewcode-block" id="Info.set_timestamp"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">set_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set UTC time in numeric format &#39;%Y%m%d%H%M&#39; or its punctuated variants.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set UTC time in numeric format &#39;%Y%m%d%H%M&#39; or &#39;LATEST&#39;.</span>
 <span class="sd">        </span>
-<span class="sd">        Essentially, the timestamp will be stored as a string of </span>
-<span class="sd">        12 digits, &quot;202003291845&quot; for example.</span>
-<span class="sd">        </span>
-<span class="sd">        The numbers have to be in order year, month, day, hour, and minute.</span>
+<span class="sd">        The 12 digit-numeric format may contain punctuation as long as the</span>
+<span class="sd">        order of the time units is not changed.</span>
 <span class="sd">        Non-digits will be simply removed.</span>
 <span class="sd">        For example, 2020/03/29 18:45 is pruned to 202003291845.</span>
-<span class="sd">        Consequently, possible _time zones_ will be also discarded. </span>
+<span class="sd">        Consequently, possible *time zones* will be also discarded. </span>
 <span class="sd">        </span>
-<span class="sd">        Todo: support for time object, unix seconds and date string parsing.</span>
+<span class="sd">        Future versions may support for time object, unix seconds and date string parsing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\W&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">):</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^0-9]*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="n">timestamp</span>  <span class="c1"># re.sub(&quot;\W&quot;, &quot;&quot;, timestamp)</span></div>
 
 <div class="viewcode-block" id="Info.set_format"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_format">[docs]</a>    <span class="k">def</span> <span class="nf">set_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sets file format (png, txt, pgm.gz, txt.zip, ...).&quot;&quot;&quot;</span>
@@ -217,10 +256,9 @@
 <div class="viewcode-block" id="Info.set_parameter"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set any parameter, including FORMAT, excluding TIMESTAMP and ID</span>
 <span class="sd">        </span>
-<span class="sd">            Arguments:</span>
-<span class="sd">                key -- a string identfying of a parameter or the product</span>
-<span class="sd">                value -- the value of the parameter, possibly not </span>
-<span class="sd">                    string but stringifiable</span>
+<span class="sd">            :param key: name (string) of the parameter</span>
+<span class="sd">            :param value: the value of the parameter, possibly not </span>
+<span class="sd">                string but hopefully stringifiable</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;EXTENSION&#39;</span><span class="p">):</span>
@@ -252,7 +290,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Info.parse_filename"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.parse_filename">[docs]</a>    <span class="k">def</span> <span class="nf">parse_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span>  <span class="nf">_parse_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Derive product parameters from a filename.&quot;&quot;&quot;</span>
 
         <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -296,7 +334,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;{0}: ERROR in parsing {1}&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="bp">self</span>
 
 
     <span class="k">def</span> <span class="nf">filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -364,57 +402,6 @@
 <span class="c1">#                    body.append(&quot;{0}{1}&quot;.format(key, value))</span>
 <span class="c1">#        return(&quot;_&quot;.join(body) + &#39;_&#39; + self.EXTENSION) # FORMAT)</span>
     
-<div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Configure a product.</span>
-
-<span class="sd">        :param product: product id string, requires explicit kwargs</span>
-<span class="sd">        :param product_id: product id string.</span>
-<span class="sd">        :param filename: product description presented as a filename</span>
-<span class="sd">        </span>
-<span class="sd">        :returns: instance (possibly incomplete, to be adjusted with separate </span>
-<span class="sd">             method calls) </span>
-<span class="sd">    </span>
-<span class="sd">        See :ref:`product.info`. Parameters equivalent at initialisation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
-        
-        <span class="k">if</span> <span class="p">(</span><span class="n">product</span><span class="p">):</span>
-
-            <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span> <span class="c1"># easiest</span>
-                <span class="c1"># self.log.warn</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;filename&#39; arg&quot;</span><span class="p">)</span>                
-
-            <span class="k">if</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> <span class="c1"># easiest</span>
-                <span class="c1"># self.log.warn</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument looks like a file?&quot;</span><span class="p">)</span>
-                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;product_id&#39; arg&quot;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">kwargs</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument requires explicit kwargs&quot;</span><span class="p">)</span>
-
-            <span class="c1"># Ok...</span>
-            <span class="n">product_id</span> <span class="o">=</span> <span class="n">product</span>  <span class="c1"># Note!</span>
-            
-            
-        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> 
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;both &#39;filename&#39; and &#39;product_id&#39; given&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-            
-        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span>  <span class="c1"># easiest</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">product_id</span><span class="p">)</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-  
 
     <span class="c1"># Todo: params</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -559,6 +546,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">path_tmp</span> <span class="o">=</span>      <span class="n">Path</span><span class="p">(</span><span class="n">cache_root</span><span class="p">,</span> <span class="n">time_dir</span><span class="p">,</span> <span class="n">prod_dir</span><span class="p">,</span> <span class="s1">&#39;tmp&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">path_static</span> <span class="o">=</span>   <span class="n">Path</span><span class="p">(</span><span class="n">cache_root</span><span class="p">,</span> <span class="n">prod_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_latest</span> <span class="o">=</span>   <span class="n">Path</span><span class="p">(</span><span class="n">cache_root</span><span class="p">,</span> <span class="n">prod_dir</span><span class="p">,</span> <span class="n">filename_latest</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;OUTDIR&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;OUTFILE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span>
+            <span class="c1">#        </span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">NO_CONTENT</span><span class="p">)</span>  <span class="c1">#204 # No content</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
@@ -577,10 +570,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_generator_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">),</span>
                            <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_INPUT_SCRIPT</span><span class="p">))</span>        
-        
-        
-        <span class="c1">#self.script = Path(product_server.get_generator_dir(product_info),</span>
-        <span class="c1">#                   product_server.SHELL_INPUT_SCRIPT)</span>
+          
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
@@ -602,6 +592,11 @@
                         <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;SET&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;product to be handled, recognises argument type&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-T&quot;</span><span class="p">,</span> <span class="s2">&quot;--timestamp&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&gt;|&#39;LATEST&#39;]&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Adjust time stamp&quot;</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-F&quot;</span><span class="p">,</span> <span class="s2">&quot;--format&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;file_format&gt;]&quot;</span><span class="p">,</span>
                         <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;FORMAT&quot;</span><span class="p">,</span>
@@ -633,13 +628,13 @@
     
  
     <span class="c1">#if (options.OUTFILE):</span>
-    <span class="c1">#    product_info.parse_filename(options.OUTFILE)</span>
+    <span class="c1">#    product_info. _parse_filename(options.OUTFILE)</span>
 
     <span class="c1">#if (options.PRODUCT):</span>
     <span class="c1">#    product_info.set_id(options.PRODUCT)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
-    <span class="c1">#    product_info.parse_filename(options.PRODUCT)</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
+    <span class="c1">#    product_info. _parse_filename(options.PRODUCT)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;product not defined&quot;</span><span class="p">)</span>
  
@@ -648,6 +643,9 @@
         <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SIZE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">640</span><span class="p">,</span><span class="mi">400</span><span class="p">],</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">:</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}</span>
         <span class="c1">#product_info.set_product(options.SET, **args)</span>
         <span class="n">product_info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
         <span class="n">product_info</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span>

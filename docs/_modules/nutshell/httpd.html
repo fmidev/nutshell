@@ -123,7 +123,7 @@
     <span class="c1">#htmlDoc = &#39;&#39;</span>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="NutHandler.get_html_template"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.get_html_template">[docs]</a>    <span class="k">def</span> <span class="nf">get_html_template</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">_get_html_template</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot;Read HTML template dir and return it for modifications.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
@@ -137,20 +137,23 @@
             <span class="n">pre</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
             <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pre</span><span class="p">)</span>
             <span class="n">html</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">html</span></div>
+        <span class="k">return</span> <span class="n">html</span>
 
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="NutHandler.parse_url"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.parse_url">[docs]</a>    <span class="k">def</span> <span class="nf">parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; splitquery(&#39;/path?query&#39;) --&gt; &#39;/path&#39;, &#39;query&#39;.</span>
-<span class="sd">            If query returned also when None        </span>
-<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># </span>
+        <span class="sd">&quot;&quot;&quot; Splits url to path (str) and query data (dict)</span>
+<span class="sd">            </span>
+<span class="sd">            An empty data dict is returned if query is empty.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span>
-        <span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">query</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">splitquery</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="c1">#  splitquery(&#39;/path?query&#39;) --&gt; &#39;/path&#39;, &#39;query&#39;.</span>
+        <span class="c1">#  (path,query) = urllib.parse.splitquery(url)</span>
+        <span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">query</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">splitquery</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">data</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">query</span><span class="p">):</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">query</span> <span class="c1">#urllib.parse.unquote(query)</span>
             <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&amp;&#39;</span><span class="p">):</span>
                 <span class="c1"># splitvalue(&#39;attr=value&#39;) --&gt; &#39;attr&#39;, &#39;value&#39;.</span>
                 <span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">splitvalue</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
@@ -164,38 +167,25 @@
         <span class="c1"># NOTE: unquote also path, because:</span>
         <span class="c1"># 201708121600_radar.rack.comp_BBOX=20,60,30,70_SITES=fikor,fivan,fiika_SIZE=800,800.png</span>
         <span class="c1"># 201708121600_radar.rack.comp_BBOX%3D20%2C60%2C30%2C70_SITES%3Dfikor%2Cfivan%2Cfiika_SIZE%3D800%2C800.png </span>
-        <span class="c1">#if (not data):</span>
-        <span class="c1">#    data = None?</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span></div>
+        <span class="c1">#return (urllib.parse.unquote(path), data)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="NutHandler.send_to_stream"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.send_to_stream">[docs]</a>    <span class="k">def</span> <span class="nf">send_to_stream</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">product_request</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Send to stream            </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">mtype</span><span class="p">,</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">fileformat</span> <span class="o">=</span> <span class="n">product_request</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">FORMAT</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">mtype</span><span class="p">):</span>
-            <span class="n">mtype</span> <span class="o">=</span> <span class="s1">&#39;application/&#39;</span> <span class="o">+</span> <span class="n">fileformat</span>
-        <span class="c1">#print (product_request.product_info.filename())</span>
-        <span class="c1">#print (mtype, encoding, product_request.path)</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="c1"># 200</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="n">mtype</span><span class="p">)</span>
-        <span class="c1"># s.send_header(&#39;Content-Disposition&#39;, &#39;attachment; filename=&quot;{0}&quot;&#39;.format(product_request.product_info.filename()))</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">,</span> <span class="s1">&#39;attachment; filename=&quot;{0}&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
-        
-        <span class="c1"># content = None</span>
-        <span class="c1"># if (fileformat in [&#39;txt&#39;, &#39;json&#39;, &#39;sh&#39;, &#39;dat&#39;, &#39;cnf&#39;]):</span>
-        <span class="c1">#    content = product_request.path.read_text()</span>
-        <span class="c1"># else:</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="n">product_request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>   
-        <span class="c1"># file_in = open(product_request.path, &#39;rb&#39;)</span>
-        <span class="c1"># content = file_in.read()</span>
-        <span class="c1"># file_in.close()</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+<span class="c1">#    @staticmethod</span>
+<span class="c1">#    def _send_to_stream(s, product_request):</span>
+<span class="c1">#        # Save. Currently unused.                 </span>
+<span class="c1">#        mtype,encoding = mimetypes.guess_type(product_request.path.name)</span>
+<span class="c1">#        fileformat = product_request.product_info.FORMAT.lower()</span>
+<span class="c1">#        if (not mtype):</span>
+<span class="c1">#            mtype = &#39;application/&#39; + fileformat</span>
+<span class="c1">#        s.send_response(product_request.status.value) # 200</span>
+<span class="c1">#        s.send_header(&#39;Content-Type&#39;, mtype)</span>
+<span class="c1">#        s.send_header(&#39;Content-Disposition&#39;, &#39;attachment; filename=&quot;{0}&quot;&#39;.format(product_request.path.name))</span>
+<span class="c1">#        s.end_headers()        </span>
+<span class="c1">#        content = product_request.path.read_bytes()   </span>
+<span class="c1">#        s.wfile.write(content)</span>
  
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="k">def</span>  <span class="nf">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
          <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">SEE_OTHER</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
          <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
          <span class="n">s</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
@@ -250,7 +240,7 @@
             <span class="c1"># and file not found (above)</span>
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;PRDOCUT? {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
             <span class="n">url</span> <span class="o">=</span>  <span class="s2">&quot;/nutshell/server/?request=MAKE&amp;product={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">NutHandler</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="n">NutHandler</span><span class="o">.</span> <span class="n">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
             <span class="k">return</span> 
                    
         <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span> <span class="o">==</span> <span class="s1">&#39;/stop&#39;</span><span class="p">):</span>
@@ -266,7 +256,7 @@
         <span class="n">product_name</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;product&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
         <span class="n">product_info</span> <span class="o">=</span> <span class="bp">None</span> 
         <span class="k">if</span> <span class="p">(</span><span class="n">product_name</span><span class="p">):</span>
-            <span class="n">product_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">product_name</span><span class="p">)</span>
+            <span class="n">product_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">product_name</span><span class="p">)</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;MAKE&quot;</span><span class="p">])</span>
             <span class="n">directives</span>      <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;directives&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -283,7 +273,7 @@
         
         <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="p">):</span>
             
-            <span class="n">product_info</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">product_name</span><span class="p">)</span>
+            <span class="n">product_info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">product_name</span><span class="p">)</span>  <span class="c1">#parse_filename(product_name)</span>
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Product info: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="p">))</span>
             
             <span class="c1"># &quot;MAIN&quot;</span>
@@ -296,7 +286,7 @@
                     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/cache/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">path_relative</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;?no_redirect&#39;</span>
                     <span class="c1">#url = &#39;/&#39;+product_server.get_relative_path(product_info)+&#39;?no_redirect&#39;</span>
                     <span class="c1">#print(&#39;CONSIDER&#39;, url)</span>
-                    <span class="n">NutHandler</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+                    <span class="n">NutHandler</span><span class="o">.</span> <span class="n">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
                     <span class="k">return</span> 
                 <span class="k">else</span><span class="p">:</span>
                      <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;MAKE failed for: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">filename</span><span class="p">()))</span>
@@ -314,7 +304,7 @@
         
     
         <span class="c1"># Proceed to HTML page response             </span>
-        <span class="n">html</span> <span class="o">=</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">get_html_template</span><span class="p">()</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">_get_html_template</span><span class="p">()</span>
         <span class="c1">#head = nutxml.get_head(html)</span>
         <span class="n">body</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_body</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
@@ -422,12 +412,7 @@
     <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;NutServer&quot;</span><span class="p">)</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">ProductServer</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">()</span>
-    <span class="c1">#arser = argparse.ArgumentParser()</span>
-
-    <span class="c1"># parser.add_argument(&quot;-c&quot;, &quot;--conf&quot;, dest=&quot;CONF&quot;,</span>
-    <span class="c1"># default=&quot;nutshell.cnf&quot;, #ProductServer.CONF_FILE?</span>
-    <span class="c1"># help=&quot;read config file&quot;, metavar=&quot;&lt;file&gt;&quot;)</span>
-
+    
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-P&quot;</span><span class="p">,</span> <span class="s2">&quot;--port&quot;</span><span class="p">,</span>
                         <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;HTTP_PORT&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -456,9 +441,8 @@
                         <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;HTML document root&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;dir&gt;&quot;</span><span class="p">)</span>
     
-    
-    
     <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    
     
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">options</span><span class="p">):</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
@@ -509,7 +493,7 @@
                     
     <span class="c1"># TODO if (file not exits options.HTTM_TEMPLATE):</span>
     
-    <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Proceed to start the server.&quot;</span><span class="p">)</span>
+    <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting the server...&quot;</span><span class="p">)</span>
     <span class="n">run_http</span><span class="p">(</span><span class="n">product_server</span><span class="p">)</span>
 
     <span class="c1"># print &#39;http request example: &#39; + &#39;http://127.0.0.1:8088/nutshell/server?request=INPUTS&amp;product=201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika_BBOX=20,60,30,70.png&#39;</span>

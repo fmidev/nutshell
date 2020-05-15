@@ -112,8 +112,8 @@ directives determine how the product is generated.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>product_info</strong> &#8211; description of the product (string or nutshell.product.Info)</li>
-<li><strong>actions</strong> &#8211; what should be done about the product: 
-<code class="docutils literal"><span class="pre">MAKE</span></code>, <code class="docutils literal"><span class="pre">MAKE</span></code>, and/or <code class="docutils literal"><span class="pre">CHECK</span></code>, see <a class="reference internal" href="nutshell-commands.html#commands"><span>Commands and status codes</span></a> .</li>
+<li><strong>actions</strong> &#8211; what should be done about the product 
+(<code class="docutils literal"><span class="pre">MAKE</span></code>, <code class="docutils literal"><span class="pre">DELETE</span></code>, <code class="docutils literal"><span class="pre">CHECK</span></code> , <code class="docutils literal"><span class="pre">RETURN</span></code>), see <a class="reference internal" href="nutshell-commands.html#commands"><span>Commands and status codes</span></a> .</li>
 <li><strong>directives</strong> &#8211; how the product is generated etc</li>
 <li><strong>log</strong> &#8211; optional logging.logger</li>
 </ul>
@@ -155,22 +155,10 @@ the file (if succefully generated) and information about the process.</p>
 </dd></dl>
 
 <dl class="staticmethod">
-<dt id="nutshell.httpd.NutHandler.get_html_template">
-<em class="property">static </em><code class="descname">get_html_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.get_html_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.get_html_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read HTML template dir and return it for modifications.</p>
-</dd></dl>
-
-<dl class="staticmethod">
 <dt id="nutshell.httpd.NutHandler.parse_url">
 <em class="property">static </em><code class="descname">parse_url</code><span class="sig-paren">(</span><em>url</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.parse_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.parse_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>splitquery(&#8216;/path?query&#8217;) &#8211;&gt; &#8216;/path&#8217;, &#8216;query&#8217;.
-If query returned also when None</p>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="nutshell.httpd.NutHandler.send_to_stream">
-<em class="property">static </em><code class="descname">send_to_stream</code><span class="sig-paren">(</span><em>s</em>, <em>product_request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.send_to_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.send_to_stream" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send to stream</p>
+<dd><p>Splits url to path (str) and query data (dict)</p>
+<p>An empty data dict is returned if query is empty.</p>
 </dd></dl>
 
 </dd></dl>
@@ -274,12 +262,6 @@ product generation directories or scripts exist.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.product.Info.parse_filename">
-<code class="descname">parse_filename</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.parse_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.parse_filename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derive product parameters from a filename.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="nutshell.product.Info.set">
 <code class="descname">set</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Configure a product.</p>
@@ -319,14 +301,19 @@ method calls)</p>
 <dt id="nutshell.product.Info.set_parameter">
 <code class="descname">set_parameter</code><span class="sig-paren">(</span><em>key</em>, <em>value=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set any parameter, including FORMAT, excluding TIMESTAMP and ID</p>
-<dl class="docutils">
-<dt>Arguments:</dt>
-<dd><p class="first">key &#8211; a string identfying of a parameter or the product
-value &#8211; the value of the parameter, possibly not</p>
-<blockquote class="last">
-<div>string but stringifiable</div></blockquote>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; name (string) of the parameter</li>
+<li><strong>value</strong> &#8211; the value of the parameter, possibly not 
+string but hopefully stringifiable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -336,25 +323,15 @@ value &#8211; the value of the parameter, possibly not</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="nutshell.product.Info.set_product">
-<code class="descname">set_product</code><span class="sig-paren">(</span><em>product_desc</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_product"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_product" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configure a product.</p>
-<p>Arguments:
-product_desc &#8211; a product ID string or a filename
-kwargs  &#8211; keyword arguments completing the product definition</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="nutshell.product.Info.set_timestamp">
 <code class="descname">set_timestamp</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_timestamp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set UTC time in numeric format &#8216;%Y%m%d%H%M&#8217; or its punctuated variants.</p>
-<p>Essentially, the timestamp will be stored as a string of 
-12 digits, &#8220;202003291845&#8221; for example.</p>
-<p>The numbers have to be in order year, month, day, hour, and minute.
+<dd><p>Set UTC time in numeric format &#8216;%Y%m%d%H%M&#8217; or &#8216;LATEST&#8217;.</p>
+<p>The 12 digit-numeric format may contain punctuation as long as the
+order of the time units is not changed.
 Non-digits will be simply removed.
 For example, 2020/03/29 18:45 is pruned to 202003291845.
-Consequently, possible _time <a href="#id1"><span class="problematic" id="id2">zones_</span></a> will be also discarded.</p>
-<p>Todo: support for time object, unix seconds and date string parsing.</p>
+Consequently, possible <em>time zones</em> will be also discarded.</p>
+<p>Future versions may support for time object, unix seconds and date string parsing.</p>
 </dd></dl>
 
 </dd></dl>

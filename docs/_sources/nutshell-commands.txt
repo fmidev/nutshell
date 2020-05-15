@@ -79,7 +79,7 @@ Code  Standard Enum Name        NutShell   Comment
 ==== ========================== ========== ==========
 102  PROCESSING                 x          
 200  OK                         x          Request completed successfully
-404  Not Found                  x          Document not found
+404  Not Found                  x          File not found (Generator may exist)
 405  Method Not Allowed         x 
 409  Conflict                              Contradicting parameters 
 413  Payload Too Large                     Parameters imply expensive computation

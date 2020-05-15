@@ -84,13 +84,25 @@ or more compactly::
   WIDTH=${WIDTH:-'640'}
   HEIGHT=${HEIGHT:-"$WIDTH"}  # double hyphens to allow expansion
 
-  
+  :ref:`configuration`
 
 Input queries
 '''''''''''''
 
 #. Create shell script file ``input.sh`` with execution permission.
+#. Design it to echo out lines of type ``<key>=<product>`` where
+   ``<key>`` is the variable name you want to use for this input in
+   ``generate.sh`` and ``<product>`` is an input product file to be retrieved.
+   For example: ::
+     RADAR=${TIMESTAMP}_radar.rack_SITE=${SITE}.h5
+     MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png
+   Will print out: ::
+     RADAR=202005121845_radar.rack_SITE=fikor.h5
+     MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:fikor.png
+#. In addition, for debugging purposes, the script can echo out comment lines starting with '#' but it
+      *should not print any other output*.
 
+   
 - Must not be any of :ref:`system variables`
 
 
