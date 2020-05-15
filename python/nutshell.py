@@ -1,97 +1,30 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
 """
-Product generator service appicable on the command line or as a library
 
-.. _command-line-usage:
+Main module -- nutshell.nutshell
+==================================
 
-Command line usage
-==================
+This module contains ProductServer class, which receives product
+requests and forwards them to product generators. A ProductServer
+instance also manages disk resources defined in 
+:ref:`configuration`.
 
-Basic format for all the command line invocations is::
+The module uses classes of :ref:`nutshell.product` for defining products 
+( nutshell.product.Info ) and for generating them using 
+nutshell.product.Generator. 
 
-    python3 -m nutshell.nutshell <nutshell-args>
-    
-Online help is optained with ``-h``::
-
-    python3 -m nutshell.nutshell -h
-    
-Simple query using configuration file and product definition::
-
-    python3 -m nutshell.nutshell -c nutshell/nutshell.cnf -m \\
-      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png 
+HTTP server provided by :ref:`nutshell.httpd` essentially forwards
+HTTP requests to ProductServer.
 
 
-
-More details in `Overall Scheme`_
-
-
-Using NutShell within python
-============================
-
-Simple example::
-
-    import nutshell.nutshell as nuts
-
-    # Initilize service
-    server = nuts.ProductServer('nutshell/nutshell.cnf')
-
-    # Retrieve / generate a product
-    response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
-
-    # Results:
-    print("Return code: {0} ".format(response.returncode))
-    print("Status (HTTP code): {0}:  ".format(response.status))
-    print("File path: {0} ".format(response.path))
-
-    # Example: further processing (image data)
-    from PIL import Image
-    file = Image.open(response.path)
-    print(file.info)
-
-
-Status codes
-============
-
-NutShell recycles some standard HTTP status codes [1]_ [2]_ for 
-communicating success or failure on operations. 
-Many of those codes can be also used by the generator scripts
-in describing errors or other exceptional conditions back 
-to the hosting system, NutShell. 
- 
-Useful HTTP codes
------------------
-
-==== ========================== ========== ==========
-Code  Standard Enum Name        NutShell   Comment
-==== ========================== ========== ==========
-102  PROCESSING                 x          
-200  OK                         x          Request completed successfully
-404  Not Found                  x          Document not found
-405  Method Not Allowed         x 
-409  Conflict                              Contradicting parameters 
-413  Payload Too Large                     Parameters imply expensive computation
-415  Unsupported Media Type                Unsupported file format
-416  Range Not Satisfiable                 Parameter underflow or overflow
-425  Too Early                             Input data not arrived
-501  Not Implemented            x          Product generator not found
-503  Service Unavailable        x          Busy, come back later
-==== ========================== ========== ==========
-
-
-.. [1] https://docs.python.org/3/library/http.html
-.. [2] https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-
-Code documentation
-==================
 
 """
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'Markus.Peura@fmi.fi'
 
 import os
-import re
 import subprocess # for shell escape
 
 from pathlib import Path
@@ -106,27 +39,8 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
 from . import nutils
-#from . import nutproduct
+from . import product 
 
-from . import product #as nprod
-
-
-
-def parse_timestamp2(timestamp, result = {}):
-    if (timestamp):
-        t = re.sub("\W", "", timestamp)
-        result['TIMESTAMP'] = t[0:12] # empty ok?
-        result['YEAR']      = t[0:4]
-        result['MONTH']     = t[4:6]
-        result['DAY']       = t[6:8]
-        result['HOUR']      = t[8:10]
-        result['MINUTE']    = t[10:12]
-    return result
-
-
-
-
-#ProductInfo = nutproduct.ProductInfo
 
 
 class ProductServer:
@@ -155,47 +69,6 @@ class ProductServer:
     counter = 0
 
     #error_code_regexp = re.compile("^\s*([0-9]+)\\.(zip|gz)$")
-   
-    @classmethod
-    def get_arg_parser(cls, parser = None):
-        """Populates parser with options of this class"""
-
-        parser = product.Info.get_arg_parser(parser)
-        # parser = argparse.ArgumentParser()
- 
-        parser.add_argument("-c", "--conf", dest="CONF",
-                            default=None, # "nutshell.cnf", #ProductServer.CONF_FILE?
-                            help="read config file", 
-                            metavar="<file>")
-     
-        parser.add_argument("-r", "--request", metavar="<string>",
-                            dest="REQUEST",
-                            default="",
-                            help="comma-separated string of [DELETE|MAKE|INPUTS]")
-    
-        parser.add_argument("-d", "--delete",
-                            dest="DELETE",
-                            action="store_true",
-                            #default=False,
-                            help="delete product file, same as -r DELETE")
-    
-        parser.add_argument("-m", "--make",
-                            dest="MAKE",
-                            action="store_true",
-                            #default=False,
-                            help="make product, same as -r MAKE")
-    
-        parser.add_argument("-i", "--inputList",
-                            dest="INPUTS",
-                            action="store_true",
-                            help="list input for a product, same as -r INPUTS")
-    
-        parser.add_argument("-D", "--directives",
-                            dest="DIRECTIVES",
-                            default='',
-                            help="additional instructions: LOG,LINK,LATEST")
-    
-        return parser    
 
     
     def init_path(self, dirname, verify=False):
@@ -275,42 +148,6 @@ class ProductServer:
             os.umask(original_umask)
         return outdir
 
-#    def run_task(self, task, log):
-#        """Runs a task object containing task.script and task.stdout"""
-#        
-#        
-#        p = subprocess.Popen(str(task.script),
-#                             cwd=str(task.script.parent),
-#                             stdout=subprocess.PIPE, # always
-#                             stderr=task.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
-#                             shell=True,
-#                             env=task.env)
-# 
-#        if (not p):
-#            log.warn('No process') 
-#            task.returncode = -1
-#            task.status = HTTPStatus.NOT_FOUND
-#            return
-#
-#        stdout,stderr = p.communicate()
-#        task.returncode = p.returncode        
-#
-#        if (stdout):
-#            stdout = stdout.decode(encoding='UTF-8')
-#            if (p.returncode != 0):
-#                lines = stdout.strip().split('\n')
-#                task.error_info = lines.pop()
-#                log.warn(task.error_info)
-#                try:             
-#                    status = int(task.error_info.split(' ')[0])
-#                    task.status = HTTPStatus(status)
-#                except ValueError:
-#                    log.warn('Not HTTP error code: {0} '.format(task.status))
-#                    task.status = HTTPStatus.CONFLICT
-#        if (stderr):
-#            stderr = stderr.decode(encoding='UTF-8')
-#        task.stdout = stdout  
-#        task.stderr = stderr
 #        
                    
     def get_input_list(self, product_info, directives, log):
@@ -343,49 +180,25 @@ class ProductServer:
         return input_query
     
 
-         
-#    def run_generator(self, product_request, params=None):
-#        """ Run shell script to generate a product. 
-#        
-#         stdout and stderr are used for output.
-#        
-#        Attributes:
-#          product_request -- state at beginning of transition.
-#          params -- attempted new state.
-#        """
-#
-#        if (params == None):
-#            params = {}
-#
-#
-#        product_request.log.info('run_generator: ' + product_request.product_info.ID)
-#        product_request.log.debug(params)
-#    
-#        product_request.env = params
-#        self.run_task(product_request, product_request.log)
-#
-#        if (product_request.returncode != 0):
-#            if (product_request.stdout):
-#                log_file = Path(str(product_request.path)+'.stdout.log')
-#                product_request.log.warn('Writing STDOUT log: {0}'.format(log_file))            
-#                log_file.write_text(product_request.stdout)
-#            if (product_request.stderr):
-#                log_file = Path(str(product_request.path)+'.stderr.log')
-#                product_request.log.warn('Writing STDERR log: {0}'.format(log_file))            
-#                log_file.write_text(product_request.stderr)
-#            
-#        return product_request.returncode
 
 
     def make_request(self, product_info, actions = ['MAKE'], directives = None, log = None):
-        """" Return path or log
-        'MAKE'   - return the product, if in cache, else generate it and return
-        'DELETE' - delete the product in cache
-        'INPUTS' - generate and store the product, also regenerate even if already exists
+        """
+        Main function.
+
+        :param product_info: description of the product (string or nutshell.product.Info)
+        :param actions: what should be done about the product: 
+            ``MAKE``, ``MAKE``, and/or ``CHECK``, see :ref:`commands` .
+        :param directives: how the product is generated etc 
+        :param log: optional logging.logger 
+
+        :returns: Instance of product.Generator that contains the path of 
+            the file (if succefully generated) and information about the process.
+        
         """
         #product_request = self.ProductRequest(self, product_info, actions, directives, log)
-        # Consider rename to Generator        
-        pr = product.Request(self, product_info, actions, directives, log)
+        # Consider rename to Generator
+        pr = product.Generator(self, product_info, actions, directives, log)
         
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
@@ -440,7 +253,6 @@ class ProductServer:
             else:
                 #pr.set_status(HTTPStatus.CONFLICT)
                 pr.set_status(HTTPStatus.PRECONDITION_FAILED)
-                #pr.log.info('Removing: {0} '.format(pr.path))
                 pr.remove_files()
                 return pr
 
@@ -467,7 +279,7 @@ class ProductServer:
         # MAIN
         if ('MAKE' in pr.actions):
             pr.log.info('Generating:  {0}'.format(pr.path))
-            pr.log.info('Environment: {0}'.format(pr.env))
+            pr.log.debug('Environment: {0}'.format(pr.env))
             #self.run_generator(pr, pr.env)
             pr.run()
 
@@ -492,7 +304,7 @@ class ProductServer:
                 
             try:
                 if ('LINK' in pr.directives): #and pr.product_info.TIMESTAMP:
-                    pr.log.info('LINK: {0} '.format(pr.path_static))
+                    pr.log.info('Linking: {0}'.format(pr.path_static))
                     self.ensure_output_dir(pr.path_static.parent)
                     nutils.symlink(pr.path_static, pr.path)
          
@@ -510,11 +322,54 @@ class ProductServer:
                     logfile.write_text(pr.stdout) #.decode(encoding='UTF-8'))            
                 except:
                     pr.log.warn("Saving log failed")               
-                
+            
+            pr.log.info('Success: {0}'.format(pr.path))
+              
         return pr
     
 
 
+   
+    @classmethod
+    def get_arg_parser(cls, parser = None):
+        """Populates parser with options of this class"""
+
+        parser = product.Info.get_arg_parser(parser)
+        # parser = argparse.ArgumentParser()
+ 
+        parser.add_argument("-c", "--conf", dest="CONF",
+                            default=None, # "nutshell.cnf", #ProductServer.CONF_FILE?
+                            help="read config file", 
+                            metavar="<file>")
+     
+        parser.add_argument("-r", "--request", metavar="<string>",
+                            dest="REQUEST",
+                            default="",
+                            help="comma-separated string of [DELETE|MAKE|INPUTS]")
+    
+        parser.add_argument("-d", "--delete",
+                            dest="DELETE",
+                            action="store_true",
+                            #default=False,
+                            help="delete product file, same as -r DELETE")
+    
+        parser.add_argument("-m", "--make",
+                            dest="MAKE",
+                            action="store_true",
+                            #default=False,
+                            help="make product, same as -r MAKE")
+    
+        parser.add_argument("-i", "--inputList",
+                            dest="INPUTS",
+                            action="store_true",
+                            help="list input for a product, same as -r INPUTS")
+    
+        parser.add_argument("-D", "--directives",
+                            dest="DIRECTIVES",
+                            default='',
+                            help="additional instructions: LOG,LINK,LATEST")
+    
+        return parser    
 
 
         
@@ -570,53 +425,37 @@ if __name__ == '__main__':
     #nutils.print_dict(product_server.get_status())
     logger.debug(product_server.get_status())
      
-    request = []
-    
-    if (options.INPUTS):
-        request.append('INPUTS')
+    actions = []
 
     if (options.REQUEST):
-        request.append(options.REQUEST.split(','))
+        actions.extend(options.REQUEST.split(','))
+
+    if (options.MAKE) or not (actions):
+        actions.append('MAKE')
+    
+    if (options.INPUTS):
+        actions.append('INPUTS')
         
     if (options.DELETE):
-        request.append('DELETE')
+        actions.append('DELETE')
 
-
-    if (options.MAKE) or not (request):
-        request.append('MAKE')
 
     if (product_info.ID and product_info.FORMAT):
         
-        logger.info('Requests: {0}'.format(str(request)))
+        logger.info('Requests: {0}'.format(str(actions)))
 
         directives = []
         if (options.DIRECTIVES):
             #directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
             directives = options.DIRECTIVES.split(',') # whattabout comma in arg?
 
-        product_request = product_server.make_request(product_info, request, directives, logger.getChild("make_request"))
+        product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
         #logger.debug(product_request)
 
-        if ('INPUTS' in request): # or (options.VERBOSE > 6):
+        if ('INPUTS' in actions): # or (options.VERBOSE > 6):
             #nutils.print_dict(product_request.inputs)
             logger.info(product_request.inputs)
-
-        #        if (product_request.status.value >= 500):
-        #            print (product_request.stdout)
-        #            print (product_request.stderr)
-        #            logger.critical(product_request.status)
-        #            exit(5)
-        #        elif (product_request.status.value >= 400):
-        #            print (product_request.stdout)
-        #            print (product_request.stderr)
-        #            logger.error(product_request.status)
-        #            exit(4)
-        #        elif (product_request.status.value >= 300):
-        #            print (product_request.stdout)
-        #            print (product_request.stderr)
-        #            logger.warning(product_request.status)
-        #            exit(3)
-        #        else:            
+    
         logger.info(product_request.status)    
             
             

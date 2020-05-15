@@ -1,11 +1,16 @@
+#!/bin/python3
+# -*- coding: utf-8 -*-
+"""
 
-"""NutShell HTTP server
+HTTP Server -- nutshell.httpd
+==============================
 
 Server can be started with command::
 
     python3  -m nutshell.httpd -c nutshell.cnf
 
-	   
+By default, it returns a status page (HTML) containing
+ 	   
 - query form
 - error messages 
 - product info
@@ -146,7 +151,11 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         print(('POST method not implemented, redirecting to do_GET(): {0}'.format(s.path)))
  
     def do_GET(s):
+        """Main function. Receives the http request and sends a response.
+                
+        """
 
+        # Consider renaming NutShell "request" to "actions"
         s.log = logging.getLogger("NutHandler" + str(++product_server.counter))
         s.log.setLevel(product_server.logger.level)
         
@@ -158,7 +167,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         
         basepath,querydata = NutHandler.parse_url(s.path, querydata)
         # basepath.replace(HTTP_PATH_PREFIX, '')
-        s.log.error(querydata)
+        s.log.info(querydata)
 
         if (basepath == '/test'):
             s.send_response(HTTPStatus.OK.value)
@@ -197,19 +206,19 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             s.log.info('Goodbye, world!')
             raise SystemExit  #KeyboardInterrupt
 
-        service_request = None
+        actions = None
         directives = []
         product_name = querydata.get('product', None)
         product_info = None 
         if (product_name):
             product_info = product.Info(product_name)
-            service_request = querydata.get('request', ["MAKE"])
+            actions = querydata.get('request', ["MAKE"])
             directives      = querydata['directives']
         else:
-            service_request = querydata['request']
+            actions = querydata['request']
             directives = querydata.get('directives', ["STATUS"])
         
-        s.log.info("Service-request: {0} ".format(service_request))
+        s.log.info("Service-request: {0} ".format(actions))
         s.log.info("Product-name: {0} ".format(product_name))
         s.log.info("Directives: {0} ".format(directives))
 
@@ -223,10 +232,10 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             s.log.info("Product info: {0} ".format(product_info))
             
             # "MAIN"
-            product_request = product_server.make_request(product_info, service_request, directives, s.log.getChild("Make_Request"))
-            # print("Phase 3", service_request)
+            product_request = product_server.make_request(product_info, actions, directives, s.log.getChild("Make_Request"))
+            # print("Phase 3", actions)
             # TODO: 'PATH'
-            if ('MAKE' in service_request) and ('STATUS' not in directives):
+            if ('MAKE' in actions) and ('STATUS' not in directives):
                 if (product_request.status == HTTPStatus.OK) and (product_request.path != ''):
                     # Redirect 
                     url = '/cache/' + str(product_request.path_relative) + '?no_redirect'
@@ -239,7 +248,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     #product_request.log
             else:
                 product_request.status = HTTPStatus.OK
-                #print("Nokemake", service_request)
+                #print("Nokemake", actions)
                 
         if product_request:
             s.send_response(product_request.status.value)
@@ -257,9 +266,9 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # Consider single table for all
         # table = ET.Element('table')
         # append_table(table, data, attributes)
-        if service_request:
+        if actions:
             elem = nutxml.get_by_id(body, 'request')
-            elem.set("value", ','.join(service_request))
+            elem.set("value", ','.join(actions))
             # OLD
             # elem = nutxml.get_by_id(body, 'request_elem')
             # elem.append(nutxml.get_table(querydata, {"title": "Request"}))
@@ -294,7 +303,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         #elem.text = "Cwd: " + os.cwd + '\n'
             
         if (product_info):
-            if ('INPUTS' in service_request):
+            if ('INPUTS' in actions):
                 if (not product_request.inputs): # what if None?
                     product_request.inputs = product_server.get_input_list(product_info).inputs
 
@@ -323,12 +332,8 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def run_http(product_server):
-    """A function just for me.
+    """A convenience function for starting and stopping the HTTP server.
 
-    :param my_arg: The first of my arguments.
-    :param my_other_arg: The second of my arguments.
-
-    :returns: A message (just for me, of course).
     """
     NutHandler.directory = product_server.HTML_ROOT # has no effect as such...
     http.server.SimpleHTTPRequestHandler.directory = product_server.HTML_ROOT # has no effect...

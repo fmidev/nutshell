@@ -1,10 +1,11 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
 """
-Product generator service appicable on the command line or as a library
 
-Code documentation
-==================
+Escape from Python -- nutshell.shell
+------------------------------------
+
+This module contains utilities for running shell scripts.
 
 """
 
@@ -23,7 +24,7 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 
 
 class Task:
-    """Something that has a script and stdin, stdout, env and log"""
+    """Something that has a script, stdin, stdout, env, and log."""
 
     script = None
     stdout = None
