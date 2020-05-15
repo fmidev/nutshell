@@ -109,13 +109,6 @@
     <span class="sd">&quot;&quot;&quot;Stores basic product information: product id, timestamp (if applicable)</span>
 <span class="sd">    file format, and specific product parameters.</span>
 <span class="sd">    </span>
-<span class="sd">     :param product: product id string, requires explicit kwargs</span>
-<span class="sd">     :param product_id: product id string.</span>
-<span class="sd">     :param filename: product description presented as a filename</span>
-
-<span class="sd">     :returns: instance (possibly incomplete, to be adjusted with separate </span>
-<span class="sd">         method calls) </span>
-<span class="sd">          </span>
 <span class="sd">          </span>
 <span class="sd">     Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
 <span class="sd">         &gt;&gt;&gt; p = Info(filename=&quot;my.image.product.png&quot;)</span>
@@ -356,10 +349,14 @@
 <div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Configure a product.</span>
 
+<span class="sd">        :param product: product id string, requires explicit kwargs</span>
+<span class="sd">        :param product_id: product id string.</span>
+<span class="sd">        :param filename: product description presented as a filename</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: instance (possibly incomplete, to be adjusted with separate </span>
+<span class="sd">             method calls) </span>
+<span class="sd">    </span>
 <span class="sd">        See :ref:`product.info`. Parameters equivalent at initialisation.</span>
-<span class="sd">        </span>
-<span class="sd">            </span>
-<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span>

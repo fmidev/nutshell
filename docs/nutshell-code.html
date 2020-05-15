@@ -115,7 +115,7 @@ directives determine how the product is generated.</p>
 <li><strong>actions</strong> &#8211; what should be done about the product: 
 <code class="docutils literal"><span class="pre">MAKE</span></code>, <code class="docutils literal"><span class="pre">MAKE</span></code>, and/or <code class="docutils literal"><span class="pre">CHECK</span></code>, see <a class="reference internal" href="nutshell-commands.html#commands"><span>Commands and status codes</span></a> .</li>
 <li><strong>directives</strong> &#8211; how the product is generated etc</li>
-<li><strong>logs</strong> &#8211; optional logger</li>
+<li><strong>log</strong> &#8211; optional logging.logger</li>
 </ul>
 </td>
 </tr>
@@ -239,23 +239,7 @@ This is always logged.</p>
 <dd><p>Stores basic product information: product id, timestamp (if applicable)
 file format, and specific product parameters.</p>
 <blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">param product:</th><td class="field-body">product id string, requires explicit kwargs</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param product_id:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">product id string.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">param filename:</th><td class="field-body">product description presented as a filename</td>
-</tr>
-<tr class="field-even field"><th class="field-name">returns:</th><td class="field-body">instance (possibly incomplete, to be adjusted with separate 
-method calls)</td>
-</tr>
-</tbody>
-</table>
-<dl class="docutils">
+<div><dl class="docutils">
 <dt>Examples of allowed calls, with <code class="docutils literal"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.image.product.png&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>
@@ -298,6 +282,23 @@ corresponding product generator directory and script exists.</p>
 <dt id="nutshell.product.Info.set">
 <code class="descname">set</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Configure a product.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>product</strong> &#8211; product id string, requires explicit kwargs</li>
+<li><strong>product_id</strong> &#8211; product id string.</li>
+<li><strong>filename</strong> &#8211; product description presented as a filename</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">instance (possibly incomplete, to be adjusted with separate 
+method calls)</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p>See <span class="xref std std-ref">product.info</span>. Parameters equivalent at initialisation.</p>
 </dd></dl>
 
