@@ -107,7 +107,8 @@
 <span class="sd">    ``TIMESTAMP`` (if applicable), file ``FORMAT``, </span>
 <span class="sd">    and product-specific free parameters.</span>
 <span class="sd">    </span>
-<span class="sd">    **Parameters** handled as with Info.set().</span>
+<span class="sd">    **Parameters** handled as with Info.set(). Key parameters are </span>
+<span class="sd">    mutually exclusive.</span>
 <span class="sd">          </span>
 <span class="sd">    Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
 <span class="sd">        &gt;&gt;&gt; p = Info(filename=&quot;my.image.product.png&quot;)</span>
@@ -379,7 +380,7 @@
                 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;product_id&#39; arg&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">kwargs</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument requires explicit kwargs (even empty)&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument requires explicit kwargs&quot;</span><span class="p">)</span>
 
             <span class="c1"># Ok...</span>
             <span class="n">product_id</span> <span class="o">=</span> <span class="n">product</span>  <span class="c1"># Note!</span>
@@ -628,12 +629,13 @@
 
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SIZE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">640</span><span class="p">,</span><span class="mi">400</span><span class="p">],</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">:</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="c1">#product_info.set_product(options.SET, **args)</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
-            <span class="n">product_info</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">filename</span><span class="p">())</span>
         <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span> <span class="c1"># contains ID</span>
         <span class="c1">#print(product_info.__dict__) # contains ID</span>

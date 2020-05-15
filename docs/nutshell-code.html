@@ -239,7 +239,8 @@ This is always logged.</p>
 <dd><p>Stores product information, especially <code class="docutils literal"><span class="pre">PRODUCT_ID</span></code>, 
 <code class="docutils literal"><span class="pre">TIMESTAMP</span></code> (if applicable), file <code class="docutils literal"><span class="pre">FORMAT</span></code>, 
 and product-specific free parameters.</p>
-<p><strong>Parameters</strong> handled as with Info.set().</p>
+<p><strong>Parameters</strong> handled as with Info.set(). Key parameters are 
+mutually exclusive.</p>
 <dl class="docutils">
 <dt>Examples of allowed calls, with <code class="docutils literal"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.image.product.png&quot;</span><span class="p">)</span>
