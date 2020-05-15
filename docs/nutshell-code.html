@@ -147,6 +147,12 @@ the file (if succefully generated) and information about the process.</p>
 <dt id="nutshell.httpd.NutHandler">
 <em class="property">class </em><code class="descclassname">nutshell.httpd.</code><code class="descname">NutHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Forwards a HTTP request to  nutshell.ProductServer instance</p>
+<dl class="method">
+<dt id="nutshell.httpd.NutHandler.do_GET">
+<code class="descname">do_GET</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.do_GET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function. Receives the http request and sends a response.</p>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="nutshell.httpd.NutHandler.get_html_template">
 <em class="property">static </em><code class="descname">get_html_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.get_html_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.get_html_template" title="Permalink to this definition">¶</a></dt>
@@ -228,7 +234,7 @@ This is always logged.</p>
 
 <dl class="class">
 <dt id="nutshell.product.Info">
-<em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stores basic product information: product id, timestamp (if applicable)
 file format, and specific product parameters.</p>
 <p>Technically independent of environment and other classes.
@@ -249,6 +255,30 @@ Does not store local information or configurations (system side paths etc.).</p>
 <dt id="nutshell.product.Info.parse_filename">
 <code class="descname">parse_filename</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.parse_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.parse_filename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive product parameters from a filename.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.product.Info.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure a product.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>product_desc &#8211; a product ID string or a filename
+kwargs  &#8211; keyword arguments completing the product definition</dd>
+<dt>Allowed calls:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="p">,</span> <span class="p">{</span><span class="n">args</span><span class="o">...</span><span class="p">})</span>   <span class="c1"># exaple: info.set(&quot;&quot;)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Plain string arguments are forbidden:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span><span class="p">))</span>     <span class="c1"># example: info.set(&quot;image.product.png&quot;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">product_id</span><span class="o">&gt;</span><span class="p">))</span>   <span class="c1"># example: info.set(image.product&quot;)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">

@@ -206,12 +206,22 @@
 <span class="sd">                    string but stringifiable</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">):</span>
-            <span class="c1"># warn?</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="c1"># todo: EXTENSION, COMPR, TIMESTAMP?</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;EXTENSION&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;COMPRESSION&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">value</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span>
+                                    
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;ID&#39;</span><span class="p">):</span>
+            <span class="c1"># WARN about</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Special member ID cannot be set with this function&quot;</span><span class="p">)</span>
+ 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -319,11 +329,67 @@
 
         <span class="k">return</span> <span class="n">env</span></div>
 
-    <span class="c1"># Todo: params</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Configure a product. </span>
+<span class="sd">        </span>
+<span class="sd">                </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            product_desc -- a product ID string or a filename</span>
+<span class="sd">            kwargs  -- keyword arguments completing the product definition</span>
+
+<span class="sd">        Allowed calls:</span>
+<span class="sd">            &gt;&gt;&gt; set(filename=&quot;...&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; set(product_id=&quot;...&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; set(product_id, {args...})   # exaple: info.set(&quot;&quot;)</span>
+
+<span class="sd">        Plain string arguments are forbidden:</span>
+<span class="sd">            &gt;&gt;&gt; set(str(&lt;filename&gt;))     # example: info.set(&quot;image.product.png&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; set(str(&lt;product_id&gt;))   # example: info.set(image.product&quot;)</span>
+<span class="sd">            </span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
+        
         <span class="k">if</span> <span class="p">(</span><span class="n">product</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">product</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span> <span class="c1"># easiest</span>
+                <span class="c1"># self.log.warn</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;filename&#39; arg&quot;</span><span class="p">)</span>                
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> <span class="c1"># easiest</span>
+                <span class="c1"># self.log.warn</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument looks like a file?&quot;</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;product_id&#39; arg&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument requires explicit kwargs (even empty)&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Ok...</span>
+            <span class="n">product_id</span> <span class="o">=</span> <span class="n">product</span>  <span class="c1"># Note!</span>
+            
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> 
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;both &#39;filename&#39; and &#39;product_id&#39; given&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span>  <span class="c1"># easiest</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">product_id</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span></div>
+  
+
+    <span class="c1"># Todo: params</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">product_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1">#def __call__(self):</span>
     <span class="c1">#    print(&#39;Print Something&#39;)</span>

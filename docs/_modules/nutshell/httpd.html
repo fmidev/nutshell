@@ -205,8 +205,12 @@
     <span class="k">def</span> <span class="nf">do_POST</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
         <span class="k">print</span><span class="p">((</span><span class="s1">&#39;POST method not implemented, redirecting to do_GET(): {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">path</span><span class="p">)))</span>
  
-    <span class="k">def</span> <span class="nf">do_GET</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class="viewcode-block" id="NutHandler.do_GET"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.httpd.NutHandler.do_GET">[docs]</a>    <span class="k">def</span> <span class="nf">do_GET</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Main function. Receives the http request and sends a response.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Consider renaming NutShell &quot;request&quot; to &quot;actions&quot;</span>
         <span class="n">s</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;NutHandler&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="o">++</span><span class="n">product_server</span><span class="o">.</span><span class="n">counter</span><span class="p">))</span>
         <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
         
@@ -218,7 +222,7 @@
         
         <span class="n">basepath</span><span class="p">,</span><span class="n">querydata</span> <span class="o">=</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">parse_url</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">querydata</span><span class="p">)</span>
         <span class="c1"># basepath.replace(HTTP_PATH_PREFIX, &#39;&#39;)</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">querydata</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">querydata</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span> <span class="o">==</span> <span class="s1">&#39;/test&#39;</span><span class="p">):</span>
             <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
@@ -257,19 +261,19 @@
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Goodbye, world!&#39;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">SystemExit</span>  <span class="c1">#KeyboardInterrupt</span>
 
-        <span class="n">service_request</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">directives</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">product_name</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;product&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
         <span class="n">product_info</span> <span class="o">=</span> <span class="bp">None</span> 
         <span class="k">if</span> <span class="p">(</span><span class="n">product_name</span><span class="p">):</span>
             <span class="n">product_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">product_name</span><span class="p">)</span>
-            <span class="n">service_request</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;MAKE&quot;</span><span class="p">])</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;MAKE&quot;</span><span class="p">])</span>
             <span class="n">directives</span>      <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;directives&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">service_request</span> <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
             <span class="n">directives</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;directives&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;STATUS&quot;</span><span class="p">])</span>
         
-        <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Service-request: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">service_request</span><span class="p">))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Service-request: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">actions</span><span class="p">))</span>
         <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Product-name: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_name</span><span class="p">))</span>
         <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Directives: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directives</span><span class="p">))</span>
 
@@ -283,10 +287,10 @@
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Product info: {0} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="p">))</span>
             
             <span class="c1"># &quot;MAIN&quot;</span>
-            <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">service_request</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;Make_Request&quot;</span><span class="p">))</span>
-            <span class="c1"># print(&quot;Phase 3&quot;, service_request)</span>
+            <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;Make_Request&quot;</span><span class="p">))</span>
+            <span class="c1"># print(&quot;Phase 3&quot;, actions)</span>
             <span class="c1"># TODO: &#39;PATH&#39;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">service_request</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;STATUS&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">directives</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;STATUS&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">directives</span><span class="p">):</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
                     <span class="c1"># Redirect </span>
                     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/cache/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">path_relative</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;?no_redirect&#39;</span>
@@ -299,7 +303,7 @@
                     <span class="c1">#product_request.log</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">product_request</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span>
-                <span class="c1">#print(&quot;Nokemake&quot;, service_request)</span>
+                <span class="c1">#print(&quot;Nokemake&quot;, actions)</span>
                 
         <span class="k">if</span> <span class="n">product_request</span><span class="p">:</span>
             <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
@@ -317,9 +321,9 @@
         <span class="c1"># Consider single table for all</span>
         <span class="c1"># table = ET.Element(&#39;table&#39;)</span>
         <span class="c1"># append_table(table, data, attributes)</span>
-        <span class="k">if</span> <span class="n">service_request</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">actions</span><span class="p">:</span>
             <span class="n">elem</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;request&#39;</span><span class="p">)</span>
-            <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">service_request</span><span class="p">))</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">actions</span><span class="p">))</span>
             <span class="c1"># OLD</span>
             <span class="c1"># elem = nutxml.get_by_id(body, &#39;request_elem&#39;)</span>
             <span class="c1"># elem.append(nutxml.get_table(querydata, {&quot;title&quot;: &quot;Request&quot;}))</span>
@@ -354,7 +358,7 @@
         <span class="c1">#elem.text = &quot;Cwd: &quot; + os.cwd + &#39;\n&#39;</span>
             
         <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">service_request</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">):</span>
                 <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">product_request</span><span class="o">.</span><span class="n">inputs</span><span class="p">):</span> <span class="c1"># what if None?</span>
                     <span class="n">product_request</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">get_input_list</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span><span class="o">.</span><span class="n">inputs</span>
 
@@ -378,7 +382,7 @@
         <span class="c1">#s.wfile.write(minidom.parseString(ET.tostring(html)).toprettyxml(indent = &quot;   &quot;))</span>
         <span class="c1">#minidom.parseString(etree.toString(root)).toprettyxml(indent = &quot;   &quot;)</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span></div></div>
      
 
 
