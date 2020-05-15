@@ -98,7 +98,12 @@
     <span class="k">return</span> <span class="n">result</span>
 
 
+<span class="sd">&quot;&quot;&quot;</span>
 
+<span class="sd">nutshell.product.Info</span>
+<span class="sd">---------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Stores basic product information: product id, timestamp (if applicable)</span>
@@ -120,7 +125,7 @@
 <span class="sd">     A plain string argument is ambiguous, and raises an exception:</span>
 <span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;)       # Looks understandable, but...</span>
 <span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product.jpeg&quot;)  # ... is this a product ID or file?</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product_.jpeg&quot;) # This could be parsed, but...</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product_.jpeg&quot;) # This could be parsed ok, but...</span>
 <span class="sd">       </span>
 <span class="sd">     This class is essential a string parser and storage for parsed variables.</span>
 <span class="sd">     This class is technically independent of server configurations </span>

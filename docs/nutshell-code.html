@@ -265,7 +265,7 @@ method calls)</td>
 <dt>A plain string argument is ambiguous, and raises an exception:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>       <span class="c1"># Looks understandable, but...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product.jpeg&quot;</span><span class="p">)</span>  <span class="c1"># ... is this a product ID or file?</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product_.jpeg&quot;</span><span class="p">)</span> <span class="c1"># This could be parsed, but...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product_.jpeg&quot;</span><span class="p">)</span> <span class="c1"># This could be parsed ok, but...</span>
 </pre></div>
 </div>
 </dd>
