@@ -68,7 +68,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
     #htmlDoc = ''
 
     @staticmethod
-    def get_html_template():
+    def _get_html_template():
         """Read HTML template dir and return it for modifications."""
         try:
             os.chdir(product_server.HTML_ROOT) # !!
@@ -87,15 +87,18 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
 
     @staticmethod
     def parse_url(url, data=None):
-        """ splitquery('/path?query') --> '/path', 'query'.
-            If query returned also when None        
-        """ # 
+        """ Splits url to path (str) and query data (dict)
+            
+            An empty data dict is returned if query is empty.
+        """ 
         sep = ','
-        (path,query) = urllib.parse.splitquery(url)
+        #  splitquery('/path?query') --> '/path', 'query'.
+        #  (path,query) = urllib.parse.splitquery(url)
+        (path,query) = urllib.parse.splitquery(urllib.parse.unquote(url))
         if (not data):
             data = {}
         if (query):
-            params = urllib.parse.unquote(query)
+            params = query #urllib.parse.unquote(query)
             for param in params.split('&'):
                 # splitvalue('attr=value') --> 'attr', 'value'.
                 (key,value) = urllib.parse.splitvalue(param)
@@ -109,38 +112,25 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # NOTE: unquote also path, because:
         # 201708121600_radar.rack.comp_BBOX=20,60,30,70_SITES=fikor,fivan,fiika_SIZE=800,800.png
         # 201708121600_radar.rack.comp_BBOX%3D20%2C60%2C30%2C70_SITES%3Dfikor%2Cfivan%2Cfiika_SIZE%3D800%2C800.png 
-        #if (not data):
-        #    data = None?
-        return (urllib.parse.unquote(path), data)
+        #return (urllib.parse.unquote(path), data)
+        return (path, data)
 
-    @staticmethod
-    def send_to_stream(s, product_request):
-        """ Send to stream            
-        """
-        mtype,encoding = mimetypes.guess_type(product_request.path.name)
-        fileformat = product_request.product_info.FORMAT.lower()
-        if (not mtype):
-            mtype = 'application/' + fileformat
-        #print (product_request.product_info.filename())
-        #print (mtype, encoding, product_request.path)
-        s.send_response(product_request.status.value) # 200
-        s.send_header('Content-Type', mtype)
-        # s.send_header('Content-Disposition', 'attachment; filename="{0}"'.format(product_request.product_info.filename()))
-        s.send_header('Content-Disposition', 'attachment; filename="{0}"'.format(product_request.path.name))
-        s.end_headers()
-        
-        # content = None
-        # if (fileformat in ['txt', 'json', 'sh', 'dat', 'cnf']):
-        #    content = product_request.path.read_text()
-        # else:
-        content = product_request.path.read_bytes()   
-        # file_in = open(product_request.path, 'rb')
-        # content = file_in.read()
-        # file_in.close()
-        s.wfile.write(content)
+#    @staticmethod
+#    def _send_to_stream(s, product_request):
+#        # Save. Currently unused.                 
+#        mtype,encoding = mimetypes.guess_type(product_request.path.name)
+#        fileformat = product_request.product_info.FORMAT.lower()
+#        if (not mtype):
+#            mtype = 'application/' + fileformat
+#        s.send_response(product_request.status.value) # 200
+#        s.send_header('Content-Type', mtype)
+#        s.send_header('Content-Disposition', 'attachment; filename="{0}"'.format(product_request.path.name))
+#        s.end_headers()        
+#        content = product_request.path.read_bytes()   
+#        s.wfile.write(content)
  
     @staticmethod
-    def redirect(s, url):
+    def  _redirect(s, url):
          s.send_response(HTTPStatus.SEE_OTHER.value)
          s.log.info(url)
          s.send_header("location", url)
@@ -195,7 +185,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             # and file not found (above)
             s.log.error("PRDOCUT? {0}".format(system_path.suffix))
             url =  "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
-            NutHandler.redirect(s, url)
+            NutHandler. _redirect(s, url)
             return 
                    
         if (basepath == '/stop'):
@@ -228,7 +218,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         
         if (product_info):
             
-            product_info.parse_filename(product_name)
+            product_info.set(filename = product_name)  #parse_filename(product_name)
             s.log.info("Product info: {0} ".format(product_info))
             
             # "MAIN"
@@ -241,7 +231,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     url = '/cache/' + str(product_request.path_relative) + '?no_redirect'
                     #url = '/'+product_server.get_relative_path(product_info)+'?no_redirect'
                     #print('CONSIDER', url)
-                    NutHandler.redirect(s, url)
+                    NutHandler. _redirect(s, url)
                     return 
                 else:
                      s.log.error("MAKE failed for: {0}".format(product_info.filename()))
@@ -259,7 +249,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         
     
         # Proceed to HTML page response             
-        html = NutHandler.get_html_template()
+        html = NutHandler._get_html_template()
         #head = nutxml.get_head(html)
         body = nutxml.get_body(html)
 
@@ -367,12 +357,7 @@ if __name__ == '__main__':
     product_server.logger = logging.getLogger("NutServer")
 
     parser = nutshell.ProductServer.get_arg_parser()
-    #arser = argparse.ArgumentParser()
-
-    # parser.add_argument("-c", "--conf", dest="CONF",
-    # default="nutshell.cnf", #ProductServer.CONF_FILE?
-    # help="read config file", metavar="<file>")
-
+    
     parser.add_argument("-P", "--port",
                         dest="HTTP_PORT",
                         default=None,
@@ -401,9 +386,8 @@ if __name__ == '__main__':
                         default=None,
                         help="HTML document root", metavar="<dir>")
     
-    
-    
     options = parser.parse_args()
+    
     
     if (not options):
         parser.print_help()
@@ -454,7 +438,7 @@ if __name__ == '__main__':
                     
     # TODO if (file not exits options.HTTM_TEMPLATE):
     
-    product_server.logger.info("Proceed to start the server.")
+    product_server.logger.info("Starting the server...")
     run_http(product_server)
 
     # print 'http request example: ' + 'http://127.0.0.1:8088/nutshell/server?request=INPUTS&product=201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika_BBOX=20,60,30,70.png'

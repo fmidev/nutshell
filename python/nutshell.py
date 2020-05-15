@@ -187,8 +187,8 @@ class ProductServer:
         Main function.
 
         :param product_info: description of the product (string or nutshell.product.Info)
-        :param actions: what should be done about the product: 
-            ``MAKE``, ``MAKE``, and/or ``CHECK``, see :ref:`commands` .
+        :param actions: what should be done about the product 
+            (``MAKE``, ``DELETE``, ``CHECK`` ), see :ref:`commands` .
         :param directives: how the product is generated etc 
         :param log: optional logging.logger 
 
@@ -412,7 +412,7 @@ if __name__ == '__main__':
     product_info = product.Info()
 
     if (options.PRODUCT):
-        product_info.parse_filename(options.PRODUCT)
+        product_info.set(filename = options.PRODUCT)
     else:
         logger.warning('Product not defined')
     
