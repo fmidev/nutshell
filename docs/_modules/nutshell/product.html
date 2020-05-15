@@ -106,24 +106,26 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Stores basic product information: product id, timestamp (if applicable)</span>
-<span class="sd">    file format, and specific product parameters.</span>
+    <span class="sd">&quot;&quot;&quot;Stores product information, especially ``PRODUCT_ID``, </span>
+<span class="sd">    ``TIMESTAMP`` (if applicable), file ``FORMAT``, </span>
+<span class="sd">    and product-specific free parameters.</span>
 <span class="sd">    </span>
+<span class="sd">    **Parameters** handled as with Info.set().</span>
 <span class="sd">          </span>
-<span class="sd">     Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(filename=&quot;my.image.product.png&quot;)</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(product_id=&quot;my.image.product&quot;)</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;, **{&quot;SIZE&quot;: &quot;640,400&quot;})</span>
+<span class="sd">    Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(filename=&quot;my.image.product.png&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(product_id=&quot;my.image.product&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;, **{&quot;SIZE&quot;: &quot;640,400&quot;})</span>
 
-<span class="sd">     A plain string argument is ambiguous, and raises an exception:</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;)       # Looks understandable, but...</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product.jpeg&quot;)  # ... is this a product ID or file?</span>
-<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product_.jpeg&quot;) # This could be parsed ok, but...</span>
+<span class="sd">    A plain string argument is ambiguous, and raises an exception:</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;)       # Looks understandable, but...</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product.jpeg&quot;)  # ... is this a product ID or file?</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product_.jpeg&quot;) # This could be parsed as a file.</span>
 <span class="sd">       </span>
-<span class="sd">     This class is essential a string parser and storage for parsed variables.</span>
-<span class="sd">     This class is technically independent of server configurations </span>
-<span class="sd">     like system side paths. Especially, if does not verify that a </span>
-<span class="sd">     corresponding product generator directory and script exists.</span>
+<span class="sd">    This class is essentially a string parser and storage for parsed variables.</span>
+<span class="sd">    It is technically independent of server configurations </span>
+<span class="sd">    like system side paths. Especially, it does not check if </span>
+<span class="sd">    product generation directories or scripts exist.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -346,6 +348,7 @@
 
         <span class="k">return</span> <span class="n">env</span></div>
 
+    
 <div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Configure a product.</span>
 

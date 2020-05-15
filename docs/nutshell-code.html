@@ -236,10 +236,11 @@ This is always logged.</p>
 <dl class="class">
 <dt id="nutshell.product.Info">
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stores basic product information: product id, timestamp (if applicable)
-file format, and specific product parameters.</p>
-<blockquote>
-<div><dl class="docutils">
+<dd><p>Stores product information, especially <code class="docutils literal"><span class="pre">PRODUCT_ID</span></code>, 
+<code class="docutils literal"><span class="pre">TIMESTAMP</span></code> (if applicable), file <code class="docutils literal"><span class="pre">FORMAT</span></code>, 
+and product-specific free parameters.</p>
+<p><strong>Parameters</strong> handled as with Info.set().</p>
+<dl class="docutils">
 <dt>Examples of allowed calls, with <code class="docutils literal"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.image.product.png&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>
@@ -250,16 +251,15 @@ file format, and specific product parameters.</p>
 <dt>A plain string argument is ambiguous, and raises an exception:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>       <span class="c1"># Looks understandable, but...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product.jpeg&quot;</span><span class="p">)</span>  <span class="c1"># ... is this a product ID or file?</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product_.jpeg&quot;</span><span class="p">)</span> <span class="c1"># This could be parsed ok, but...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product_.jpeg&quot;</span><span class="p">)</span> <span class="c1"># This could be parsed as a file.</span>
 </pre></div>
 </div>
 </dd>
 </dl>
-<p>This class is essential a string parser and storage for parsed variables.
-This class is technically independent of server configurations 
-like system side paths. Especially, if does not verify that a 
-corresponding product generator directory and script exists.</p>
-</div></blockquote>
+<p>This class is essentially a string parser and storage for parsed variables.
+It is technically independent of server configurations 
+like system side paths. Especially, it does not check if 
+product generation directories or scripts exist.</p>
 <dl class="classmethod">
 <dt id="nutshell.product.Info.get_arg_parser">
 <em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_arg_parser" title="Permalink to this definition">¶</a></dt>
