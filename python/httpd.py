@@ -211,7 +211,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         product_name = querydata.get('product', None)
         product_info = None 
         if (product_name):
-            product_info = product.Info(product_name)
+            product_info = product.Info(filename = product_name)
             actions = querydata.get('request', ["MAKE"])
             directives      = querydata['directives']
         else:

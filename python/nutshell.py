@@ -213,7 +213,7 @@ class ProductServer:
                     pr.set_status(HTTPStatus.OK)
                 else:
                     pr.product_obj  = '' # BUSY
-                    pr.log.warning('BUSY') # TODO riase (prevent deletion)
+                    pr.log.warning('BUSY (empty file found)') # TODO riase (prevent deletion)
                     pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
                 return pr
         else:
@@ -262,7 +262,7 @@ class ProductServer:
             for i in pr.inputs:
                 #pr.log.info('INPUTFILE: ' + i)
                 input = pr.inputs[i] # <filename>.h5
-                input_prod_info = product.Info(input)
+                input_prod_info = product.Info(filename = input)
                 pr.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
                 r = self.make_request(input_prod_info, ['MAKE'], [], pr.log.getChild("input[{0}]".format(i)))
                 if (r.path):
