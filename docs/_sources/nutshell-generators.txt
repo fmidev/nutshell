@@ -26,8 +26,8 @@ Product ID's, files and directories
 
 Each product generator is associated with a unique *product id* consisting of lowercase literals and periods,
 for example ``test.image.product``.
-Respective directory names will be derived from the product id, replacing periods with slashes, 
-for example: ``test/image/product``.
+The system will automatically use directory derievd from the product id, replacing periods with slashes;
+for the example case: ``test/image/product``.
 
 In NutShell, output files with dynamic content have syntax::
 

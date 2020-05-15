@@ -67,10 +67,12 @@ NutShell recycles some standard HTTP status codes [1]_ [2]_ for
 communicating success or failure on operations. 
 Many of those codes can be also used by the generator scripts
 in describing errors or other exceptional conditions back 
-to the hosting system, NutShell. 
- 
-Useful HTTP codes
------------------
+to the hosting system, NutShell.
+
+.. _http-codes:
+
+Appicable HTTP codes
+--------------------
 
 ==== ========================== ========== ==========
 Code  Standard Enum Name        NutShell   Comment

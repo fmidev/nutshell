@@ -16,13 +16,9 @@ NutShell Code
 .. automodule:: nutshell.product
    :members:
       
-Escape from Python -- nutshell.shell
-------------------------------------
 .. automodule:: nutshell.shell
    :members:
 
-Utilities -- nutshell.nutils
-----------------------------
 .. automodule:: nutshell.nutils
    :members:
 
