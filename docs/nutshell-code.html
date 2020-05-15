@@ -242,40 +242,34 @@ file format, and specific product parameters.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">param product:</th><td class="field-body"><p class="first">product id string, requires explicit kwargs</p>
-</td>
+<tr class="field-odd field"><th class="field-name">param product:</th><td class="field-body">product id string, requires explicit kwargs</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">param product_id:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">product id string.</p>
-</td>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">product id string.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">param filename:</th><td class="field-body"><p class="first">product description presented as a filename</p>
-</td>
+<tr class="field-odd field"><th class="field-name">param filename:</th><td class="field-body">product description presented as a filename</td>
 </tr>
-<tr class="field-even field"><th class="field-name">returns:</th><td class="field-body"><dl class="first last docutils">
-<dt>instance (possibly incomplete, to be adjusted with separate </dt>
-<dd><p class="first last">method calls)</p>
-</dd>
-<dt>Examples of allowed calls:</dt>
-<dd><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.test.product&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="n">product_id</span><span class="p">,</span> <span class="p">{</span><span class="n">args</span><span class="o">...</span><span class="p">})</span>   <span class="c1"># exaple: info.set(&quot;&quot;)</span>
-</pre></div>
-</div>
-<dl class="last docutils">
-<dt>Plain string arguments are forbidden:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span><span class="p">))</span>     <span class="c1"># example: info.set(&quot;image.product.png&quot;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">&lt;</span><span class="n">product_id</span><span class="o">&gt;</span><span class="p">))</span>   <span class="c1"># example: info.set(image.product&quot;)</span>
-</pre></div>
-</div>
-</dd>
-</dl>
-</dd>
-</dl>
-</td>
+<tr class="field-even field"><th class="field-name">returns:</th><td class="field-body">instance (possibly incomplete, to be adjusted with separate 
+method calls)</td>
 </tr>
 </tbody>
 </table>
+<dl class="docutils">
+<dt>Examples of allowed calls, with <code class="docutils literal"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.image.product.png&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;SIZE&quot;</span><span class="p">:</span> <span class="s2">&quot;640,400&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd>
+<dt>A plain string argument is ambiguous, and raises an exception:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>       <span class="c1"># Looks understandable, but...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product.jpeg&quot;</span><span class="p">)</span>  <span class="c1"># ... is this a product ID or file?</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product_.jpeg&quot;</span><span class="p">)</span> <span class="c1"># This could be parsed, but...</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <p>This class is essential a string parser and storage for parsed variables.
 This class is technically independent of server configurations 
 like system side paths. Especially, if does not verify that a 

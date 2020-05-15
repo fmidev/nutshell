@@ -112,14 +112,15 @@
 <span class="sd">         method calls) </span>
 <span class="sd">          </span>
 <span class="sd">          </span>
-<span class="sd">      Examples of allowed calls:</span>
-<span class="sd">            &gt;&gt;&gt; p = nutshell.product.Info(filename=&quot;my.test.product&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; set(product_id=&quot;...&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; set(product_id, {args...})   # exaple: info.set(&quot;&quot;)</span>
+<span class="sd">     Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(filename=&quot;my.image.product.png&quot;)</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(product_id=&quot;my.image.product&quot;)</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;, **{&quot;SIZE&quot;: &quot;640,400&quot;})</span>
 
-<span class="sd">        Plain string arguments are forbidden:</span>
-<span class="sd">            &gt;&gt;&gt; set(str(&lt;filename&gt;))     # example: info.set(&quot;image.product.png&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; set(str(&lt;product_id&gt;))   # example: info.set(image.product&quot;)</span>
+<span class="sd">     A plain string argument is ambiguous, and raises an exception:</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;)       # Looks understandable, but...</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product.jpeg&quot;)  # ... is this a product ID or file?</span>
+<span class="sd">         &gt;&gt;&gt; p = Info(&quot;my.image.product_.jpeg&quot;) # This could be parsed, but...</span>
 <span class="sd">       </span>
 <span class="sd">     This class is essential a string parser and storage for parsed variables.</span>
 <span class="sd">     This class is technically independent of server configurations </span>
