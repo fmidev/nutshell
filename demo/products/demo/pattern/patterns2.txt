@@ -1,0 +1,55 @@
+Tag 	Mode 	Description 	Notes
+BRICKS 	R 	brick pattern, 16x16 	BRICKS
+CHECKERBOARD 	R 	checkerboard pattern, 30x30 	CHECKERBOARD
+CIRCLES 	R 	circles pattern, 16x16 	CIRCLES
+CROSSHATCH 	R 	crosshatch pattern, 8x4 	CROSSHATCH
+CROSSHATCH30 	R 	crosshatch pattern with lines at 30 degrees, 8x4 	CROSSHATCH30
+CROSSHATCH45 	R 	crosshatch pattern with lines at 45 degrees, 8x4 	CROSSHATCH45
+FISHSCALES 	R 	fish scales pattern, 16x8 	FISHSCALES
+GRAY0 	R 	0% intensity gray, 32x32 	GRAY0
+GRAY5 	R 	5% intensity gray, 32x32 	GRAY5
+GRAY10 	R 	10% intensity gray, 32x32 	GRAY10
+GRAY15 	R 	15% intensity gray, 32x32 	GRAY15
+GRAY20 	R 	20% intensity gray, 32x32 	GRAY20
+GRAY25 	R 	25% intensity gray, 32x32 	GRAY25
+GRAY30 	R 	30% intensity gray, 32x32 	GRAY30
+GRAY35 	R 	35% intensity gray, 32x32 	GRAY35
+GRAY40 	R 	40% intensity gray, 32x32 	GRAY40
+GRAY45 	R 	45% intensity gray, 32x32 	GRAY45
+GRAY50 	R 	50% intensity gray, 32x32 	GRAY50
+GRAY55 	R 	55% intensity gray, 32x32 	GRAY55
+GRAY60 	R 	60% intensity gray, 32x32 	GRAY60
+GRAY65 	R 	65% intensity gray, 32x32 	GRAY65
+GRAY70 	R 	70% intensity gray, 32x32 	GRAY70
+GRAY75 	R 	75% intensity gray, 32x32 	GRAY75
+GRAY80 	R 	80% intensity gray, 32x32 	GRAY80
+GRAY85 	R 	85% intensity gray, 32x32 	GRAY85
+GRAY90 	R 	90% intensity gray, 32x32 	GRAY90
+GRAY95 	R 	95% intensity gray, 32x32 	GRAY95
+GRAY100 	R 	100% intensity gray, 32x32 	GRAY100
+HEXAGONS 	R 	hexagon pattern, 30x18 	HEXAGONS
+HORIZONTAL 	R 	horizontal line pattern, 8x4 	HORIZONTAL
+HORIZONTAL2 	R 	horizontal line pattern, 8x8 	HORIZONTAL2
+HORIZONTAL3 	R 	horizontal line pattern, 9x9 	HORIZONTAL3
+HORIZONTALSAW 	R 	horizontal saw-tooth pattern, 16x8 	HORIZONTALSAW
+HS_BDIAGONAL 	R 	backward diagonal line pattern (45 degrees slope), 8x8 	HS_BDIAGONAL
+HS_CROSS 	R 	cross line pattern, 8x8 	HS_CROSS
+HS_DIAGCROSS 	R 	diagonal line cross pattern (45 degrees slope), 8x8 	HS_DIAGCROSS
+HS_FDIAGONAL 	R 	forward diagonal line pattern (45 degrees slope), 8x8 	HS_FDIAGONAL
+HS_HORIZONTAL 	R 	horizontal line pattern, 8x8 	HS_HORIZONTAL
+HS_VERTICAL 	R 	vertical line pattern, 8x8 	HS_VERTICAL
+LEFT30 	R 	forward diagonal pattern (30 degrees slope), 8x4 	LEFT0
+LEFT45 	R 	forward diagonal line pattern (45 degrees slope), 8x8 	LEFT45
+LEFTSHINGLE 	R 	left shingle pattern, 24x24 	LEFTSHINGLE
+OCTAGONS 	R 	octagons pattern, 16x16 	OCTAGONS
+RIGHT30 	R 	backward diagonal line pattern (30 degrees) 8x4 	RIGHT30
+RIGHT45 	R 	backward diagonal line pattern (30 degrees), 8x8 	RIGHT45
+RIGHTSHINGLE 	R 	right shingle pattern, 24x24 	RIGHTSHINGLE
+SMALLFISHSCALES 	R 	small fish scales pattern, 8x8 	SMALLFISHSCALES
+VERTICAL 	R 	vertical line pattern, 8x8 	VERTICAL
+VERTICAL2 	R 	vertical line pattern, 8x8 	VERTICAL2
+VERTICAL3 	R 	vertical line pattern, 9x9 	VERTICAL3
+VERTICALBRICKS 	R 	vertical brick pattern, 16x16 	VERTICALBRICKS
+VERTICALLEFTSHINGLE 	R 	vertical left shingle pattern, 24x24 	VERTICALLEFTSHINGLE
+VERTICALRIGHTSHINGLE 	R 	vertical right shingle pattern, 24x24 	VERTICALRIGHTSHINGLE
+VERTICALSAW 	R 	vertical saw-tooth pattern, 8x16 	VERTICALSAW
