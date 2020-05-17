@@ -45,7 +45,7 @@ OUTDIR=${OUTDIR:-'.'}
 OUTFILE=${OUTFILE:-"image.pattern.png"}
 
 #cmd="convert -size 8x8 pattern:gray50 -filter Point -resize ${WIDTH},${HEIGHT} $OUTDIR/$OUTFILE"
-cmd="convert -size ${WIDTH}x${HEIGHT} pattern:${PATTERN} $OUTDIR/$OUTFILE"
+cmd="convert -size ${WIDTH}x${HEIGHT} pattern:${PATTERN//-/_} $OUTDIR/$OUTFILE"
 
 echo "LOG: executing: $cmd"
 
