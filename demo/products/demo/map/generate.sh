@@ -52,14 +52,21 @@ fi
 BBox=( ${BBOX//,/ } )
 
 
-WIDTH=${WIDTH:-'600'}
-HEIGHT=${HEIGHT:-$WIDTH}
-SIZE=${SIZE:-"$WIDTH,$HEIGHT"}
-#SIZE=${SIZE:-'600,800'}
-Size=( ${SIZE/,/ } )
-WIDTH=${WIDTH:-${Size[0]}}
-HEIGHT=${HEIGHT:-${Size[1]}}
-HEIGHT=${HEIGHT:-$WIDTH}
+SIZE=${SIZE:-"256,256"}
+SIZE=( ${SIZE/,/ } )
+WIDTH=${WIDTH:-${SIZE[0]}}   
+HEIGHT=${HEIGHT:-${SIZE[1]}} 
+HEIGHT=${HEIGHT:-$WIDTH} 
+SIZE="${WIDTH},${HEIGHT}"
+
+#WIDTH=${WIDTH:-'600'}
+#HEIGHT=${HEIGHT:-$WIDTH}
+#SIZE=${SIZE:-"$WIDTH,$HEIGHT"}
+#
+#Size=( ${SIZE/,/ } )
+#WIDTH=${WIDTH:-${Size[0]}}
+#HEIGHT=${HEIGHT:-${Size[1]}}
+#HEIGHT=${HEIGHT:-$WIDTH}
 
 #BGCOLOR=${BGCOLOR:-'0xc0d0f0'}
 # If not given, will be transparent
