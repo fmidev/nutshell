@@ -61,7 +61,7 @@ class Task:
             
         self.returncode = 0
             
-    def run(self):
+    def run(self, log_basename=None):
         """Runs a task object containing task.script and task.stdout"""
         
         
@@ -82,23 +82,35 @@ class Task:
         stdout,stderr = p.communicate()
         self.returncode = p.returncode        
 
+        # TODO: test also stderr
+        if (log_basename):
+            log_basename = str(log_basename)
         if (stdout):
-            stdout = stdout.decode(encoding='UTF-8')
+            self.stdout = stdout.decode(encoding='UTF-8').strip()
             if (p.returncode != 0):
-                lines = stdout.strip().split('\n')
+                lines = self.stdout.split('\n')
                 self.error_info = lines.pop()
-                self.log.warn(self.error_info)
+                self.log.warn('Errors? Return code: {0}'.format(p.returncode))
                 try:             
                     status = int(self.error_info.split(' ')[0])
                     self.status = HTTPStatus(status)
+                    if (log_basename):
+                        log_stdout = Path(log_basename + ".stdout")
+                        self.log.warn('Dumping log: {0}'.format(log_stdout))
+                        log_stdout.write_text(self.stdout)
                 except ValueError:
-                    self.log.warn('Not HTTP error code: {0} '.format(self.status))
+                    self.log.warn('Could not extract numeric HTTP error code from: {0} '.format(self.error_info))
                     self.status = HTTPStatus.CONFLICT
+                #except FileError:
+                #    self.log.error('Failed writing log: {0} '.format(log_stdout))
+                    
         if (stderr):
-            stderr = stderr.decode(encoding='UTF-8')
-        self.stdout = stdout  
-        self.stderr = stderr
-
+            self.stderr = stderr.decode(encoding='UTF-8')
+            if (log_basename):
+                log_stderr = Path(log_basename + ".stderr")
+                self.log.warn('Dumping log: {0}'.format(log_stderr))
+                log_stderr.write_text(self.stderr)
+        
 
         
 if __name__ == '__main__':

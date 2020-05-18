@@ -167,36 +167,45 @@ class ProductServer:
         # TODO generalize (how)
         log.debug(input_query.env)
         
-        input_query.run()
+        input_query.run(log_basename = input_query) # ??
      
         if (input_query.returncode == 0): 
-            nutils.read_conf_text(input_query.stdout.split('\n'), input_query.inputs)
-            log.info(input_query.inputs)
+            log.info(type(input_query.stdout))
+            if (input_query.stdout == ''):
+                log.warning("empty stdout of input declaration script {0}:".format(input_query.script))
+            else:
+                nutils.read_conf_text(input_query.stdout.split('\n'), input_query.inputs)
+                log.info(input_query.inputs)
         else:
             log.warning("executing failed with error code={0}: {1} ".format(input_query.returncode, input_query.script))
-            log.warning(input_query.error_info)
+            log.warning(input_query.stdout)
+            log.warning(input_query.stderr)
+            log.warning(input_query.log)
         #    else:
         #        log.critical("input script reported no error info")
                        
         return input_query
     
     def retrieve_inputs(self, product_generator):
-        product_generator.log.debug('Retrieving inputs for: ' + str(product_generator.path.name))
         inputs = {}
-        for i in product_generator.inputs:
-            #product_generator.log.info('INPUTFILE: ' + i)
-            input = product_generator.inputs[i] # <filename>.h5
-            input_prod_info = product.Info(filename = input)
-            product_generator.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
-            r = self.make_request(input_prod_info, ['MAKE'], [], product_generator.log.getChild("input[{0}]".format(i)))
-            if (r.path):
-                inputs[i] = str(r.path) # sensitive
-                product_generator.log.debug('Success: ' + str(r.path))
-            else:
-                product_generator.log.warning('SKIPPED: ' + i) 
-        # warn if  none succeeded?
+        if (product_generator.inputs):
+            product_generator.log.debug('Retrieving inputs for: ' + str(product_generator.path.name))
+            for i in product_generator.inputs:
+                #product_generator.log.info('INPUTFILE: ' + i)
+                input = product_generator.inputs[i] # <filename>.h5
+                #product_generator.error(i, input)
+                product_generator.log.info('Make input: {0} ({1})'.format(i, input))
+                input_prod_info = product.Info(filename = input)
+                product_generator.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
+                r = self.make_request(input_prod_info, ['MAKE'], [], product_generator.log.getChild("input[{0}]".format(i)))
+                if (r.path):
+                    inputs[i] = str(r.path) # sensitive
+                    product_generator.log.debug('Success: ' + str(r.path))
+                else:
+                    product_generator.log.warning('SKIPPED: ' + i) 
+            if (not inputs):
+                product_generator.log.warning('All input queries returned empty') 
         product_generator.inputs = inputs
-        #product_generator.log.extend2(product_generator.inputs , 'INPUTPATH: ')
         product_generator.env['INPUTKEYS'] = ','.join(product_generator.inputs.keys())
         product_generator.env.update(product_generator.inputs)
 
@@ -273,10 +282,13 @@ class ProductServer:
             
         # Runs input.sh
         if ('MAKE' in pr.actions) or ('INPUTS' in pr.actions):
-            input_info = self.get_input_list(pr.product_info, pr.directives, pr.log.getChild('get_input_list'))
+            # input_info = self.get_input_list(pr.product_info, pr.directives, pr.log.getChild('get_input_list'))
+            input_info = pr.get_input_list()
             if (input_info.returncode == 0):
+                #pr.log.debug('Input script exists')
                 pr.inputs = input_info.inputs
-            else:
+            else: 
+                pr.log.debug('Input scipt problem')
                 #pr.set_status(HTTPStatus.CONFLICT)
                 pr.set_status(HTTPStatus.PRECONDITION_FAILED)
                 pr.remove_files()
@@ -306,10 +318,18 @@ class ProductServer:
             pr.log.info('Generating:  {0}'.format(pr.path))
             pr.log.debug('Environment: {0}'.format(pr.env))
             #self.run_generator(pr, pr.env)
-            pr.run()
+            pr.run(log_basename = pr.path)
+
+            if ('DEBUG' in pr.directives) or ('LOG' in pr.directives):
+                logfile = Path(str(pr.path) + '.log')
+                pr.log.info('Saving log: {0} '.format(logfile))
+                try:
+                    logfile.write_text(pr.stdout) #.decode(encoding='UTF-8'))            
+                except:
+                    pr.log.warn("Saving log failed")               
 
             if (pr.returncode != 0):
-                pr.log.error("generator failed (retrun code={0}".format(pr.returncode))
+                pr.log.error("generator failed (return code={0})".format(pr.returncode))
                 pr.remove_files()
                 return pr
                 
@@ -340,13 +360,6 @@ class ProductServer:
             except:
                  pr.log.warn("Linking file failed")               
  
-            if ('DEBUG' in pr.directives) or ('LOG' in pr.directives):
-                logfile = Path(str(pr.path) + '.log')
-                pr.log.info('Saving log: {0} '.format(logfile))
-                try:
-                    logfile.write_text(pr.stdout) #.decode(encoding='UTF-8'))            
-                except:
-                    pr.log.warn("Saving log failed")               
             
             pr.log.info('Success: {0}'.format(pr.path))
               
