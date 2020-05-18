@@ -312,11 +312,13 @@ class ProductServer:
             pr.log.info('Generating:  {0}'.format(pr.path))
             pr.log.debug('Environment: {0}'.format(pr.env))
 
-            logfile_level = logging.DEBUG #ERROR
-            if (DEBUG) or (LOG): 
-                logfile_level = logging.DEBUG
+            #logfile_level = logging.DEBUG #ERROR
+            #if (DEBUG) or (LOG): 
+            #    logfile_level = logging.DEBUG
             
-            pr.run(logfile_basename = str(pr.path)+'mika', logfile_level = logfile_level)
+            #pr.run(logfile_basename = str(pr.path)+'-'+self.SHELL_GENERATOR_SCRIPT, 
+            #       logfile_level = logfile_level)
+            pr.run2()
 
             if (pr.returncode != 0):
                 pr.log.error("generator failed (return code={0})".format(pr.returncode))
