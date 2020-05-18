@@ -227,33 +227,47 @@ class ProductServer:
         #product_request = self.ProductRequest(self, product_info, actions, directives, log)
         # Consider rename to Generator
         pr = product.Generator(self, product_info, actions, directives, log)
+
+        MAKE   = ('MAKE'   in pr.actions)     
+        INPUTS = ('INPUTS' in pr.actions)     
+        DELETE = ('DELETE' in pr.actions)     
+        CHECK  = ('CHECK'  in pr.actions)     
+
+        LOG =    ('LOG'    in pr.directives)        
+        DEBUG =  ('DEBUG'  in pr.directives)        
+        LATEST = ('LATEST' in pr.directives)  
+        LINK =   ('LINK'   in pr.directives)  
         
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
-            if ('DELETE' in pr.actions):
+            if (DELETE):
                 pr.remove_files()
                 pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
-            elif ('MAKE' in pr.actions): # PATH_ONLY
+            elif (MAKE): # PATH_ONLY
                 stat = pr.path.stat()
+                age_mins = (time.time() - stat.st_mtime) / 60
                 if (stat.st_size > 0): # Non-empty
                     pr.product_obj = pr.path
-                    pr.log.info('File found: ' + str(pr.path))
-                    pr.set_status(HTTPStatus.OK)
-                    return pr
-                elif (time.time() - stat.st_mtime) > 600: # 10mins
-                    pr.log.warn("Empty file found, but over 5 mins old...")
+                    pr.log.info('File found (age {1} ): {0}'.format(pr.path, age_mins))
+                    if (not CHECK):
+                        pr.set_status(HTTPStatus.OK)
+                        return pr
+                elif (age_mins > 10): # 10mins
+                    pr.log.warn("Empty file found, but over 10 mins old...")
                 else:    
                     pr.product_obj  = '' # BUSY
                     pr.log.warning('BUSY (empty file found)') # TODO riase (prevent deletion)
                     #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
-                    pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
-                    return pr
+                    if (not CHECK):
+                        pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
+                        return pr
         else:
             pr.log.debug('File not found: {0}'.format(pr.path))
             if (product_info.TIMESTAMP == 'LATEST'):
                 pr.log.warn("LATEST-file not found, returning")
-                pr.set_status(HTTPStatus.NOT_FOUND) 
-                return pr
+                if (not CHECK):
+                    pr.set_status(HTTPStatus.NOT_FOUND) 
+                    return pr
 
         # only check at this point
         if (pr.script.exists()):
@@ -262,71 +276,41 @@ class ProductServer:
             pr.log.warning('Generator script not found: {0}'.format(pr.script))
             # Consider case of copied valid product (without local generator)            
             pr.path = ''
-            pr.set_status(HTTPStatus.NOT_IMPLEMENTED) # Not Implemented
-            return pr
+            if (not CHECK):
+                pr.set_status(HTTPStatus.NOT_IMPLEMENTED) # Not Implemented
+                return pr
         
 
         # TODO: if not stream?
-        #pr.env = {}
-        if ('MAKE' in pr.actions):
+        if (MAKE):
             pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
             self.ensure_output_dir(pr.path_tmp.parent)
             self.ensure_output_dir(pr.path.parent)
-
-            # what about true ENV?
-            #pr.env = pr.product_info.get_param_env() # {})
-            #pr.env['OUTDIR']  = str(pr.path_tmp.parent)
-            #pr.env['OUTFILE'] = pr.path.name
-            #os.mknod(pr.path) # = touch
             pr.path.touch()
             
         # Runs input.sh
-        if ('MAKE' in pr.actions) or ('INPUTS' in pr.actions):
-            # input_info = self.get_input_list(pr.product_info, pr.directives, pr.log.getChild('get_input_list'))
+        if (MAKE or INPUTS or CHECK):
+            pr.log.debug('Querying input list (dependencies)')
             input_info = pr.get_input_list()
-            if (input_info.returncode == 0):
-                #pr.log.debug('Input script exists')
-                pr.inputs = input_info.inputs
-            else: 
-                pr.log.debug('Input scipt problem')
-                #pr.set_status(HTTPStatus.CONFLICT)
-                pr.set_status(HTTPStatus.PRECONDITION_FAILED)
-                pr.remove_files()
-                return pr
-
-        if ('MAKE' in pr.actions): 
-            self.retrieve_inputs(pr)
-#            pr.log.debug('Retrieving inputs for: ' + str(pr.path.name))
-#            inputs = {}
-#            for i in pr.inputs:
-#                input = pr.inputs[i] # <filename>.h5
-#                input_prod_info = product.Info(filename = input)
-#                pr.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
-#                r = self.make_request(input_prod_info, ['MAKE'], [], pr.log.getChild("input[{0}]".format(i)))
-#                if (r.path):
-#                    inputs[i] = str(r.path) # sensitive
-#                    pr.log.debug('Success: ' + str(r.path))
-#                else:
-#                    pr.log.warning('SKIPPED: ' + i) 
-#            # warn if  none succeeded?
-#            pr.inputs = inputs
-#            pr.env['INPUTKEYS'] = ','.join(pr.inputs.keys())
-#            pr.env.update(pr.inputs)
+            if (input_info.returncode != 0):
+                pr.log.debug('Input scipt problem, return code: {0}'.format(input_info.returncode))
+                if (not CHECK):
+                    pr.set_status(HTTPStatus.PRECONDITION_FAILED)
+                    pr.remove_files()
+                    return pr
+            if (MAKE): 
+                self.retrieve_inputs(pr)
 
         # MAIN
-        if ('MAKE' in pr.actions):
+        if (MAKE):
             pr.log.info('Generating:  {0}'.format(pr.path))
             pr.log.debug('Environment: {0}'.format(pr.env))
-            #self.run_generator(pr, pr.env)
-            pr.run(log_basename = pr.path)
 
-            if ('DEBUG' in pr.directives) or ('LOG' in pr.directives):
-                logfile = Path(str(pr.path) + '.log')
-                pr.log.info('Saving log: {0} '.format(logfile))
-                try:
-                    logfile.write_text(pr.stdout) #.decode(encoding='UTF-8'))            
-                except:
-                    pr.log.warn("Saving log failed")               
+            logfile_level = logging.ERROR
+            if (DEBUG) or (LOG): 
+                logfile_level = logging.DEBUG
+            
+            pr.run(logfile_basename = pr.path, logfile_level = logfile_level)
 
             if (pr.returncode != 0):
                 pr.log.error("generator failed (return code={0})".format(pr.returncode))
@@ -348,12 +332,12 @@ class ProductServer:
             pr.set_status(HTTPStatus.OK)
                 
             try:
-                if ('LINK' in pr.directives): #and pr.product_info.TIMESTAMP:
+                if (LINK): #and pr.product_info.TIMESTAMP:
                     pr.log.info('Linking: {0}'.format(pr.path_static))
                     self.ensure_output_dir(pr.path_static.parent)
                     nutils.symlink(pr.path_static, pr.path)
          
-                if ('LATEST' in pr.directives):
+                if (LATEST):
                     pr.log.info('LATEST: {0} '.format(pr.path_latest))
                     self.ensure_output_dir(pr.path_latest.parent)
                     nutils.symlink(pr.path_latest, pr.path, True)

@@ -61,8 +61,16 @@ class Task:
             
         self.returncode = 0
             
-    def run(self, log_basename=None):
-        """Runs a task object containing task.script and task.stdout"""
+    def run(self, logfile_basename=None, logfile_level = logging.ERROR):
+        """Runs a task object containing task.script and task.stdout
+        
+        :param logfile_basename: Leading part of logs, '.err' and '.out' will be added.
+        :param logfile_save_thereshold: save stderr and stdout to logs, if
+            this threshold is at least logging.ERROR and logging.DEBUG, respecively 
+
+        :returns: Return code of the process. Will be also stored to ``self``.
+        
+        """
         
         
         p = subprocess.Popen(str(self.script),
@@ -83,8 +91,8 @@ class Task:
         self.returncode = p.returncode        
 
         # TODO: test also stderr
-        if (log_basename):
-            log_basename = str(log_basename)
+        if (logfile_basename):
+            logfile_basename = str(logfile_basename)
         if (stdout):
             self.stdout = stdout.decode(encoding='UTF-8').strip()
             if (p.returncode != 0):
@@ -94,8 +102,8 @@ class Task:
                 try:             
                     status = int(self.error_info.split(' ')[0])
                     self.status = HTTPStatus(status)
-                    if (log_basename):
-                        log_stdout = Path(log_basename + ".stdout")
+                    if (logfile_basename) and (logfile_level <= logging.DEBUG):
+                        log_stdout = Path(logfile_basename + ".stdout")
                         self.log.warn('Dumping log: {0}'.format(log_stdout))
                         log_stdout.write_text(self.stdout)
                 except ValueError:
@@ -106,16 +114,18 @@ class Task:
                     
         if (stderr):
             self.stderr = stderr.decode(encoding='UTF-8')
-            if (log_basename):
-                log_stderr = Path(log_basename + ".stderr")
+            if (logfile_basename) and (logfile_level <= logging.ERROR):
+                log_stderr = Path(logfile_basename + ".stderr")
                 self.log.warn('Dumping log: {0}'.format(log_stderr))
                 log_stderr.write_text(self.stderr)
+                
+        return  p.returncode  
         
 
         
 if __name__ == '__main__':
 
-    logger = logging.getLogger('NutShell')
+    logger = logging.getLogger('Shell')
     logger.setLevel(logging.INFO)
     
     #parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
