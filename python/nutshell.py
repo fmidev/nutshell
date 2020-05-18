@@ -448,7 +448,9 @@ if __name__ == '__main__':
 
     if (options.CONF):
         product_server.read_conf(options.CONF)
-
+    else:
+        product_server.read_conf("nutshell.cnf", False)  # Lenient
+        
     #if (options.VERBOSE > 4):
     #nutils.print_dict(product_server.get_status())
     logger.debug(product_server.get_status())
