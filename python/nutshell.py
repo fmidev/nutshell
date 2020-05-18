@@ -109,11 +109,17 @@ class ProductServer:
             self.logger.warning("Conf file not found: " + conffile)
             #print ("Conf file not found: ", conffile)  
 
+    # Rename... Missleading name.
     def get_status(self):  
         return nutils.get_entries(self)
+
+    def get_cache_root(self):
+        """Return the abolute path (Path) to CACHE_ROOT directory. """
+        return Path(self.CACHE_ROOT).absolute()
     
     def get_product_dir(self, product_info):
-        """Returns directory containing product generator script (generate.sh) and possible configurations etc"""
+        """Return the directory containing product generator script 
+            (generate.sh) and possible configurations etc"""
         return product_info.ID.replace('.', os.sep)
     
     def get_time_dir(self, timestamp):
@@ -206,7 +212,7 @@ class ProductServer:
             if (not inputs):
                 product_generator.log.warning('All input queries returned empty') 
         product_generator.inputs = inputs
-        product_generator.env['INPUTKEYS'] = ','.join(product_generator.inputs.keys())
+        product_generator.env['INPUTKEYS'] = ','.join(sorted(product_generator.inputs.keys()))
         product_generator.env.update(product_generator.inputs)
 
 
@@ -245,10 +251,10 @@ class ProductServer:
                 pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
             elif (MAKE): # PATH_ONLY
                 stat = pr.path.stat()
-                age_mins = (time.time() - stat.st_mtime) / 60
+                age_mins = round((time.time() - stat.st_mtime) / 60)
                 if (stat.st_size > 0): # Non-empty
                     pr.product_obj = pr.path
-                    pr.log.info('File found (age {1} ): {0}'.format(pr.path, age_mins))
+                    pr.log.info('File found (age {1}mins): {0}'.format(pr.path, age_mins))
                     if (not CHECK):
                         pr.set_status(HTTPStatus.OK)
                         return pr
@@ -306,11 +312,11 @@ class ProductServer:
             pr.log.info('Generating:  {0}'.format(pr.path))
             pr.log.debug('Environment: {0}'.format(pr.env))
 
-            logfile_level = logging.ERROR
+            logfile_level = logging.DEBUG #ERROR
             if (DEBUG) or (LOG): 
                 logfile_level = logging.DEBUG
             
-            pr.run(logfile_basename = pr.path, logfile_level = logfile_level)
+            pr.run(logfile_basename = str(pr.path)+'mika', logfile_level = logfile_level)
 
             if (pr.returncode != 0):
                 pr.log.error("generator failed (return code={0})".format(pr.returncode))

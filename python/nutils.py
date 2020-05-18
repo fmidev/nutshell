@@ -64,14 +64,21 @@ def print_dict(d, format='  {0}="{1}"\n'):
         print( dict_str(d.items(), format))
 
 
-def get_entries(obj):
+def get_entries(obj, regexp=None, dst_type=None):
     """Gets member values as a dictionary
     """    
+ 
+    if (type(regexp) == str):
+        regexp = re.compile(regexp)
+        
     entries = {}
     for i in dir(obj):
-        x = getattr(obj, i)
-        if (not callable(x)):
-            entries[i] = x
+        if (not regexp) or (regexp.match(i)):
+            x = getattr(obj, i)
+            if (dst_type):
+                x = dst_type(x)  # often str()           
+            if (not callable(x)):
+                entries[i] = x
     return entries
 
 def symlink(link, target, overwrite = False):

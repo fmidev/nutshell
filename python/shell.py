@@ -102,15 +102,16 @@ class Task:
                 try:             
                     status = int(self.error_info.split(' ')[0])
                     self.status = HTTPStatus(status)
-                    if (logfile_basename) and (logfile_level <= logging.DEBUG):
-                        log_stdout = Path(logfile_basename + ".stdout")
-                        self.log.warn('Dumping log: {0}'.format(log_stdout))
-                        log_stdout.write_text(self.stdout)
+                   
                 except ValueError:
                     self.log.warn('Could not extract numeric HTTP error code from: {0} '.format(self.error_info))
                     self.status = HTTPStatus.CONFLICT
                 #except FileError:
                 #    self.log.error('Failed writing log: {0} '.format(log_stdout))
+            if (logfile_basename):# and (logfile_level <= logging.DEBUG):
+                log_stdout = Path(logfile_basename + ".stdout")
+                self.log.warn('Dumping log: {0}'.format(log_stdout))
+                log_stdout.write_text(self.stdout)
                     
         if (stderr):
             self.stderr = stderr.decode(encoding='UTF-8')
