@@ -46,7 +46,8 @@ MINUTEDEC=$(( 10#$MINUTE * 100 / 60 ))
 #MINUTEDEC=
 HOURDEC=`printf '%s%02d' $HOUR  $(( 10#$MINUTE * 100 / 60 ))`
 if [ "$MODE" == 'clouds' ]; then
-    PRECENTAGE=$(( 50*HOUR%2 + MINUTEDEC/2 ))
+    #PRECENTAGE=$(( 50*HOUR%2 + MINUTEDEC/2 ))
+    PRECENTAGE=$(( MINUTEDEC ))
     roll="-roll +$(( PRECENTAGE * WIDTH / 100 ))+0"
 fi
 

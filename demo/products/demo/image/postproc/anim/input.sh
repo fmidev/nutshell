@@ -1,7 +1,10 @@
+#!/bin/bash
 
-
-INPUT_ID=${PRODUCT_ID%.anim}
-INPUT_PARAMS=${OUTFILE#*__}
+INPUT_ID=${PRODUCT%.anim}
+INPUT_PARAMS=${OUTFILE#__*}
+echo "# $INPUT_PARAMS"
+INPUT_PARAMS=${INPUT_PARAMS%.*}
+echo "# $INPUT_PARAMS"
 
 # Number of frames
 FRAMES=${FRAMES:-'8'}
