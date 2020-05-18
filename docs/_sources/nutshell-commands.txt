@@ -81,11 +81,13 @@ Code  Standard Enum Name        NutShell   Comment
 200  OK                         x          Request completed successfully
 404  Not Found                  x          File not found (Generator may exist)
 405  Method Not Allowed         x 
-409  Conflict                              Contradicting parameters 
+409  Conflict                              Contradicting parameters
+412  Precondition Failed                   Required input missing
 413  Payload Too Large                     Parameters imply expensive computation
 415  Unsupported Media Type                Unsupported file format
 416  Range Not Satisfiable                 Parameter underflow or overflow
 425  Too Early                             Input data not arrived
+500  Internal Server Error                 Generator script failed
 501  Not Implemented            x          Product generator not found
 503  Service Unavailable        x          Busy, come back later
 ==== ========================== ========== ==========

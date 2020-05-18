@@ -51,6 +51,7 @@ Contents
    nutshell-config
    nutshell-generators	      
    nutshell-variables
+   nutshell-demo  
    nutshell-code
 		
 

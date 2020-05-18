@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Search &mdash; NutShell 0.3 documentation</title>
+    <title>Overview &mdash; NutShell 0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,16 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/searchtools.js"></script>
     <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
-    <link rel="top" title="NutShell 0.3 documentation" href="index.html" />
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
-   
-
+    <link rel="top" title="NutShell 0.3 documentation" href="index.html" /> 
   </head>
   <body role="document">
     <div class="header-wrapper" role="banner">
@@ -59,29 +51,18 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1 id="search-documentation">Search</h1>
-  <div id="fallback" class="admonition warning">
-  <script type="text/javascript">$('#fallback').hide();</script>
-  <p>
-    Please activate JavaScript to enable the search
-    functionality.
-  </p>
-  </div>
-  <p>
-    From here you can search these documents. Enter your search
-    words into the box below and click "search". Note that the search
-    function will automatically search for all of the words. Pages
-    containing fewer words won't appear in the result list.
-  </p>
-  <form action="" method="get">
-    <input type="text" name="q" value="" />
-    <input type="submit" value="search" />
-    <span id="search-progress" style="padding-left: 10px"></span>
-  </form>
-  
-  <div id="search-results">
-  
-  </div>
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>Product requests can be sent to NutShell in three different ways:</p>
+<ol class="arabic simple">
+<li>Using the <strong>command line</strong>, especially for testing. For details, see <a class="reference internal" href="nutshell-usage.html#command-line-usage"><span>Command-line usage</span></a></li>
+<li>Most flexibly as a library inside your <strong>Python program</strong>. For details, see <span class="xref std std-ref">using-nutshell-api</span></li>
+<li>Providing access to others via a <strong>Web server</strong>.  For details, see <span class="xref std std-ref">nutshell-http-server</span></li>
+</ol>
+<p>These options are illustrated in the image below.</p>
+<img alt="_images/nutshell-scheme-dot.png" src="_images/nutshell-scheme-dot.png" />
+</div>
+
 
           </div>
         </div>
@@ -101,7 +82,7 @@
 
           <div role="search">
             <h3 style="margin-top: 1.5em;">Search</h3>
-            <form class="search" action="#" method="get">
+            <form class="search" action="search.html" method="get">
                 <input type="text" name="q" />
                 <input type="submit" value="Go" />
                 <input type="hidden" name="check_keywords" value="yes" />
@@ -126,6 +107,9 @@
               >index</a>
           </div>
           <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/demo.txt"
+                rel="nofollow">Show Source</a>
           </div>
         </div>
 

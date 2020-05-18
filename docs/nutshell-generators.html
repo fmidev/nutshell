@@ -96,7 +96,7 @@ In code, <span class="xref std std-ref">nutshell.product.INFO</span> parses the 
 <div class="section" id="setting-up-product-generators">
 <h2>Setting up product generators<a class="headerlink" href="#setting-up-product-generators" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Move to product generator root directory, <code class="docutils literal"><span class="pre">GENERATOR_ROOT</span></code> (See <span class="xref std std-ref">configuration-file</span>)</li>
+<li>Move to product generator root directory, <code class="docutils literal"><span class="pre">GENERATOR_ROOT</span></code>. (See <a class="reference internal" href="nutshell-config.html#configuration"><span>Configuration</span></a>.)</li>
 <li>Create shell script file <code class="docutils literal"><span class="pre">generate.sh</span></code> with execution permission.</li>
 <li>Preferably, use <strong>bash</strong>, starting the script with <code class="docutils literal"><span class="pre">#!/bin/bash</span></code></li>
 <li>Edit the script such that it finally writes its result in path <code class="docutils literal"><span class="pre">$OUTDIR/$OUTFILE</span></code></li>
@@ -123,8 +123,6 @@ fi
 <p>or more compactly:</p>
 <div class="highlight-python"><div class="highlight"><pre>WIDTH=${WIDTH:-&#39;640&#39;}
 HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
-
-:ref:`configuration`
 </pre></div>
 </div>
 </div>
@@ -135,18 +133,7 @@ HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
 </li>
 <li><p class="first">Design it to echo out lines of type <code class="docutils literal"><span class="pre">&lt;key&gt;=&lt;product&gt;</span></code> where
 <code class="docutils literal"><span class="pre">&lt;key&gt;</span></code> is the variable name you want to use for this input in
-<code class="docutils literal"><span class="pre">generate.sh</span></code> and <code class="docutils literal"><span class="pre">&lt;product&gt;</span></code> is an input product file to be retrieved.
-For example:</p>
-<div class="highlight-python"><div class="highlight"><pre>RADAR=${TIMESTAMP}_radar.rack_SITE=${SITE}.h5
-MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png
-</pre></div>
-</div>
-<dl class="docutils">
-<dt>Will print out::</dt>
-<dd><p class="first last">RADAR=202005121845_radar.rack_SITE=fikor.h5
-MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:fikor.png</p>
-</dd>
-</dl>
+<code class="docutils literal"><span class="pre">generate.sh</span></code> and <code class="docutils literal"><span class="pre">&lt;product&gt;</span></code> is an input product file to be retrieved.</p>
 </li>
 <li><dl class="first docutils">
 <dt>In addition, for debugging purposes, the script can echo out comment lines starting with &#8216;#&#8217; but it</dt>
@@ -155,9 +142,22 @@ MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:fikor.png</p>
 </dl>
 </li>
 </ol>
+<div class="section" id="example">
+<h4>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt>Consider a</dt>
+<dd>CLOUDINESS=${TIMESTAMP}_radar.rack_SITE=${SITE}.h5
+MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png</dd>
+</dl>
+<p>Will print out:</p>
+<div class="highlight-python"><div class="highlight"><pre>RADAR=202005121845_radar.rack_SITE=fikor.h5
+MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:fikor.png
+</pre></div>
+</div>
 <ul class="simple">
 <li>Must not be any of <span class="xref std std-ref">system variables</span></li>
 </ul>
+</div>
 </div>
 </div>
 </div>
@@ -183,6 +183,7 @@ MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:fikor.png</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
 </ul>
 

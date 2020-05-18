@@ -7,8 +7,10 @@
 NutShell Variables
 ==================
 
-Main variables
-==============
+.. _system-variables:
+
+System variables
+================
 
 =============== =========================== ==================
 Variable        Description                 Example  

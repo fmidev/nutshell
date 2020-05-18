@@ -116,8 +116,16 @@
             
         <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
             
-<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.shell.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Runs a task object containing task.script and task.stdout&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.shell.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile_basename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logfile_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs a task object containing task.script and task.stdout</span>
+<span class="sd">        </span>
+<span class="sd">        :param logfile_basename: Leading part of logs, &#39;.err&#39; and &#39;.out&#39; will be added.</span>
+<span class="sd">        :param logfile_save_thereshold: save stderr and stdout to logs, if</span>
+<span class="sd">            this threshold is at least logging.ERROR and logging.DEBUG, respecively </span>
+
+<span class="sd">        :returns: Return code of the process. Will be also stored to ``self``.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         
         <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">),</span>
@@ -137,28 +145,43 @@
         <span class="n">stdout</span><span class="p">,</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span>        
 
+        <span class="c1"># TODO: test also stderr</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logfile_basename</span><span class="p">):</span>
+            <span class="n">logfile_basename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">logfile_basename</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">stdout</span><span class="p">):</span>
-            <span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">lines</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">error_info</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_info</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Errors? Return code: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
                 <span class="k">try</span><span class="p">:</span>             
                     <span class="n">status</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_info</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+                   
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Not HTTP error code: {0} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Could not extract numeric HTTP error code from: {0} &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_info</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">CONFLICT</span>
+                <span class="c1">#except FileError:</span>
+                <span class="c1">#    self.log.error(&#39;Failed writing log: {0} &#39;.format(log_stdout))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logfile_basename</span><span class="p">):</span><span class="c1"># and (logfile_level &lt;= logging.DEBUG):</span>
+                <span class="n">log_stdout</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">logfile_basename</span> <span class="o">+</span> <span class="s2">&quot;.stdout&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Dumping log: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log_stdout</span><span class="p">))</span>
+                <span class="n">log_stdout</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+                    
         <span class="k">if</span> <span class="p">(</span><span class="n">stderr</span><span class="p">):</span>
-            <span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>  
-        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span></div></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logfile_basename</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">logfile_level</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log_stderr</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">logfile_basename</span> <span class="o">+</span> <span class="s2">&quot;.stderr&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Dumping log: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log_stderr</span><span class="p">))</span>
+                <span class="n">log_stderr</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                
+        <span class="k">return</span>  <span class="n">p</span><span class="o">.</span><span class="n">returncode</span>  </div></div>
+        
 
         
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;NutShell&#39;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;Shell&#39;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
     
     <span class="c1">#parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)</span>
@@ -197,6 +220,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
 </ul>
 

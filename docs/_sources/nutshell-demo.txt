@@ -1,0 +1,36 @@
+.. NutShell documentation, description . . image: : img/nutshell-scheme-dot.png
+
+
+====   
+Demo
+====
+
+NutShell installation package comes with a simple demo using HTTP server
+that can be started with::
+  
+  python3  -m nutshell.httpd -c nutshell-demo.cnf
+
+Demo "products"
+===============
+
+The demo, appearing as the start page (index.html) contains three sample products:
+  
+#. ``demo.image.ppmforge`` -- Linux/Unix program generating fractal clouds and planets
+#. ``demo.image.pattern`` -- Image Magick's convert creating built-in patterns 
+#. ``demo.maps`` -- Map creation based on open map data and WMS servers
+
+On the HTML demo page, one can change the values using HTML widgets and
+click ``Update`` to regenerate the respective image product. In addition,
+the filename (``$OUTFILE``) become updated in the first input widget.
+There, it can be further edited for testing purposes. The HTML widgets 
+on the page do not cover all the options supported by the generator scripts.
+Further, the scripts do not cover all the functionalities of the wrapped
+original programs.)
+
+All of these are NutShell independent; their generator scripts can be run 
+on command lines. For example:
+
+
+
+	   
+  

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Search &mdash; NutShell 0.3 documentation</title>
+    <title>Demo &mdash; NutShell 0.3 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,16 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/searchtools.js"></script>
     <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
     <link rel="top" title="NutShell 0.3 documentation" href="index.html" />
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
-   
-
+    <link rel="next" title="NutShell Code" href="nutshell-code.html" />
+    <link rel="prev" title="NutShell Variables" href="nutshell-variables.html" /> 
   </head>
   <body role="document">
     <div class="header-wrapper" role="banner">
@@ -43,6 +37,10 @@
         <div class="headertitle"><a
           href="index.html">NutShell 0.3 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="nutshell-variables.html" title="NutShell Variables"
+             accesskey="P">previous</a> |
+          <a href="nutshell-code.html" title="NutShell Code"
+             accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
           <a href="genindex.html" title="General Index"
@@ -59,29 +57,33 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1 id="search-documentation">Search</h1>
-  <div id="fallback" class="admonition warning">
-  <script type="text/javascript">$('#fallback').hide();</script>
-  <p>
-    Please activate JavaScript to enable the search
-    functionality.
-  </p>
-  </div>
-  <p>
-    From here you can search these documents. Enter your search
-    words into the box below and click "search". Note that the search
-    function will automatically search for all of the words. Pages
-    containing fewer words won't appear in the result list.
-  </p>
-  <form action="" method="get">
-    <input type="text" name="q" value="" />
-    <input type="submit" value="search" />
-    <span id="search-progress" style="padding-left: 10px"></span>
-  </form>
-  
-  <div id="search-results">
-  
-  </div>
+  <div class="section" id="demo">
+<h1>Demo<a class="headerlink" href="#demo" title="Permalink to this headline">¶</a></h1>
+<p>NutShell installation package comes with a simple demo using HTTP server
+that can be started with:</p>
+<div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell-demo.cnf
+</pre></div>
+</div>
+<div class="section" id="demo-products">
+<h2>Demo &#8220;products&#8221;<a class="headerlink" href="#demo-products" title="Permalink to this headline">¶</a></h2>
+<p>The demo, appearing as the start page (index.html) contains three sample products:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">demo.image.ppmforge</span></code> &#8211; Linux/Unix program generating fractal clouds and planets</li>
+<li><code class="docutils literal"><span class="pre">demo.image.pattern</span></code> &#8211; Image Magick&#8217;s convert creating built-in patterns</li>
+<li><code class="docutils literal"><span class="pre">demo.maps</span></code> &#8211; Map creation based on open map data and WMS servers</li>
+</ol>
+<p>On the HTML demo page, one can change the values using HTML widgets and
+click <code class="docutils literal"><span class="pre">Update</span></code> to regenerate the respective image product. In addition,
+the filename (<code class="docutils literal"><span class="pre">$OUTFILE</span></code>) become updated in the first input widget.
+There, it can be further edited for testing purposes. The HTML widgets
+on the page do not cover all the options supported by the generator scripts.
+Further, the scripts do not cover all the functionalities of the wrapped
+original programs.)</p>
+<p>All of these are NutShell independent; their generator scripts can be run
+on command lines. For example:</p>
+</div>
+</div>
+
 
           </div>
         </div>
@@ -89,19 +91,22 @@
         </div>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
-          <ul>
+          <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-commands.html">Commands and status codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Demo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#demo-products">Demo &#8220;products&#8221;</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
 </ul>
 
           <div role="search">
             <h3 style="margin-top: 1.5em;">Search</h3>
-            <form class="search" action="#" method="get">
+            <form class="search" action="search.html" method="get">
                 <input type="text" name="q" />
                 <input type="submit" value="Go" />
                 <input type="hidden" name="check_keywords" value="yes" />
@@ -120,12 +125,19 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
+            <a href="nutshell-variables.html" title="NutShell Variables"
+              >previous</a> |
+            <a href="nutshell-code.html" title="NutShell Code"
+              >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
             <a href="genindex.html" title="General Index"
               >index</a>
           </div>
           <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/nutshell-demo.txt"
+                rel="nofollow">Show Source</a>
           </div>
         </div>
 
