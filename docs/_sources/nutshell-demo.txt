@@ -59,9 +59,10 @@ can be run on the command line. For example: ::
   ./generate.sh 
   
   # Essentially produces and runs a command line...
-  ppmforge  -seed '1001' -inclination 0  -dimension '2.2' -power '1.0' -hour '12.00' -width '256' -height '256'
-  \
-  # ... post-processed with conversion to PNG image:
+  ppmforge  -seed '1001' -inclination 0  -dimension '2.2' \
+    -power '1.0' -hour '12.00' -width '256' -height '256'
+  
+  # ... output of which is conversed to a PNG image:
   convert ppm:- ./test.png
 
 Further, one can (in bash) add parameters -- communicated as environment variables in Nutshell --
@@ -75,7 +76,7 @@ Input requests are communicated to NutShell server with *input declaration scrip
 ``input.sh`` which the developer can freely
 design to produce ``<KEY=VALUE>`` lines *as output*. As initialisation from NutShell,
 this script gets the
-same parameters as environment variables as the actual generator script (``generate.sh``).
+same parameters (environment variables) as the actual generator script (``generate.sh``).
 Again, a good policy is to use default variables so that input declarations can be
 tested on command line without parameters, for example: ::
 
@@ -87,18 +88,18 @@ tested on command line without parameters, for example: ::
   CLOUD=202005121245_demo.image.ppmforge_MODE=clouds_GRAY=True_DIMENSION=2_SIZE=256,256.png
   MAP=demo.map_BBOX=0,45,32,71_SIZE=256,256_CONF=geoserver_PROJ=4326.png
 
-Again, one can experiment with parameters with prefixing, for example: ::
+Again, one can experiment with parameters with prefixes, for example: ::
 
     TIMESTAMP=201708121600 SIZE=512,512 PATTERN=OCTAGONS ./input.sh
   
 
-In building the product (here ``demo.cloudy``), NutShell calls first its *input declaration script* and the generates
-the queried products. Then, it assigns their *full system side paths in desired variables*
+In building the product (here ``demo.cloudy``), NutShell calls first its input declaration script and generates
+the desired products. Then, it assigns their *full system side paths in desired variables*
 -- ``HATCH``, ``CLOUD``, and ``MAP`` in this case -- in environment variables and forwards them
 among other product parameters to
 ``generate.sh`` for generating the actual product. The developer can rather freely select variable names, 
-excluding system variables like ``TIMESTAMP``. As input variable names, one may also use underscores ``'_'``
-since they will not end up filename parsing involving splitting by that character.
+excluding system variables like ``TIMESTAMP``. Is input variable names, one may also use underscores ``'_'``
+since they will not end up filename parsing using splitting by underscore.
 More on system and user variables is explained in :ref:`nutshell-variables`.  
 
 	   

@@ -107,9 +107,10 @@ can be run on the command line. For example:</p>
 ./generate.sh
 
 # Essentially produces and runs a command line...
-ppmforge  -seed &#39;1001&#39; -inclination 0  -dimension &#39;2.2&#39; -power &#39;1.0&#39; -hour &#39;12.00&#39; -width &#39;256&#39; -height &#39;256&#39;
-\
-# ... post-processed with conversion to PNG image:
+ppmforge  -seed &#39;1001&#39; -inclination 0  -dimension &#39;2.2&#39; \
+  -power &#39;1.0&#39; -hour &#39;12.00&#39; -width &#39;256&#39; -height &#39;256&#39;
+
+# ... output of which is conversed to a PNG image:
 convert ppm:- ./test.png
 </pre></div>
 </div>
@@ -122,7 +123,7 @@ It overlays a fractal cloud image by <code class="docutils literal"><span class=
 <code class="docutils literal"><span class="pre">input.sh</span></code> which the developer can freely
 design to produce <code class="docutils literal"><span class="pre">&lt;KEY=VALUE&gt;</span></code> lines <em>as output</em>. As initialisation from NutShell,
 this script gets the
-same parameters as environment variables as the actual generator script (<code class="docutils literal"><span class="pre">generate.sh</span></code>).
+same parameters (environment variables) as the actual generator script (<code class="docutils literal"><span class="pre">generate.sh</span></code>).
 Again, a good policy is to use default variables so that input declarations can be
 tested on command line without parameters, for example:</p>
 <div class="highlight-python"><div class="highlight"><pre>cd $NUTSHELL_DIR/demo/products/demo/cloudy
@@ -134,17 +135,17 @@ CLOUD=202005121245_demo.image.ppmforge_MODE=clouds_GRAY=True_DIMENSION=2_SIZE=25
 MAP=demo.map_BBOX=0,45,32,71_SIZE=256,256_CONF=geoserver_PROJ=4326.png
 </pre></div>
 </div>
-<p>Again, one can experiment with parameters with prefixing, for example:</p>
+<p>Again, one can experiment with parameters with prefixes, for example:</p>
 <div class="highlight-python"><div class="highlight"><pre>TIMESTAMP=201708121600 SIZE=512,512 PATTERN=OCTAGONS ./input.sh
 </pre></div>
 </div>
-<p>In building the product (here <code class="docutils literal"><span class="pre">demo.cloudy</span></code>), NutShell calls first its <em>input declaration script</em> and the generates
-the queried products. Then, it assigns their <em>full system side paths in desired variables</em>
+<p>In building the product (here <code class="docutils literal"><span class="pre">demo.cloudy</span></code>), NutShell calls first its input declaration script and generates
+the desired products. Then, it assigns their <em>full system side paths in desired variables</em>
 &#8211; <code class="docutils literal"><span class="pre">HATCH</span></code>, <code class="docutils literal"><span class="pre">CLOUD</span></code>, and <code class="docutils literal"><span class="pre">MAP</span></code> in this case &#8211; in environment variables and forwards them
 among other product parameters to
 <code class="docutils literal"><span class="pre">generate.sh</span></code> for generating the actual product. The developer can rather freely select variable names,
-excluding system variables like <code class="docutils literal"><span class="pre">TIMESTAMP</span></code>. As input variable names, one may also use underscores <code class="docutils literal"><span class="pre">'_'</span></code>
-since they will not end up filename parsing involving splitting by that character.
+excluding system variables like <code class="docutils literal"><span class="pre">TIMESTAMP</span></code>. Is input variable names, one may also use underscores <code class="docutils literal"><span class="pre">'_'</span></code>
+since they will not end up filename parsing using splitting by underscore.
 More on system and user variables is explained in <a class="reference internal" href="nutshell-variables.html#nutshell-variables"><span>NutShell Variables</span></a>.</p>
 </div>
 <div class="section" id="helper-programs">
