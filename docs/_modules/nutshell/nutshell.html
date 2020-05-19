@@ -293,11 +293,11 @@
         <span class="n">INPUTS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
         <span class="n">DELETE</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;DELETE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
         <span class="n">CHECK</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CHECK&#39;</span>  <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
-
+        <span class="n">LATEST</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>  
+        <span class="n">LINK</span> <span class="o">=</span>   <span class="p">(</span><span class="s1">&#39;LINK&#39;</span>   <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>  
+       
         <span class="n">LOG</span> <span class="o">=</span>    <span class="p">(</span><span class="s1">&#39;LOG&#39;</span>    <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">)</span>        
         <span class="n">DEBUG</span> <span class="o">=</span>  <span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span>  <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">)</span>        
-        <span class="n">LATEST</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">)</span>  
-        <span class="n">LINK</span> <span class="o">=</span>   <span class="p">(</span><span class="s1">&#39;LINK&#39;</span>   <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">)</span>  
         
         <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>  
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File exists: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
@@ -540,6 +540,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="p">):</span>
             <span class="c1">#directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
             <span class="n">directives</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="c1"># whattabout comma in arg?</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">directives</span><span class="p">))</span>
 
         <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">)</span> <span class="c1">#, logger.getChild(&quot;make_request&quot;)</span>
         <span class="c1">#logger.debug(product_request)</span>

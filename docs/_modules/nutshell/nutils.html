@@ -78,7 +78,7 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="read_conf_text"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.read_conf_text">[docs]</a><span class="k">def</span> <span class="nf">read_conf_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">regexp</span><span class="o">=</span><span class="s1">&#39;^([A-Za-z][\w]*)=([^#]*)(#.*)?&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_conf_text"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutils.read_conf_text">[docs]</a><span class="k">def</span> <span class="nf">read_conf_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}):</span> <span class="c1">#, regexp=&#39;^([A-Za-z][\w]*)=([^#]*)(#.*)?&#39;</span>
     <span class="sd">&quot;&quot;&quot;Traverse array of text lines consisting of &lt;key&gt;=&lt;value&gt; pairs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -86,8 +86,11 @@
         <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Could not handle text: &quot;</span> <span class="o">+</span> <span class="n">text</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
         
-    <span class="c1">#if (type(text) != list):</span>
-    <span class="c1">#    text = text.split(&#39;\n&#39;)         </span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>         
+       
+    <span class="c1">#regexp=&#39;^([A-Za-z][\w]*)=([^#]*)(#.*)?&#39;</span>
+    <span class="n">regexp</span><span class="o">=</span><span class="s1">&#39;^([A-Za-z][\w]*)(=([^#]*))?(#.*)?&#39;</span>
        
     <span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regexp</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
@@ -95,8 +98,11 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="p">):</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
-                <span class="c1">#print &#39;&quot;{}&quot;&#39;.format(line)</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="se">\n\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)):</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="se">\n\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 

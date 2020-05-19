@@ -151,7 +151,7 @@
 
     <span class="c1"># Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS</span>
     <span class="c1"># filenameRe = re.compile(&quot;^((LATEST|[0-9]+)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$&quot;)</span>
-    <span class="n">filenameRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^((LATEST|[0-9]*)_)?([^_]+)(_(.*))?</span><span class="se">\\</span><span class="s2">.([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>
+    <span class="n">filenameRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?</span><span class="se">\\</span><span class="s2">.([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>
 
     <span class="n">prodRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$&quot;</span><span class="p">)</span>
 
@@ -217,7 +217,7 @@
    
 <div class="viewcode-block" id="Info.set_timestamp"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">set_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set UTC time in numeric format &#39;%Y%m%d%H%M&#39; or &#39;LATEST&#39;.</span>
+<span class="sd">        Set UTC time in numeric format &#39;%Y%m%d%H%M&#39;, &#39;LATEST&#39;, or &#39;TIMESTAMP&#39;</span>
 <span class="sd">        </span>
 <span class="sd">        The 12 digit-numeric format may contain punctuation as long as the</span>
 <span class="sd">        order of the time units is not changed.</span>
@@ -227,7 +227,7 @@
 <span class="sd">        </span>
 <span class="sd">        Future versions may support for time object, unix seconds and date string parsing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">):</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^0-9]*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="n">timestamp</span>  <span class="c1"># re.sub(&quot;\W&quot;, &quot;&quot;, timestamp)</span></div>
 
