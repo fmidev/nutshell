@@ -36,7 +36,11 @@ The demo contains five sample products (with requirements shown as footnotes):
 #. ``demo.maps`` -- Map creation based on open map data and WMS servers [wget]_, [convert]_
 #. ``demo.cloudy`` -- An artifical "weather map" combining outputs of the above three [convert]_
 #. ``demo.cloudy.anim`` -- Animated (GIF) series of ``demo.cloudy`` [convert]_
-      
+
+Examples of the three first products are shown in the image below.
+
+.. image:: img/demo-images3.png
+   
 On the HTML demo page, one can change the values using HTML widgets and
 then click ``Update`` to regenerate them. The respective
 filename -- that is, ``$OUTFILE`` which *identifies a product instance* in NutShell --
