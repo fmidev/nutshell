@@ -60,24 +60,7 @@
   <div class="section" id="demo">
 <h1>Demo<a class="headerlink" href="#demo" title="Permalink to this headline">¶</a></h1>
 <p>NutShell installation package comes with five demo products under directory <code class="docutils literal"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>.
-This directory is set also in configuration file <code class="docutils literal"><span class="pre">nutshell-demo.cnf</span></code> .
-The demo products can be generated using the command line, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre># cd $NUTSHELL_DIR/
-python3 -m nutshell.nutshell -c nutshell-demo.cnf \
-  --make --product demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
-</pre></div>
-</div>
-<p>or</p>
-<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell -c nutshell-demo.cnf \
-  --delete --make --product  2020050800_demo.cloudy_SIZE=800,600.jpg
-</pre></div>
-</div>
-<p>In addition, the demo provides an interactive HTML page which can be started with</p>
-<div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell-demo.cnf
-</pre></div>
-</div>
-<p>and appears in <a class="reference external" href="http://127.0.0.1:8088/index.html">http://127.0.0.1:8088/index.html</a>
-or other address configured (see <a class="reference internal" href="nutshell-config.html#configuration"><span>Configuration</span></a>).</p>
+This directory is set also in configuration file <code class="docutils literal"><span class="pre">nutshell-demo.cnf</span></code> .</p>
 <div class="section" id="demo-products">
 <h2>Demo products<a class="headerlink" href="#demo-products" title="Permalink to this headline">¶</a></h2>
 <p>The demo contains five sample products (with requirements shown as footnotes):</p>
@@ -93,6 +76,12 @@ or other address configured (see <a class="reference internal" href="nutshell-co
 </div>
 <div class="section" id="html-demo-page">
 <h2>HTML demo page<a class="headerlink" href="#html-demo-page" title="Permalink to this headline">¶</a></h2>
+<p>The demo includes an interactive HTML page which can be started with</p>
+<div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell-demo.cnf
+</pre></div>
+</div>
+<p>and appears in <a class="reference external" href="http://127.0.0.1:8088/index.html">http://127.0.0.1:8088/index.html</a>
+or other address configured (see <a class="reference internal" href="nutshell-config.html#configuration"><span>Configuration</span></a>).</p>
 <p>On the HTML demo page, one can change the values using HTML widgets and
 then click <code class="docutils literal"><span class="pre">Update</span></code> to regenerate them. The respective
 filename &#8211; that is, <code class="docutils literal"><span class="pre">$OUTFILE</span></code> which <em>identifies a product instance</em> in NutShell &#8211;
@@ -104,6 +93,25 @@ original programs.</p>
 </div>
 <div class="section" id="command-line-examples">
 <h2>Command line examples<a class="headerlink" href="#command-line-examples" title="Permalink to this headline">¶</a></h2>
+<p>The demo products can be generated using the command line, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre># cd $NUTSHELL_DIR/
+
+python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+  --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+  --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png
+
+python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+  --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png
+
+python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+  --product 2020050800_demo.cloudy_SIZE=800,600.jpg
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-quick-look-in-the-product-generators">
+<h2>A quick look in the product generators<a class="headerlink" href="#a-quick-look-in-the-product-generators" title="Permalink to this headline">¶</a></h2>
 <p>On the system side, the product generators &#8211; the <code class="docutils literal"><span class="pre">generate.sh</span></code> scripts generating the products &#8211;
 can be found under <code class="docutils literal"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>. All of them reside under directory
 <code class="docutils literal"><span class="pre">./demo</span></code> meaning that one can include them in an operative NutShell product directory
@@ -199,6 +207,7 @@ re-sample, and much more.</em>  ImageMagick, 1 October 2009</td></tr>
 <li class="toctree-l2"><a class="reference internal" href="#demo-products">Demo products</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#html-demo-page">HTML demo page</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#command-line-examples">Command line examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-quick-look-in-the-product-generators">A quick look in the product generators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helper-programs">Helper programs</a></li>
 </ul>
 </li>

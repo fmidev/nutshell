@@ -7,23 +7,6 @@ Demo
 
 NutShell installation package comes with five demo products under directory ``$NUTSHELL_DIR/demo/products/``.
 This directory is set also in configuration file ``nutshell-demo.cnf`` .
-The demo products can be generated using the command line, for example: ::
-
-  # cd $NUTSHELL_DIR/
-  python3 -m nutshell.nutshell -c nutshell-demo.cnf \
-    --make --product demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
-
-or ::
-      
-  python3 -m nutshell.nutshell -c nutshell-demo.cnf \
-    --delete --make --product  2020050800_demo.cloudy_SIZE=800,600.jpg
-
-In addition, the demo provides an interactive HTML page which can be started with ::
-  
-  python3  -m nutshell.httpd -c nutshell-demo.cnf
-
-and appears in http://127.0.0.1:8088/index.html
-or other address configured (see :ref:`configuration`). 
 
 
 Demo products
@@ -44,6 +27,13 @@ Examples of the three first products are shown in the image below.
 HTML demo page
 ==============
 
+The demo includes an interactive HTML page which can be started with ::
+  
+  python3  -m nutshell.httpd -c nutshell-demo.cnf
+
+and appears in http://127.0.0.1:8088/index.html
+or other address configured (see :ref:`configuration`). 
+
 On the HTML demo page, one can change the values using HTML widgets and
 then click ``Update`` to regenerate them. The respective
 filename -- that is, ``$OUTFILE`` which *identifies a product instance* in NutShell --
@@ -55,6 +45,28 @@ original programs.
 
 Command line examples
 =====================
+
+The demo products can be generated using the command line, for example: ::
+
+  # cd $NUTSHELL_DIR/
+
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+    --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+    --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png
+
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+    --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png
+
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
+    --product 2020050800_demo.cloudy_SIZE=800,600.jpg
+
+
+
+     
+A quick look in the product generators
+======================================
 
 On the system side, the product generators -- the ``generate.sh`` scripts generating the products --
 can be found under ``$NUTSHELL_DIR/demo/products/``. All of them reside under directory
