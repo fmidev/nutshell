@@ -110,7 +110,8 @@ Helper programs
 
 These packages can be installed from standard distributions for example with ``apt install <package>`` .
 
-.. [convert] Conversion program by ImageMagick
-.. [ppmforge] Fractal generation program
+.. [convert] -- *Convert  between image formats as well as resize an image, blur, crop, despeckle, dither, draw on, flip, join,
+       re-sample, and much more.*  ImageMagick, 1 October 2009
+.. [ppmforge] -- *Fractal forgeries of clouds, planets, and starry skies.* John Walker, 25 October 1991.
 .. [wget] HTTP retrieval program			   
    
