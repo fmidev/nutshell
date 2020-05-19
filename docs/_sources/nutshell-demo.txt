@@ -97,9 +97,9 @@ the queried products. Then, it assigns their *full system side paths in desired 
 -- ``HATCH``, ``CLOUD``, and ``MAP`` in this case -- in environment variables and forwards them
 among other product parameters to
 ``generate.sh`` for generating the actual product. The developer can rather freely select variable names, 
-excluding system variables like ``TIMESTAMP``. As input variable names, one may also use underscore ``'_'``,
-because they will not be used in filenames subject to parsing (involving splitting by ``'_'``).
-More on system and user variables is explained in :ref:`variables`.  
+excluding system variables like ``TIMESTAMP``. As input variable names, one may also use underscores ``'_'``
+since they will not end up filename parsing involving splitting by that character.
+More on system and user variables is explained in :ref:`nutshell-variables`.  
 
 	   
 
