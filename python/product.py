@@ -77,7 +77,7 @@ class Info:
     log = None
 
     TIMESTAMP = ''
-    ID = ''
+    PRODUCT_ID = ''
     PARAMETERS = None #{}
     #PARAMS = None #[]
     FORMAT = ''
@@ -156,7 +156,7 @@ class Info:
     def set_id(self, product_id):
         """Set the product ID string consisting of alphanumeric chars and periods.""" 
         if (self.prodRe.match(product_id)):
-            self.ID = product_id
+            self.PRODUCT_ID = product_id
         else:
             raise NameError('Value not accepted as product id: {}'.format(product_id))
    
@@ -222,9 +222,9 @@ class Info:
             self.set_timestamp(value)
             return
                                     
-        if (key == 'ID'):
+        if (key == 'PRODUCT_ID'):
             # WARN about
-            raise KeyError("Special member ID cannot be set with this function")
+            raise KeyError("Special member PRODUCT_ID cannot be set with this function")
  
         if (self.PARAMETERS == None):
             self.PARAMETERS = {}
@@ -263,7 +263,7 @@ class Info:
                 self.set_timestamp('')
 
             # Product id
-            self.ID = m.group(3)
+            self.PRODUCT_ID = m.group(3)
 
             # Product specific parameters
             #if (len(m.groups()) > 5):
@@ -289,11 +289,11 @@ class Info:
         return self
 
 
-    def filename(self):
+    def get_filename(self):
         body = []
         if (self.TIMESTAMP):
             body.append(self.TIMESTAMP)
-        body.append(self.ID)
+        body.append(self.PRODUCT_ID)
 
         if (self.PARAMETERS):
             for key,value in sorted(self.PARAMETERS.items()):
@@ -304,7 +304,7 @@ class Info:
         return("_".join(body) + '.' + self.EXTENSION) # FORMAT)
 
     def get_static_filename(self):
-        body = [self.ID]
+        body = [self.PRODUCT_ID]
         if (self.PARAMETERS):
             for key,value in sorted(self.PARAMETERS.items()):
                 if (value == ''):
@@ -313,8 +313,8 @@ class Info:
                     body.append("{0}={1}".format(key, value))
         return("_".join(body) + '.' + self.EXTENSION) # FORMAT)
 
-    def filename_latest(self):
-        body = ['LATEST', self.ID]
+    def get_filename_latest(self):
+        body = ['LATEST', self.PRODUCT_ID]
         if (self.PARAMETERS):
             for key,value in sorted(self.PARAMETERS.items()):
                 if (value == ''):
@@ -323,8 +323,19 @@ class Info:
                     body.append("{0}={1}".format(key, value))
         return("_".join(body) + '.' + self.EXTENSION) #FORMAT)
 
+ 
+    #MEMBER_ENV_RE = re.compile("[A-Z]+[A-Z_]*")
 
-    def get_param_env(self, env=None):
+    def get_param_env(self):
+        env = nutils.get_entries(self, Tasklet.MEMBER_ENV_RE, str)
+        env['PARAMETERS'] = '' # kludge
+        env.update(self.PARAMETERS) 
+        if (self.TIMESTAMP):
+            parse_timestamp2(self.TIMESTAMP, env)
+        # env['PRODUCT'] = self.PRODUCT_ID
+        return env
+    
+    def get_param_env_OLD(self, env=None):
         """ Append or create dict with TIMESTAMP and params"""
         """ Uses PRODUCT instead of ID which is too general (example: "radar.rack.comp")"""
         if (env == None):
@@ -336,7 +347,7 @@ class Info:
         if (self.TIMESTAMP):
             parse_timestamp2(self.TIMESTAMP, env)
 
-        env['PRODUCT'] = self.ID
+        env['PRODUCT'] = self.PRODUCT_ID
 
         for i in ['FORMAT', 'COMPRESSION', 'EXTENSION']:
             env[i] = getattr(self, i, "")
@@ -345,7 +356,7 @@ class Info:
         
 #    def get_signature(self):
 #        body = []
-#        body.append(self.ID)
+#        body.append(self.PRODUCT_ID)
 #        if (self.PARAMETERS):
 #            for key,value in sorted(self.PARAMETERS.items()):
 #                if (value == ''):
@@ -396,7 +407,7 @@ class Info:
 
         return parser
         
-# Consider renaming to Generator (generator => shell)
+#
 class Tasklet(shell.Task):
     
     def __init__(self, product_server, product_info, script_filename, log = None):
@@ -406,7 +417,6 @@ class Tasklet(shell.Task):
 
         self.GENERATOR_DIR = product_server.get_generator_dir(product_info)          
             
-        #super().__init__(self.GENERATOR_DIR, script_filename, env={}, log=log)
         super().__init__(Path(self.GENERATOR_DIR, script_filename), 
                          env={}, 
                          log=log)
@@ -415,8 +425,8 @@ class Tasklet(shell.Task):
         self.product_info   = product_info
 
         s = self
-        filename        = s.product_info.filename()
-        filename_latest = s.product_info.filename_latest()
+        filename        = s.product_info.get_filename()
+        filename_latest = s.product_info.get_filename_latest()
 
         s.CACHE_ROOT = s.product_server.get_cache_root()
         s.TIME_DIR   = s.product_server.get_time_dir(product_info)
@@ -504,8 +514,9 @@ class Generator(Tasklet):
         # TODO generalize (how)
         log.debug(input_query.env)
         
-        input_query.run(logfile_basename = str(self.path) + '-input.sh', logfile_level = log.level)
-     
+        #input_query.run(logfile_basename = str(self.path) + '-input.sh', logfile_level = log.level)
+        input_query.run2()
+    
         if (input_query.returncode == 0): 
             log.info(type(input_query.stdout))
             if (input_query.stdout == ''):
@@ -532,8 +543,8 @@ class Generator(Tasklet):
                 p.unlink() 
 
     
-    def __init__(self, product_server, product_info, 
-                 actions=None, directives=None, log=None):
+    def __init__(self, product_server, product_info, log=None):
+                #actions=None, directives=None, 
 
         if not log:
             log = logging.getLogger("Generator")
@@ -544,61 +555,28 @@ class Generator(Tasklet):
                          product_server.SHELL_GENERATOR_SCRIPT,
                          log=log)
         
-#        super().__init__(Path(product_server.get_generator_dir(product_info),
-#                         product_server.SHELL_GENERATOR_SCRIPT), 
-#                         None, 
-#                         log) # ! env dropped, added later 
-        
-        # Consider stripping 'product_'
-#        self.product_server = product_server
-#
-#        if (type(product_info) == str):
-#            self.product_info = Info(product_info)
-#        else:        
-#            self.product_info = product_info
-        
-        if (actions):
-            self.actions = actions
-        else:
-            self.actions = []
-        self.log.debug('actions:' + str(actions))
-  
-        if (directives):              
-            self.directives = directives
-        else:
-            self.directives = []
-        self.log.debug('directives: ' + str(self.directives))
+ 
+#        if (actions):
+#            self.actions = actions
+#        else:
+#            self.actions = []
+#        self.log.debug('actions:' + str(actions))
+#  
+#        if (directives):              
+#            self.directives = directives
+#        else:
+#            self.directives = []
+#        self.log.debug('directives: ' + str(self.directives))
 
         self.product_obj = None
         self.inputs = {}
        
-        #filename        = self.product_info.filename()
-        #filename_latest = self.product_info.filename_latest()
-
-#        cache_root = product_server.get_cache_root()
-#        time_dir = product_server.get_time_dir(self.product_info)
-#        prod_dir = product_server.get_product_dir(self.product_info)  
-        # Target path. Will be cleared (to None) if product generation fails.
-        #print(self.path)
-        #print(cache_root, time_dir, prod_dir, filename) 
-        #exit(-1)
-#        self.path =          Path(cache_root, time_dir, prod_dir, filename)
-#        self.path_relative = Path(            time_dir, prod_dir, filename)
-#        self.path_tmp =      Path(cache_root, time_dir, prod_dir, 'tmp', filename)  
-#        self.path_static =   Path(cache_root, prod_dir, filename)
-#        self.path_latest =   Path(cache_root, prod_dir, filename_latest)
-
-       
-        #self.env = {}
         self.env.update(product_info.get_param_env())
         self.env.update(self.get_param_env())
-        #self.env['OUTDIR']  = str(self.path_tmp.parent)
-        #self.env['OUTFILE'] = self.path.name
              
         self.reset_status() # 204 HTTPStatus.NO_CONTENT
         self.returncode = -1
         
-        # self.path_tmp = self.cache_dir+os.sep+self.out_file_tmp
 
 
 class InputQuery(Tasklet):
@@ -611,10 +589,6 @@ class InputQuery(Tasklet):
         #    log = logging.getLogger("Generator")
         #    log.setLevel(product_server.logger.level)
 
-#       super().__init__(Path(product_server.get_generator_dir(product_info),
-#                           product_server.SHELL_INPUT_SCRIPT), env={}, 
-#                        log=logging.getLogger("InputQuery"))        
-
         super().__init__(product_server, 
                          product_info,
                          product_server.SHELL_INPUT_SCRIPT, 
@@ -624,14 +598,10 @@ class InputQuery(Tasklet):
        
         self.env.update(product_info.get_param_env())
         self.env.update(self.get_param_env()) # OUTDIR, OUTFILE    
-        #self.env['OUTDIR']  = str(out_dir)
-        #self.env['OUTFILE'] = str(out_file)
         
         self.log.debug("Created env : {0}".format(self.env))
         self.returncode = 0
                 
-
-   
 
 
 if __name__ == '__main__':
@@ -702,8 +672,8 @@ if __name__ == '__main__':
     if (options.FORMAT):
         product_info.set_format(options.FORMAT)
 
-    if (product_info.ID):
-        print(product_info.filename())
+    if (product_info.PRODUCT_ID):
+        print(product_info.get_filename())
         print(product_info.get_static_filename())
         print(product_info.get_param_env()) # contains ID
         #print(product_info.__dict__) # contains ID
