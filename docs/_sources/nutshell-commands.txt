@@ -15,12 +15,17 @@ Requests
 ========
 
 
-========== ===========================================================
-``MAKE``   Generate file, if it does not exist (default request)
-``DELETE`` Delete the product file in cache dir
-``CHECK``  Check existence and permissions of directories and scripts
-``INPUTS`` Check existence and permissions of directories and scripts
-========== ===========================================================
+============ ============== ======
+ Request     Cmd line arg
+============ ============== ======
+``CHECK``    --check        Check existence and permissions of directories and scripts
+``MAKE``     --make, -m     Generate file, if it does not exist (default request)
+``DELETE``   --delete, -d   Delete the product file in cache dir
+``GENERATE`` --generate, -g Remake file, even if it exists. Same as ``--delete --make``
+``LINK``     --link, -l     Link file to short directory
+``LATEST``   --latest, -L   Link file with ``$TIMESTAMP`` replaced with ``'LATEST'``
+``INPUTS``   --inputs, -I   Check inputs
+============ ============== ======
 
 
 
@@ -55,8 +60,6 @@ Built-in directives
 ``STATUS`` Also after successful ``MAKE`` return the status page (HTML)
 ``NICE``   Generate a product with lower CPU priority
 ``LOG``    Save log 
-``LINK``   Link file to short directory
-``LATEST`` Link file with ``$TIMESTAMP`` replaced with ``'LATEST'``
 ========== ============================================================
 
 

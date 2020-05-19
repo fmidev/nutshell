@@ -53,21 +53,23 @@
             
   <div class="section" id="using-nutshell">
 <h1>Using NutShell<a class="headerlink" href="#using-nutshell" title="Permalink to this headline">¶</a></h1>
-<p>This sections explains product queries are made from command line, Python code and HTTP requests.</p>
+<p>This sections explains how product queries are made from command line, Python code and HTTP requests.</p>
 <p>Instructions for setting up product generators is explained in <a class="reference internal" href="nutshell-generators.html#generators"><span>Product generators</span></a> .</p>
 <div class="section" id="command-line-usage">
 <span id="id1"></span><h2>Command-line usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>Basic format for all the command line invocations is:</p>
-<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell &lt;nutshell-args&gt;
+<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell  &lt;args&gt;
 </pre></div>
 </div>
+<p>By default, NutShell tries to read configuration file <code class="docutils literal"><span class="pre">nutshell.cnf</span></code> in the current directory.
+A file in other location is given with <code class="docutils literal"><span class="pre">-c</span> <span class="pre">&lt;config-file&gt;</span></code> .</p>
 <p>Online help is optained with <code class="docutils literal"><span class="pre">-h</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell -h
 </pre></div>
 </div>
 <p>Simple query using configuration file and product definition:</p>
-<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell -c nutshell/nutshell.cnf -m \\
-  -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png
+<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell --make \
+  -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fi_BBOX=20,62,30,70.png
 </pre></div>
 </div>
 </div>
@@ -113,6 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nutshell-config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-generators.html">Product generators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
 </ul>
 

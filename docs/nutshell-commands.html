@@ -64,20 +64,43 @@
 <table border="1" class="docutils">
 <colgroup>
 <col width="14%" />
-<col width="86%" />
+<col width="16%" />
+<col width="69%" />
 </colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Request</th>
+<th class="head">Cmd line arg</th>
+<th class="head">&nbsp;</th>
+</tr>
+</thead>
 <tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">CHECK</span></code></td>
+<td>&#8211;check</td>
+<td>Check existence and permissions of directories and scripts</td>
+</tr>
 <tr class="row-odd"><td><code class="docutils literal"><span class="pre">MAKE</span></code></td>
+<td>&#8211;make, -m</td>
 <td>Generate file, if it does not exist (default request)</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal"><span class="pre">DELETE</span></code></td>
+<td>&#8211;delete, -d</td>
 <td>Delete the product file in cache dir</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">CHECK</span></code></td>
-<td>Check existence and permissions of directories and scripts</td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">GENERATE</span></code></td>
+<td>&#8211;generate, -g</td>
+<td>Remake file, even if it exists. Same as <code class="docutils literal"><span class="pre">--delete</span> <span class="pre">--make</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">LINK</span></code></td>
+<td>&#8211;link, -l</td>
+<td>Link file to short directory</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">LATEST</span></code></td>
+<td>&#8211;latest, -L</td>
+<td>Link file with <code class="docutils literal"><span class="pre">$TIMESTAMP</span></code> replaced with <code class="docutils literal"><span class="pre">'LATEST'</span></code></td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal"><span class="pre">INPUTS</span></code></td>
-<td>Check existence and permissions of directories and scripts</td>
+<td>&#8211;inputs, -I</td>
+<td>Check inputs</td>
 </tr>
 </tbody>
 </table>
@@ -114,12 +137,6 @@ defined below.</p>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal"><span class="pre">LOG</span></code></td>
 <td>Save log</td>
-</tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">LINK</span></code></td>
-<td>Link file to short directory</td>
-</tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">LATEST</span></code></td>
-<td>Link file with <code class="docutils literal"><span class="pre">$TIMESTAMP</span></code> replaced with <code class="docutils literal"><span class="pre">'LATEST'</span></code></td>
 </tr>
 </tbody>
 </table>

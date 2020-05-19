@@ -4,7 +4,7 @@
 Using NutShell
 ==============
 
-This sections explains product queries are made from command line, Python code and HTTP requests.
+This sections explains how product queries are made from command line, Python code and HTTP requests.
 
 Instructions for setting up product generators is explained in :ref:`generators` .  
 
@@ -15,7 +15,10 @@ Command-line usage
 
 Basic format for all the command line invocations is::
 
-    python3 -m nutshell.nutshell <nutshell-args>
+    python3 -m nutshell.nutshell  <args>
+    
+By default, NutShell tries to read configuration file ``nutshell.cnf`` in the current directory.
+A file in other location is given with ``-c <config-file>`` .    
     
 Online help is optained with ``-h``::
 
@@ -23,9 +26,10 @@ Online help is optained with ``-h``::
     
 Simple query using configuration file and product definition::
 
-    python3 -m nutshell.nutshell -c nutshell/nutshell.cnf -m \\
-      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png 
+    python3 -m nutshell.nutshell --make \
+      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fi_BBOX=20,62,30,70.png 
 
+      
 
 .. _nutshell-api:
 
