@@ -5,26 +5,37 @@
 Demo
 ====
 
-NutShell installation package comes with a simple demo using HTTP server
-that can be started with::
+NutShell installation package comes with five demo products under directory ``$NUTSHELL_DIR/demo/products/``.
+This directory is set also in configuration file ``nutshell-demo.cnf`` .
+The demo products can be generated using the command line, for example: ::
+
+  # cd $NUTSHELL_DIR/
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf \\
+    --make --product demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+
+or ::
+      
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf \
+     --make -product  2020050800_demo.cloudy_SIZE=800,600.jpg
+
+In addition, the demo provides a HTML interface which can be started with ::
   
   python3  -m nutshell.httpd -c nutshell-demo.cnf
 
-The demo consists of a simple HTML page appearing in http://127.0.0.1:8088/index.html
-or other server address configured (see :ref:`configuration`). 
+and appears in http://127.0.0.1:8088/index.html
+or other address configured (see :ref:`configuration`). 
 
 
 Demo "products"
 ===============
 
-The demo, appearing as the start page (index.html) contains three sample products:
+The demo contains five sample products (with requirements shown as footnotes):
   
-#. ``demo.image.ppmforge`` -- Linux/Unix program generating fractal clouds and planets
-#. ``demo.image.pattern`` -- Image Magick's convert creating built-in patterns 
-#. ``demo.maps`` -- Map creation based on open map data and WMS servers
-#. ``demo.cloudy`` -- An artifical "weather map" combining outputs of the above three
-#. ``demo.cloudy.anim`` -- Animated series of ``demo.cloudy``
-      
+#. ``demo.image.ppmforge`` -- Linux/Unix program generating fractal clouds and planets [ppmforge]_, [convert]_
+#. ``demo.image.pattern`` -- Image Magick's convert creating built-in patterns [convert]_
+#. ``demo.maps`` -- Map creation based on open map data and WMS servers [wget]_, [convert]_
+#. ``demo.cloudy`` -- An artifical "weather map" combining outputs of the above three [convert]_
+#. ``demo.cloudy.anim`` -- Animated (GIF) series of ``demo.cloudy`` [convert]_
       
 On the HTML demo page, one can change the values using HTML widgets and
 then click ``Update`` to regenerate them. The respective
@@ -87,8 +98,14 @@ because they will not be used in filenames subject to parsing (involving splitti
 More on system and user variables is explained in :ref:`variables`.  
 
 	   
-Hints
-=====
 
-#. On purpose, the demo products have prefix ``demo``, so 
 
+Helper programs
+===============
+
+These packages can be installed from standard distributions for example with ``apt install <package>`` .
+
+.. [convert] Conversion program by ImageMagick
+.. [ppmforge] Fractal generation program
+.. [wget] HTTP retrieval program			   
+   

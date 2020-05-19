@@ -59,22 +59,34 @@
             
   <div class="section" id="demo">
 <h1>Demo<a class="headerlink" href="#demo" title="Permalink to this headline">¶</a></h1>
-<p>NutShell installation package comes with a simple demo using HTTP server
-that can be started with:</p>
+<p>NutShell installation package comes with five demo products under directory <code class="docutils literal"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>.
+This directory is set also in configuration file <code class="docutils literal"><span class="pre">nutshell-demo.cnf</span></code> .
+The demo products can be generated using the command line, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre># cd $NUTSHELL_DIR/
+python3 -m nutshell.nutshell -c nutshell-demo.cnf \\
+  --make --product demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell -c nutshell-demo.cnf \
+   --make -product  2020050800_demo.cloudy_SIZE=800,600.jpg
+</pre></div>
+</div>
+<p>In addition, the demo provides a HTML interface which can be started with</p>
 <div class="highlight-python"><div class="highlight"><pre>python3  -m nutshell.httpd -c nutshell-demo.cnf
 </pre></div>
 </div>
-<p>The demo consists of a simple HTML page appearing in <a class="reference external" href="http://127.0.0.1:8088/index.html">http://127.0.0.1:8088/index.html</a>
-or other server address configured (see <a class="reference internal" href="nutshell-config.html#configuration"><span>Configuration</span></a>).</p>
+<p>and appears in <a class="reference external" href="http://127.0.0.1:8088/index.html">http://127.0.0.1:8088/index.html</a>
+or other address configured (see <a class="reference internal" href="nutshell-config.html#configuration"><span>Configuration</span></a>).</p>
 <div class="section" id="demo-products">
 <h2>Demo &#8220;products&#8221;<a class="headerlink" href="#demo-products" title="Permalink to this headline">¶</a></h2>
-<p>The demo, appearing as the start page (index.html) contains three sample products:</p>
+<p>The demo contains five sample products (with requirements shown as footnotes):</p>
 <ol class="arabic simple">
-<li><code class="docutils literal"><span class="pre">demo.image.ppmforge</span></code> &#8211; Linux/Unix program generating fractal clouds and planets</li>
-<li><code class="docutils literal"><span class="pre">demo.image.pattern</span></code> &#8211; Image Magick&#8217;s convert creating built-in patterns</li>
-<li><code class="docutils literal"><span class="pre">demo.maps</span></code> &#8211; Map creation based on open map data and WMS servers</li>
-<li><code class="docutils literal"><span class="pre">demo.cloudy</span></code> &#8211; An artifical &#8220;weather map&#8221; combining outputs of the above three</li>
-<li><code class="docutils literal"><span class="pre">demo.cloudy.anim</span></code> &#8211; Animated series of <code class="docutils literal"><span class="pre">demo.cloudy</span></code></li>
+<li><code class="docutils literal"><span class="pre">demo.image.ppmforge</span></code> &#8211; Linux/Unix program generating fractal clouds and planets <a class="reference internal" href="#ppmforge" id="id1">[ppmforge]</a>, <a class="reference internal" href="#convert" id="id2">[convert]</a></li>
+<li><code class="docutils literal"><span class="pre">demo.image.pattern</span></code> &#8211; Image Magick&#8217;s convert creating built-in patterns <a class="reference internal" href="#convert" id="id3">[convert]</a></li>
+<li><code class="docutils literal"><span class="pre">demo.maps</span></code> &#8211; Map creation based on open map data and WMS servers <a class="reference internal" href="#wget" id="id4">[wget]</a>, <a class="reference internal" href="#convert" id="id5">[convert]</a></li>
+<li><code class="docutils literal"><span class="pre">demo.cloudy</span></code> &#8211; An artifical &#8220;weather map&#8221; combining outputs of the above three <a class="reference internal" href="#convert" id="id6">[convert]</a></li>
+<li><code class="docutils literal"><span class="pre">demo.cloudy.anim</span></code> &#8211; Animated (GIF) series of <code class="docutils literal"><span class="pre">demo.cloudy</span></code> <a class="reference internal" href="#convert" id="id7">[convert]</a></li>
 </ol>
 <p>On the HTML demo page, one can change the values using HTML widgets and
 then click <code class="docutils literal"><span class="pre">Update</span></code> to regenerate them. The respective
@@ -132,11 +144,27 @@ excluding system variables like <code class="docutils literal"><span class="pre"
 because they will not be used in filenames subject to parsing (involving splitting by <code class="docutils literal"><span class="pre">'_'</span></code>).
 More on system and user variables is explained in <span class="xref std std-ref">variables</span>.</p>
 </div>
-<div class="section" id="hints">
-<h2>Hints<a class="headerlink" href="#hints" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>On purpose, the demo products have prefix <code class="docutils literal"><span class="pre">demo</span></code>, so</li>
-</ol>
+<div class="section" id="helper-programs">
+<h2>Helper programs<a class="headerlink" href="#helper-programs" title="Permalink to this headline">¶</a></h2>
+<p>These packages can be installed from standard distributions for example with <code class="docutils literal"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">&lt;package&gt;</span></code> .</p>
+<table class="docutils citation" frame="void" id="convert" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[convert]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id5">3</a>, <a class="fn-backref" href="#id6">4</a>, <a class="fn-backref" href="#id7">5</a>)</em> Conversion program by ImageMagick</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="ppmforge" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[ppmforge]</a></td><td>Fractal generation program</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="wget" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[wget]</a></td><td>HTTP retrieval program</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 
@@ -155,7 +183,7 @@ More on system and user variables is explained in <span class="xref std std-ref"
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Demo</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#demo-products">Demo &#8220;products&#8221;</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#hints">Hints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helper-programs">Helper programs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
