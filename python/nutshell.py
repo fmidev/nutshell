@@ -416,6 +416,11 @@ if __name__ == '__main__':
     
     parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
     
+    parser.add_argument("-M", "--move", metavar="<path>",
+                            dest="MOVE",
+                            default='',
+                            help="move output file from cache")
+    
     #(options, args) = parser.parse_args()
     options = parser.parse_args()
     #logger.warning(*options.__dict__)  
@@ -489,7 +494,11 @@ if __name__ == '__main__':
             logger.info(product_request.inputs)
     
         logger.info(product_request.status)    
-            
+        
+        if (options.MOVE):
+            # product_request.path.exists()
+            logger.info('Moving: {1} <=  {0}'.format(product_request.path, options.MOVE) )    
+            product_request.path.rename(options.MOVE)
             
     else:
         logger.warning('Could not parse product')
