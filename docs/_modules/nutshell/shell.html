@@ -116,24 +116,28 @@
             
         <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
             
-<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.shell.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile_basename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logfile_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">):</span>
+<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.shell.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile_basename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logfile_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">directives</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Runs a task object containing task.script and task.stdout</span>
 <span class="sd">        </span>
 <span class="sd">        :param logfile_basename: Leading part of logs, &#39;.err&#39; and &#39;.out&#39; will be added.</span>
-<span class="sd">        :param logfile_save_thereshold: save stderr and stdout to logs, if</span>
+<span class="sd">        :param logfile_save_thereshold: Save stderr and stdout to logs, if</span>
 <span class="sd">            this threshold is at least logging.ERROR and logging.DEBUG, respecively </span>
-
+<span class="sd">        :param directives[dict]: Additional instructions to the script </span>
 <span class="sd">        :returns: Return code of the process. Will be also stored to ``self``.</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
+        <span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>        
+        <span class="k">if</span> <span class="p">(</span><span class="n">directives</span><span class="p">):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
         
         <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">),</span>
                              <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span>
                              <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="c1"># always</span>
                              <span class="n">stderr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="c1"># stdout for cmd-line and subprocess.PIPE (separate) for http usage</span>
                              <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                             <span class="n">env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>
+                             <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
                             
  
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">p</span><span class="p">):</span>

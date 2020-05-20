@@ -175,7 +175,7 @@
 <div class="viewcode-block" id="ProductServer.get_product_dir"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_product_dir">[docs]</a>    <span class="k">def</span> <span class="nf">get_product_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the directory containing product generator script </span>
 <span class="sd">            (generate.sh) and possible configurations etc&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span></div>
     
     <span class="k">def</span> <span class="nf">get_time_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">):</span>
@@ -193,9 +193,9 @@
     
     
     <span class="k">def</span> <span class="nf">get_generator_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ROOT</span><span class="p">,</span> <span class="o">*</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ROOT</span><span class="p">,</span> <span class="o">*</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
-        <span class="c1">#return self.PRODUCT_ROOT+os.sep+product_info.ID.replace(&#39;.&#39;, os.sep)</span>
+        <span class="c1">#return self.PRODUCT_ROOT+os.sep+product_info.PRODUCT_ID.replace(&#39;.&#39;, os.sep)</span>
 
    
 
@@ -257,7 +257,7 @@
                 <span class="c1">#product_generator.error(i, input)</span>
                 <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Make input: {0} ({1})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">input</span><span class="p">))</span>
                 <span class="n">input_prod_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="nb">input</span><span class="p">)</span>
-                <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Make input: {0} ({1})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">input_prod_info</span><span class="o">.</span><span class="n">ID</span><span class="p">))</span>
+                <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Make input: {0} ({1})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">input_prod_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">))</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">input_prod_info</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="p">[],</span> <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;input[{0}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
                     <span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="c1"># sensitive</span>
@@ -285,19 +285,42 @@
 <span class="sd">            the file (if succefully generated) and information about the process.</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">directives</span> <span class="o">=</span> <span class="n">directives</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">directives</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
+            
         <span class="c1">#product_request = self.ProductRequest(self, product_info, actions, directives, log)</span>
         <span class="c1"># Consider rename to Generator</span>
-        <span class="n">pr</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span> <span class="c1">#, actions, directives, log)</span>
 
-        <span class="n">MAKE</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span>   <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
-        <span class="n">INPUTS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
-        <span class="n">DELETE</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;DELETE&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
-        <span class="n">CHECK</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CHECK&#39;</span>  <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>     
-        <span class="n">LATEST</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>  
-        <span class="n">LINK</span> <span class="o">=</span>   <span class="p">(</span><span class="s1">&#39;LINK&#39;</span>   <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>  
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;GENERATE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">):</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;DELETE&#39;</span><span class="p">)</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;MAKE&#39;</span><span class="p">)</span>
+            
+        <span class="n">LATEST</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>
+        <span class="n">LINK</span> <span class="o">=</span>   <span class="p">(</span><span class="s1">&#39;LINK&#39;</span>   <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>  
+        <span class="k">if</span> <span class="p">(</span><span class="n">LINK</span> <span class="ow">or</span> <span class="n">LATEST</span><span class="p">):</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;MAKE&#39;</span><span class="p">)</span>          
+        
+        <span class="n">MAKE</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span>   <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
+        
+        <span class="n">INPUTS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
+        <span class="n">DELETE</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;DELETE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
+        <span class="n">CHECK</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CHECK&#39;</span>  <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span> 
+
+
        
-        <span class="n">LOG</span> <span class="o">=</span>    <span class="p">(</span><span class="s1">&#39;LOG&#39;</span>    <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">)</span>        
-        <span class="n">DEBUG</span> <span class="o">=</span>  <span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span>  <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">directives</span><span class="p">)</span>        
+        <span class="c1"># LOG =    (&#39;LOG&#39;    in pr.directives)        </span>
+        <span class="c1"># DEBUG =  (&#39;DEBUG&#39;  in pr.directives)        </span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>  
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File exists: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
@@ -325,7 +348,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File not found: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">==</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">):</span>
-                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;LATEST-file not found, returning&quot;</span><span class="p">)</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;LATEST-file not found (cannot generate it)&quot;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">CHECK</span><span class="p">):</span>
                     <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">)</span> 
                     <span class="k">return</span> <span class="n">pr</span>
@@ -352,7 +375,7 @@
         <span class="c1"># Runs input.sh</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">MAKE</span> <span class="ow">or</span> <span class="n">INPUTS</span> <span class="ow">or</span> <span class="n">CHECK</span><span class="p">):</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Querying input list (dependencies)&#39;</span><span class="p">)</span>
-            <span class="n">input_info</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get_input_list</span><span class="p">()</span>
+            <span class="n">input_info</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get_input_list</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Input scipt problem, return code: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
                 <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">CHECK</span><span class="p">):</span>
@@ -370,10 +393,7 @@
             <span class="c1">#logfile_level = logging.DEBUG #ERROR</span>
             <span class="c1">#if (DEBUG) or (LOG): </span>
             <span class="c1">#    logfile_level = logging.DEBUG</span>
-            
-            <span class="c1">#pr.run(logfile_basename = str(pr.path)+&#39;-&#39;+self.SHELL_GENERATOR_SCRIPT, </span>
-            <span class="c1">#       logfile_level = logfile_level)</span>
-            <span class="n">pr</span><span class="o">.</span><span class="n">run2</span><span class="p">()</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">run2</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator failed (return code={0})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
@@ -532,7 +552,7 @@
         <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;DELETE&#39;</span><span class="p">)</span>
 
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span> <span class="ow">and</span> <span class="n">product_info</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="ow">and</span> <span class="n">product_info</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
         
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requests: {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">actions</span><span class="p">)))</span>
 

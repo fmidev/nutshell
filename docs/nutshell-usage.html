@@ -68,10 +68,11 @@ A file in other location is given with <code class="docutils literal"><span clas
 </pre></div>
 </div>
 <p>Simple query using configuration file and product definition:</p>
-<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell --make \
+<div class="highlight-python"><div class="highlight"><pre>python3 -m nutshell.nutshell --request &#39;MAKE&#39; \
   -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fi_BBOX=20,62,30,70.png
 </pre></div>
 </div>
+<p>Other commands</p>
 </div>
 <div class="section" id="nutshell-api">
 <span id="id2"></span><h2>NutShell API<a class="headerlink" href="#nutshell-api" title="Permalink to this headline">¶</a></h2>
@@ -79,7 +80,7 @@ A file in other location is given with <code class="docutils literal"><span clas
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nutshell.nutshell</span>
 
 <span class="c1"># Initialize service</span>
-<span class="n">server</span> <span class="o">=</span> <span class="n">nuts</span><span class="o">.</span><span class="n">ProductServer</span><span class="p">(</span><span class="s1">&#39;nutshell/nutshell.cnf&#39;</span><span class="p">)</span>
+<span class="n">server</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">ProductServer</span><span class="p">(</span><span class="s1">&#39;nutshell/nutshell.cnf&#39;</span><span class="p">)</span>
 
 <span class="c1"># Retrieve / generate a product</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="s2">&quot;201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png&quot;</span><span class="p">,</span> <span class="s2">&quot;MAKE&quot;</span><span class="p">)</span>
