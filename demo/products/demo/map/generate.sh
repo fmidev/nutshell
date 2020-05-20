@@ -11,7 +11,7 @@ echo "# executing $0 PID=$$"
 date --utc +'#  %A, %d %m %Y %H:%M %Z' 
 date       +'# (%A, %d %m %Y %H:%M %Z)'
 
-echo "FORMAT=$FORMAT"
+echo "# FORMAT=$FORMAT"
 
 #CONVERT="../convert.sh"
 #if [ -f 'mapserver.cnf' ]; then

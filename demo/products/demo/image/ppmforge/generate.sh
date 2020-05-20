@@ -44,7 +44,7 @@ HOUR=${HOUR:-'12'}
 MINUTE=${MINUTE:-'0'}
 MINUTEDEC=$(( 10#$MINUTE * 100 / 60 ))
 #MINUTEDEC=
-HOURDEC=`printf '%s%02d' $HOUR  $(( 10#$MINUTE * 100 / 60 ))`
+HOURDEC=`printf '%s.%02d' $HOUR  $(( 10#$MINUTE * 100 / 60 ))`
 if [ "$MODE" == 'clouds' ]; then
     #PRECENTAGE=$(( 50*HOUR%2 + MINUTEDEC/2 ))
     PRECENTAGE=$(( MINUTEDEC ))
@@ -58,7 +58,7 @@ grayscale=${GRAY:+"-channel R -separate "}
 
 
 cmd="ppmforge $mode -seed '100$SEED' -inclination $INCLINATION  -dimension '$DIMENSION' -power '$POWER' ${TYPE:+-$TYPE} $glaciers $ice  -hour '$HOURDEC' -width '$WIDTH' -height '$HEIGHT'"
-cmd2="convert - -crop ${WIDTH}x${HEIGHT}+0+0 $grayscale $roll $OUTDIR/$OUTFILE"
+cmd2="convert ppm:- -crop ${WIDTH}x${HEIGHT}+0+0 $grayscale $roll $OUTDIR/$OUTFILE"
 
 echo "# $cmd"
 case $EXTENSION in
