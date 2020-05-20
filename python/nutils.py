@@ -23,16 +23,19 @@ def read_conf(path, result = {}):
     return result
 
 
-def read_conf_text(text, result = {}, regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?'):
+def read_conf_text(text, result = {}): #, regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?'
     """Traverse array of text lines consisting of <key>=<value> pairs.
     """
 
     if (not text):
-        print ("Could not handle text: " + text)
+        #print ("Could not handle text: " + text)
         return result
         
-    #if (type(text) != list):
-    #    text = text.split('\n')         
+    if (type(text) == str):
+      text = text.split('\n')         
+       
+    #regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?'
+    regexp='^([A-Za-z][\w]*)(=([^#]*))?(#.*)?'
        
     r = re.compile(regexp)
     for line in text:
@@ -40,8 +43,11 @@ def read_conf_text(text, result = {}, regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?'):
         if (line):
             m = r.match(line)
             if m:
-                #print '"{}"'.format(line)
-                result[m.group(1).strip()] = m.group(2).strip('"\n\'')
+                key = m.group(1).strip()
+                if (m.group(3)):
+                    result[key] = m.group(3).strip('"\n\'')
+                else:
+                    result[key] = True
     return result
 
 

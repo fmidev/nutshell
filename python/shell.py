@@ -61,24 +61,28 @@ class Task:
             
         self.returncode = 0
             
-    def run(self, logfile_basename=None, logfile_level = logging.ERROR):
+    def run(self, logfile_basename=None, logfile_level = logging.ERROR, directives=None):
         """Runs a task object containing task.script and task.stdout
         
         :param logfile_basename: Leading part of logs, '.err' and '.out' will be added.
-        :param logfile_save_thereshold: save stderr and stdout to logs, if
+        :param logfile_save_thereshold: Save stderr and stdout to logs, if
             this threshold is at least logging.ERROR and logging.DEBUG, respecively 
-
+        :param directives[dict]: Additional instructions to the script 
         :returns: Return code of the process. Will be also stored to ``self``.
         
         """
         
+        env = {}
+        env.update(self.env)        
+        if (directives):
+            env.update(directives)
         
         p = subprocess.Popen(str(self.script),
                              cwd=str(self.script.parent),
                              stdout=self.stdout, # always
                              stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
                              shell=True,
-                             env=self.env)
+                             env=env)
                             
  
         if (not p):

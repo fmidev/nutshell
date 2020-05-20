@@ -120,7 +120,7 @@ class ProductServer:
     def get_product_dir(self, product_info):
         """Return the directory containing product generator script 
             (generate.sh) and possible configurations etc"""
-        return product_info.ID.replace('.', os.sep)
+        return product_info.PRODUCT_ID.replace('.', os.sep)
     
     def get_time_dir(self, timestamp):
         if (type(timestamp) != str):
@@ -138,9 +138,9 @@ class ProductServer:
     
     
     def get_generator_dir(self, product_info):
-        path = Path(self.PRODUCT_ROOT, *product_info.ID.split('.'))
+        path = Path(self.PRODUCT_ROOT, *product_info.PRODUCT_ID.split('.'))
         return str(path.absolute())
-        #return self.PRODUCT_ROOT+os.sep+product_info.ID.replace('.', os.sep)
+        #return self.PRODUCT_ROOT+os.sep+product_info.PRODUCT_ID.replace('.', os.sep)
 
    
 
@@ -202,7 +202,7 @@ class ProductServer:
                 #product_generator.error(i, input)
                 product_generator.log.info('Make input: {0} ({1})'.format(i, input))
                 input_prod_info = product.Info(filename = input)
-                product_generator.log.info('Make input: {0} ({1})'.format(i, input_prod_info.ID))
+                product_generator.log.info('Make input: {0} ({1})'.format(i, input_prod_info.PRODUCT_ID))
                 r = self.make_request(input_prod_info, ['MAKE'], [], product_generator.log.getChild("input[{0}]".format(i)))
                 if (r.path):
                     inputs[i] = str(r.path) # sensitive
@@ -230,19 +230,42 @@ class ProductServer:
             the file (if succefully generated) and information about the process.
         
         """
+
+        if (type(actions) == str):
+            actions = actions.split(',')
+
+        if (type(actions) == list):
+            actions = set(actions)
+            
+        if (type(directives) == str):
+            directives = directives.split(',')
+
+        if (type(directives) == list):
+            directives = nutils.read_conf_text(directives)
+            
         #product_request = self.ProductRequest(self, product_info, actions, directives, log)
         # Consider rename to Generator
-        pr = product.Generator(self, product_info, actions, directives, log)
+        pr = product.Generator(self, product_info, log) #, actions, directives, log)
 
-        MAKE   = ('MAKE'   in pr.actions)     
-        INPUTS = ('INPUTS' in pr.actions)     
-        DELETE = ('DELETE' in pr.actions)     
-        CHECK  = ('CHECK'  in pr.actions)     
+        if ('GENERATE' in actions):
+            actions.add('DELETE')
+            actions.add('MAKE')
+            
+        LATEST = ('LATEST' in actions)
+        LINK =   ('LINK'   in actions)  
+        if (LINK or LATEST):
+            actions.add('MAKE')          
+        
+        MAKE   = ('MAKE'   in actions)     
+        
+        INPUTS = ('INPUTS' in actions)     
+        DELETE = ('DELETE' in actions)     
+        CHECK  = ('CHECK'  in actions) 
 
-        LOG =    ('LOG'    in pr.directives)        
-        DEBUG =  ('DEBUG'  in pr.directives)        
-        LATEST = ('LATEST' in pr.directives)  
-        LINK =   ('LINK'   in pr.directives)  
+
+       
+        # LOG =    ('LOG'    in pr.directives)        
+        # DEBUG =  ('DEBUG'  in pr.directives)        
         
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
@@ -270,7 +293,7 @@ class ProductServer:
         else:
             pr.log.debug('File not found: {0}'.format(pr.path))
             if (product_info.TIMESTAMP == 'LATEST'):
-                pr.log.warn("LATEST-file not found, returning")
+                pr.log.warn("LATEST-file not found (cannot generate it)")
                 if (not CHECK):
                     pr.set_status(HTTPStatus.NOT_FOUND) 
                     return pr
@@ -297,7 +320,7 @@ class ProductServer:
         # Runs input.sh
         if (MAKE or INPUTS or CHECK):
             pr.log.debug('Querying input list (dependencies)')
-            input_info = pr.get_input_list()
+            input_info = pr.get_input_list(directives)
             if (input_info.returncode != 0):
                 pr.log.debug('Input scipt problem, return code: {0}'.format(input_info.returncode))
                 if (not CHECK):
@@ -315,10 +338,7 @@ class ProductServer:
             #logfile_level = logging.DEBUG #ERROR
             #if (DEBUG) or (LOG): 
             #    logfile_level = logging.DEBUG
-            
-            #pr.run(logfile_basename = str(pr.path)+'-'+self.SHELL_GENERATOR_SCRIPT, 
-            #       logfile_level = logfile_level)
-            pr.run2()
+            pr.run2(directives)
 
             if (pr.returncode != 0):
                 pr.log.error("generator failed (return code={0})".format(pr.returncode))
@@ -477,7 +497,7 @@ if __name__ == '__main__':
         actions.append('DELETE')
 
 
-    if (product_info.ID and product_info.FORMAT):
+    if (product_info.PRODUCT_ID and product_info.FORMAT):
         
         logger.info('Requests: {0}'.format(str(actions)))
 
@@ -485,6 +505,7 @@ if __name__ == '__main__':
         if (options.DIRECTIVES):
             #directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
             directives = options.DIRECTIVES.split(',') # whattabout comma in arg?
+            print(nutils.read_conf_text(directives))
 
         product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
         #logger.debug(product_request)
