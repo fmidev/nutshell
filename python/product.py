@@ -54,7 +54,7 @@ class Info:
     ``TIMESTAMP`` (if applicable), file ``FORMAT``, 
     and product-specific free parameters.
     
-    **Parameters** handled as with Info.set(). Key parameters are 
+    **Parameters** handled as with Info.set_product(). Key parameters are 
     mutually exclusive.
           
     Examples of allowed calls, with ``Info = nutshell.product.Info`` :
@@ -101,7 +101,7 @@ class Info:
     prodRe = re.compile("^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$")
 
 
-    def set(self, product=None, filename=None, product_id=None, **kwargs):
+    def set_product(self, product=None, filename=None, product_id=None, **kwargs):
         """Configure a product.
 
         :param product: product id string, requires explicit kwargs
@@ -332,7 +332,7 @@ class Info:
         env.update(self.PARAMETERS) 
         if (self.TIMESTAMP):
             parse_timestamp2(self.TIMESTAMP, env)
-        # env['PRODUCT'] = self.PRODUCT_ID
+        env['PRODUCT'] = self.PRODUCT_ID # temporary (rack-tile)
         return env
     
     def get_param_env_OLD(self, env=None):
@@ -368,8 +368,8 @@ class Info:
 
     # Todo: params
     def __init__(self, product=None, filename=None, product_id=None, **kwargs):
-        """See :ref:`product.info`. Parameters equivalent with those of set()."""
-        self.set(product, filename, product_id, **kwargs)
+        """See :ref:`product.info`. Parameters equivalent with those of set_product()."""
+        self.set_product(product, filename, product_id, **kwargs)
         self.log = logging.getLogger('Info')
         self.log.setLevel(logging.WARN)
             
@@ -653,7 +653,7 @@ if __name__ == '__main__':
     #if (options.PRODUCT):
     #    product_info.set_id(options.PRODUCT)
     if (options.PRODUCT):
-        product_info.set(filename = options.PRODUCT)
+        product_info.set_product(filename = options.PRODUCT)
     #    product_info. _parse_filename(options.PRODUCT)
     else:
         logger.warning("product not defined")
@@ -662,7 +662,7 @@ if __name__ == '__main__':
     if (options.SET):
         args = {'SIZE': [640,400], 'FORMAT': 'png', 'VERSION': 2.0}
         #product_info.set_product(options.SET, **args)
-        product_info.set(options.SET, **args)
+        product_info.set_product(options.SET, **args)
 
     if (options.TIMESTAMP):
         product_info.set_timestamp(options.TIMESTAMP)

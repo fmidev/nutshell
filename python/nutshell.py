@@ -467,7 +467,7 @@ if __name__ == '__main__':
     product_info = product.Info()
 
     if (options.PRODUCT):
-        product_info.set(filename = options.PRODUCT)
+        product_info.set_product(filename = options.PRODUCT)
     else:
         logger.warning('Product not defined')
     

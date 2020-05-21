@@ -17,35 +17,25 @@ By default, it returns a status page (HTML) containing
 - input info
 - server status
 
-	  
-
-
 """
+
 __version__ = '0.1'
 __author__ = 'Markus.Peura@fmi.fi'
 
-#import argparse
 import urllib.request, urllib.parse, urllib.error
 import http.server
 import xml.etree.ElementTree as ET
-#from xml.dom import minidom
+#from xml.dom import minidom  # Pretty printing
 import os
-import mimetypes
+#import mimetypes
 import logging
 logging.basicConfig(format='%(levelname)s\t %(name)s:%(funcName)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(name)s : %(message)s', datefmt='%Y%m%d%I:%M:%S %p')
 #logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-
-
-# Pretty printing
-# from xml.dom import minidom
-
-
 from . import nutils
-from . import nutxml    # HTML utils
-#from . import nutproduct
+from . import nutxml    
 from . import product
 from . import nutshell
 
@@ -183,9 +173,9 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # system_path.suffix == format extension, so smells like a filename
         if (basepath.find('/cache/') == 0) and system_path.suffix and (s.path.find('?') == -1):
             # and file not found (above)
-            s.log.error("PRDOCUT? {0}".format(system_path.suffix))
+            s.log.error("PRODUCT? {0}".format(system_path.suffix))
             url =  "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
-            NutHandler. _redirect(s, url)
+            NutHandler._redirect(s, url)
             return 
                    
         if (basepath == '/stop'):
@@ -218,7 +208,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         
         if (product_info):
             
-            product_info.set(filename = product_name)  #parse_filename(product_name)
+            product_info.set_product(filename = product_name)  #parse_filename(product_name)
             s.log.info("Product info: {0} ".format(product_info))
             
             # "MAIN"
@@ -231,7 +221,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     url = '/cache/' + str(product_request.path_relative) + '?no_redirect'
                     #url = '/'+product_server.get_relative_path(product_info)+'?no_redirect'
                     #print('CONSIDER', url)
-                    NutHandler. _redirect(s, url)
+                    NutHandler._redirect(s, url)
                     return 
                 else:
                      s.log.error("MAKE failed for: {0}".format(product_info.filename()))
@@ -259,10 +249,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         if actions:
             elem = nutxml.get_by_id(body, 'request')
             elem.set("value", ','.join(actions))
-            # OLD
-            # elem = nutxml.get_by_id(body, 'request_elem')
-            # elem.append(nutxml.get_table(querydata, {"title": "Request"}))
-
+ 
         if product_request:
             elem = nutxml.get_by_id(body, 'product')
             elem.set("value", product_request.product_info.filename())
@@ -270,7 +257,6 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         if directives:
             elem = nutxml.get_by_id(body, 'directives')
             elem.set("value", ','.join(directives))
-                
         
         if product_request and (product_request.returncode != 0):
             responses = http.server.SimpleHTTPRequestHandler.responses
@@ -402,7 +388,7 @@ if __name__ == '__main__':
         else:
             product_server.logger.setLevel(int(options.LOG_LEVEL))
     
-    conf = ("nutshell/nutshell.cnf", False) # lenient, skip silently if missing
+    conf = ("nutshell.cnf", False) # lenient, skip silently if missing
     if (options.CONF):
         conf = (options.CONF, True) # strict, explicit 
 

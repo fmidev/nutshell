@@ -1,9 +1,9 @@
 #!/bin/bash
 
-INPUT_ID=${PRODUCT%.anim}
-INPUT_PARAMS=${OUTFILE#__*}
+INPUT_ID=${PRODUCT_ID%.anim}
+INPUT_PARAMS=${OUTFILE#*.anim_}
 echo "# $INPUT_PARAMS"
-INPUT_PARAMS=${INPUT_PARAMS%.*}
+INPUT_PARAMS=${INPUT_PARAMS%__*}
 echo "# $INPUT_PARAMS"
 
 # Number of frames

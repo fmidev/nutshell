@@ -47,7 +47,7 @@ def read_conf_text(text, result = {}): #, regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?
                 if (m.group(3)):
                     result[key] = m.group(3).strip('"\n\'')
                 else:
-                    result[key] = True
+                    result[key] = 'True'
     return result
 
 
