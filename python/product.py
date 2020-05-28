@@ -271,7 +271,12 @@ class Info:
                 # pindex = 0
                 for e in m.group(5).split('_'): #self.PARAMS:
                     entry = e.split('=')
-                    self.set_parameter(*entry)
+                    if (entry[0] == ''):
+                        print ("INPUTPARAMETERS => {0}".format(self.PARAMETERS))
+                        self.INPUTPARAMETERS = self.PARAMETERS                        
+                        self.PARAMETERS = {}
+                    else:
+                        self.set_parameter(*entry)
                     #if (len(entry) == 1):
                     #    self.set_parameter('P'+str(pindex), entry[0])
 
@@ -295,12 +300,22 @@ class Info:
             body.append(self.TIMESTAMP)
         body.append(self.PRODUCT_ID)
 
+        if (self.INPUTPARAMETERS):
+            for key,value in sorted(self.INPUTPARAMETERS.items()):
+                if (value == ''):
+                    body.append(key)
+                else:
+                    body.append("{0}={1}".format(key, value))
+            if (self.PARAMETERS):
+                body.append(':')
+
         if (self.PARAMETERS):
             for key,value in sorted(self.PARAMETERS.items()):
                 if (value == ''):
                     body.append(key)
                 else:
                     body.append("{0}={1}".format(key, value))
+
         return("_".join(body) + '.' + self.EXTENSION) # FORMAT)
 
     def get_static_filename(self):
