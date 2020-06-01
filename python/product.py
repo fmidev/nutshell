@@ -79,6 +79,7 @@ class Info:
     TIMESTAMP = ''
     PRODUCT_ID = ''
     PARAMETERS = None #{}
+    INPUT_PARAMETERS = None
     #PARAMS = None #[]
     FORMAT = ''
     COMPRESSION = ''
@@ -272,8 +273,8 @@ class Info:
                 for e in m.group(5).split('_'): #self.PARAMS:
                     entry = e.split('=')
                     if (entry[0] == ''):
-                        print ("INPUTPARAMETERS => {0}".format(self.PARAMETERS))
-                        self.INPUTPARAMETERS = self.PARAMETERS                        
+                        print ("INPUT_PARAMETERS => {0}".format(self.PARAMETERS))
+                        self.INPUT_PARAMETERS = self.PARAMETERS                        
                         self.PARAMETERS = {}
                     else:
                         self.set_parameter(*entry)
@@ -300,8 +301,8 @@ class Info:
             body.append(self.TIMESTAMP)
         body.append(self.PRODUCT_ID)
 
-        if (self.INPUTPARAMETERS):
-            for key,value in sorted(self.INPUTPARAMETERS.items()):
+        if (self.INPUT_PARAMETERS):
+            for key,value in sorted(self.INPUT_PARAMETERS.items()):
                 if (value == ''):
                     body.append(key)
                 else:
@@ -343,31 +344,34 @@ class Info:
 
     def get_param_env(self):
         env = nutils.get_entries(self, Tasklet.MEMBER_ENV_RE, str)
-        env['PARAMETERS'] = '' # kludge
-        env.update(self.PARAMETERS) 
+        env['PARAMETERS'] = '' # overwrite kludge
+        if (self.INPUT_PARAMETERS):
+            env.update(self.INPUT_PARAMETERS) 
+        if (self.PARAMETERS):
+            env.update(self.PARAMETERS)  # overrides INPUT_PARAMETERS
         if (self.TIMESTAMP):
             parse_timestamp2(self.TIMESTAMP, env)
         env['PRODUCT'] = self.PRODUCT_ID # temporary (rack-tile)
         return env
     
-    def get_param_env_OLD(self, env=None):
-        """ Append or create dict with TIMESTAMP and params"""
-        """ Uses PRODUCT instead of ID which is too general (example: "radar.rack.comp")"""
-        if (env == None):
-            env = {}
-
-        # Start with these (and override with 'system' variables below).
-        env.update(self.PARAMETERS)
-
-        if (self.TIMESTAMP):
-            parse_timestamp2(self.TIMESTAMP, env)
-
-        env['PRODUCT'] = self.PRODUCT_ID
-
-        for i in ['FORMAT', 'COMPRESSION', 'EXTENSION']:
-            env[i] = getattr(self, i, "")
-
-        return env
+#    def get_param_env_OLD(self, env=None):
+#        """ Append or create dict with TIMESTAMP and params"""
+#        """ Uses PRODUCT instead of ID which is too general (example: "radar.rack.comp")"""
+#        if (env == None):
+#            env = {}
+#
+#        # Start with these (and override with 'system' variables below).
+#        env.update(self.PARAMETERS)
+#
+#        if (self.TIMESTAMP):
+#            parse_timestamp2(self.TIMESTAMP, env)
+#
+#        env['PRODUCT'] = self.PRODUCT_ID
+#
+#        for i in ['FORMAT', 'COMPRESSION', 'EXTENSION']:
+#            env[i] = getattr(self, i, "")
+#
+#        return env
         
 #    def get_signature(self):
 #        body = []
