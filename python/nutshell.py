@@ -344,7 +344,7 @@ class ProductServer:
             pr.run2(directives)
 
             if (pr.returncode != 0):
-                pr.log.error("generator failed (return code={0})".format(pr.returncode))
+                pr.log.error("Error ({0}): '{1}'".format(pr.returncode, pr.error_info))
                 pr.remove_files()
                 return pr
                 
@@ -359,7 +359,11 @@ class ProductServer:
                 return pr
             
             pr.log.debug("Final move from tmp")
-            pr.path_tmp.replace(pr.path)
+            if (pr.path_tmp.is_symlink()):
+                pr.path.unlink()
+                pr.path.symlink_to(pr.path_tmp.resolve())
+            else:    
+                pr.path_tmp.replace(pr.path)
             pr.set_status(HTTPStatus.OK)
                 
             try:

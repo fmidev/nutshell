@@ -113,8 +113,9 @@ class Task:
             if (p.returncode != 0):
                 lines = self.stdout.split('\n')
                 self.error_info = lines.pop()
-                self.log.warn('Errors? Return code: {0}'.format(p.returncode))
-                try:             
+                self.log.warn('Error code: {0}'.format(p.returncode))
+                self.log.warn('Error msg:  {0}'.format(self.error_info))
+                try: 
                     status = int(self.error_info.split(' ')[0])
                     self.status = HTTPStatus(status)                   
                 except ValueError:
