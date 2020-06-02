@@ -13,7 +13,8 @@ __version__ = '0.2'
 __author__ = 'Markus.Peura@fmi.fi'
 
 
-import subprocess # for shell escape
+import subprocess # shell escape
+import os         # pid
 
 from   pathlib import Path
 from   http    import HTTPStatus
@@ -61,11 +62,12 @@ class Task:
             
         self.returncode = 0
             
+            
     def run(self, logfile_basename=None, logfile_level = logging.ERROR, directives=None):
         """Runs a task object containing task.script and task.stdout
         
         :param logfile_basename: Leading part of logs, '.err' and '.out' will be added.
-        :param logfile_save_thereshold: Save stderr and stdout to logs, if
+        :param logfile_level: Save stderr and stdout to logs, if
             this threshold is at least logging.ERROR and logging.DEBUG, respecively 
         :param directives[dict]: Additional instructions to the script 
         :returns: Return code of the process. Will be also stored to ``self``.
@@ -82,8 +84,7 @@ class Task:
                              stdout=self.stdout, # always
                              stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
                              shell=True,
-                             env=env)
-                            
+                             env=env)           
  
         if (not p):
             self.log.warn('Could not run process: {0}'.format(self.script)) 
@@ -94,9 +95,19 @@ class Task:
         stdout,stderr = p.communicate()
         self.returncode = p.returncode        
 
+
         # TODO: test also stderr
         if (logfile_basename):
             logfile_basename = str(logfile_basename)
+        else:
+            logfile_basename = 'nutshell-{0}'.format(os.getpid())      
+
+        # Add sensitivity
+        if (p.returncode != 0):
+            logfile_level -= 10
+
+        print ("LOG LEVEL: ", logfile_level)            
+            
         if (stdout):
             self.stdout = stdout.decode(encoding='UTF-8').strip()
             if (p.returncode != 0):
@@ -105,21 +116,20 @@ class Task:
                 self.log.warn('Errors? Return code: {0}'.format(p.returncode))
                 try:             
                     status = int(self.error_info.split(' ')[0])
-                    self.status = HTTPStatus(status)
-                   
+                    self.status = HTTPStatus(status)                   
                 except ValueError:
                     self.log.warn('Could not extract numeric HTTP error code from: {0} '.format(self.error_info))
                     self.status = HTTPStatus.CONFLICT
                 #except FileError:
                 #    self.log.error('Failed writing log: {0} '.format(log_stdout))
-            if (logfile_basename):# and (logfile_level <= logging.DEBUG):
+            if (logfile_level <= logging.DEBUG):
                 log_stdout = Path(logfile_basename + ".stdout")
-                self.log.warn('Dumping log: {0}'.format(log_stdout))
+                self.log.info('Dumping log: {0}'.format(log_stdout))
                 log_stdout.write_text(self.stdout)
                     
         if (stderr):
             self.stderr = stderr.decode(encoding='UTF-8')
-            if (logfile_basename) and (logfile_level <= logging.ERROR):
+            if (logfile_level <= logging.WARN):
                 log_stderr = Path(logfile_basename + ".stderr")
                 self.log.warn('Dumping log: {0}'.format(log_stderr))
                 log_stderr.write_text(self.stderr)

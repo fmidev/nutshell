@@ -97,17 +97,20 @@ class ProductServer:
         # self._init_dir('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
         
     def read_conf(self, conffile = 'nutshell.cnf', strict=True):
+        """Read given conf file, if it exists. Raise error, if strict."""
         if (os.path.exists(conffile)):
             self.logger.debug("reading conf file {0} ".format(conffile))
             result = nutils.read_conf(conffile)
             # print result
             nutils.set_entries(self, result)
+            return True
         elif strict:
             self.logger.error("Conf file not found: " + conffile)
             raise FileNotFoundError("Conf file not found: ", conffile)
         else:
             self.logger.warning("Conf file not found: " + conffile)
             #print ("Conf file not found: ", conffile)  
+        return False
 
     # Rename... Missleading name.
     def get_status(self):  
@@ -425,6 +428,10 @@ class ProductServer:
         
 if __name__ == '__main__':
 
+    NUTSHELL_DIR = None
+    if ("NUTSHELL_DIR" in os.environ):
+        NUTSHELL_DIR = os.environ["NUTSHELL_DIR"]      
+            
     product_server = ProductServer()
 
     #print()
@@ -461,6 +468,7 @@ if __name__ == '__main__':
             logger.setLevel(int(options.LOG_LEVEL))
     
     logger.debug(options)   
+    logger.debug('NUTSHELL_DIR={0}'.format(NUTSHELL_DIR))   
     
     product_server.verbosity = int(options.VERBOSE)
     product_server.logger = logger # NEW
@@ -476,8 +484,11 @@ if __name__ == '__main__':
     if (options.CONF):
         product_server.read_conf(options.CONF)
     else:
-        product_server.read_conf("nutshell.cnf", False)  # Lenient
-        
+        if not product_server.read_conf("nutshell.cnf", False):  # Local, lenient
+            if NUTSHELL_DIR:
+                logger.warning('Reading ' + NUTSHELL_DIR + "/nutshell.cnf")
+                product_server.read_conf(NUTSHELL_DIR + "/nutshell.cnf", False)
+                
     #if (options.VERBOSE > 4):
     #nutils.print_dict(product_server.get_status())
     logger.debug(product_server.get_status())
