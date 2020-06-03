@@ -84,6 +84,8 @@ class Task:
                              stdout=self.stdout, # always
                              stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
                              shell=True,
+                             #text=True,
+                             universal_newlines=True,
                              env=env)           
  
         if (not p):
@@ -109,9 +111,11 @@ class Task:
         print ("LOG LEVEL: ", logfile_level)            
             
         if (stdout):
-            self.stdout = stdout.decode(encoding='UTF-8') #.strip()
+            self.stdout = stdout #.decode(encoding='UTF-8') #.strip()
+            #self.stdout = str(stdout) #.strip()
             if (p.returncode != 0):
                 lines = self.stdout.split('\n')
+                lines.pop() # last line is empty
                 self.error_info = lines.pop().strip()
                 self.log.warn('Error code: {0}'.format(p.returncode))
                 self.log.warn('Error msg:  {0}'.format(self.error_info))
@@ -129,7 +133,8 @@ class Task:
                 log_stdout.write_text(self.stdout)
                     
         if (stderr):
-            self.stderr = stderr.decode(encoding='UTF-8')
+            self.stderr = stderr # .decode(encoding='UTF-8')
+            #self.stderr = str(stderr)
             if (logfile_level <= logging.WARN):
                 log_stderr = Path(logfile_basename + ".stderr")
                 self.log.warn('Dumping log: {0}'.format(log_stderr))
