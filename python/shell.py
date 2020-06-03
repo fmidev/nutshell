@@ -109,10 +109,10 @@ class Task:
         print ("LOG LEVEL: ", logfile_level)            
             
         if (stdout):
-            self.stdout = stdout.decode(encoding='UTF-8').strip()
+            self.stdout = stdout.decode(encoding='UTF-8') #.strip()
             if (p.returncode != 0):
                 lines = self.stdout.split('\n')
-                self.error_info = lines.pop()
+                self.error_info = lines.pop().strip()
                 self.log.warn('Error code: {0}'.format(p.returncode))
                 self.log.warn('Error msg:  {0}'.format(self.error_info))
                 try: 
