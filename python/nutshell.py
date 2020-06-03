@@ -257,7 +257,11 @@ class ProductServer:
             
         LATEST = ('LATEST' in actions)
         LINK =   ('LINK'   in actions)  
-        if (LINK or LATEST):
+        
+        COPY = ('COPY' in directives)
+        MOVE = ('MOVE' in directives)
+         
+        if (LINK or LATEST or COPY or MOVE):
             actions.add('MAKE')          
         
         MAKE   = ('MAKE'   in actions)     
@@ -319,7 +323,8 @@ class ProductServer:
             pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
             self.ensure_output_dir(pr.path_tmp.parent)
             self.ensure_output_dir(pr.path.parent)
-            pr.path.touch()
+            if (not pr.path.exists()):
+                pr.path.touch()
             
         # Runs input.sh
         if (MAKE or INPUTS or CHECK):
@@ -376,8 +381,26 @@ class ProductServer:
                     nutils.symlink(pr.path_latest, pr.path, True)
             except:
                  pr.log.warn("Linking file failed")               
- 
-            
+
+            try:
+                if COPY:
+                    COPY = directives['COPY']
+                    logger.info('Copying: {1} <=  {0}'.format(pr.path, COPY) )    
+                    shutil.copy(str(pr.path), COPY)
+       
+                if (options.MOVE):
+                    MOVE = directives['MOVE']
+                    logger.info('Moving: {1} <=  {0}'.format(pr.path, MOVE) )    
+                    # product_request.path.rename(options.MOVE) does not accept plain dirname
+                    path = Path(MOVE)
+                    if (path.is_dir()):
+                        path = path.joinpath(pr.path.name)
+                    if (path.exists()):
+                        path.unlink()
+                    shutil.move(str(pr.path), MOVE)
+            except:
+                 pr.log.warn("Copying/moving file failed")               
+
             pr.log.info('Success: {0}'.format(pr.path))
               
         return pr
@@ -524,17 +547,22 @@ if __name__ == '__main__':
 
     if (not actions):
         actions.append('MAKE')
-            
 
+    directives = {}
+    if (options.DIRECTIVES):
+        #directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
+        directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
+        print(directives)
+    
+    for i in ['MOVE', 'COPY']:
+        value = getattr(options, i)
+        if (value):
+            directives[i] = value
+        
     if (product_info.PRODUCT_ID and product_info.FORMAT):
         
-        logger.info('Requests: {0}'.format(str(actions)))
-
-        directives = []
-        if (options.DIRECTIVES):
-            #directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
-            directives = options.DIRECTIVES.split(',') # whattabout comma in arg?
-            print(nutils.read_conf_text(directives))
+        logger.info('Requests:   {0}'.format(str(actions)))
+        logger.info('Directives: {0}'.format(str(directives)))
 
         product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
         #logger.debug(product_request)
@@ -545,22 +573,7 @@ if __name__ == '__main__':
     
         logger.info(product_request.status)    
         
-        if (options.MOVE):
-            # product_request.path.exists()
-            logger.info('Moving: {1} <=  {0}'.format(product_request.path, options.MOVE) )    
-            # product_request.path.rename(options.MOVE) does not accept plain dirname
-            path = Path(options.MOVE)
-            if (path.is_dir()):
-                path = path.joinpath(product_request.path.name)
-            if (path.exists()):
-                path.unlink()
-            shutil.move(str(product_request.path), options.MOVE)
-            
-
-        if (options.COPY):
-            logger.info('Copying: {1} <=  {0}'.format(product_request.path, options.COPY) )    
-            shutil.copy(str(product_request.path), options.COPY)
-            
+             
     else:
         logger.warning('Could not parse product')
         exit(1)
