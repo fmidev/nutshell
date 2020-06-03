@@ -338,9 +338,6 @@ class ProductServer:
             pr.log.info('Generating:  {0}'.format(pr.path))
             pr.log.debug('Environment: {0}'.format(pr.env))
 
-            #logfile_level = logging.DEBUG #ERROR
-            #if (DEBUG) or (LOG): 
-            #    logfile_level = logging.DEBUG
             pr.run2(directives)
 
             if (pr.returncode != 0):
@@ -416,6 +413,17 @@ class ProductServer:
                             #default=False,
                             help="make product, same as -r MAKE")
     
+        parser.add_argument("-L", "--link",
+                            dest="LINK",
+                            action="store_true",
+                            help="link product file, same as -r LINK")
+
+        parser.add_argument("-Z", "--latest",
+                            dest="LATEST",
+                            action="store_true",
+                            help="link latest product file, same as -r LATEST")
+    
+        
         parser.add_argument("-i", "--inputList",
                             dest="INPUTS",
                             action="store_true",
@@ -502,14 +510,19 @@ if __name__ == '__main__':
     if (options.REQUEST):
         actions.extend(options.REQUEST.split(','))
 
-    if (options.MAKE) or not (actions):
-        actions.append('MAKE')
     
-    if (options.INPUTS):
-        actions.append('INPUTS')
+    for i in ['DELETE', 'MAKE', 'INPUTS', 'LINK', 'LATEST']:
+        if (getattr(options, i)):
+            actions.append(i)
+
+    if (not actions):
+        actions.append('MAKE')
+            
+    #if (options.INPUTS):
+    #    actions.append('INPUTS')
         
-    if (options.DELETE):
-        actions.append('DELETE')
+    #if (options.DELETE):
+    #    actions.append('DELETE')
 
 
     if (product_info.PRODUCT_ID and product_info.FORMAT):
