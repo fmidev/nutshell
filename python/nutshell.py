@@ -29,6 +29,7 @@ import time
 import subprocess # for shell escape
 
 from pathlib import Path
+import shutil # for copy cmd  only...
 from http import HTTPStatus
 #import http.server
 #HTTPresponses = http.server.SimpleHTTPRequestHandler.responses
@@ -393,46 +394,32 @@ class ProductServer:
  
         parser.add_argument("-c", "--conf", dest="CONF",
                             default=None, # "nutshell.cnf", #ProductServer.CONF_FILE?
-                            help="read config file", 
+                            help="Read config file", 
                             metavar="<file>")
      
         parser.add_argument("-r", "--request", metavar="<string>",
                             dest="REQUEST",
                             default="",
-                            help="comma-separated string of [DELETE|MAKE|INPUTS]")
+                            help="Comma-separated string of [DELETE|MAKE|INPUTS]")
     
         parser.add_argument("-d", "--delete",
                             dest="DELETE",
                             action="store_true",
                             #default=False,
-                            help="delete product file, same as -r DELETE")
-    
-        parser.add_argument("-m", "--make",
-                            dest="MAKE",
-                            action="store_true",
-                            #default=False,
-                            help="make product, same as -r MAKE")
-    
-        parser.add_argument("-L", "--link",
-                            dest="LINK",
-                            action="store_true",
-                            help="link product file, same as -r LINK")
+                            help="Delete product file, same as -r DELETE")
 
-        parser.add_argument("-Z", "--latest",
-                            dest="LATEST",
-                            action="store_true",
-                            help="link latest product file, same as -r LATEST")
-    
         
         parser.add_argument("-i", "--inputList",
                             dest="INPUTS",
                             action="store_true",
                             help="list input for a product, same as -r INPUTS")
     
-        parser.add_argument("-D", "--directives",
-                            dest="DIRECTIVES",
-                            default='',
-                            help="additional instructions: LOG,LINK,LATEST")
+        parser.add_argument("-m", "--make",
+                            dest="MAKE",
+                            action="store_true",
+                            #default=False,
+                            help="Make product, same as -r MAKE")
+    
     
         return parser    
 
@@ -456,9 +443,29 @@ if __name__ == '__main__':
     parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
     
     parser.add_argument("-M", "--move", metavar="<path>",
-                            dest="MOVE",
-                            default='',
-                            help="move output file from cache")
+                        dest="MOVE",
+                        default='',
+                        help="Move output file from cache")
+    
+    parser.add_argument("-L", "--link",
+                        dest="LINK",
+                        action="store_true",
+                        help="Link product file, same as -r LINK")
+
+    parser.add_argument("-C", "--copy", metavar="<path>",
+                        dest="COPY",
+                        help="Copy product file")
+
+    parser.add_argument("-Z", "--latest",
+                        dest="LATEST",
+                        action="store_true",
+                        help="Link latest product file, same as -r LATEST")
+
+    # Raise? Could be http default directives?
+    parser.add_argument("-D", "--directives",
+                        dest="DIRECTIVES",
+                        default='',
+                        help="additional instructions: LOG,LINK,LATEST")
     
     #(options, args) = parser.parse_args()
     options = parser.parse_args()
@@ -518,12 +525,6 @@ if __name__ == '__main__':
     if (not actions):
         actions.append('MAKE')
             
-    #if (options.INPUTS):
-    #    actions.append('INPUTS')
-        
-    #if (options.DELETE):
-    #    actions.append('DELETE')
-
 
     if (product_info.PRODUCT_ID and product_info.FORMAT):
         
@@ -547,7 +548,18 @@ if __name__ == '__main__':
         if (options.MOVE):
             # product_request.path.exists()
             logger.info('Moving: {1} <=  {0}'.format(product_request.path, options.MOVE) )    
-            product_request.path.rename(options.MOVE)
+            # product_request.path.rename(options.MOVE) does not accept plain dirname
+            path = Path(options.MOVE)
+            if (path.is_dir()):
+                path = path.joinpath(product_request.path.name)
+            if (path.exists()):
+                path.unlink()
+            shutil.move(str(product_request.path), options.MOVE)
+            
+
+        if (options.COPY):
+            logger.info('Copying: {1} <=  {0}'.format(product_request.path, options.COPY) )    
+            shutil.copy(str(product_request.path), options.COPY)
             
     else:
         logger.warning('Could not parse product')
