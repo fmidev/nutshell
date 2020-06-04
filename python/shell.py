@@ -94,7 +94,13 @@ class Task:
             self.status = HTTPStatus.NOT_FOUND
             return
 
-        stdout,stderr = p.communicate()
+        try:
+            stdout,stderr = p.communicate()
+        except:
+            self.log.warn('Could not read stdout/stderr of {0}'.format(self.script))
+            self.status = HTTPStatus.CONFLICT
+            return 
+            
         self.returncode = p.returncode        
 
 

@@ -207,7 +207,9 @@ class ProductServer:
                 product_generator.log.info('Make input: {0} ({1})'.format(i, input))
                 input_prod_info = product.Info(filename = input)
                 product_generator.log.info('Make input: {0} ({1})'.format(i, input_prod_info.PRODUCT_ID))
-                r = self.make_request(input_prod_info, ['MAKE'], [], product_generator.log.getChild("input[{0}]".format(i)))
+                #r = self.make_request(input_prod_info, ['MAKE'], [], product_generator.log.getChild("input[{0}]".format(i)))
+                r = self.make_request(input_prod_info, log = product_generator.log.getChild("input[{0}]".format(i)))
+                # r = self.make_request(input_prod_info, log = product_generator.log)
                 if (r.path):
                     inputs[i] = str(r.path) # sensitive
                     product_generator.log.debug('Success: ' + str(r.path))
@@ -219,6 +221,101 @@ class ProductServer:
         product_generator.env['INPUTKEYS'] = ','.join(sorted(product_generator.inputs.keys()))
         product_generator.env.update(product_generator.inputs)
 
+
+    # UNDER CONSTR. FUTURE OPTION
+    def make_prod(self, pr, directives = None, TEST=False):
+        """
+        Main function.
+
+        :param pr: description of the product (string or nutshell.product.Info)
+        """
+        if (pr.path.exists()):  
+            pr.log.debug('File exists: {0}'.format(pr.path))
+            stat = pr.path.stat()
+            age_mins = round((time.time() - stat.st_mtime) / 60)
+            if (stat.st_size > 0): # Non-empty
+                pr.product_obj = pr.path
+                pr.log.info('File found (age {1}mins): {0}'.format(pr.path, age_mins))
+                pr.set_status(HTTPStatus.OK)
+                return 
+            elif (age_mins > 10): # 10mins
+                pr.log.warn("Empty file found, but over 10 mins old...")
+            else:    
+                pr.product_obj  = '' # BUSY
+                pr.log.warning('BUSY (empty file found)') # TODO riase (prevent deletion)
+                #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
+                if (not TEST):
+                    pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
+                return 
+        else:
+            pr.log.debug('File not found: {0}'.format(pr.path))
+            if (pr.product_info.TIMESTAMP == 'LATEST'):
+                pr.log.warn("LATEST-file not found (cannot generate it)")
+                pr.set_status(HTTPStatus.NOT_FOUND) 
+                return 
+
+        # only TEST at this point
+        if (pr.script.exists()):
+            pr.log.debug('Generator script ok: {0}'.format(pr.script))
+        else:
+            pr.log.warning('Generator script not found: {0}'.format(pr.script))
+            # Consider case of copied valid product (without local generator)            
+            pr.path = ''
+            if (not TEST):
+                pr.set_status(HTTPStatus.NOT_IMPLEMENTED) # Not Implemented
+                return
+
+        # TODO: if not stream?
+        pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
+        self.ensure_output_dir(pr.path_tmp.parent)
+        self.ensure_output_dir(pr.path.parent)
+        if (not pr.path.exists()):
+            pr.path.touch()
+            
+        # Runs input.sh
+        #if (MAKE or INPUTS or CHECK):  
+        pr.log.debug('Querying input list (dependencies)')
+        input_info = pr.get_input_list(directives)
+        if (input_info.returncode != 0):
+            pr.log.debug('Input scipt problem, return code: {0}'.format(input_info.returncode))
+            if (not TEST):
+                pr.set_status(HTTPStatus.PRECONDITION_FAILED)
+                pr.remove_files()
+                return
+        if (not TEST): 
+            self.retrieve_inputs(pr)
+
+        # MAIN
+        pr.log.info('Generating:  {0}'.format(pr.path))
+        pr.log.debug('Environment: {0}'.format(pr.env))
+
+        pr.run2(directives)
+
+        if (pr.returncode != 0):
+            pr.log.error("Error ({0}): '{1}'".format(pr.returncode, pr.error_info))
+            pr.remove_files()
+            return pr
+            
+        if (not pr.path_tmp.exists()):
+            pr.log.error("generator did not create desired file")
+            pr.remove_files()
+            return pr
+ 
+        if (pr.path_tmp.stat().st_size == 0):
+            pr.log.error("generator failed (empty file intact)")
+            pr.remove_files()
+            return pr
+        
+        pr.log.debug("Final move from tmp")
+        if (pr.path_tmp.is_symlink()):
+            pr.path.unlink()
+            pr.path.symlink_to(pr.path_tmp.resolve())
+        else:    
+            pr.path_tmp.replace(pr.path)
+        pr.set_status(HTTPStatus.OK)
+
+
+        
 
     def make_request(self, product_info, actions = ['MAKE'], directives = None, log = None):
         """
@@ -239,7 +336,8 @@ class ProductServer:
             actions = actions.split(',')
 
         if (type(actions) == list):
-            actions = set(actions)
+            #actions = set(actions) 
+            actions = nutils.read_conf_text(actions)
             
         if (type(directives) == str):
             directives = directives.split(',')
@@ -251,157 +349,98 @@ class ProductServer:
         # Consider rename to Generator
         pr = product.Generator(self, product_info, log) #, actions, directives, log)
 
+        # Future option
         if ('GENERATE' in actions):
-            actions.add('DELETE')
-            actions.add('MAKE')
+            actions['DELETE'] = True
+            actions['MAKE'] = True
+            #actions.add('DELETE')
+            #actions.add('MAKE')
             
         LATEST = ('LATEST' in actions)
         LINK =   ('LINK'   in actions)  
         
-        COPY = ('COPY' in directives)
-        MOVE = ('MOVE' in directives)
+        COPY = actions.get('COPY')  # in actions) # directives)
+        MOVE = actions.get('MOVE') # in actions) # directives)
          
         if (LINK or LATEST or COPY or MOVE):
-            actions.add('MAKE')          
+            actions['MAKE'] = True
+            #actions['CHECK'] = True
+            #actions.add('MAKE')          
+            #actions.add('CHECK') # dont return...
         
         MAKE   = ('MAKE'   in actions)     
         
-        INPUTS = ('INPUTS' in actions)     
+        #INPUTS = ('INPUTS' in actions)     
         DELETE = ('DELETE' in actions)     
-        CHECK  = ('CHECK'  in actions) 
-
-
-       
+        TEST  = ('CHECK'  in actions) 
+                
         # LOG =    ('LOG'    in pr.directives)        
         # DEBUG =  ('DEBUG'  in pr.directives)        
-        
-        if (pr.path.exists()):  
-            pr.log.debug('File exists: {0}'.format(pr.path))
-            if (DELETE):
-                pr.remove_files()
-                pr.set_status(HTTPStatus.ACCEPTED)  #202 # Accepted
-            elif (MAKE): # PATH_ONLY
-                stat = pr.path.stat()
-                age_mins = round((time.time() - stat.st_mtime) / 60)
-                if (stat.st_size > 0): # Non-empty
-                    pr.product_obj = pr.path
-                    pr.log.info('File found (age {1}mins): {0}'.format(pr.path, age_mins))
-                    if (not CHECK):
-                        pr.set_status(HTTPStatus.OK)
-                        return pr
-                elif (age_mins > 10): # 10mins
-                    pr.log.warn("Empty file found, but over 10 mins old...")
-                else:    
-                    pr.product_obj  = '' # BUSY
-                    pr.log.warning('BUSY (empty file found)') # TODO riase (prevent deletion)
-                    #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
-                    if (not CHECK):
-                        pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
-                        return pr
-        else:
-            pr.log.debug('File not found: {0}'.format(pr.path))
-            if (product_info.TIMESTAMP == 'LATEST'):
-                pr.log.warn("LATEST-file not found (cannot generate it)")
-                if (not CHECK):
-                    pr.set_status(HTTPStatus.NOT_FOUND) 
-                    return pr
 
-        # only check at this point
-        if (pr.script.exists()):
-            pr.log.debug('Generator script ok: {0}'.format(pr.script))
-        else:
-            pr.log.warning('Generator script not found: {0}'.format(pr.script))
-            # Consider case of copied valid product (without local generator)            
-            pr.path = ''
-            if (not CHECK):
-                pr.set_status(HTTPStatus.NOT_IMPLEMENTED) # Not Implemented
-                return pr
-        
-
-        # TODO: if not stream?
-        if (MAKE):
-            pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
-            self.ensure_output_dir(pr.path_tmp.parent)
-            self.ensure_output_dir(pr.path.parent)
-            if (not pr.path.exists()):
-                pr.path.touch()
-            
-        # Runs input.sh
-        if (MAKE or INPUTS or CHECK):
-            pr.log.debug('Querying input list (dependencies)')
-            input_info = pr.get_input_list(directives)
-            if (input_info.returncode != 0):
-                pr.log.debug('Input scipt problem, return code: {0}'.format(input_info.returncode))
-                if (not CHECK):
-                    pr.set_status(HTTPStatus.PRECONDITION_FAILED)
-                    pr.remove_files()
-                    return pr
-            if (MAKE): 
-                self.retrieve_inputs(pr)
+        # MAIN
+        if (DELETE):
+            if (pr.path.is_file()):
+                pr.path.unlink()
 
         # MAIN
         if (MAKE):
-            pr.log.info('Generating:  {0}'.format(pr.path))
-            pr.log.debug('Environment: {0}'.format(pr.env))
+            pr.log.warn("Making... {0}".format(pr.path.name)) 
+            self.make_prod(pr, directives, TEST) 
+        else:
+            pr.log.warn("NOT Making... {0}".format(pr.path.name)) 
 
-            pr.run2(directives)
-
-            if (pr.returncode != 0):
-                pr.log.error("Error ({0}): '{1}'".format(pr.returncode, pr.error_info))
-                pr.remove_files()
-                return pr
-                
-            if (not pr.path_tmp.exists()):
-                pr.log.error("generator did not create desired file")
-                pr.remove_files()
-                return pr
- 
-            if (pr.path_tmp.stat().st_size == 0):
-                pr.log.error("generator failed (empty file intact)")
-                pr.remove_files()
-                return pr
+        if (pr.status != HTTPStatus.OK):
+            pr.log.warn("Make status: {0}".format(pr.status)) 
+            pr.log.warn(pr.status) 
+            pr.log.warn("Make failed: {0}".format(pr.path.name)) 
+            return pr              
             
-            pr.log.debug("Final move from tmp")
-            if (pr.path_tmp.is_symlink()):
-                pr.path.unlink()
-                pr.path.symlink_to(pr.path_tmp.resolve())
-            else:    
-                pr.path_tmp.replace(pr.path)
-            pr.set_status(HTTPStatus.OK)
+          
+        try:
+
+            if LINK: #and pr.product_info.TIMESTAMP:
+                pr.log.info('Linking: {0}'.format(pr.path_static))
+                self.ensure_output_dir(pr.path_static.parent)
+                nutils.symlink(pr.path_static, pr.path)
+     
+            if LATEST:
+                pr.log.info('LATEST: {0} '.format(pr.path_latest))
+                self.ensure_output_dir(pr.path_latest.parent)
+                nutils.symlink(pr.path_latest, pr.path, True)
                 
-            try:
-                if (LINK): #and pr.product_info.TIMESTAMP:
-                    pr.log.info('Linking: {0}'.format(pr.path_static))
-                    self.ensure_output_dir(pr.path_static.parent)
-                    nutils.symlink(pr.path_static, pr.path)
-         
-                if (LATEST):
-                    pr.log.info('LATEST: {0} '.format(pr.path_latest))
-                    self.ensure_output_dir(pr.path_latest.parent)
-                    nutils.symlink(pr.path_latest, pr.path, True)
-            except:
-                 pr.log.warn("Linking file failed")               
+        except Exception as err:
+            pr.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+            pr.log.warn("Linking file failed: {0}".format(err))               
 
-            try:
-                if COPY:
-                    COPY = directives['COPY']
-                    logger.info('Copying: {1} <=  {0}'.format(pr.path, COPY) )    
-                    shutil.copy(str(pr.path), COPY)
-       
-                if (options.MOVE):
-                    MOVE = directives['MOVE']
-                    logger.info('Moving: {1} <=  {0}'.format(pr.path, MOVE) )    
-                    # product_request.path.rename(options.MOVE) does not accept plain dirname
-                    path = Path(MOVE)
-                    if (path.is_dir()):
-                        path = path.joinpath(pr.path.name)
-                    if (path.exists()):
-                        path.unlink()
-                    shutil.move(str(pr.path), MOVE)
-            except:
-                 pr.log.warn("Copying/moving file failed")               
 
-            pr.log.info('Success: {0}'.format(pr.path))
+        try:
+
+            if COPY:
+                #COPY = directives['COPY']
+                pr.log.info('Copying: {1} <=  {0}'.format(pr.path, COPY) )    
+                path = Path(COPY)
+                if (path.is_dir()): # shutil does not need this...
+                    path = path.joinpath(pr.path.name)
+                if (path.exists()):
+                    path.unlink()
+                shutil.copy(str(pr.path), str(COPY))
+   
+            if MOVE:
+                #MOVE = directives['MOVE']
+                pr.log.info('Moving: {1} <=  {0}'.format(pr.path, MOVE) )    
+                # product_request.path.rename(options.MOVE) does not accept plain dirname
+                path = Path(MOVE)
+                if (path.is_dir()): # ...but shutil needs this
+                    path = path.joinpath(pr.path.name)
+                if (path.exists()):
+                    path.unlink()
+                shutil.move(str(pr.path), str(MOVE))
+
+        except Exception as err:
+            pr.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+            pr.log.warn("Copying/moving file failed: {0}".format(err))               
+
+        pr.log.info('Success: {0}'.format(pr.path))
               
         return pr
     
@@ -535,34 +574,41 @@ if __name__ == '__main__':
     #nutils.print_dict(product_server.get_status())
     logger.debug(product_server.get_status())
      
-    actions = []
+    actions = {} # []
 
     if (options.REQUEST):
-        actions.extend(options.REQUEST.split(','))
-
+        # actions.extend(options.REQUEST.split(','))
+        actions = nutils.read_conf_text(options.REQUEST.split(','))
     
-    for i in ['DELETE', 'MAKE', 'INPUTS', 'LINK', 'LATEST']:
-        if (getattr(options, i)):
-            actions.append(i)
+    for i in ['DELETE', 'MAKE', 'INPUTS', 'LINK', 'LATEST', 'MOVE', 'COPY']:
+        value = getattr(options, i)
+        if (value): # Boolean ok, no numeric args expected, especially not zero
+            actions[i] = value
+#       #if (getattr(options, i)):
+        #    actions[i] = True  # Bool ok, not exported to env
+    
 
     if (not actions):
-        actions.append('MAKE')
+        actions['MAKE'] = True
+        #actions.append('MAKE')
 
     directives = {}
     if (options.DIRECTIVES):
         #directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
         directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
         print(directives)
+
+#    for i in ['MOVE', 'COPY']:
+#        value = getattr(options, i)
+#        if (value):
+#            actions[i] = value
+#            #actions.append(i)
     
-    for i in ['MOVE', 'COPY']:
-        value = getattr(options, i)
-        if (value):
-            directives[i] = value
         
     if (product_info.PRODUCT_ID and product_info.FORMAT):
         
-        logger.info('Requests:   {0}'.format(str(actions)))
-        logger.info('Directives: {0}'.format(str(directives)))
+        logger.info('Requests:   {0}'.format(actions))
+        logger.info('Directives: {0}'.format(directives))
 
         product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
         #logger.debug(product_request)

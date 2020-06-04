@@ -498,7 +498,7 @@ class Generator(Tasklet):
     
     #actions = []
     #directives = []
-
+    error_info = None
 
     # Status, defined using HTTP status codes
     status = HTTPStatus.OK
