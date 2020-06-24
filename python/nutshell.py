@@ -356,19 +356,21 @@ class ProductServer:
             #actions.add('DELETE')
             #actions.add('MAKE')
             
-        LATEST = ('LATEST' in actions)
-        LINK =   ('LINK'   in actions)  
+        LATEST   = ('LATEST' in actions)
+        SHORTCUT = ('SHORTCUT' in actions)
+
+        LINK = actions.get('LINK') #   in actions)  
         
         COPY = actions.get('COPY')  # in actions) # directives)
         MOVE = actions.get('MOVE') # in actions) # directives)
          
-        if (LINK or LATEST or COPY or MOVE):
+        if (SHORTCUT or LATEST or LINK or COPY or MOVE):
             actions['MAKE'] = True
             #actions['CHECK'] = True
             #actions.add('MAKE')          
             #actions.add('CHECK') # dont return...
         
-        MAKE   = ('MAKE'   in actions)     
+        MAKE = ('MAKE'   in actions)     
         
         #INPUTS = ('INPUTS' in actions)     
         DELETE = ('DELETE' in actions)     
@@ -392,14 +394,14 @@ class ProductServer:
         if (pr.status != HTTPStatus.OK):
             pr.log.warn("Make status: {0}".format(pr.status)) 
             pr.log.warn(pr.status) 
-            pr.log.warn("Make failed: {0}".format(pr.path.name)) 
+            pr.log.warn("Make failed: {0}".format(pr.path)) 
             return pr              
             
           
         try:
 
-            if LINK: #and pr.product_info.TIMESTAMP:
-                pr.log.info('Linking: {0}'.format(pr.path_static))
+            if SHORTCUT: #and pr.product_info.TIMESTAMP:
+                pr.log.info('SHORTCUT: {0}'.format(pr.path_static))
                 self.ensure_output_dir(pr.path_static.parent)
                 nutils.symlink(pr.path_static, pr.path)
      
@@ -414,6 +416,17 @@ class ProductServer:
 
 
         try:
+
+            if LINK:
+                #COPY = directives['COPY']
+                pr.log.info('Linking: {1} <=  {0}'.format(pr.path, LINK) )    
+                path = Path(LINK)
+                if (path.is_dir()): # shutil does not need this...
+                    path = path.joinpath(pr.path.name)
+                if (path.exists()):
+                    path.unlink()
+                #shutil.copy(str(pr.path), str(COPY))
+                nutils.symlink(path, pr.path, True)  
 
             if COPY:
                 #COPY = directives['COPY']
@@ -503,25 +516,31 @@ if __name__ == '__main__':
     #logger.debug("parsing arguments")
     
     parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
-    
-    parser.add_argument("-M", "--move", metavar="<path>",
-                        dest="MOVE",
-                        default='',
-                        help="Move output file from cache")
-    
-    parser.add_argument("-L", "--link",
-                        dest="LINK",
-                        action="store_true",
-                        help="Link product file, same as -r LINK")
 
-    parser.add_argument("-C", "--copy", metavar="<path>",
-                        dest="COPY",
-                        help="Copy product file")
+    parser.add_argument("-S", "--shortcut",
+                        dest="SHORTCUT",
+                        action="store_true",
+                        help="Add link from static to timestamped dir, equals -r SHORTCUT")
 
     parser.add_argument("-Z", "--latest",
                         dest="LATEST",
                         action="store_true",
-                        help="Link latest product file, same as -r LATEST")
+                        help="Add link with timestamp replaced with 'LATEST', same as -r LATEST")
+    
+    parser.add_argument("-M", "--move", metavar="<path>",
+                        dest="MOVE",
+                        default='',
+                        help="Move resulting file, equals -r MOVE=<path>")
+    
+    parser.add_argument("-L", "--link", metavar="<path>",
+                        dest="LINK",
+                        default='',
+                        help="Link resulting file, equals -r LINK=<path>")
+
+    parser.add_argument("-C", "--copy", metavar="<path>",
+                        dest="COPY",
+                        help="Copy resulting file, equals -r COPY=<path>")
+
 
     # Raise? Could be http default directives?
     parser.add_argument("-D", "--directives",
@@ -580,7 +599,8 @@ if __name__ == '__main__':
         # actions.extend(options.REQUEST.split(','))
         actions = nutils.read_conf_text(options.REQUEST.split(','))
     
-    for i in ['DELETE', 'MAKE', 'INPUTS', 'LINK', 'LATEST', 'MOVE', 'COPY']:
+    # , 'TEST'
+    for i in ['DELETE', 'MAKE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
         value = getattr(options, i)
         if (value): # Boolean ok, no numeric args expected, especially not zero
             actions[i] = value

@@ -190,7 +190,7 @@ class Info:
             self.EXTENSION = self.FORMAT+'.'+self.COMPRESSION
         else:
             m = Info.extensionRe.match(extension)
-            print (m)
+            # print (m)
             if (m):
                 # replace None's with empty string
                 m = m.groups('')
@@ -199,7 +199,7 @@ class Info:
                 self.COMPRESSION = ''
             else:
                 raise SyntaxError("could nut parse: " + extension)
-        print (self.__dict__)
+        # print (self.__dict__)
 
     # NOTE: remove PARAMS!
     # Consider typing (int, str)
