@@ -286,7 +286,7 @@ class ProductServer:
             self.retrieve_inputs(pr)
 
         # MAIN
-        pr.log.info('Generating:  {0}'.format(pr.path))
+        pr.log.info('Generating:  {0}'.format(pr.path.name))
         pr.log.debug('Environment: {0}'.format(pr.env))
 
         pr.run2(directives)
