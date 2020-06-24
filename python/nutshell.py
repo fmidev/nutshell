@@ -235,7 +235,7 @@ class ProductServer:
             age_mins = round((time.time() - stat.st_mtime) / 60)
             if (stat.st_size > 0): # Non-empty
                 pr.product_obj = pr.path
-                pr.log.info('File found (age {1}mins): {0}'.format(pr.path, age_mins))
+                pr.log.info('File found (age {1}mins, size {2}): {0}'.format(pr.path, age_mins, stat.st_size))
                 pr.set_status(HTTPStatus.OK)
                 return 
             elif (age_mins > 10): # 10mins
@@ -386,10 +386,10 @@ class ProductServer:
 
         # MAIN
         if (MAKE):
-            pr.log.warn("Making... {0}".format(pr.path.name)) 
+            pr.log.info("Making... {0}".format(pr.path.name)) 
             self.make_prod(pr, directives, TEST) 
         else:
-            pr.log.warn("NOT Making... {0}".format(pr.path.name)) 
+            pr.log.info("NOT Making... {0}".format(pr.path.name)) 
 
         if (pr.status != HTTPStatus.OK):
             pr.log.warn("Make status: {0}".format(pr.status)) 
