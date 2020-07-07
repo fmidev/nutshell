@@ -110,6 +110,20 @@ directives determine how the product is generated.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="nutshell.nutshell.ProductServer.make_prod">
+<code class="descname">make_prod</code><span class="sig-paren">(</span><em>pr</em>, <em>directives=None</em>, <em>TEST=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_prod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_prod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pr</strong> &#8211; description of the product (string or nutshell.product.Info)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="nutshell.nutshell.ProductServer.make_request">
 <code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, actions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function.</p>
@@ -132,6 +146,12 @@ the file (if succefully generated) and information about the process.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nutshell.nutshell.ProductServer.read_conf">
+<code class="descname">read_conf</code><span class="sig-paren">(</span><em>conffile='nutshell.cnf'</em>, <em>strict=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.read_conf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.read_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read given conf file, if it exists. Raise error, if strict.</p>
 </dd></dl>
 
 </dd></dl>
@@ -241,7 +261,7 @@ Setting is logged.</p>
 <dd><p>Stores product information, especially <code class="docutils literal"><span class="pre">PRODUCT_ID</span></code>, 
 <code class="docutils literal"><span class="pre">TIMESTAMP</span></code> (if applicable), file <code class="docutils literal"><span class="pre">FORMAT</span></code>, 
 and product-specific free parameters.</p>
-<p><strong>Parameters</strong> handled as with Info.set(). Key parameters are 
+<p><strong>Parameters</strong> handled as with Info.set_product(). Key parameters are 
 mutually exclusive.</p>
 <dl class="docutils">
 <dt>Examples of allowed calls, with <code class="docutils literal"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
@@ -267,36 +287,6 @@ product generation directories or scripts exist.</p>
 <dt id="nutshell.product.Info.get_arg_parser">
 <em class="property">classmethod </em><code class="descname">get_arg_parser</code><span class="sig-paren">(</span><em>parser=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_arg_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_arg_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populates parser with options of this class</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nutshell.product.Info.get_param_env_OLD">
-<code class="descname">get_param_env_OLD</code><span class="sig-paren">(</span><em>env=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.get_param_env_OLD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.get_param_env_OLD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append or create dict with TIMESTAMP and params</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nutshell.product.Info.set">
-<code class="descname">set</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configure a product.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>product</strong> &#8211; product id string, requires explicit kwargs</li>
-<li><strong>product_id</strong> &#8211; product id string.</li>
-<li><strong>filename</strong> &#8211; product description presented as a filename</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">instance (possibly incomplete, to be adjusted with separate 
-method calls)</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p>See <span class="xref std std-ref">product.info</span>. Parameters equivalent at initialisation.</p>
 </dd></dl>
 
 <dl class="method">
@@ -337,6 +327,30 @@ string but hopefully stringifiable</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="nutshell.product.Info.set_product">
+<code class="descname">set_product</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_product"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure a product.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>product</strong> &#8211; product id string, requires explicit kwargs</li>
+<li><strong>product_id</strong> &#8211; product id string.</li>
+<li><strong>filename</strong> &#8211; product description presented as a filename</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">instance (possibly incomplete, to be adjusted with separate 
+method calls)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>See <span class="xref std std-ref">product.info</span>. Parameters equivalent at initialisation.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="nutshell.product.Info.set_timestamp">
 <code class="descname">set_timestamp</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info.set_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info.set_timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set UTC time in numeric format &#8216;%Y%m%d%H%M&#8217;, &#8216;LATEST&#8217;, or &#8216;TIMESTAMP&#8217;</p>
@@ -368,7 +382,7 @@ Consequently, possible <em>time zones</em> will be also discarded.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>logfile_basename</strong> &#8211; Leading part of logs, &#8216;.err&#8217; and &#8216;.out&#8217; will be added.</li>
-<li><strong>logfile_save_thereshold</strong> &#8211; Save stderr and stdout to logs, if
+<li><strong>logfile_level</strong> &#8211; Save stderr and stdout to logs, if
 this threshold is at least logging.ERROR and logging.DEBUG, respecively</li>
 <li><strong>directives[dict]</strong> &#8211; Additional instructions to the script</li>
 </ul>

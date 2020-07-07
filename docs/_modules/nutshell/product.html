@@ -109,7 +109,7 @@
 <span class="sd">    ``TIMESTAMP`` (if applicable), file ``FORMAT``, </span>
 <span class="sd">    and product-specific free parameters.</span>
 <span class="sd">    </span>
-<span class="sd">    **Parameters** handled as with Info.set(). Key parameters are </span>
+<span class="sd">    **Parameters** handled as with Info.set_product(). Key parameters are </span>
 <span class="sd">    mutually exclusive.</span>
 <span class="sd">          </span>
 <span class="sd">    Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
@@ -134,6 +134,7 @@
     <span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="n">PRODUCT_ID</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="n">PARAMETERS</span> <span class="o">=</span> <span class="bp">None</span> <span class="c1">#{}</span>
+    <span class="n">INPUT_PARAMETERS</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="c1">#PARAMS = None #[]</span>
     <span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="n">COMPRESSION</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -156,7 +157,7 @@
     <span class="n">prodRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Info.set"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Info.set_product"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_product">[docs]</a>    <span class="k">def</span> <span class="nf">set_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Configure a product.</span>
 
 <span class="sd">        :param product: product id string, requires explicit kwargs</span>
@@ -244,7 +245,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">Info</span><span class="o">.</span><span class="n">extensionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
-            <span class="k">print</span> <span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="c1"># print (m)</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">):</span>
                 <span class="c1"># replace None&#39;s with empty string</span>
                 <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -252,8 +253,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;could nut parse: &quot;</span> <span class="o">+</span> <span class="n">extension</span><span class="p">)</span>
-        <span class="k">print</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span></div>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;could nut parse: &quot;</span> <span class="o">+</span> <span class="n">extension</span><span class="p">)</span></div>
+        <span class="c1"># print (self.__dict__)</span>
 
     <span class="c1"># NOTE: remove PARAMS!</span>
     <span class="c1"># Consider typing (int, str)</span>
@@ -326,7 +327,12 @@
                 <span class="c1"># pindex = 0</span>
                 <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span> <span class="c1">#self.PARAMS:</span>
                     <span class="n">entry</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;INPUT_PARAMETERS =&gt; {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span>                        
+                        <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)</span>
                     <span class="c1">#if (len(entry) == 1):</span>
                     <span class="c1">#    self.set_parameter(&#39;P&#39;+str(pindex), entry[0])</span>
 
@@ -350,12 +356,22 @@
             <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">)</span>
         <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+                <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
                     <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
         <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1"># FORMAT)</span>
 
     <span class="k">def</span> <span class="nf">get_static_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -383,31 +399,34 @@
 
     <span class="k">def</span> <span class="nf">get_param_env</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tasklet</span><span class="o">.</span><span class="n">MEMBER_ENV_RE</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-        <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PARAMETERS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># kludge</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">)</span> 
+        <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PARAMETERS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># overwrite kludge</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="p">):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">)</span>  <span class="c1"># overrides INPUT_PARAMETERS</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
             <span class="n">parse_timestamp2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
-        <span class="c1"># env[&#39;PRODUCT&#39;] = self.PRODUCT_ID</span>
+        <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PRODUCT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="c1"># temporary (rack-tile)</span>
         <span class="k">return</span> <span class="n">env</span>
     
-<div class="viewcode-block" id="Info.get_param_env_OLD"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.get_param_env_OLD">[docs]</a>    <span class="k">def</span> <span class="nf">get_param_env_OLD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Append or create dict with TIMESTAMP and params&quot;&quot;&quot;</span>
-        <span class="sd">&quot;&quot;&quot; Uses PRODUCT instead of ID which is too general (example: &quot;radar.rack.comp&quot;)&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">env</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
-            <span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Start with these (and override with &#39;system&#39; variables below).</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
-            <span class="n">parse_timestamp2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
-
-        <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PRODUCT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FORMAT&#39;</span><span class="p">,</span> <span class="s1">&#39;COMPRESSION&#39;</span><span class="p">,</span> <span class="s1">&#39;EXTENSION&#39;</span><span class="p">]:</span>
-            <span class="n">env</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">env</span></div>
+<span class="c1">#    def get_param_env_OLD(self, env=None):</span>
+<span class="c1">#        &quot;&quot;&quot; Append or create dict with TIMESTAMP and params&quot;&quot;&quot;</span>
+<span class="c1">#        &quot;&quot;&quot; Uses PRODUCT instead of ID which is too general (example: &quot;radar.rack.comp&quot;)&quot;&quot;&quot;</span>
+<span class="c1">#        if (env == None):</span>
+<span class="c1">#            env = {}</span>
+<span class="c1">#</span>
+<span class="c1">#        # Start with these (and override with &#39;system&#39; variables below).</span>
+<span class="c1">#        env.update(self.PARAMETERS)</span>
+<span class="c1">#</span>
+<span class="c1">#        if (self.TIMESTAMP):</span>
+<span class="c1">#            parse_timestamp2(self.TIMESTAMP, env)</span>
+<span class="c1">#</span>
+<span class="c1">#        env[&#39;PRODUCT&#39;] = self.PRODUCT_ID</span>
+<span class="c1">#</span>
+<span class="c1">#        for i in [&#39;FORMAT&#39;, &#39;COMPRESSION&#39;, &#39;EXTENSION&#39;]:</span>
+<span class="c1">#            env[i] = getattr(self, i, &quot;&quot;)</span>
+<span class="c1">#</span>
+<span class="c1">#        return env</span>
         
 <span class="c1">#    def get_signature(self):</span>
 <span class="c1">#        body = []</span>
@@ -423,8 +442,8 @@
 
     <span class="c1"># Todo: params</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;See :ref:`product.info`. Parameters equivalent with those of set().&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">product_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;See :ref:`product.info`. Parameters equivalent with those of set_product().&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">product_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
             
@@ -534,7 +553,7 @@
     
     <span class="c1">#actions = []</span>
     <span class="c1">#directives = []</span>
-
+    <span class="n">error_info</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># Status, defined using HTTP status codes</span>
     <span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span>
@@ -571,7 +590,7 @@
         <span class="n">input_query</span><span class="o">.</span><span class="n">run2</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="c1">## TODO: directives</span>
     
         <span class="k">if</span> <span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> 
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+            <span class="c1">#log.debug(type(input_query.stdout))</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;empty stdout of input declaration script {0}:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -708,7 +727,7 @@
     <span class="c1">#if (options.PRODUCT):</span>
     <span class="c1">#    product_info.set_id(options.PRODUCT)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
     <span class="c1">#    product_info. _parse_filename(options.PRODUCT)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;product not defined&quot;</span><span class="p">)</span>
@@ -717,7 +736,7 @@
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SIZE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">640</span><span class="p">,</span><span class="mi">400</span><span class="p">],</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">:</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}</span>
         <span class="c1">#product_info.set_product(options.SET, **args)</span>
-        <span class="n">product_info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
         <span class="n">product_info</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">)</span>
