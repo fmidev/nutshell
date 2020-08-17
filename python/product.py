@@ -535,7 +535,7 @@ class Generator(Tasklet):
         input_query.run2(directives) ## TODO: directives
     
         if (input_query.returncode == 0): 
-            log.info(type(input_query.stdout))
+            #log.debug(type(input_query.stdout))
             if (input_query.stdout == ''):
                 log.warning("empty stdout of input declaration script {0}:".format(input_query.script))
             else:

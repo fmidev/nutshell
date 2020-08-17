@@ -79,6 +79,8 @@ class Task:
         if (directives):
             env.update(directives)
         
+        self.log.info('Running: {0}'.format(self.script)) 
+        
         p = subprocess.Popen(str(self.script),
                              cwd=str(self.script.parent),
                              stdout=self.stdout, # always
