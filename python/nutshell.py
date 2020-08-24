@@ -638,8 +638,10 @@ if __name__ == '__main__':
             logger.info(product_request.inputs)
     
         logger.info(product_request.status)    
-        
-             
+        if (product_request.status == HTTPStatus.OK):
+            exit(0)
+        else:
+            exit(1)  # consider STATUS / 10 etc
     else:
         logger.warning('Could not parse product')
         exit(1)
