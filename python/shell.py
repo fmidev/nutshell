@@ -80,6 +80,9 @@ class Task:
             env.update(directives)
         
         self.log.info('Running: {0}'.format(self.script)) 
+
+        #new_d = {str(key): str(value) for key, value in d.items()}
+        env = {str(key): str(value) for key, value in env.items()}
         
         p = subprocess.Popen(str(self.script),
                              cwd=str(self.script.parent),
