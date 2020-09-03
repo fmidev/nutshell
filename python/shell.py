@@ -91,7 +91,7 @@ class Task:
                              shell=True,
                              #text=True,
                              universal_newlines=True,
-                             env=map(str,env))           
+                             env=env)           
  
         if (not p):
             self.log.warn('Could not run process: {0}'.format(self.script)) 

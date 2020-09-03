@@ -306,12 +306,19 @@ class ProductServer:
             pr.remove_files()
             return pr
         
-        pr.log.debug("Final move from tmp")
+        pr.log.debug("Finally, move main product from tmp")
         if (pr.path_tmp.is_symlink()):
             pr.path.unlink()
             pr.path.symlink_to(pr.path_tmp.resolve())
         else:    
             pr.path_tmp.replace(pr.path)
+
+        globber = "{0}*".format(pr.path_tmp.stem) # note: dot omitten on purpose
+        pr.log.debug("Move remaiming (auxiliary) files from tmp: {0}".format(globber))
+        for p in pr.path_tmp.parent.glob(globber):
+            pr.log.debug("move {0}".format(p))
+            p.replace(pr.path.parent.joinpath(p.name))
+        
         pr.set_status(HTTPStatus.OK)
 
 
@@ -597,7 +604,7 @@ if __name__ == '__main__':
 
     if (options.REQUEST):
         # actions.extend(options.REQUEST.split(','))
-        actions = nutils.read_conf_text(options.REQUEST.split(','))
+        actions = nutils.read_conf_text(options.REQUEST.split(',')) # No values using ','?
     
     # , 'TEST'
     for i in ['DELETE', 'MAKE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
@@ -614,8 +621,9 @@ if __name__ == '__main__':
 
     directives = {}
     if (options.DIRECTIVES):
-        #directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
-        directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
+        # directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
+        # directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
+        directives =  nutils.read_conf_text(options.DIRECTIVES.split('|')) 
         print(directives)
 
 #    for i in ['MOVE', 'COPY']:
