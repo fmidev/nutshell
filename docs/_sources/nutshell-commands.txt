@@ -23,11 +23,11 @@ Also know as *actions*
 ``MAKE``     --make, -m     Generate file, if it does not exist (default request)
 ``DELETE``   --delete, -d   Delete the product file in cache dir
 ``GENERATE`` --generate, -g Remake file, even if it exists. Same as ``--delete --make``
-**           --copy, -C     Copy file 
+             --copy, -C     Copy file 
+             --move, -m     Move file 
 	     --link, -l     Link file 
-	     --move, -m     Move file 
 ``SHORTCUT`` --shortcut     Link file to short directory
-``LATEST``   --latest, -L   Link file with ``$TIMESTAMP`` replaced with ``'LATEST'``
+``LATEST``   --latest, -L   Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
 ``INPUTS``   --inputs, -I   Check inputs
 ============ ============== ======
 
@@ -62,12 +62,8 @@ Built-in directives
 
 ========== ============================================================
 ``LOG``    Save log
-``LINK``    Save log
-``MOVE``    Save log
-``LOG``    Save log
 ``STATUS`` Also after successful ``MAKE`` return the status page (HTML)
 ``NICE``   Generate a product with lower CPU priority
-``LOG``    Save log 
 ========== ============================================================
 
 

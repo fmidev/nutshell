@@ -361,12 +361,19 @@
             <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">pr</span>
         
-        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Final move from tmp&quot;</span><span class="p">)</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finally, move main product from tmp&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()):</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
             <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>    
             <span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">globber</span> <span class="o">=</span> <span class="s2">&quot;{0}*&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span> <span class="c1"># note: dot omitten on purpose</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Move remaiming (auxiliary) files from tmp: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">globber</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">globber</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;move {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        
         <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">)</span></div>
 
 
@@ -652,7 +659,7 @@
 
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">):</span>
         <span class="c1"># actions.extend(options.REQUEST.split(&#39;,&#39;))</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">REQUEST</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">REQUEST</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="c1"># No values using &#39;,&#39;?</span>
     
     <span class="c1"># , &#39;TEST&#39;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="s1">&#39;MAKE&#39;</span><span class="p">,</span> <span class="s1">&#39;INPUTS&#39;</span><span class="p">,</span> <span class="s1">&#39;SHORTCUT&#39;</span><span class="p">,</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">,</span> <span class="s1">&#39;LINK&#39;</span><span class="p">,</span> <span class="s1">&#39;MOVE&#39;</span><span class="p">,</span> <span class="s1">&#39;COPY&#39;</span><span class="p">]:</span>
@@ -669,8 +676,9 @@
 
     <span class="n">directives</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="p">):</span>
-        <span class="c1">#directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
-        <span class="n">directives</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="c1"># whattabout comma in arg?</span>
+        <span class="c1"># directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
+        <span class="c1"># directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
+        <span class="n">directives</span> <span class="o">=</span>  <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">))</span> 
         <span class="k">print</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
 
 <span class="c1">#    for i in [&#39;MOVE&#39;, &#39;COPY&#39;]:</span>
@@ -693,8 +701,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
     
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>    
-        
-             
+        <span class="k">if</span> <span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">):</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># consider STATUS / 10 etc</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Could not parse product&#39;</span><span class="p">)</span>
         <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
