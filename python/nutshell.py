@@ -222,12 +222,55 @@ class ProductServer:
         product_generator.env.update(product_generator.inputs)
 
 
-    # UNDER CONSTR. FUTURE OPTION
+    def query_file(self, pr):
+        """
+        Main function.
+
+        :param pr[nutshell.product.Info]: description of the product (string or nutshell.product.Info)
+        """
+        if (pr.path.exists()):  
+            pr.log.debug('File exists: {0}'.format(pr.path))
+            stat = pr.path.stat()
+            age_mins = round((time.time() - stat.st_mtime) / 60)
+            if (stat.st_size > 0): # Non-empty
+                pr.product_obj = pr.path
+                pr.log.info('File found (age {1}mins, size {2}): {0}'.format(pr.path, age_mins, stat.st_size))
+                pr.set_status(HTTPStatus.OK)
+            elif (age_mins > 10):
+                pr.log.warn("Empty file found, but over 10 mins old...")
+                # set status? WAIT?
+            else:    
+                pr.log.warn('BUSY (empty file, under generation?)') # TODO raise (prevent deletion)
+                pr.product_obj  = '' # BUSY
+                for i in range(1,5):
+                    stat = pr.path.stat()
+                    if (stat.st_size > 0): 
+                        pr.set_status(HTTPStatus.OK)
+                        pr.log.warn("OK GO!! <-- found {0}".format(pr.path))
+                        continue
+                    else:
+                        pr.log.info("Sleep {0} seconds...".format(i*i))
+                        time.sleep(i*i)
+                ## TODO: waitFor(file, 8)
+                #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
+                #if (not TEST):
+                pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
+                # return 
+        else:
+            pr.log.debug('File not found: {0}'.format(pr.path))
+            if (pr.product_info.TIMESTAMP == 'LATEST'):
+                pr.log.warn("LATEST-file not found (cannot generate it)")
+                pr.set_status(HTTPStatus.NOT_FOUND) 
+                # return 
+        
     def make_prod(self, pr, directives = None, TEST=False):
         """
         Main function.
 
-        :param pr: description of the product (string or nutshell.product.Info)
+        :param pr[nutshell.product.Info]: description of the product
+        """
+
+        self.query_file(pr)
         """
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
@@ -242,7 +285,7 @@ class ProductServer:
                 pr.log.warn("Empty file found, but over 10 mins old...")
             else:    
                 pr.product_obj  = '' # BUSY
-                pr.log.warning('BUSY (empty file found)') # TODO riase (prevent deletion)
+                pr.log.warning('BUSY (empty file, under generation?)') # TODO riase (prevent deletion)
                 #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
                 if (not TEST):
                     pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
@@ -253,7 +296,10 @@ class ProductServer:
                 pr.log.warn("LATEST-file not found (cannot generate it)")
                 pr.set_status(HTTPStatus.NOT_FOUND) 
                 return 
-
+        """
+        if (pr.status == HTTPStatus.OK):
+            return
+        
         # only TEST at this point
         if (pr.script.exists()):
             pr.log.debug('Generator script ok: {0}'.format(pr.script))

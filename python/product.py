@@ -35,7 +35,7 @@ from . import shell
 
 def parse_timestamp2(timestamp, result = {}):
     if (timestamp):
-        t = re.sub("\W", "", timestamp)
+        t = re.sub(r"\W", "", timestamp)
         result['TIMESTAMP'] = t[0:12] # empty ok?
         result['YEAR']      = t[0:4]
         result['MONTH']     = t[4:6]
@@ -89,17 +89,17 @@ class Info:
 
     # Resolve compression, if any. Plain compression not accepted, base format has to appear.
     # compressionRe = re.compile("^(.*\\.[a-z][a-z0-9]*)\\.(zip|gz)$")
-    compressionRe = re.compile("^(.*)\\.(zip|gz)$")
+    compressionRe = re.compile(r"^(.*)\.(zip|gz)$")
 
     # Resolve extension = <format>.<compression>
     # extensionRe = re.compile("^([a-z][a-z0-9]*)(\\.(zip|gz))?$")
-    extensionRe = re.compile("^((.*)\\.)?([a-z][a-z0-9]*)$")    
+    extensionRe = re.compile(r"^((.*)\.)?([a-z][a-z0-9]*)$")    
 
     # Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
     # filenameRe = re.compile("^((LATEST|[0-9]+)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$")
-    filenameRe = re.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$")
+    filenameRe = re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
 
-    prodRe = re.compile("^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$")
+    prodRe = re.compile(r"^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$")
 
 
     def set_product(self, product=None, filename=None, product_id=None, **kwargs):
@@ -143,7 +143,7 @@ class Info:
             
         if (filename) and (product_id): 
             raise KeyError("both 'filename' and 'product_id' given")
-            return
+            #return
             
         if (filename):  # easiest
             self. _parse_filename(filename)
@@ -290,7 +290,7 @@ class Info:
             
         else:
             #print ("{0}: ERROR in parsing {1}").format(__name__, filename)
-            print ("ERROR in parsing {0}").format(filename)
+            print ("ERROR in parsing {0}".format(filename))
 
         return self
 
