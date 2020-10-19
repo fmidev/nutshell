@@ -55,6 +55,8 @@ class ProductServer:
     SHELL_GENERATOR_SCRIPT = 'generate.sh'
     SHELL_INPUT_SCRIPT = 'input.sh'
 
+    TIMEOUT = 90
+
     # HTTP Server Options (forward defs HTTP server, so perhaps later moved to NutServer )
     HTTP_PORT = 8088
     HTTP_NAME = ''
@@ -98,11 +100,14 @@ class ProductServer:
         # self._init_dir('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
         
     def read_conf(self, conffile = 'nutshell.cnf', strict=True):
-        """Read given conf file, if it exists. Raise error, if strict."""
+        """
+        Read given conf file, if it exists. Raise error, if strict.
+        The entries are copied to respective member of self.
+        """
         if (os.path.exists(conffile)):
             self.logger.debug("reading conf file {0} ".format(conffile))
             result = nutils.read_conf(conffile)
-            # print result
+            # print(result)
             nutils.set_entries(self, result)
             return True
         elif strict:
@@ -242,18 +247,23 @@ class ProductServer:
             else:    
                 pr.log.warn('BUSY (empty file, under generation?)') # TODO raise (prevent deletion)
                 pr.product_obj  = '' # BUSY
-                for i in range(1,5):
+                total_time = 0
+                for i in range(1,10):
+                    i = i*i
+                    total_time += i                        
                     stat = pr.path.stat()
                     if (stat.st_size > 0): 
                         pr.set_status(HTTPStatus.OK)
-                        pr.log.warn("OK GO!! <-- found {0}".format(pr.path))
-                        continue
+                        pr.log.info("OK, finally received: {0}".format(pr.path))
+                        return
                     else:
-                        pr.log.info("Sleep {0} seconds...".format(i*i))
-                        time.sleep(i*i)
-                ## TODO: waitFor(file, 8)
-                #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
-                #if (not TEST):
+                        pr.log.info("Sleep {0} seconds...".format(i))
+                        time.sleep(i)
+
+                    if (total_time > self.TIMEOUT):
+                        pr.log.warn("timeout ({0}s) exceeded".format(self.TIMEOUT))
+                        break
+
                 pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
                 # return 
         else:
@@ -272,30 +282,11 @@ class ProductServer:
 
         self.query_file(pr)
         """
-        if (pr.path.exists()):  
-            pr.log.debug('File exists: {0}'.format(pr.path))
-            stat = pr.path.stat()
-            age_mins = round((time.time() - stat.st_mtime) / 60)
-            if (stat.st_size > 0): # Non-empty
-                pr.product_obj = pr.path
-                pr.log.info('File found (age {1}mins, size {2}): {0}'.format(pr.path, age_mins, stat.st_size))
-                pr.set_status(HTTPStatus.OK)
-                return 
-            elif (age_mins > 10): # 10mins
-                pr.log.warn("Empty file found, but over 10 mins old...")
-            else:    
-                pr.product_obj  = '' # BUSY
-                pr.log.warning('BUSY (empty file, under generation?)') # TODO riase (prevent deletion)
-                #pr.set_status(HTTPStatus.ACCEPTED)  # 202 Accepted
-                if (not TEST):
-                    pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
-                return 
-        else:
-            pr.log.debug('File not found: {0}'.format(pr.path))
-            if (pr.product_info.TIMESTAMP == 'LATEST'):
-                pr.log.warn("LATEST-file not found (cannot generate it)")
-                pr.set_status(HTTPStatus.NOT_FOUND) 
-                return 
+        Check if file exits or is under generation.
+
+        A file is interpreted as being under generation if a corresponding,
+        "relatively new" empty file exists.
+        
         """
         if (pr.status == HTTPStatus.OK):
             return
@@ -409,6 +400,7 @@ class ProductServer:
             #actions.add('DELETE')
             #actions.add('MAKE')
             
+        # Boolean:
         LATEST   = ('LATEST' in actions)
         SHORTCUT = ('SHORTCUT' in actions)
 
@@ -504,7 +496,7 @@ class ProductServer:
 
         except Exception as err:
             pr.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
-            pr.log.warn("Copying/moving file failed: {0}".format(err))               
+            pr.log.warn("Copying/moving/linking file failed: {0}".format(err))               
 
         pr.log.info('Success: {0}'.format(pr.path))
               
@@ -548,6 +540,11 @@ class ProductServer:
                             #default=False,
                             help="Make product, same as -r MAKE")
     
+        parser.add_argument("-t", "--timeout",
+                            dest="TIMEOUT",
+                            default=90,
+                            type=int,
+                            help="Time limit for generating or waiting for a product")
     
         return parser    
 
@@ -600,6 +597,8 @@ if __name__ == '__main__':
                         dest="DIRECTIVES",
                         default='',
                         help="additional instructions: LOG,LINK,LATEST")
+    
+    
     
     #(options, args) = parser.parse_args()
     options = parser.parse_args()

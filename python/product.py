@@ -481,16 +481,17 @@ class Generator(Tasklet):
     product_info = None
     """Specification of a product instance."""
 
-    path = ''
+    #path = ''
+    path = Path('/tmp')
     """System-side full path to a dynamic directory and the generated product file."""
     
     """System-side full path to the generated file, the product."""
-    path_static = ''        
+    path_static = Path('/tmp') # ''        
     
     """Optional: System-side full path to the generated product file."""
-    path_tmp = ''
+    path_tmp = Path('/tmp') # ''
  
-    """Optional: Actual object (for example, python Image in the future) """
+    """Futue extension: resulting object (for example, python Image) """
     product_obj = None
     
     # Later, use (dir + file) object
