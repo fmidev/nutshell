@@ -28,10 +28,13 @@ class Task:
     """Something that has a script, stdin, stdout, env, and log."""
 
     script = None
-    stdout = None
-    stderr = None
     log    = None
     env    = None
+
+    # TODO: redesign this?! Now double behaviour:
+    # TODO: output control (-1 or stream) AND saved output text/stream
+    stdout = None
+    stderr = None
     returncode = 0
     
     def __init__(self, script, env=None, log=None):
@@ -41,8 +44,8 @@ class Task:
         else:
             self.script = script
 
-        self.stdout = subprocess.PIPE
-        self.stderr = subprocess.PIPE
+        self.stdout = subprocess.PIPE # -1 , hence numeric
+        self.stderr = subprocess.PIPE # -1 , hence numeric
 
         if log:
             self.log = log
@@ -121,7 +124,7 @@ class Task:
 
         print ("LOG LEVEL: ", logfile_level)            
             
-        if (stdout):
+        if (stdout): # and (type(stdout) == str)): # 2020/10
             self.stdout = stdout #.decode(encoding='UTF-8') #.strip()
             #self.stdout = str(stdout) #.strip()
             if (p.returncode != 0):
@@ -143,7 +146,7 @@ class Task:
                 self.log.info('Dumping log: {0}'.format(log_stdout))
                 log_stdout.write_text(self.stdout)
                     
-        if (stderr):
+        if (stderr): # and (type(stderr) == str)): # 2020/10
             self.stderr = stderr # .decode(encoding='UTF-8')
             #self.stderr = str(stderr)
             if (logfile_level <= logging.WARN):

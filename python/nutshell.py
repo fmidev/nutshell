@@ -42,6 +42,7 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 
 from . import nutils
 from . import product 
+from . import request
 
 
 
@@ -173,7 +174,7 @@ class ProductServer:
 
         # TODO: directives
 
-        input_query = product.InputQuery(self, product_info) # TODO: directives
+        input_query = request.InputQuery(self, product_info) # TODO: directives
         
         if (not input_query.script.exists()):
             log.debug("No input script: {0}".format(input_query.script))         
@@ -391,7 +392,7 @@ class ProductServer:
             
         #product_request = self.ProductRequest(self, product_info, actions, directives, log)
         # Consider rename to Generator
-        pr = product.Generator(self, product_info, log) #, actions, directives, log)
+        pr = request.Generator(self, product_info, log) #, actions, directives, log)
 
         # Future option
         if ('GENERATE' in actions):
@@ -417,7 +418,7 @@ class ProductServer:
         
         MAKE = ('MAKE'   in actions)     
         
-        #INPUTS = ('INPUTS' in actions)     
+        INPUTS = ('INPUTS' in actions)     
         DELETE = ('DELETE' in actions)     
         TEST  = ('CHECK'  in actions) 
                 
@@ -433,6 +434,10 @@ class ProductServer:
         if (MAKE):
             pr.log.info("Making... {0}".format(pr.path.name)) 
             self.make_prod(pr, directives, TEST) 
+        elif (INPUTS):
+            pr.log.info("Inputs... {0}".format(pr.path.name))
+            input_info = pr.get_input_list(directives)
+            print(input_info.inputs)
         else:
             pr.log.info("NOT Making... {0}".format(pr.path.name)) 
 
@@ -688,6 +693,7 @@ if __name__ == '__main__':
 
         if ('INPUTS' in actions): # or (options.VERBOSE > 6):
             #nutils.print_dict(product_request.inputs)
+            logger.warn("Inputs:")
             logger.info(product_request.inputs)
     
         logger.info(product_request.status)    
