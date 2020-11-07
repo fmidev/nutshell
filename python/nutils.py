@@ -15,17 +15,23 @@ import re
 #from pathlib import Path
 
 
-def read_conf(path, result = {}): 
+def read_conf(path, result = None): 
     """Read plain-text configuration file consisting of <key>=<value> pairs.
     """
+    if (result == None):
+        result = {}
+        
     file = open(path, 'r')
     read_conf_text(file, result)
     return result
 
 
-def read_conf_text(text, result = {}): #, regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?'
+def read_conf_text(text, result = None): #, regexp='^([A-Za-z][\w]*)=([^#]*)(#.*)?'
     """Traverse array of text lines consisting of <key>=<value> pairs.
     """
+
+    if (result == None):
+        result = {}
 
     if (not text):
         #print ("Could not handle text: " + text)
@@ -97,9 +103,13 @@ def symlink(link, target, overwrite = False):
     link.symlink_to(target)  
 
 # Test
-def set_entries(obj, entries={}, lenient = True):
+def set_entries(obj, entries=None, lenient = True):
     """Given a dictionary, sets corresponding member values
     """
+    
+    if (entries == None):
+        return
+    
     members = dir(obj) # or: limit to ["CACHE_ROOT", ...]
     for i in entries:
         if i in members:

@@ -22,11 +22,13 @@ By default, it returns a status page (HTML) containing
 __version__ = '0.1'
 __author__ = 'Markus.Peura@fmi.fi'
 
+import os
+from   pathlib import Path
+
 import urllib.request, urllib.parse, urllib.error
 import http.server
 import xml.etree.ElementTree as ET
 #from xml.dom import minidom  # Pretty printing
-import os
 #import mimetypes
 import logging
 logging.basicConfig(format='%(levelname)s\t %(name)s:%(funcName)s: %(message)s')
@@ -167,12 +169,13 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             s.log.info("File found, forwarding to standard handler") #  -> {0} ".format(system_path))
             http.server.SimpleHTTPRequestHandler.do_GET(s)
             return
-            
-        #s.log.error("PRDOCUT? {0}".format(system_path.suffix))
-        #s.log.error("PRDOCUT? {0}".format(querydata))
-        # system_path.suffix == format extension, so smells like a filename
+
+        # If the path 
+        # - starts with "/cache/"
+        # - is a file, that has not been found (checked above)
+        # - has a filename extension (system_path.suffix, like ".png")
+        # - has no special parameters (like "?redirect=None")
         if (basepath.find('/cache/') == 0) and system_path.suffix and (s.path.find('?') == -1):
-            # and file not found (above)
             s.log.error("PRODUCT? {0}".format(system_path.suffix))
             url =  "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
             NutHandler._redirect(s, url)
@@ -193,7 +196,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         if (product_name):
             product_info = product.Info(filename = product_name)
             actions = querydata.get('request', ["MAKE"])
-            directives      = querydata['directives']
+            directives = querydata['directives']
         else:
             actions = querydata['request']
             directives = querydata.get('directives', ["STATUS"])
@@ -224,7 +227,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     NutHandler._redirect(s, url)
                     return 
                 else:
-                     s.log.error("MAKE failed for: {0}".format(product_info.filename()))
+                     s.log.error("MAKE failed for: {0}".format(product_info.get_filename()))
                     #product_request.log
             else:
                 product_request.status = HTTPStatus.OK
@@ -252,7 +255,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
  
         if product_request:
             elem = nutxml.get_by_id(body, 'product')
-            elem.set("value", product_request.product_info.filename())
+            elem.set("value", product_request.product_info.get_filename())
         
         if directives:
             elem = nutxml.get_by_id(body, 'directives')
@@ -289,7 +292,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     
             env = product_info.get_param_env()
             elem = nutxml.get_by_id(body, 'product_elem')
-            elem.append(nutxml.get_table(env, {"title": "Product ({0}) parameters".format(product_info.ID)}))
+            elem.append(nutxml.get_table(env, {"title": "Product ({0}) parameters".format(product_info.PRODUCT_ID)}))
 
         #elem = nutxml.get_by_tag(body, 'pre', {'id': 'dump'})
         elem = nutxml.get_by_id(body, 'dump_elem')
@@ -319,9 +322,17 @@ def run_http(product_server):
     httpd = http.server.HTTPServer((product_server.HTTP_NAME, int(product_server.HTTP_PORT)), NutHandler)
 
     #if (options.VERBOSE > 1):
-    print(( 'Starting server (port={0}, root={1})'.format(product_server.HTTP_PORT, NutHandler.directory) ))
+    print('Starting server (port={0}, root={1})'.format(product_server.HTTP_PORT, NutHandler.directory))
     nutils.print_dict(nutils.get_entries(httpd))
 
+    cache = Path(product_server.HTML_ROOT, 'cache')
+    if (not cache.exists()):
+        print('Warning: cache dir does not exist: {0}'.format(cache))
+    # elif not writable:
+
+    print('Starting: http://{0}:{1}/nutshell/'.format( httpd.server_name, httpd.server_port))
+  
+    
     try:
         httpd.serve_forever()
         # httpd.handle_request() # single
