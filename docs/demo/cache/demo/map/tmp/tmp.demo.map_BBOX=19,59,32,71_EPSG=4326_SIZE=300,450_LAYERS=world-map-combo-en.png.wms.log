@@ -1,0 +1,12 @@
+--2020-05-18 16:46:24--  http://map.fmi.fi/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&format=image/png&layers=world-map-combo-en&srs=EPSG:4326&bbox=19,59,32,71&width=300&height=450
+Resolving map.fmi.fi (map.fmi.fi)... 193.166.221.30
+Connecting to map.fmi.fi (map.fmi.fi)|193.166.221.30|:80... connected.
+HTTP request sent, awaiting response... 200 
+Length: 52966 (52K) [image/png]
+Saving to: '/home/mpeura/nutshell/demo/cache/demo/map/tmp/tmp.demo.map_BBOX=19,59,32,71_EPSG=4326_SIZE=300,450_LAYERS=world-map-combo-en.png'
+
+     0K .......... .......... .......... .......... .......... 96%  273K 0s
+    50K .                                                     100%  798K=0.2s
+
+2020-05-18 16:46:32 (279 KB/s) - '/home/mpeura/nutshell/demo/cache/demo/map/tmp/tmp.demo.map_BBOX=19,59,32,71_EPSG=4326_SIZE=300,450_LAYERS=world-map-combo-en.png' saved [52966/52966]
+

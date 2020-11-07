@@ -1,0 +1,117 @@
+.. NutShell documentation, description
+
+
+.. _generators:
+
+==================
+Product generators
+==================
+
+In NutShell, a *product generator* is a shell script that computes something with given parameters and
+saves the result as a file in a given path. As a precondition, a generator may need
+*product inputs* and will request NutShell to compute them first. In this sense,
+NutShell functions much like ``make`` and ``Makefile``, where respective inputs are called *dependencies*.
+
+Typical Unix/Linux commands have a form like: ::
+
+  command -i <input-file>  -p <parameter> -o <output-file>
+
+Much in a way ``Makefile`` does, a generator script wraps such a line to something like: ::
+
+  command -i $INPUT  -p $PARAMETER -o $OUTDIR/$OUTFILE
+
+
+Product ID's, files and directories
+===================================
+
+Each product generator is associated with a unique *product id* consisting of lowercase literals and periods,
+for example ``test.image.product``.
+The system will automatically use directory derievd from the product id, replacing periods with slashes;
+for the example case: ``test/image/product``.
+
+In NutShell, output files with dynamic content have syntax::
+
+  <TIMESTAMP>_<PRODUCT_ID>_<PARAMETERS>.<EXTENSION>
+
+for example: ::
+  
+  200508091630_test.image.product_SIZE=640,400.png
+
+Static products do not have a timestamp, so they have syntax::
+
+  <TIMESTAMP>_<PRODUCT_ID>_<PARAMETERS>.<EXTENSION>
+
+Variable parsing scheme is explained in :ref:`nutshell-variables` .
+In code, :ref:`nutshell.product.INFO` parses the filenames. 
+
+
+The generator has script has a fixed name, ``generate.sh`` .
+
+
+Setting up product generators
+=============================
+
+  
+#. Move to product generator root directory, ``GENERATOR_ROOT``. (See :ref:`configuration`.)
+#. Create shell script file ``generate.sh`` with execution permission.
+#. Preferably, use **bash**, starting the script with ``#!/bin/bash`` 
+#. Edit the script such that it finally writes its result in path ``$OUTDIR/$OUTFILE``
+
+The generator scripts can and should be designed so that they can be
+executed off-line, ie. independently of NutShell.
+
+      
+	   
+User-defined variables
+----------------------
+
+
+- Must not be any of :ref:`variables` (below)
+- Must not contain underscores
+- Should be short, to keeping resulting filenames reasonably short.
+
+It is recommended that variables contain default values. In **bash**, they can be set for example
+as follows::
+
+  if [ "$WIDTH" == '' ]; then
+     WIDTH='640'
+  fi
+  if [ "$HEIGHT" == '' ]; then
+     HEIGHT=$WIDTH
+  fi
+
+or more compactly::
+  
+  WIDTH=${WIDTH:-'640'}
+  HEIGHT=${HEIGHT:-"$WIDTH"}  # double hyphens to allow expansion
+
+
+Input queries
+-------------
+
+#. Create shell script file ``input.sh`` with execution permission.
+#. Design it to echo out lines of type ``<key>=<product>`` where
+   ``<key>`` is the variable name you want to use for this input in
+   ``generate.sh`` and ``<product>`` is an input product file to be retrieved.
+#. In addition, for debugging purposes, the script can echo out comment lines starting with '#' but it
+      *should not print any other output*.
+
+
+Example
+'''''''
+
+Consider a 
+     CLOUDINESS=${TIMESTAMP}_radar.rack_SITE=${SITE}.h5
+     MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png
+
+Will print out::
+       
+     RADAR=202005121845_radar.rack_SITE=fikor.h5
+     MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:fikor.png
+
+   
+- Must not be any of :ref:`system variables`
+
+
+  
+

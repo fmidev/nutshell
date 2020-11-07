@@ -1,0 +1,17 @@
+# Configuration for NutShell demonstration
+
+# Directory for NutShell Python files:
+# NUTSHELL_DIR='./nutshell'
+
+# Root of cache directory, often on separate resource:
+CACHE_ROOT='./demo/cache'
+
+# Root of product generator (script) directories
+PRODUCT_ROOT='./demo/products'
+
+# Top-level directory for HTTP server (optional).
+HTML_ROOT='./demo/html'
+
+# Port for HTTP server (optional).
+HTTP_PORT='8088'
+

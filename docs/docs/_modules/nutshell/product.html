@@ -1,0 +1,820 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>nutshell.product &mdash; NutShell 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/nutshell-logo.ico"/>
+    <link rel="top" title="NutShell 0.3 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+          <p class="logo"><a href="../../index.html">
+            <img class="logo" src="../../_static/nutshell-logo-small.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="../../index.html">NutShell 0.3 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for nutshell.product</h1><div class="highlight"><pre>
+<span class="ch">#!/bin/python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">Product definitions and requests -- nutshell.product</span>
+<span class="sd">====================================================</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.2&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
+
+<span class="c1">#import os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="c1">#import subprocess # for shell escape</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">http</span> <span class="kn">import</span> <span class="n">HTTPStatus</span>
+<span class="c1">#import http.server</span>
+<span class="c1">#HTTPresponses = http.server.SimpleHTTPRequestHandler.responses</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="se">\t</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="c1">#logging.basicConfig(format=&#39;%(levelname)s:%(message)s&#39;, level=logging.DEBUG)</span>
+<span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(message)s&#39;, datefmt=&#39;%m/%d/%Y %I:%M:%S %p&#39;)</span>
+<span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(levelname)s %(name)s : %(message)s&#39;, datefmt=&#39;%Y%m%d%H:%M:%S&#39;)</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">nutils</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">shell</span>
+
+
+<span class="k">def</span> <span class="nf">parse_timestamp2</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\W&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="c1"># empty ok?</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;YEAR&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;MONTH&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;DAY&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;HOUR&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;MINUTE&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">nutshell.product.Info!!</span>
+<span class="sd">-----------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Stores product information, especially ``PRODUCT_ID``, </span>
+<span class="sd">    ``TIMESTAMP`` (if applicable), file ``FORMAT``, </span>
+<span class="sd">    and product-specific free parameters.</span>
+<span class="sd">    </span>
+<span class="sd">    **Parameters** handled as with Info.set_product(). Key parameters are </span>
+<span class="sd">    mutually exclusive.</span>
+<span class="sd">          </span>
+<span class="sd">    Examples of allowed calls, with ``Info = nutshell.product.Info`` :</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(filename=&quot;my.image.product.png&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(product_id=&quot;my.image.product&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;, **{&quot;SIZE&quot;: &quot;640,400&quot;})</span>
+
+<span class="sd">    A plain string argument is ambiguous, and raises an exception:</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product&quot;)       # Looks understandable, but...</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product.jpeg&quot;)  # ... is this a product ID or file?</span>
+<span class="sd">        &gt;&gt;&gt; p = Info(&quot;my.image.product_.jpeg&quot;) # This could be parsed as a file.</span>
+<span class="sd">       </span>
+<span class="sd">    This class is essentially a string parser and storage for parsed variables.</span>
+<span class="sd">    It is technically independent of server configurations </span>
+<span class="sd">    like system side paths. Especially, it does not check if </span>
+<span class="sd">    product generation directories or scripts exist.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">log</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">PRODUCT_ID</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">PARAMETERS</span> <span class="o">=</span> <span class="bp">None</span> <span class="c1">#{}</span>
+    <span class="n">INPUT_PARAMETERS</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c1">#PARAMS = None #[]</span>
+    <span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">COMPRESSION</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">EXTENSION</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1"># \w = [a-zA-Z0-9_]</span>
+
+    <span class="c1"># Resolve compression, if any. Plain compression not accepted, base format has to appear.</span>
+    <span class="c1"># compressionRe = re.compile(&quot;^(.*\\.[a-z][a-z0-9]*)\\.(zip|gz)$&quot;)</span>
+    <span class="n">compressionRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^(.*)</span><span class="se">\\</span><span class="s2">.(zip|gz)$&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Resolve extension = &lt;format&gt;.&lt;compression&gt;</span>
+    <span class="c1"># extensionRe = re.compile(&quot;^([a-z][a-z0-9]*)(\\.(zip|gz))?$&quot;)</span>
+    <span class="n">extensionRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^((.*)</span><span class="se">\\</span><span class="s2">.)?([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>    
+
+    <span class="c1"># Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS</span>
+    <span class="c1"># filenameRe = re.compile(&quot;^((LATEST|[0-9]+)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$&quot;)</span>
+    <span class="n">filenameRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?</span><span class="se">\\</span><span class="s2">.([a-z][a-z0-9]*)$&quot;</span><span class="p">)</span>
+
+    <span class="n">prodRe</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^([a-z][a-z0-9]*)(\.[a-z][a-z0-9]*)*$&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Info.set_product"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_product">[docs]</a>    <span class="k">def</span> <span class="nf">set_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Configure a product.</span>
+
+<span class="sd">        :param product: product id string, requires explicit kwargs</span>
+<span class="sd">        :param product_id: product id string.</span>
+<span class="sd">        :param filename: product description presented as a filename</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: instance (possibly incomplete, to be adjusted with separate </span>
+<span class="sd">             method calls) </span>
+<span class="sd">    </span>
+<span class="sd">        See :ref:`product.info`. Parameters equivalent at initialisation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">product</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span> <span class="c1"># easiest</span>
+                <span class="c1"># self.log.warn</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) looks like a product_id&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;filename&#39; arg&quot;</span><span class="p">)</span>                
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> <span class="c1"># easiest</span>
+                <span class="c1"># self.log.warn</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) could be a product_id&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument looks like a file?&quot;</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;first argument ({0}) excludes explicit &#39;product_id&#39; arg&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;first argument requires explicit kwargs&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Ok...</span>
+            <span class="n">product_id</span> <span class="o">=</span> <span class="n">product</span>  <span class="c1"># Note!</span>
+            
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span> 
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;both &#39;filename&#39; and &#39;product_id&#39; given&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">filename</span><span class="p">):</span>  <span class="c1"># easiest</span>
+            <span class="bp">self</span><span class="o">.</span> <span class="n">_parse_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">product_id</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">product_id</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+  
+
+<div class="viewcode-block" id="Info.set_id"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the product ID string consisting of alphanumeric chars and periods.&quot;&quot;&quot;</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prodRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">product_id</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="o">=</span> <span class="n">product_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Value not accepted as product id: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_id</span><span class="p">))</span></div>
+   
+<div class="viewcode-block" id="Info.set_timestamp"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">set_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set UTC time in numeric format &#39;%Y%m%d%H%M&#39;, &#39;LATEST&#39;, or &#39;TIMESTAMP&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        The 12 digit-numeric format may contain punctuation as long as the</span>
+<span class="sd">        order of the time units is not changed.</span>
+<span class="sd">        Non-digits will be simply removed.</span>
+<span class="sd">        For example, 2020/03/29 18:45 is pruned to 202003291845.</span>
+<span class="sd">        Consequently, possible *time zones* will be also discarded. </span>
+<span class="sd">        </span>
+<span class="sd">        Future versions may support for time object, unix seconds and date string parsing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">):</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^0-9]*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="n">timestamp</span>  <span class="c1"># re.sub(&quot;\W&quot;, &quot;&quot;, timestamp)</span></div>
+
+<div class="viewcode-block" id="Info.set_format"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_format">[docs]</a>    <span class="k">def</span> <span class="nf">set_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets file format (png, txt, pgm.gz, txt.zip, ...).&quot;&quot;&quot;</span>
+        
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Info</span><span class="o">.</span><span class="n">compressionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">):</span>
+            <span class="c1"># replace None&#39;s with empty string</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1"># redo with compression stripped</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">Info</span><span class="o">.</span><span class="n">extensionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+            <span class="c1"># print (m)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                <span class="c1"># replace None&#39;s with empty string</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;could nut parse: &quot;</span> <span class="o">+</span> <span class="n">extension</span><span class="p">)</span></div>
+        <span class="c1"># print (self.__dict__)</span>
+
+    <span class="c1"># NOTE: remove PARAMS!</span>
+    <span class="c1"># Consider typing (int, str)</span>
+<div class="viewcode-block" id="Info.set_parameter"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set any parameter, including FORMAT, excluding TIMESTAMP and ID</span>
+<span class="sd">        </span>
+<span class="sd">            :param key: name (string) of the parameter</span>
+<span class="sd">            :param value: the value of the parameter, possibly not </span>
+<span class="sd">                string but hopefully stringifiable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;EXTENSION&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;COMPRESSION&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">value</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span>
+                                    
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;PRODUCT_ID&#39;</span><span class="p">):</span>
+            <span class="c1"># WARN about</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Special member PRODUCT_ID cannot be set with this function&quot;</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="Info.set_parameters"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Given a dictionary of parameters, set values.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span>  <span class="nf">_parse_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Derive product parameters from a filename.&quot;&quot;&quot;</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressionRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">):</span>
+            <span class="c1"># print &#39;Compression: {0}&#39;.format(m.group(3))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filenameRe</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">):</span>
+
+            <span class="c1">#print (m.groups()) # !DEBUG</span>
+
+            <span class="c1"># Time variables</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                <span class="c1">#self.TIMESTAMP =  re.sub(&quot;\W&quot;, &quot;&quot;, m.group(2))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Missing TIMESTAMP? (Filename with leading &#39;_&#39;.)&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Product id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="c1"># Product specific parameters</span>
+            <span class="c1">#if (len(m.groups()) &gt; 5):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">)):</span>
+                <span class="c1"># pindex = 0</span>
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span> <span class="c1">#self.PARAMS:</span>
+                    <span class="n">entry</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;INPUT_PARAMETERS =&gt; {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span>                        
+                        <span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)</span>
+                    <span class="c1">#if (len(entry) == 1):</span>
+                    <span class="c1">#    self.set_parameter(&#39;P&#39;+str(pindex), entry[0])</span>
+
+            <span class="c1"># Format, excluding optional COMPRESSION (parsed above)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">COMPRESSION</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMAT</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#print (&quot;{0}: ERROR in parsing {1}&quot;).format(__name__, filename)</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;ERROR in parsing {0}&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+
+    <span class="k">def</span> <span class="nf">get_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
+            <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+                <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1"># FORMAT)</span>
+
+    <span class="k">def</span> <span class="nf">get_static_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1"># FORMAT)</span>
+
+    <span class="k">def</span> <span class="nf">get_filename_latest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LATEST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTENSION</span><span class="p">)</span> <span class="c1">#FORMAT)</span>
+
+ 
+    <span class="c1">#MEMBER_ENV_RE = re.compile(&quot;[A-Z]+[A-Z_]*&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">get_param_env</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tasklet</span><span class="o">.</span><span class="n">MEMBER_ENV_RE</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PARAMETERS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># overwrite kludge</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="p">):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INPUT_PARAMETERS</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="p">)</span>  <span class="c1"># overrides INPUT_PARAMETERS</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
+            <span class="n">parse_timestamp2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="n">env</span><span class="p">[</span><span class="s1">&#39;PRODUCT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="c1"># temporary (rack-tile)</span>
+        <span class="k">return</span> <span class="n">env</span>
+    
+<span class="c1">#    def get_param_env_OLD(self, env=None):</span>
+<span class="c1">#        &quot;&quot;&quot; Append or create dict with TIMESTAMP and params&quot;&quot;&quot;</span>
+<span class="c1">#        &quot;&quot;&quot; Uses PRODUCT instead of ID which is too general (example: &quot;radar.rack.comp&quot;)&quot;&quot;&quot;</span>
+<span class="c1">#        if (env == None):</span>
+<span class="c1">#            env = {}</span>
+<span class="c1">#</span>
+<span class="c1">#        # Start with these (and override with &#39;system&#39; variables below).</span>
+<span class="c1">#        env.update(self.PARAMETERS)</span>
+<span class="c1">#</span>
+<span class="c1">#        if (self.TIMESTAMP):</span>
+<span class="c1">#            parse_timestamp2(self.TIMESTAMP, env)</span>
+<span class="c1">#</span>
+<span class="c1">#        env[&#39;PRODUCT&#39;] = self.PRODUCT_ID</span>
+<span class="c1">#</span>
+<span class="c1">#        for i in [&#39;FORMAT&#39;, &#39;COMPRESSION&#39;, &#39;EXTENSION&#39;]:</span>
+<span class="c1">#            env[i] = getattr(self, i, &quot;&quot;)</span>
+<span class="c1">#</span>
+<span class="c1">#        return env</span>
+        
+<span class="c1">#    def get_signature(self):</span>
+<span class="c1">#        body = []</span>
+<span class="c1">#        body.append(self.PRODUCT_ID)</span>
+<span class="c1">#        if (self.PARAMETERS):</span>
+<span class="c1">#            for key,value in sorted(self.PARAMETERS.items()):</span>
+<span class="c1">#                if (value == &#39;&#39;):</span>
+<span class="c1">#                    body.append(key)</span>
+<span class="c1">#                else:</span>
+<span class="c1">#                    body.append(&quot;{0}{1}&quot;.format(key, value))</span>
+<span class="c1">#        return(&quot;_&quot;.join(body) + &#39;_&#39; + self.EXTENSION) # FORMAT)</span>
+    
+
+    <span class="c1"># Todo: params</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;See :ref:`product.info`. Parameters equivalent with those of set_product().&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">product_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+            
+
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Info.get_arg_parser"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Info.get_arg_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Populates parser with options of this class&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">parser</span><span class="p">):</span>
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+
+
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-l&quot;</span><span class="p">,</span> <span class="s2">&quot;--log_level&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;DEBUG|INFO|ERROR|CRITICAL&#39;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;LOG_LEVEL&quot;</span><span class="p">,</span>
+                            <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                            <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Print status messages to stdout&quot;</span><span class="p">)</span>
+ 
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-v&quot;</span><span class="p">,</span> <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;VERBOSE&quot;</span><span class="p">,</span>
+                            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Same as --log_level 0 : print all status messages&quot;</span><span class="p">)</span>
+
+<span class="c1">#        parser.add_argument(&quot;-f&quot;, &quot;--product_filename&quot;, metavar=&quot;&lt;filename&gt;&quot;,</span>
+<span class="c1">#                            dest=&quot;OUTFILE&quot;,</span>
+<span class="c1">#                            default=&quot;&quot;,</span>
+<span class="c1">#                            help=&quot;product to be handled&quot;)</span>
+
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;--product&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;filename&gt;|&lt;id&gt;]&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;PRODUCT&quot;</span><span class="p">,</span>
+                            <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;product to be handled&quot;</span><span class="p">)</span>
+        <span class="c1"># consider -o OUTFILE!</span>
+
+        <span class="k">return</span> <span class="n">parser</span></div></div>
+        
+<span class="c1">#</span>
+<span class="k">class</span> <span class="nc">Tasklet</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">script_filename</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">product_info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">product_info</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GENERATOR_DIR</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">get_generator_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>          
+            
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GENERATOR_DIR</span><span class="p">,</span> <span class="n">script_filename</span><span class="p">),</span> 
+                         <span class="n">env</span><span class="o">=</span><span class="p">{},</span> 
+                         <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_server</span> <span class="o">=</span> <span class="n">product_server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_info</span>   <span class="o">=</span> <span class="n">product_info</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">filename</span>        <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()</span>
+        <span class="n">filename_latest</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_filename_latest</span><span class="p">()</span>
+
+        <span class="n">s</span><span class="o">.</span><span class="n">CACHE_ROOT</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_cache_root</span><span class="p">()</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">TIME_DIR</span>   <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_time_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">PROD_DIR</span>   <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_product_dir</span><span class="p">(</span><span class="n">product_info</span><span class="p">)</span>
+        
+        <span class="n">s</span><span class="o">.</span><span class="n">path_relative</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>              <span class="n">s</span><span class="o">.</span><span class="n">TIME_DIR</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">PROD_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">path</span>          <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">CACHE_ROOT</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">TIME_DIR</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">PROD_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">path_tmp</span>      <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">CACHE_ROOT</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">TIME_DIR</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">PROD_DIR</span><span class="p">,</span> <span class="s1">&#39;tmp&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>  
+        <span class="n">s</span><span class="o">.</span><span class="n">path_static</span>   <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">CACHE_ROOT</span><span class="p">,</span>             <span class="n">s</span><span class="o">.</span><span class="n">PROD_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">path_latest</span>   <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">CACHE_ROOT</span><span class="p">,</span>             <span class="n">s</span><span class="o">.</span><span class="n">PROD_DIR</span><span class="p">,</span> <span class="n">filename_latest</span><span class="p">)</span>
+
+        <span class="n">s</span><span class="o">.</span><span class="n">OUTDIR</span>     <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># Note         </span>
+        <span class="n">s</span><span class="o">.</span><span class="n">OUTFILE</span>    <span class="o">=</span> <span class="n">filename</span>        
+
+
+    <span class="n">MEMBER_ENV_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;[A-Z]+[A-Z_]*&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_param_env</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tasklet</span><span class="o">.</span><span class="n">MEMBER_ENV_RE</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>        
+        
+    <span class="k">def</span> <span class="nf">run2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directives</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="c1"># short</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">,</span>
+                        <span class="n">directives</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">(</span><span class="n">Tasklet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Container for storing information on requested product and server side resources derived thereof.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">product_server</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;Server assigned for manufacturing this product&quot;&quot;&quot;</span>
+
+    <span class="n">product_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;Specification of a product instance.&quot;&quot;&quot;</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;System-side full path to a dynamic directory and the generated product file.&quot;&quot;&quot;</span>
+    
+    <span class="sd">&quot;&quot;&quot;System-side full path to the generated file, the product.&quot;&quot;&quot;</span>
+    <span class="n">path_static</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>        
+    
+    <span class="sd">&quot;&quot;&quot;Optional: System-side full path to the generated product file.&quot;&quot;&quot;</span>
+    <span class="n">path_tmp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+ 
+    <span class="sd">&quot;&quot;&quot;Optional: Actual object (for example, python Image in the future) &quot;&quot;&quot;</span>
+    <span class="n">product_obj</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="c1"># Later, use (dir + file) object</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1">#actions = []</span>
+    <span class="c1">#directives = []</span>
+    <span class="n">error_info</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c1"># Status, defined using HTTP status codes</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span>
+
+    <span class="n">sid</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">builtin_directives</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;LOG&quot;</span><span class="p">,</span> <span class="s2">&quot;LATEST&quot;</span><span class="p">,</span> <span class="s2">&quot;LINK&quot;</span><span class="p">)</span>        
+
+    <span class="k">def</span> <span class="nf">reset_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">NO_CONTENT</span>
+        
+<div class="viewcode-block" id="Generator.set_status"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set success or failure status using http.HTTPStatus codes.</span>
+<span class="sd">           Setting is logged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span></div>
+        
+<div class="viewcode-block" id="Generator.get_input_list"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator.get_input_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directives</span><span class="p">):</span> <span class="c1"># directives!):</span>
+        <span class="sd">&quot;&quot;&quot; Used for reading dynamic input configuration generated by input.sh.</span>
+<span class="sd">        directives determine how the product is generated. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s1">&#39;get_input_list&#39;</span><span class="p">)</span>
+
+        <span class="n">input_query</span> <span class="o">=</span> <span class="n">InputQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">product_server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">product_info</span><span class="p">)</span> 
+        
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No input script: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>         
+            <span class="k">return</span> <span class="n">input_query</span>   
+        
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>
+        
+        <span class="n">input_query</span><span class="o">.</span><span class="n">run2</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="c1">## TODO: directives</span>
+    
+        <span class="k">if</span> <span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> 
+            <span class="c1">#log.debug(type(input_query.stdout))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;empty stdout of input declaration script {0}:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">input_query</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">input_query</span><span class="o">.</span><span class="n">inputs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;executing failed with error code={0}: {1} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+               
+        <span class="k">return</span> <span class="n">input_query</span></div>
+
+
+<div class="viewcode-block" id="Generator.remove_files"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.product.Generator.remove_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the existing (even empty) files, log as info().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_static</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_tmp</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing file: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span> </div>
+
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="c1">#actions=None, directives=None, </span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;Generator&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
+        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">product_server</span><span class="p">,</span>
+                         <span class="n">product_info</span><span class="p">,</span>
+                         <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_GENERATOR_SCRIPT</span><span class="p">,</span>
+                         <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        
+ 
+<span class="c1">#        if (actions):</span>
+<span class="c1">#            self.actions = actions</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            self.actions = []</span>
+<span class="c1">#        self.log.debug(&#39;actions:&#39; + str(actions))</span>
+<span class="c1">#  </span>
+<span class="c1">#        if (directives):              </span>
+<span class="c1">#            self.directives = directives</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            self.directives = []</span>
+<span class="c1">#        self.log.debug(&#39;directives: &#39; + str(self.directives))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_obj</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+       
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span>
+             
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_status</span><span class="p">()</span> <span class="c1"># 204 HTTPStatus.NO_CONTENT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+        
+
+
+<span class="k">class</span> <span class="nc">InputQuery</span><span class="p">(</span><span class="n">Tasklet</span><span class="p">):</span>
+    
+    <span class="n">inputs</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
+
+        <span class="c1">#if not log:</span>
+        <span class="c1">#    log = logging.getLogger(&quot;Generator&quot;)</span>
+        <span class="c1">#    log.setLevel(product_server.logger.level)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">product_server</span><span class="p">,</span> 
+                         <span class="n">product_info</span><span class="p">,</span>
+                         <span class="n">product_server</span><span class="o">.</span><span class="n">SHELL_INPUT_SCRIPT</span><span class="p">,</span> 
+                         <span class="n">log</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;InputQuery&quot;</span><span class="p">))</span>
+                         
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+       
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span> <span class="c1"># OUTDIR, OUTFILE    </span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Created env : {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
+                
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c1"># parser = argparse.ArgumentParser()</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">Info</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">()</span>
+
+    <span class="c1"># Consider leaving &quot;rare&quot; or specific params in-class</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--set&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;id&gt;|&lt;filename&gt;]&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;SET&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;product to be handled, recognises argument type&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-T&quot;</span><span class="p">,</span> <span class="s2">&quot;--timestamp&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&gt;|&#39;LATEST&#39;]&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Adjust time stamp&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-F&quot;</span><span class="p">,</span> <span class="s2">&quot;--format&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;[&lt;file_format&gt;]&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;FORMAT&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;sets product format explicitly, called with -p&quot;</span><span class="p">)</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">options</span><span class="p">):</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+        <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+    
+    <span class="n">product_info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">):</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span>
+        
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+            <span class="c1">#nutils.VERBOSITY_LEVELS[options.VERBOSE]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>   
+    
+ 
+    <span class="c1">#if (options.OUTFILE):</span>
+    <span class="c1">#    product_info. _parse_filename(options.OUTFILE)</span>
+
+    <span class="c1">#if (options.PRODUCT):</span>
+    <span class="c1">#    product_info.set_id(options.PRODUCT)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
+    <span class="c1">#    product_info. _parse_filename(options.PRODUCT)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;product not defined&quot;</span><span class="p">)</span>
+ 
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SIZE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">640</span><span class="p">,</span><span class="mi">400</span><span class="p">],</span> <span class="s1">&#39;FORMAT&#39;</span><span class="p">:</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}</span>
+        <span class="c1">#product_info.set_product(options.SET, **args)</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">SET</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">):</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_filename</span><span class="p">())</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_static_filename</span><span class="p">())</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">())</span> <span class="c1"># contains ID</span>
+        <span class="c1">#print(product_info.__dict__) # contains ID</span>
+        <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Error: Product not given&#39;</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+        <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-commands.html">Commands and status codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-generators.html">Product generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-demo.html">Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+            <p class="searchtip" style="font-size: 90%">
+                Enter search terms or a module, class or function name.
+            </p>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2020, Markus Peura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

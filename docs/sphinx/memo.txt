@@ -1,0 +1,2 @@
+make html
+git-doc-refresh.sh build/html ../docs 

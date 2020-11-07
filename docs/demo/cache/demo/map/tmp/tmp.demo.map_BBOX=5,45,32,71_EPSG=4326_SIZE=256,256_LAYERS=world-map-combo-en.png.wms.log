@@ -1,0 +1,22 @@
+--2020-05-18 12:06:10--  http://map.fmi.fi/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&format=image/png&layers=world-map-combo-en&srs=EPSG:4326&bbox=5,45,32,71&width=256&height=256
+Resolving map.fmi.fi (map.fmi.fi)... 193.166.221.30
+Connecting to map.fmi.fi (map.fmi.fi)|193.166.221.30|:80... connected.
+HTTP request sent, awaiting response... 200 
+Length: 28988 (28K) [image/png]
+Saving to: '/home/mpeura/nutshell/demo/cache/demo/map/tmp/tmp.demo.map_BBOX=5,45,32,71_EPSG=4326_SIZE=256,256_LAYERS=world-map-combo-en.png'
+
+     0K .......... .......... ........                        100%  217K=0.1s
+
+2020-05-18 12:06:24 (217 KB/s) - '/home/mpeura/nutshell/demo/cache/demo/map/tmp/tmp.demo.map_BBOX=5,45,32,71_EPSG=4326_SIZE=256,256_LAYERS=world-map-combo-en.png' saved [28988/28988]
+
+--2020-05-18 13:19:37--  http://map.fmi.fi/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&format=image/png&layers=world-map-combo-en&srs=EPSG:4326&bbox=5,45,32,71&width=256&height=256
+Resolving map.fmi.fi (map.fmi.fi)... 193.166.221.30
+Connecting to map.fmi.fi (map.fmi.fi)|193.166.221.30|:80... connected.
+HTTP request sent, awaiting response... 200 
+Length: 28988 (28K) [image/png]
+Saving to: '/home/mpeura/nutshell/demo/cache/demo/map/tmp/tmp.demo.map_BBOX=5,45,32,71_EPSG=4326_SIZE=256,256_LAYERS=world-map-combo-en.png'
+
+     0K .......... .......... ........                        100%  239K=0.1s
+
+2020-05-18 13:19:50 (239 KB/s) - '/home/mpeura/nutshell/demo/cache/demo/map/tmp/tmp.demo.map_BBOX=5,45,32,71_EPSG=4326_SIZE=256,256_LAYERS=world-map-combo-en.png' saved [28988/28988]
+

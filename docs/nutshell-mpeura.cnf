@@ -1,0 +1,18 @@
+# Directory for NutShell Python files:
+NUTSHELL_DIR='./python'
+
+# Root of cache directory, often on separate resource:
+CACHE_ROOT='/home/mpeura/venison/cache'
+
+# Root of product generator (script) directories
+PRODUCT_ROOT='/home/mpeura/venison/products'
+
+# Root directory for HTTP server (optional).
+HTML_ROOT='./html'
+
+# Port for HTTP server.
+HTTP_PORT='8088'
+
+# URL directory prefix (future option).
+HTTP_PREFIX='nutshell/'
+

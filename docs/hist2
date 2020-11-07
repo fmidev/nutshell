@@ -1,0 +1,500 @@
+  164  ls -ltr
+  165  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fi_SIZE=800,800.png-generate.sh.stdout
+  166  ghistory anim
+  167  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  168  ghistory rm
+  169  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  170  rm -vrf /home/mpeura/nutshell/demo/cache/1970
+  171  rm -vrf /home/mpeura/nutshell/demo/cache/demo/image/
+  172  rm -vrf /home/mpeura/nutshell/demo/cache/demo/cloudy/
+  173  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  174  rm -vrf /home/mpeura/nutshell/demo/cache/demo/image/
+  175  rm -vrf /home/mpeura/nutshell/demo/cache/demo/cloudy/
+  176  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  177  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/anim/202005101245_demo.cloudy.anim__FRAMES=12_SIZE=800,600_TIMESTEP=5.gif-generate.sh.stdout
+  178  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/anim/202005101245_demo.cloudy.anim__FRAMES=12_SIZE=800,600_TIMESTEP=5.gif-generate.sh.stderr
+  179  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  180  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/202005101315_demo.cloudy__202005101245_FRAMES=12_SIZE=800,600_TIMESTEP=5_demo.cloudy.anim.png-generate.sh.stderr
+  181  rm /home/mpeura/nutshell/demo/cache/demo/map/demo.map_BBOX=0,45,32,71_CONF=geoserver_PROJ=4326_SIZE=800,600.png
+  182  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  183  file /home/mpeura/nutshell/demo/cache/demo/map/demo.map_BBOX=0,45,32,71_CONF=geoserver_PROJ=4326_SIZE=800,600.png
+  184  xv /home/mpeura/nutshell/demo/cache/demo/map/demo.map_BBOX=0,45,32,71_CONF=geoserver_PROJ=4326_SIZE=800,600.png
+  185  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/anim/202005101245_demo.cloudy.anim__FRAMES=12_SIZE=800,600_TIMESTEP=5.gif-generate.sh.stderr
+  186  ls -ltr /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/
+  187  rm -vrf /home/mpeura/nutshell/demo/cache/demo/cloudy/
+  188  rm -vrf /home/mpeura/nutshell/demo/cache/demo/image/
+  189  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  190  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  191  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=4_TIMESTEP=5.gif
+  192  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=5_TIMESTEP=5.gif
+  193  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=6_TIMESTEP=5.gif
+  194  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=8_TIMESTEP=5.gif
+  195  history
+  196  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  197  history
+  198  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  199  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  200  ghistory git
+  201  git commit . -m 'Release'
+  202  git push
+  203  commit-svn.sh
+  204  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  205  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  206  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  207  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  208  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  209  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  210  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  211  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  212  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/anim/202005101245_demo.cloudy.anim__FRAMES=3_SIZE=800,600_TIMESTEP=5.gif-generate.sh.stdout
+  213  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/anim/202005101245_demo.cloudy.anim__FRAMES=3_SIZE=800,600_TIMESTEP=5.gif-generate.sh.stderr
+  214  ls -ltr /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/
+  215  ls -ltr /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/202005101245_demo.cloudy__202005101245_FRAMES=3_SIZE=800,600_TIMESTEP=5_demo.cloudy.anim.png
+  216  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  217  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  218  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  219  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  220  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  221  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/202005101250_demo.cloudy__202005101245_FRAMES=3_SIZE=800,600_TIMESTEP=5_demo.cloudy.anim.png-generate.sh.stdout
+  222  convert /home/mpeura/nutshell/demo/cache/2020/05/10/demo/image/ppmforge/202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png -evaluate Threshold 12 /home/mpeura/nutshell/demo/cache/demo/image/pattern/demo.image.pattern_PATTERN=LEFT45_SIZE=800,600.png -negate -compose Multiply -composite /home/mpeura/nutshell/demo/cache/2020/05/10/demo/cloudy/202005101250_demo.cloudy__202005101245_FRAMES=3_SIZE=800,600_TIMESTEP=5_demo.cloudy.anim-24943-MASK.png
+  223  xv /home/mpeura/nutshell/demo/cache/2020/05/10/demo/image/ppmforge/202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png
+  224  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png
+  225  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/image/ppmforge/202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png-generate.sh.stdout
+  226  ppmforge -clouds -seed '100120200510' -inclination 0  -dimension '2' -power '1.0'     -hour '1283' -width '800' -height '600' | convert - -crop 800x600+0+0 -channel R -separate  -roll +664+0 foo.png
+  227  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/image/ppmforge/202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png-generate.sh.stderr
+  228  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png
+  229  python3 -m nutshell.nutshell -c nutshell-demo.cnf -v  -dm -p 202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png
+  230  cat /home/mpeura/nutshell/demo/cache/2020/05/10/demo/image/ppmforge/202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png-generate.sh.stderr
+  231  ls -ltr /home/mpeura/nutshell/demo/cache/2020/05/10/demo/image/ppmforge/tmp
+  232  python3 -m nutshell.nutshell -c nutshell-demo.cnf -v  -dm -p 202005101250_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=800,600.png
+  233  history
+  234  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  235  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  236  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  237  ghistory demo
+  238  ghistory htt
+  239  ghistory mak
+  240  history
+  241  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=12_TIMESTEP=5.gif
+  242  ghistory htt
+  243  python3  -m nutshell.httpd -c nutshell-demo.cnf 
+  244  ghistory clou
+  245  python3 -m nutshell.nutshell -c nutshell-demo.cnf  -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=1_TIMESTEP=5.gif
+  246  python3  -m nutshell.httpd -c nutshell-demo.cnf 
+  247  ghistory .nu
+  248  python3 -m nutshell.nutshell -c nutshell-demo.cnf -dm -p 2020050800_demo.cloudy_SIZE=800,600.jpg
+  249  xv /home/mpeura/nutshell/demo/cache/2020/05/08/demo/cloudy/2020050800_demo.cloudy_SIZE=800,600.jpg
+  250  ghistory patt
+  251  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make -p demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+  252  python3 -m nutshell.nutshell -c nutshell-demo.cnf -dm -p 2020050800_demo.cloudy_SIZE=800,600.jpg
+  253  cd $NUTSHELL_DIR/
+  254  cd
+  255  source .bash_aliases
+  256  cd $NUTSHELL_DIR/
+  257  cat ~/.bash_aliases
+  258  ghistory 
+  259  ghistory rm
+  260  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  261  ghistory  http_codes.txt 
+  262  ghistory  http
+  263  python3  -m nutshell.httpd -c nutshell-demo.cnf
+  264  history
+  265  pushd ~/venison/
+  266  cd products
+  267  ln -s ~/nutshell/demo/products/demo .
+  268  cd
+  269  popd
+  270  python3 -m nutshell.nutshell -dm -p 2020050800_demo.cloudy_SIZE=800,600.jpg
+  271  --make -p demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+  272  python3 -m nutshell.nutshell -dm -p 2020050800_demo.cloudy_SIZE=800,600.jpg --make -p demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+  273  python3 -m nutshell.nutshell --make -p demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+  274  python3 -m nutshell.nutshell --make --move foo.png  -p demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+  275  ls -ltr
+  276  xv foo.png 
+  277  python3 -m nutshell.nutshell --make --move foo.png  -p demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
+  278  cd img/
+  279  ls
+  280  make demo-images3.png 
+  281  ln -s .. nutshell
+  282  make demo-images3.png 
+  283  cd ..
+  284  python3 -m nutshell.nutshell -m --move demo-pattern.png demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+  285  ls nutshell
+  286  cd img/
+  287  ls -ltr
+  288  rm nutshell
+  289  ln -s ../python nutshell
+  290  python3 -m nutshell.nutshell -m --move demo-pattern.png demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+  291  make demo-images3.png 
+  292  ln -s ../nutshell.cnf
+  293  make demo-images3.png 
+  294  xv demo-images3.png
+  295  make demo-images3.png 
+  296  rm demo-images3.png 
+  297  make demo-images3.png 
+  298  xv demo-images3.png
+  299  make demo-images3.png 
+  300  xv demo-images3.png
+  301  file demo-map.png demo-images2.png
+  302  make demo-images3.png 
+  303  rm demo-images3.png 
+  304  make demo-images3.png 
+  305  rm demo-map.png
+  306  make demo-images3.png 
+  307  xv demo-images3.png
+  308  cd ..
+  309  fgrep img doc-source/*.rst
+  310  ghistory cloudy
+  311  python3 -m nutshell.nutshell -dm -p 2020050800_demo.cloudy_SIZE=800,600.png
+  312  xv /home/mpeura/venison/cache/2020/05/08/demo/cloudy/2020050800_demo.cloudy_SIZE=800,600.png
+  313  xv /home/mpeura/venison/cache/2020/05/08/demo/cloudy/2020050812145_demo.cloudy_SIZE=800,600.png
+  314  python3 -m nutshell.nutshell -dm -p 202005081245_demo.cloudy_SIZE=800,600.png
+  315  xv /home/mpeura/venison/cache/2020/05/08/demo/cloudy/2020050812145_demo.cloudy_SIZE=800,600.png
+  316  xv /home/mpeura/venison/cache/2020/05/08/demo/cloudy/202005081245_demo.cloudy_SIZE=800,600.png
+  317  rm img/demo-cloudy.png 
+  318  commit-svn.sh
+  319  xv img/demo-cloudy.png 
+  320  cd img/
+  321  make all
+  322  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+  323  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png
+  324  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png
+  325  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 2020050800_demo.cloudy_SIZE=800,600.jpg
+  326  cd ..
+  327  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+  328  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png
+  329  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png
+  330  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 2020050800_demo.cloudy_SIZE=800,600.jpg
+  331  xv 2020050800_demo.cloudy_SIZE=800,600.jpg
+  332  xv /home/mpeura/nutshell/demo/cache/2020/05/08/demo/cloudy/2020050800_demo.cloudy_SIZE=800,600.jpg
+  333  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 2020050800_demo.cloudy_SIZE=800,600.jpg
+  334  history
+  335  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 2020050800_demo.cloudy_SIZE=800,600_${USER}.jpg
+  336  python3 -m nutshell.nutshell --make --product 2020050800_demo.cloudy_SIZE=800,600_${USER}.jpg
+  337  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  338  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make   --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  339  history
+  340  python3 -m nutshell.nutshell  --make --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  341  python3 -m nutshell.nutshell --make   --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  342  python3 -m nutshell.nutshell  --make --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  343  history
+  344  python3 -m nutshell.nutshell  --make --product 2020050800_demo.cloudy_SIZE=800,600_${USER}.jpg
+  345  history
+  346  python3 -m nutshell.nutshell  --make   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  347  history
+  348  commit-svn.sh
+  349  git commit python/nutshell.py -m 'MOVE option'
+  350  git commit python/product.py -m 'TIMESTAMP literal'
+  351  git add python/product.py 
+  352  git commit python/product.py -m 'TIMESTAMP literal'
+  353  https_proxy='' HTTPS_PROXY='' git push
+  354  python3 -m nutshell.nutshell  --request CHECK -D mika=1   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  355  python3 -m nutshell.nutshell  --request CHECK -D mika=1,jouno,maki   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  356  python3 -m nutshell.nutshell  --make -D mika=1,jouno,maki   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  357  ghistory rm
+  358  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  359  ghistory .nu
+  360  python3 -m nutshell.nutshell  --make --product 2020050800_demo.cloudy_SIZE=800,600_${USER}.jpg
+  361  rm -vrf /home/mpeura/venison/cache/2020/05/08/demo
+  362  rm -vrf /home/mpeura/venison/cache/demo/image/
+  363  history
+  364  python3 -m nutshell.nutshell  --make --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  365  python3 -m nutshell.nutshell  --make --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  366  python3 -m nutshell.nutshell  -dm --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  367  python3 -m nutshell.nutshell  --make   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  368  python3 -m nutshell.nutshell  -dm   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  369  xv /home/mpeura/venison/cache/demo/image/pattern/demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300_mpeura.png
+  370  history
+  371  python3 -m nutshell.nutshell --make   --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  372  python3 -m nutshell.nutshell -dm --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  373  ghistory .nut
+  374  python3 -m nutshell.nutshell  -dm --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  375  python3 -m nutshell.nutshell -dm --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  376  python3 -m nutshell.nutshell  -dm   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  377  cat /home/mpeura/venison/cache/demo/map/demo.map_BBOX=19,59,32,71_CONF=geoserver_PROJ=4326_SIZE=300,500_mpeura.png-generate.sh.stdout
+  378  cat /home/mpeura/venison/cache/demo/map/demo.map_BBOX=19,59,32,71_CONF=geoserver_PROJ=4326_SIZE=/home/mpeura/venison/cache/demo/map/demo.map_BBOX\=19\,59\,32\,71_CONF\=geoserver_PROJ\=4326_SIZE\=300\,500_mpeura.png-generate.sh.stderr 
+  379  ls -ltr /home/mpeura/venison/cache/demo/map//home/mpeura/venison/cache/demo/map/demo.map_BBOX=19,59,32,71_CONF=geoserver_PROJ=4326_SIZE=300,500_mpeura.png-generate.sh.stdout
+  380  ls -ltr /home/mpeura/venison/cache/demo/map/
+  381  rm -vrf  /home/mpeura/venison/cache/demo/map/
+  382  python3 -m nutshell.nutshell  -dm   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  383  python3 -m nutshell.nutshell  -dm --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  384  python3 -m nutshell.nutshell -v  -dm --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  385  ghistory htt
+  386  python3  -m nutshell.httpd -c nutshell-demo.cnf
+  387  ghistory rm
+  388  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  389  python3  -m nutshell.httpd -c nutshell-demo.cnf
+  390  rm -vrf /home/mpeura/nutshell/demo/cache/2020/
+  391  python3 -m nutshell.nutshell  -dm --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326_${USER}.png
+  392  python3 -m nutshell.nutshell  -dm   --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS_${USER}.png
+  393  python3 -m nutshell.nutshell -dm --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  394  git commit python/product.py -m 'ID, actions''
+  395  '
+  396  git commit python/*.py -m 'actions'
+  397  git push
+  398  ghistory htt
+  399  https_proxy='' HTTPS_PROXY='' git push
+  400  python3 -m nutshell.nutshell -dm --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  401  python3 -m nutshell.nutshell  -v -dm --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300_${USER}.png
+  402  ghistory .comp
+  403  python3 -m nutshell.nutshell -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  404  find /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  405  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  406  python3 -m nutshell.nutshell -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  407  find /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  408  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=800,800.png
+  409  python3 -m nutshell.nutshell -D SCHEME=TILED -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  410  python3 -m nutshell.nutshell -D SCHEME=TILED -md -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  411  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=800,800.png-generate.sh.stdout
+  412  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=800,800.png-generate.sh.stderr
+  413  python3 -m nutshell.nutshell -D SCHEME=TILED -md -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  414  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  415  python3 -m nutshell.nutshell -D SCHEME=TILED -md -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  416  find /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  417  hdfview /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikor_SIZE=800,800_VDATA=DBZH.h5
+  418  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikes_SIZE=800,800_VDATA=DBZH.h5-generate.sh.stdout
+  419  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikes_SIZE=800,800_VDATA=DBZH.h5-generate.sh.stdout
+  420  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  421  python3 -m nutshell.nutshell -D SCHEME=TILED -md -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  422  find /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/
+  423  ls /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5
+  424  for i in  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5; basename $i; done
+  425  for i in  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5; echo ${i#*/}; done
+  426  for i in  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5; do echo ${i#*/}; done
+  427  for i in  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5; do echo ${i##*/}; done
+  428  for i in  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5; do python3 -m nutshell.nutshell -D SCHEME=TILE -md -p  ${i##*/}; done
+  429  python3 -m nutshell.nutshell -D SCHEME=TILED -md -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  430  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=800,800.png
+  431  history
+  432  history >> hist
+  433  commit-svn.sh
+  434  svn add sphinx/source/nutshell-demo.rst
+  435  commit-svn.sh
+  436  ghistory comp
+  437  for i in  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/*.h5; do python3 -m nutshell.nutshell -D SCHEME=TILE -md -p  ${i##*/}; done
+  438  ghistory comp
+  439  python3 -m nutshell.nutshell -D SCHEME=TILED -md -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  440  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=800,800.png
+  441  commit-svn.sh
+  442  svn info python/
+  443  svn status python/
+  444  python3 -m nutshell.nutshell -D SCHEME=TILED --inputs -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  445  python3 -m nutshell.nutshell -D SCHEME=TILED -i -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  446  commit-svn.sh
+  447  man ls
+  448  python3 -m nutshell.nutshell -D SCHEME=TILED -i -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  449  python3 -m nutshell.nutshell -D SCHEME=TILED -m -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  450  python3 -m nutshell.nutshell -D ASCHEME=TILED -m -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  451  ghistory rm
+  452  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  453  python3 -m nutshell.nutshell -D SCHEME=TILED -m -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  454  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=800,800.png-generate.sh.stdout
+  455  rack --cMethod 'MAXIMUM' --cSize 800,800 --cBBox '16,57,35,70' --cProj "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" --encoding type=C --cInit --script ' --cAdd' --inputPrefix '/home/mpeura/venison/cache/2017/08/12/radar/rack/comp/' tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikes_SIZE=800,800_VDATA=DBZH.h5 tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikor_SIZE=800,800_VDATA=DBZH.h5 tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikuo_SIZE=800,800_VDATA=DBZH.h5 --cExtract dwsc --outputPrefix /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tmp/ --select quantity='^DBZH' -o koe.png
+  456  hdfview /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikes_SIZE=800,800_VDATA=DBZH.h5
+  457  ls -ltr /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=*
+  458  fgrep SCHEME /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=*std?? 
+  459  fgrep SCHEME /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_COORD=C_SITES=fik_SIZE=*std??? 
+  460  cd demo/products/demo/
+  461  ls -ltr
+  462  cd cloudy/
+  463  ls -ltr
+  464  ./input.sh 
+  465  cd anim
+  466  TIMESTAMP./input.sh 
+  467  TIMESTAMP=201708121600 ./input.sh 
+  468  OUTFILE=201708121600_test.somthing_WIDTH=1__FRAMES=6.gif  ./input.sh 
+  469  ghistory  gif
+  470  python3 -m nutshell.nutshell -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  471  cd
+  472  python3 -m nutshell.nutshell -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  473  history
+  474  python3 -m nutshell.nutshell -dm -p 202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif
+  475  ghistory TIL
+  476  ghistory rm
+  477  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  478  ghistory rm
+  479  ghistory TIL
+  480  python3 -m nutshell.nutshell -D SCHEME=TILED -m -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  481  fgrep SCHEME /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikuo_SIZE=800,800_VDATA=DBZH.h5-generate.sh.stderr
+  482  fgrep SCHEME /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=16,57,35,70_METHOD=MAXIMUM_PROJ=4326_SITE=fikuo_SIZE=800,800_VDATA=DBZH.h5-generate.sh.stdout
+  483  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  484  python3 -m nutshell.nutshell -D SCHEME=TILED -m -p 201708121600_radar.rack.comp_SIZE=800,800_COORD=C_SITES=fik.png
+  485  find /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  486  ghistory htt
+  487  python3  -m nutshell.httpd 
+  488  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  489  python3  -m nutshell.httpd 
+  490  find /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  491  rack /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=20,60,30,70_METHOD=MAXIMUM_PROJ=4326_SITE=fiika_SIZE=800,800_VDATA=DBZH.h5 -o -
+  492  rack /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=20,60,30,70_METHOD=MAXIMUM_PROJ=4326_SITE=fiika_SIZE=800,800_VDATA=DBZH.h5 -o koe.png
+  493  xv koe.png 
+  494  ghistory git
+  495  git commit . -m 'Fix'
+  496  git push 
+  497  https_proxy='' HTTPS_PROXY='' git push
+  498  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/
+  499  python3  -m nutshell.httpd 
+  500  cd
+  501  ls -ltr
+  502  cd  Omat/
+  503  ls -ltr
+  504  cat sanat.txt
+  505  fgrep elis sanat.txt 
+  506* 
+  507  cat >> sanat.txt
+  508  cd
+  509  cd venison/cache
+  510  ls -ltr
+  511  rmdir  \(U\ Wyoming\)\=201509200200/26038/skewt/parc/
+  512  rmdir  \(U\ Wyoming\)\=201509200200/26038/skewt
+  513  rmdir  \(U\ Wyoming\)\=201509200200/26038
+  514  rmdir  \(U\ Wyoming\)\=201509200200
+  515  ls -ltr radar/obstacle/
+  516  cp radar/obstacle/radar.obstacle.txt ~/workspace-cpp/rack/demo/obstacles.dat
+  517  fgrep text ~/bin/*.sh
+  518  cd
+  519  cd nutshell
+  520  python3 -m nutshell.nutshell -m -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI__COORD=C_PDATA=CLASS_PALETTE=default_iDistanceTransformFill=5.png 
+  521  python3 -m nutshell.nutshell -dm -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI__COORD=C_PDATA=CLASS_PALETTE=default_iDistanceTransformFill=5.png 
+  522  python3 -m nutshell.nutshell -v -dm -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI__COORD=C_PDATA=CLASS_PALETTE=default_iDistanceTransformFill=5.png 
+  523  cat /home/mpeura/venison/products/radar/rack/andre/det/img/input.sh
+  524  python3 -m nutshell.nutshell -v -dm -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C_PDATA=CLASS__PALETTE=default_iDistanceTransformFill=5.png 
+  525  python3 -m nutshell.nutshell -dm -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C_PDATA=CLASS__PALETTE=default_iDistanceTransformFill=5.png 
+  526  python3 -m nutshell.nutshell -v --request CHECK -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C_PDATA=CLASS__PALETTE=default_iDistanceTransformFill=5.png 
+  527  spyder3 &
+  528  python3 -m nutshell.product -v --request CHECK -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C_PDATA=CLASS__PALETTE=default_iDistanceTransformFill=5.png 
+  529  python3 -m nutshell.product -v  -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C_PDATA=CLASS__PALETTE=default_iDistanceTransformFill=5.png 
+  530  python3 -m nutshell.product -v  -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C.png 
+  531  python3 -m nutshell.product -v  -p 202004071630_radar.rack.andre.det.img__SITE=fiika_ANDRE=FMI_COORD=C.png 
+  532  python3 -m nutshell.product -v  -p 202004071630_radar.rack.andre.det.img_SITE=fiika_ANDRE=FMI_COORD=C__A=1_B=2.png 
+  533  git commit python/product.py -m 'INPUTPARAMETERS'
+  534  cp  ~/venison/products/maps/wms/generate.sh  ~/venison/products/maps/wms/generate.sh.bak2
+  535  cp demo/products/demo/map/generate.sh  ~/venison/products/maps/wms/generate.sh 
+  536  python3 -m nutshell.nutshell -v --request CHECK -p 201708121600_radar.rack.comp_PPROD=pSweep,DBZH,1_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.h5
+  537  python3 -m nutshell.nutshell -v -m -p 201708121600_radar.rack.comp_PPROD=pSweep,DBZH,1_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.h5
+  538  python3 -m nutshell.nutshell -v -m -p 201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.h5
+  539  hdfview /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITES=fikor,fivan_SIZE=800,600.h5
+  540  python3 -m nutshell.nutshell -v -m -p 201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.png
+  541  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITES=fikor,fivan_SIZE=800,600.png
+  542  python3 -m nutshell.nutshell -D TILED -v -m -p 201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.png
+  543  python3 -m nutshell.nutshell -D TILED -v -md -p 201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.png
+  544  python3 -m nutshell.nutshell -D SCHEME=TILED -v -md -p 201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.png
+  545  rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack
+  546  python3 -m nutshell.nutshell -D SCHEME=TILED -v -md -p 201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_SIZE=800,600_PROJ=4326_SITES=fikor,fivan_METHOD=LATEST.png
+  547  find /home/mpeura/venison/cache/2017/08/12/radar/rack
+  548  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITES=fikor,fivan_SIZE=800,600.png
+  549  hdfview /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITE=fivan_SIZE=800,600_VDATA=DBZH.h5
+  550  python3 -m nutshell.nutshell -D SCHEME=TILE -v -md -p 201708121600_radar.rack.comp.tile_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITE=fivan_SIZE=800,600_VDATA=DBZH.sh
+  551  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITE=fivan_SIZE=800,600_VDATA=DBZH.sh
+  552  python3 nutshell.nutshell --request MAKE,LINK -p 201708121600_radar.rack.comp_CMETHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=default.png
+  553  history
+  554  python3 -m nutshell.nutshell --request MAKE,LINK -p 201708121600_radar.rack.comp_CMETHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=default.png
+  555  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CMETHOD=LATEST_IDATA=DBZHDEV_PALETTE=default_SITES=fivan,fivim.png
+  556* display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CMETHOD=LATEST_IDATA=DBZHDEV_PALETTE=default_SITES=fivan,fivim.sh
+  557  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_CMETHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=default.sh
+  558  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CMETHOD=LATEST_IDATA=DBZHDEV_PALETTE=default_SITES=fivan,fivim.sh
+  559  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=default.sh
+  560  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=default.png
+  561  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_IDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.png
+  562  display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_IDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.png
+  563  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=default.sh
+  564  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_IDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.sh
+  565  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTE=default.sh
+  566  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.sh
+  567  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim.sh
+  568  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTE=default.sh
+  569  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTE=default.sh
+  570  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.sh
+  571* 
+  572  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTE=DBZHDEV.sh
+  573* cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim.png
+  574  display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim.png
+  575  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  576  display 201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim.png
+  577  display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim.png
+  578  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTEKEY=DBZHDEV.png
+  579  display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTEKEY=DBZHDEV_SITES=fivan,fivim.png
+  580  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTEKEY=DBZHDEV.sh
+  581  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTEKEY=DBZHDEV_SITES=fivan,fivim.sh
+  582  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.sh
+  583  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTEKEY=default.sh
+  584  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTEKEY=default_SITES=fivan,fivim.sh
+  585  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.sh
+  586  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_CDATA=DBZHDEV_PALETTE=default.sh
+  587  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_CDATA=DBZHDEV_METHOD=LATEST_PALETTE=default_SITES=fivan,fivim.sh
+  588  python3 -m nutshell.nutshell --request DELETE,MAKE -p 201708121600_radar.rack.comp_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_PDATA=DBZHDEV_PALETTE=default.sh
+  589  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_METHOD=LATEST_PALETTE=default_PDATA=DBZHDEV_SITES=fivan,fivim.sh
+  590  history
+  591  python3 -d nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  592  python3 -m nutshell.nutshell --request MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  593  xv /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_IDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim_SIZE=500.png
+  594  display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_IDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim_SIZE=500.png
+  595  man python3
+  596  echp PYTHONPATH
+  597  echo $PYTHONPATH
+  598  PYTHONPATH=~/nutshell/
+  599  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  600  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fiika_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  601  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fikor_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  602  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fikuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  603  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  604  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  605  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  606  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fikor_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  607  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fikuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  608  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  609  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  610  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  611  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=17.462,57.814,26.4403,62.2903_SITES=fikor,fikuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  612  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=17.462,57.814,26.4403,62.2903_SITES=fikor,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  613  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=17.462,57.814,26.4403,62.2903_SITES=fikor,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  614  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,filuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  615  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  616  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  617  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  618  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.6643,64.8032,33.2007,69.2664_SITES=filuo,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  619  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.6643,64.8032,33.2007,69.2664_SITES=filuo,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  620  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.5035,62.4474,32.0092,66.9158_SITES=fiuta,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  621  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.5035,62.4474,32.0092,66.9158_SITES=fiuta,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  622  rm -vrf  /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/
+  623  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fiika_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  624  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fikor_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  625  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fikuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  626  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  627  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  628  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8345,58.5873,32.0318,63.0625_SITES=fianj,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  629  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fikor_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  630  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fikuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  631  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  632  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  633  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=18.6949,59.4486,28.1512,63.9224_SITES=fiika,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  634  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=17.462,57.814,26.4403,62.2903_SITES=fikor,fikuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  635  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=17.462,57.814,26.4403,62.2903_SITES=fikor,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  636  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=17.462,57.814,26.4403,62.2903_SITES=fikor,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  637  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,filuo_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  638  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  639  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  640  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=22.8531,60.541,32.6631,65.013_SITES=fikuo,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  641  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.6643,64.8032,33.2007,69.2664_SITES=filuo,fiuta_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  642  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.6643,64.8032,33.2007,69.2664_SITES=filuo,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  643  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.5035,62.4474,32.0092,66.9158_SITES=fiuta,fivan_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  644  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=21.5035,62.4474,32.0092,66.9158_SITES=fiuta,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  645  python3 -m nutshell.nutshell --request LATEST,MAKE -p 201708121600_radar.rack.comp_SIZE=500_METHOD=LATEST_BBOX=20.6712,57.9556,29.6887,62.4318_SITES=fivan,fivim_IDATA=DBZHDEV_PALETTE=DBZHDEV.png
+  646  display /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_BBOX=20.6712,57.9556,29.6887,62.4318_IDATA=DBZHDEV_METHOD=LATEST_PALETTE=DBZHDEV_SITES=fivan,fivim_SIZE=500.png
+  647  ghistory TILE
+  648  python3 -m nutshell.nutshell -D SCHEME=TILE -v -md -p 201708121600_radar.rack.comp.tile_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITE=fivan_SIZE=800,600_VDATA=DBZH.sh
+  649  cat /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/tile/201708121600_radar.rack.comp.tile_BBOX=17.13,57.93,29.41,62.58_METHOD=LATEST_PROJ=4326_SITE=fivan_SIZE=800,600_VDATA=DBZH.sh
+  650  rack   --cMethod 'LATEST' --cSize 800,600 --cBBox '17.13,57.93,29.41,62.58' --cProj "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  --encoding type=C         /home/mpeura/venison/cache/2017/08/12/radar/polar/fivan/201708121600_radar.polar.fivan.h5 --select 'dataset1,quantity=^DBZH$'    --select quantity=DBZH --cCreateTile -o koe.png
+  651  xv koe.png 
+  652  rack   --cMethod 'LATEST' --cSize 800,600 --cBBox '17.13,57.93,29.41,62.58' --cProj "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  --encoding type=C         /home/mpeura/venison/cache/2017/08/12/radar/polar/fivim/201708121600_radar.polar.fivan.h5 --select 'dataset1,quantity=^DBZH$'    --select quantity=DBZH --cCreateTile -o koe.png
+  653  rack   --cMethod 'LATEST' --cSize 800,600 --cBBox '17.13,57.93,29.41,62.58' --cProj "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  --encoding type=C         /home/mpeura/venison/cache/2017/08/12/radar/polar/fivim/201708121600_radar.polar.fi???.h5 --select 'dataset1,quantity=^DBZH$'    --select quantity=DBZH --cCreateTile -o koe.png
+  654  xv koe.png 
+  655  rack   --cMethod 'LATEST' --cSize 800,600 --cBBox '17.13,57.93,29.41,62.58' --cProj "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  --encoding type=C         /home/mpeura/venison/cache/2017/08/12/radar/polar/fivim/201708121600_radar.polar.fi???.h5 --select 'dataset1,quantity=^DBZH$'    --select quantity=DBZH --cCreateTile -o koe.png
+  656  xv koe.png 
+  657  history
+  658  git commit python/product.py -m 'INPUT_PARAMS'
+  659  git push
+  660  ghistory ht
+  661  https_proxy='' HTTPS_PROXY='' git push
+  662  history
+  663  history >> hist2

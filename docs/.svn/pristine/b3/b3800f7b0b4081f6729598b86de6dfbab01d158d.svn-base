@@ -1,0 +1,230 @@
+
+
+__version__ = '0.1'
+__author__ = 'Markus.Peura@fmi.fi'
+
+import argparse
+import BaseHTTPServer
+import SimpleHTTPServer
+import xml.etree.ElementTree as ET
+
+# Pretty printing
+# from xml.dom import minidom
+
+import nutxml # HTML utils
+import nutshell
+
+# http://127.0.0.1:8088/rauno/ahonen?request=MAKE&product=201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika.png
+
+HOST_NAME = ''
+#PORT_NUMBER=8088
+
+
+nutserver = nutshell.ProductServer()
+
+
+
+#SimpleHTTPRequestHandler
+
+
+"""Return a foobang
+
+Optional plotz says to frobnicate the bizbaz first.
+"""
+#class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+
+    counter = 0
+    htmlDoc = ''
+
+    @classmethod
+    def get_html_template(cls):
+        # Copy, to server each request independently
+        return cls.htmlDoc.getroot().copy()
+
+    @staticmethod
+    def parse_url(url):
+        query = url.split('?')
+        #print "MIKA", query
+        # path = query[0]
+        data = {}
+        if (len(query) > 1):
+            for entry in query[1].split('&'):
+                index = entry.find('=')
+                if (index > 0):
+                    data[entry[0:index]] = entry[(index+1):]
+                else:
+                    data[entry] = None # or true or itself?
+        #print "MOUKO: ", data
+        return (query[0], data)
+    
+    def do_POST(s):
+        s.send_response(200)
+        s.end_headers()
+        varLen = int(s.headers['Content-Length'])
+        postVars = s.rfile.read(varLen)
+        print postVars
+
+    def do_GET(s):
+
+        ++MyHandler.counter
+
+        print s.path
+        basepath,data = MyHandler.parse_url(s.path)
+
+        if (basepath == '/test'):
+            s.send_response(200)
+            s.end_headers()
+            s.wfile.write("<html><body>Test</body></html>\n")
+            return 
+
+        if (basepath == '/stop'):
+            s.send_response(200)
+            s.end_headers()
+            s.wfile.write("<html>Stopped server</html>")
+            httpd.server_close()
+            return 
+
+        # Todo: add dir handler
+        if (basepath != '/nutshell/server'):
+            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(s)
+            return
+            
+        s.send_response(200)
+        #s.send_header('Content-type: ', 'image/png')
+        s.end_headers()
+
+        # NEW             
+        html = MyHandler.get_html_template()
+        spans={}
+        for elem in html.findall('body/span[@id]'):
+            spans[elem.get('id')] = elem
+        #s.wfile.write(ET.tostring(html))
+
+        s.wfile.write("<html>")
+        s.wfile.write("<h1>Hello, this is NutServer!</h1>")
+        s.wfile.write("<b>Request #{0}</h1>".format(MyHandler.counter))
+
+        s.wfile.write('<p>' + basepath + '</p>\n')
+        s.wfile.write('<p>' + str(data) + '</p>\n')
+               
+        s.wfile.write(nutxml.value_table(data, 'Query data'))
+
+        productInfo = nutshell.ProductInfo()
+            
+        if ('product' in data):
+            productInfo.parse(data['product'])
+            s.wfile.write('<h2>Product: ' + productInfo.ID + '</h2>\n')
+                
+            if ('request' in data):
+
+                request = data['request'].split(',')
+
+                #print request
+                
+                if ('MAKE' in request):
+
+                    s.wfile.write('<em>processing...</em>\n')
+                    product = nutserver.make_product(productInfo)
+                    s.wfile.write('<b>' + product.path + '</b>\n')
+
+                if ('INPUTS' in request):
+                    inputs = nutserver.get_input_list(productInfo)
+                    layout = '<tr><td>{0}</td><td><a href="/nutshell/server?request=INPUTS&product={1}">{1}</a></td></tr>\n'
+
+                    s.wfile.write(nutxml.value_table(inputs, 'Inputs', layout=layout ))
+
+                    
+            env = productInfo.get_param_env()
+            s.wfile.write(nutxml.value_table(env, 'Product variables'))
+
+                    
+        status =  nutserver.status()
+        s.wfile.write(nutxml.value_table(status, 'Server status'))
+        
+        s.wfile.write("<pre>")
+        s.wfile.write("<hr/>\n")
+        s.wfile.write("</pre>")
+
+
+
+        s.wfile.write("</html>")
+
+
+
+parser = argparse.ArgumentParser()
+
+
+
+parser.add_argument("-c", "--conf", dest="CONF",
+    default="nutshell.cnf", #ProductServer.CONF_FILE?
+    help="read config file", metavar="<file>")
+
+parser.add_argument("-m", "--make", dest="MAKE",
+    default="",
+    help="make product", metavar="<file>")
+
+parser.add_argument("-p", "--port", dest="HTTP_PORT",
+    default=0,
+    help="http port", metavar="<int>")
+
+parser.add_argument(
+    "-t", "--test", dest="TESTPRODUCT",
+    default="",
+    help="test product directlty", metavar="<file>"
+)
+
+parser.add_argument("-v", "--verbose", dest="VERBOSE", default=5, metavar="<level>",
+    help="Print status messages to stdout")
+
+
+    
+
+    
+#(options, args) = parser.parse_args()
+options = parser.parse_args()
+
+if (not options):
+    parser.print_help()
+    exit(1)
+    
+if (options.VERBOSE > 10):
+    print options
+
+if (options.CONF):
+    if (options.VERBOSE > 5):
+        print "Reading conf file: {0}".format(options.CONF)
+    nutserver.read_conf(options.CONF)
+
+# Override conf
+if (options.HTTP_PORT):
+    nutserver.HTTP_PORT = options.HTTP_PORT
+    
+# inits
+MyHandler.htmlDoc = ET.parse('response.html')
+
+server_class = BaseHTTPServer.HTTPServer
+#server_class = SimpleHTTPServer.BaseHTTPServer
+
+if (options.VERBOSE > 1):
+    print 'Starting NutServer at port ' + nutserver.HTTP_PORT
+httpd = server_class((HOST_NAME, int(nutserver.HTTP_PORT)), MyHandler)
+
+
+# reads HTTP port etc
+#nutserver.read_conf('nutshell.cnf')
+
+
+#print 'http request example: ' + 'http://127.0.0.1:8088/nutshell/server?request=INPUTS&product=201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika_BBOS=20,60,30,70.png'
+
+try:
+    httpd.serve_forever()
+    # httpd.handle_request()
+except KeyboardInterrupt:
+    print
+    print "Keyboard interrupt (CTRL-C)"
+    print "Stopping server"
+    pass
+
+#print postVars
+#httpd.server_close()

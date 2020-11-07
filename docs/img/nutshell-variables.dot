@@ -1,0 +1,107 @@
+digraph G {
+
+  size = "8,6";
+  node [shape=record];
+
+  {rank=same; "TIMESTAMP"; "PRODUCT"; "EXTENSION"; }
+
+
+   subgraph cluster_0 {
+     label = "Product-specific parameters";
+     PARAMETERS [color=brown, label="PARAMETERS"; style= "dashed"; ];
+     P1 [color=brown,label="{$SITES|fikor,fivan,fiika}"];
+     P2 [color=brown,label="{$PPROD|pCappi,500}"];
+     P3 [color=brown,label="{$BBOX|20,60,30,70}"];
+   }
+
+
+   /* subgraph cluster_1 { */
+
+    /* label = "NutShell"; */
+    /* bgcolor = "0.1 0.1 1.0"; */
+
+
+   OUTFILE [color=orange, label="{$OUTFILE|200508091630_radar.rack.comp_SITES=fikor,fivan,fiika_PPROD=pCappi,500_BBOX=20,60,30,70.pgm.gz| {<timestamp>200508091630|<product>radar.rack.comp|<parameters>SITES=fikor,fivan,fiika_PPROD=pCappi,500_BBOX=20,60,30,70|<extension>pgm.gz} }"];
+ 
+   TIMESTAMP [color=red,label="{$TIMESTAMP|200508091630}" ];
+   PRODUCT [color=blue, label="{$PRODUCT|radar.rack.comp}"];
+
+   /* PARAMETERS [color=brown, label="{$PARAMETERS|SITES=fikor,fivan,fiika_PPROD=pCappi,500_BBOX=20,60,30,70}"]; */
+   EXTENSION [color=green, label="{$EXTENSION|pgm.gz}"];
+
+   YEAR  [color=red, shape=record,label="{$YEAR|2005}" ];
+   MONTH [color=red, shape=record,label="{$MONTH|08}" ];
+   DAY   [color=red, shape=record,label="{$DAY|09}" ];
+   HOUR  [color=red, shape=record,label="{$HOUR|16}" ];
+   MINUTE [color=red, shape=record,label="{$MINUTE|30}" ];
+
+   FORMAT [color=green, shape=record,label="{$FORMAT|pgm}" ];
+   COMPRESSION [color=green, shape=record,label="{$COMPRESSION|gz}" ];
+
+
+   /*  OUTDIR [color=black,label="{$OUTDIR|$CACHE_ROOT/2005/08/09/radar/rack/comp}" ]; */
+   /* $CACHE_ROOT/$TIMESTAMP_DIR/$PRODUCT_DIR| */
+   OUTDIR [color=black,label="{$OUTDIR|$CACHE_ROOT/2005/08/09/radar/rack/comp}" ];
+
+   OUTFILE:timestamp  -> TIMESTAMP;
+   OUTFILE:product    -> PRODUCT;
+   OUTFILE:parameters -> PARAMETERS;
+   OUTFILE:extension  -> EXTENSION;
+
+   TIMESTAMP -> YEAR;
+   TIMESTAMP -> MONTH;
+   TIMESTAMP -> DAY;
+   TIMESTAMP -> HOUR;
+   TIMESTAMP -> MINUTE;
+
+   /*
+   YEAR ->TIMESTAMP;
+   MONTH -> TIMESTAMP;
+   DAY -> TIMESTAMP;
+   HOUR -> TIMESTAMP;
+   MINUTE -> TIMESTAMP;
+   */
+   
+   YEAR -> TIMESTAMP_DIR;
+   MONTH -> TIMESTAMP_DIR;
+   DAY -> TIMESTAMP_DIR;
+
+   PRODUCT -> PRODUCT_DIR;
+
+   PARAMETERS -> P1;
+   PARAMETERS -> P2;
+   PARAMETERS -> P3;
+
+   EXTENSION -> FORMAT;
+   EXTENSION -> COMPRESSION;
+
+   /* } */
+
+   subgraph cluster2 {
+
+    label = "System side variables";
+    /* bgcolor = "orange" */
+    
+
+    CONF [label="{Configuration file|<generator_root>$GENERATOR_ROOT|<cache_root>$CACHE_ROOT}", bgcolor="white"]; 
+
+    TIMESTAMP_DIR [color=red,label="{$TIMESTAMP_DIR|2005/08/09}" ];
+    PRODUCT_DIR [color=blue, bgcolor="white", label="{$PRODUCT_DIR|radar/rack/comp}" ];
+    GENERATOR_DIR [color=blue, fillcolor="white",label="{$GENERATOR_DIR|$GENERATOR_ROOT/radar/rack/comp}" ];
+
+
+    TIMESTAMP_DIR -> OUTDIR;
+    PRODUCT_DIR -> OUTDIR;
+    PRODUCT_DIR -> GENERATOR_DIR;
+
+    CONF:generator_root -> GENERATOR_SCRIPT;
+
+    CONF:cache_root -> OUTDIR;
+
+    GENERATOR_DIR -> GENERATOR_SCRIPT;
+
+    GENERATOR_SCRIPT [color=blue,label="{$GENERATOR_SCRIPT|$GENERATOR_ROOT/radar/rack/comp/...|{generator.sh|generator.py?...}}" ];
+
+  }
+
+}

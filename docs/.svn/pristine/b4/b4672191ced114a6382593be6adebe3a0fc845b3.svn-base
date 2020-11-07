@@ -1,0 +1,245 @@
+#!/bin/python3
+# -*- coding: utf-8 -*-
+"""
+Product generator service appicable on the command line or as a library
+
+.. _command-line-usage:
+
+Command line usage
+==================
+
+Basic format for all the command line invocations is::
+
+    python3 -m nutshell.nutshell <nutshell-args>
+    
+Online help is optained with ``-h``::
+
+    python3 -m nutshell.nutshell -h
+    
+Simple query using configuration file and product definition::
+
+    python3 -m nutshell.nutshell -c nutshell/nutshell.cnf -m \\
+      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fiika_BBOX=20,62,30,70.png 
+
+
+
+More details in `Overall Scheme`_
+
+
+Using NutShell within python
+============================
+
+Simple example::
+
+    import nutshell.nutshell as nuts
+
+    # Initilize service
+    server = nuts.ProductServer('nutshell/nutshell.cnf')
+
+    # Retrieve / generate a product
+    response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
+
+    # Results:
+    print("Return code: {0} ".format(response.returncode))
+    print("Status (HTTP code): {0}:  ".format(response.status))
+    print("File path: {0} ".format(response.path))
+
+    # Example: further processing (image data)
+    from PIL import Image
+    file = Image.open(response.path)
+    print(file.info)
+
+
+Status codes
+============
+
+NutShell recycles some standard HTTP status codes [1]_ [2]_ for 
+communicating success or failure on operations. 
+Many of those codes can be also used by the generator scripts
+in describing errors or other exceptional conditions back 
+to the hosting system, NutShell. 
+ 
+Useful HTTP codes
+-----------------
+
+==== ========================== ========== ==========
+Code  Standard Enum Name        NutShell   Comment
+==== ========================== ========== ==========
+102  PROCESSING                 x          
+200  OK                         x          Request completed successfully
+404  Not Found                  x          Document not found
+405  Method Not Allowed         x 
+409  Conflict                              Contradicting parameters 
+413  Payload Too Large                     Parameters imply expensive computation
+415  Unsupported Media Type                Unsupported file format
+416  Range Not Satisfiable                 Parameter underflow or overflow
+425  Too Early                             Input data not arrived
+501  Not Implemented            x          Product generator not found
+==== ========================== ========== ==========
+
+
+.. [1] https://docs.python.org/3/library/http.html
+.. [2] https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+
+Code documentation
+==================
+
+"""
+
+__version__ = '0.2'
+__author__ = 'Markus.Peura@fmi.fi'
+
+#import os
+#import re
+import subprocess # for shell escape
+
+from   pathlib import Path
+from   http    import HTTPStatus
+
+import logging
+logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
+
+
+
+class Task:
+    """Something that has a script and stdin, stdout, env and log"""
+
+    script = None
+    stdout = None
+    stderr = None
+    log    = None
+    env    = None
+    
+    def __init__(self, script, env=None, log=None):
+        if (type(script) == str):
+            self.script = Path(script) 
+        else:
+            self.script = script
+        self.stdout = subprocess.PIPE
+        self.stderr = subprocess.PIPE
+
+        if log:
+            self.log = log
+        else:
+            self.log = logging.getLogger('Task')
+
+        if env:
+            self.env = env
+        else:
+            self.env = {}
+            
+            
+    def run(self):
+        """Runs a task object containing task.script and task.stdout"""
+        
+        
+        p = subprocess.Popen(str(self.script),
+                             cwd=str(self.script.parent),
+                             stdout=self.stdout, # always
+                             stderr=self.stderr, # stdout for cmd-line and subprocess.PIPE (separate) for http usage
+                             shell=True,
+                             env=self.env)
+                            
+ 
+        if (not p):
+            self.log.warn('Could not run process: {0}'.format(self.script)) 
+            self.returncode = -1
+            self.status = HTTPStatus.NOT_FOUND
+            return
+
+        stdout,stderr = p.communicate()
+        self.returncode = p.returncode        
+
+        if (stdout):
+            stdout = stdout.decode(encoding='UTF-8')
+            if (p.returncode != 0):
+                lines = stdout.strip().split('\n')
+                self.error_info = lines.pop()
+                self.log.warn(self.error_info)
+                try:             
+                    status = int(self.error_info.split(' ')[0])
+                    self.status = HTTPStatus(status)
+                except ValueError:
+                    self.log.warn('Not HTTP error code: {0} '.format(self.status))
+                    self.status = HTTPStatus.CONFLICT
+        if (stderr):
+            stderr = stderr.decode(encoding='UTF-8')
+        self.stdout = stdout  
+        self.stderr = stderr
+        
+                   
+    
+
+         
+    def run_generator(self, product_request, params=None):
+        """ Run shell script to generate a product. 
+        
+         stdout and stderr are used for output.
+        
+        Attributes:
+          product_request -- state at beginning of transition.
+          params -- attempted new state.
+        """
+
+        if (params == None):
+            params = {}
+
+
+        product_request.log.info('run_generator: ' + product_request.product_info.ID)
+        product_request.log.debug(params)
+    
+        product_request.env = params
+        self.run_task(product_request, product_request.log)
+
+#        p = subprocess.Popen(str(product_request.script), #'./'+self.SHELL_GENERATOR_SCRIPT,
+#                             cwd=str(product_request.script.parent),
+#                             stdout=subprocess.PIPE,  #self.stdout,
+#                             stderr=subprocess.STDOUT, # Use same stream as stdout, be it os.stdout or subprocess.STDOUT
+#                             shell=True,
+#                             env=params)
+#              
+#        self.run_process(p, product_request, product_request.log)              
+        if (product_request.returncode != 0):
+            if (product_request.stdout):
+                log_file = Path(str(product_request.path)+'.stdout.log')
+                product_request.log.warn('Writing STDOUT log: {0}'.format(log_file))            
+                log_file.write_text(product_request.stdout)
+            if (product_request.stderr):
+                log_file = Path(str(product_request.path)+'.stderr.log')
+                product_request.log.warn('Writing STDERR log: {0}'.format(log_file))            
+                log_file.write_text(product_request.stderr)
+            
+        return product_request.returncode
+
+
+  
+
+
+        
+if __name__ == '__main__':
+
+    logger = logging.getLogger('NutShell')
+    logger.setLevel(logging.INFO)
+    
+    #parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
+    
+    #(options, args) = parser.parse_args()
+#    options = parser.parse_args()
+#    
+#    if (not options):
+#        parser.print_help()
+#        exit(1)
+#
+#    
+#    if (options.VERBOSE):
+#        options.LOG_LEVEL = "DEBUG"
+#        
+#    if (options.LOG_LEVEL):
+#        if hasattr(logging, options.LOG_LEVEL):
+#            logger.setLevel(getattr(logging, options.LOG_LEVEL))
+#        else:
+#            logger.setLevel(int(options.LOG_LEVEL))
+#    
+#    logger.debug(options)   
+    
+    exit(0)

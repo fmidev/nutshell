@@ -1,0 +1,56 @@
+# https://imagemagick.org/script/formats.php#builtin-patterns
+Tag 	Description 
+BRICKS 	brick pattern, 16x16 
+CHECKERBOARD 	checkerboard pattern, 30x30 
+CIRCLES 	circles pattern, 16x16 
+CROSSHATCH 	crosshatch pattern, 8x4 
+CROSSHATCH30 	crosshatch pattern with lines at 30 degrees, 8x4 
+CROSSHATCH45 	crosshatch pattern with lines at 45 degrees, 8x4 
+FISHSCALES 	fish scales pattern, 16x8 
+GRAY0 	0% intensity gray, 32x32 
+GRAY5 	5% intensity gray, 32x32 
+GRAY10 	10% intensity gray, 32x32 
+GRAY15 	15% intensity gray, 32x32 
+GRAY20 	20% intensity gray, 32x32 
+GRAY25 	25% intensity gray, 32x32 
+GRAY30 	30% intensity gray, 32x32 
+GRAY35 	35% intensity gray, 32x32 
+GRAY40 	40% intensity gray, 32x32 
+GRAY45 	45% intensity gray, 32x32 
+GRAY50 	50% intensity gray, 32x32 
+GRAY55 	55% intensity gray, 32x32 
+GRAY60 	60% intensity gray, 32x32 
+GRAY65 	65% intensity gray, 32x32 
+GRAY70 	70% intensity gray, 32x32 
+GRAY75 	75% intensity gray, 32x32 
+GRAY80 	80% intensity gray, 32x32 
+GRAY85 	85% intensity gray, 32x32 
+GRAY90 	90% intensity gray, 32x32 
+GRAY95 	95% intensity gray, 32x32 
+GRAY100 	100% intensity gray, 32x32 
+HEXAGONS 	hexagon pattern, 30x18 
+HORIZONTAL 	horizontal line pattern, 8x4 
+HORIZONTAL2 	horizontal line pattern, 8x8 
+HORIZONTAL3 	horizontal line pattern, 9x9 
+HORIZONTALSAW 	horizontal saw-tooth pattern, 16x8 
+HS-BDIAGONAL 	backward diagonal line pattern (45 degrees slope), 8x8 
+HS-CROSS 	cross line pattern, 8x8 
+HS-DIAGCROSS 	diagonal line cross pattern (45 degrees slope), 8x8 
+HS-FDIAGONAL 	forward diagonal line pattern (45 degrees slope), 8x8 
+HS-HORIZONTAL 	horizontal line pattern, 8x8 
+HS-VERTICAL 	vertical line pattern, 8x8 
+LEFT30 	forward diagonal pattern (30 degrees slope), 8x4 
+LEFT45 	forward diagonal line pattern (45 degrees slope), 8x8 
+LEFTSHINGLE 	left shingle pattern, 24x24 
+OCTAGONS 	octagons pattern, 16x16 
+RIGHT30 	backward diagonal line pattern (30 degrees) 8x4 
+RIGHT45 	backward diagonal line pattern (30 degrees), 8x8 
+RIGHTSHINGLE 	right shingle pattern, 24x24 
+SMALLFISHSCALES 	small fish scales pattern, 8x8 
+VERTICAL 	vertical line pattern, 8x8 
+VERTICAL2 	vertical line pattern, 8x8 
+VERTICAL3 	vertical line pattern, 9x9 
+VERTICALBRICKS 	vertical brick pattern, 16x16 
+VERTICALLEFTSHINGLE 	vertical left shingle pattern, 24x24 
+VERTICALRIGHTSHINGLE 	vertical right shingle pattern, 24x24 
+VERTICALSAW 	vertical saw-tooth pattern, 8x16 

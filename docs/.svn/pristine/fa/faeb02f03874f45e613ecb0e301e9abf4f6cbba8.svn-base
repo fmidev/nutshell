@@ -1,0 +1,17 @@
+# Conf by mpeura, la 2.5.2020 22.56.31 +0300
+
+# Directory for NutShell Python files:
+NUTSHELL_DIR='/home/mpeura/nutshell/python'
+
+# Root of cache directory, often on separate resource:
+CACHE_ROOT='/home/mpeura/venison/cache'
+
+# Root of product generator (script) directories
+PRODUCT_ROOT='/home/mpeura/venison/products'
+
+# Top-level directory for HTTP server (optional).
+HTML_ROOT='/home/mpeura/nutshell/html'
+
+# Port for HTTP server (optional).
+HTTP_PORT='8088'
+

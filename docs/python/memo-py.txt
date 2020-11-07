@@ -1,0 +1,64 @@
+
+import http.server
+import nutshell.nutshell
+import nutshell.nutserver
+
+product_server = nutshell.nutshell.ProductServer('nutshell/nutshell.cnf')
+
+NutHandler = nutshell.nutserver.NutHandler
+NutHandler.directory = '/home/mpeura/nutshell/nutshell'
+
+httpd = http.server.HTTPServer((product_server.HTTP_NAME, int(product_server.HTTP_PORT)), NutHandler)
+
+httpd.serve_forever()
+#try:
+#    httpd.serve_forever()
+#except KeyboardInterrupt:
+#    httpd.server_close()
+#    pass	
+    
+import nutshell.nutshell
+import nutshell.nutproduct
+
+# Create server instance 
+product_server = nutshell.nutshell.ProductServer('nutshell/nutshell.cnf')
+
+# Create product description - the quick way
+
+product_info = nutshell.nutproduct.ProductInfo( '201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika.png')
+
+# Create product description - the longer way
+#product_info = nutshell.nutproduct.ProductInfo('radar.rack.comp')
+product_info = nutshell.nutshell.ProductInfo('radar.rack.comp')
+product_info.FORMAT = 'h5'
+product_info.set_timestamp('2017/08/12 16:00')  # or '201708121600'
+product_info.set_parameters({'SITES': 'fikor,fivan,fiika', 'SIZE': '800,800'})
+
+# Debugging: check status. Notice params in alphabetical order.
+product_info.filename()
+# Outputs: '201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.h5'
+
+
+# Create product (if not in cache already)
+r = product_server.make_request(product_info) 
+print (r.returncode, r.path)# O
+0 /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.h5
+
+import nutshell.nutshell as nuts
+
+server = nuts.ProductServer('nutshell/nutshell.cnf')
+response = server.make_request("201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.png", "MAKE")
+response.status
+
+
+product_info = nuts.ProductInfo('201708121600_radar.rack.comp_SITES=fikor,fivan,fiika_SIZE=800,800.h5')
+
+
+response = server.make_request(product_info, "MAKE")
+
+from PIL import Image
+file = Image.open(response.path)
+file.info
+
+print (response.status)
+

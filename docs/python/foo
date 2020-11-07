@@ -1,0 +1,24 @@
+String
+PVOL
+CVOL
+SCAN
+RAY
+AZIM
+ELEV
+IMAGE
+COMP
+XSEC
+VP
+PIC
+Description
+Polar volume
+Cartesian volume
+Polar scan
+Single polar ray
+Azimuthal object
+Elevational object
+2-D cartesian image
+Cartesian composite image(s)
+2-D vertical cross section(s)
+1-D vertical profile
+Embedded graphical image

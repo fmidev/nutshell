@@ -1,0 +1,130 @@
+#!/bin/python3
+# -*- coding: utf-8 -*-
+"""FMI code for using NutShell in AirFlow"""
+
+__version__ = '0.1beta'
+__author__ = 'Markus.Peura@fmi.fi'
+
+#import argparse
+import re
+
+from . import product 
+
+#  task = PythonOperator(                                                                                                       
+#            task_id=keybase2,                                                                                                        
+#            python_callable=make_nutshell_composite,                                                                                 
+#            # 'TIMESTAMP': '{{ (execution_date - macros.timedelta(minutes=5)).strftime("%Y%m%d%H%M") }}'                             
+#            op_kwargs={'SITE': SITE, 'TIMESTAMP': env['TIMESTAMP'], 'CONF': CONF},                                                   
+#            dag=dag,                                                                                                                 
+#        )                                                                                                                            
+                  
+class DummyPythonOperator:
+    """Imitates PythonOperator"""
+    
+#    def __init__(python_callable, op_args=None, op_kwargs=None, 
+#                 provide_context=False, templates_dict=None, 
+#                 templates_exts=None, *args, **kwargs):
+    def __init__(self, task_id, dag, python_callable, op_kwargs=None):
+        self.task_id = task_id
+        self.callable = python_callable
+        
+        print (self.id)
+        pass
+
+#def make_nutshell_composite(TIMESTAMP, **kwargs):                                                                                    
+#    """This is a function that will run within the DAG execution"""                                                                  
+#    p = nutshell.product.Info('radar.rack.comp.tile')                                                                                
+#    p.set_format('h5')                                                                                                               
+#    p.set_timestamp(TIMESTAMP)                                                                                                       
+#    p.set_parameters(kwargs)                                                                                                         
+#    print(p.filename())                                                                                                              
+#    preq = product_server.make_request(p, ['MAKE'], ['LINK', 'LATEST'])                                                              
+#    print(preq.path)                                                                                                                 
+#    return preq.returncode         
+
+def make_nutshell_product(TIMESTAMP, product_server, product_info):
+    if (TIMESTAMP):
+        product_info.set_timestamp(TIMESTAMP)
+    print("AIRFLOW-NUTSHELL: making: {0}".format(product_info.filename()))
+    product_request = product_server.make_request(product_info, ['MAKE'], ['LINK', 'LATEST'])                                                              
+    print(product_request.path)                                                                                                                 
+    return product_request.returncode     
+
+def create_operator(dag, product_server, product_info, params=None, task_id = None, 
+                    op_cls=DummyPythonOperator):
+    
+    if (type(product_info) == str):
+        product_info = product.Info(filename = product_info)
+        
+    if (params):
+        product_info.set_parameters(params)
+    
+    if (not task_id):
+        task_id = product_info.get_static_filename().replace(".", "")
+        task_id = re.sub("\W","_", task_id)
+    
+    result = op_cls(
+        task_id = task_id,                                                                                                        
+        python_callable = make_nutshell_product,                                                                                 
+        dag = dag,  
+        op_kwargs = {"product_server": product_server, 
+                     "product_info": product_info})
+        
+    return result
+    
+    
+    
+# def create_operator0(dag, product_id=None, filename=None, task_id = None, 
+#                     op_cls=DummyPythonOperator,  **kwargs):
+    
+#     if (product_id) and (filename):
+#         raise KeyError("'product_id' and 'filename' are mutually exclusive")
+
+#     product_info = product.Info()
+
+#     if (filename):
+#         product_info.set(filename = filename)
+#     else:
+#         product_info.set(product_id = product_id)        
+
+
+#     if (not task_id):
+#         task_id = product_info.get_static_filename().replace(".", "")
+#         task_id = re.sub("\W","_")
+    
+#     result = op_cls(
+#             task_id=task_id,                                                                                                        
+#             python_callable=make_nutshell_product,                                                                                 
+#             dag = dag,            
+#             op_kwargs = kwargs)  
+   
+#     return result
+
+
+if __name__ == '__main__':
+
+    # parser = argparse.ArgumentParser()
+    parser = product.Info.get_arg_parser()
+
+    # Consider leaving "rare" or specific params in-class
+    parser.add_argument("-s", "--set", metavar="[<id>|<filename>]",
+                        dest="SET",
+                        default="",
+                        help="product to be handled, recognises argument type")
+
+    options = parser.parse_args()
+
+    if (not options):
+        parser.print_help()
+        exit(1)
+
+
+    product_info = product.Info()
+
+    if (options.PRODUCT):
+        product_info.set_product(options.PRODUCT)
+    #else:
+    #    logger.warning("product not defined")
+ 
+    op = create_operator()
+    print (op)

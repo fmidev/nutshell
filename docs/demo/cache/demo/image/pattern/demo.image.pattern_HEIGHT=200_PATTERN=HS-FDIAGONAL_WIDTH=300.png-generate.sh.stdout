@@ -1,0 +1,2 @@
+DEBUG: HS-FDIAGONAL 	forward diagonal line pattern (45 degrees slope), 8x8 
+LOG: executing: convert -size 300x200 pattern:HS_FDIAGONAL /home/mpeura/nutshell/demo/cache/demo/image/pattern/tmp/demo.image.pattern_HEIGHT=200_PATTERN=HS-FDIAGONAL_WIDTH=300.png

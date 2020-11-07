@@ -1,0 +1,19 @@
+
+127.0.0.1:8088/nutshell/server?request=MAKE&product=201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika_BBOX=20,60,30,70.png
+
+while [ true ]; do sleep 1; ipython3; done
+
+TIME=`date +'%m%d-%H%M'`
+tar -cvzf bak/nutshell-$TIME.tgz python nutshell html img demo
+
+pushd doc-sphinx; make html; popd; git-doc-refresh.sh doc-sphinx/build/html/ ./docs/
+git commit -m 'Automatic' ./docs/
+https_proxy='' HTTPS_PROXY='' git push
+
+pushd sphinx; make html; popd; git-doc-refresh.sh sphinx/build/html/ ./docs/
+git commit -m 'Automatic' /home/mpeura/nutshell/docs/
+git push
+
+touch .nojekyll
+git add .nojekyll
+git commit -m "added .nojekyll"

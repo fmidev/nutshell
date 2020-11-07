@@ -1,0 +1,30 @@
+rm -vrf /home/mpeura/venison/cache/2017/08/12/radar/rack/comp/*
+python nutshell.py -m 201708121600_radar.srack.comp_SIZE=800,800_SITES=fikor,fivan,fiika.png
+python nutserver.py 
+http://127.0.0.1:8088/rauno/ahonen?request=INPUTS&product=201708121600_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika.png
+
+reload(nutshell); s = nutshell.ProductServer('nutshell.cnf')
+p = nutshell.ProductInfo('201708121600_radar.rack.comp_PPROD=_BBOX=17.13,57.93,29.41,64.08_SIZE=800,800_PROJ=4326_SITES=fikor,fivan,fiika_METHOD=MAXIMUM_PALETTE=default_TRANSP2=0.1:0.3,0,0.8.png')
+s.makeProduct(p)
+
+import nutshell
+s = nutshell.ProductServer('nutshell.cnf')
+p = nutshell.ProductInfo('201708121600_radar.rack.comp_PPROD=_BBOX=17.13,57.93,29.41,64.08_SIZE=800,800_PROJ=4326_SITES=fikor,fivan,fiika_METHOD=MAXIMUM_PALETTE=default_TRANSP2=0.1:0.3,0,0.8.png')
+
+
+preq = s.handle_request(p)
+
+# Optional:
+pr= s.ProductRequest(s,p)
+print s.run_generator(pr)
+
+python nutshell.py -d -m -p 201708121600_radar.srack.comp_SIZE=800,800_SITES=fikor,fivan,fiika.png
+python3  -m nutshell.nutshell -c $NUT_DIR/nutshellX.cnf -m -p 201706121400_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika.png
+
+NUTSHELL_DIR=/home/mpeura/nutshell/nutshell
+python3  -m nutshell.nutshell -v 8 -c /home/mpeura/nutshell/nutshell/nutshell.cnf -md -p 201706121400_radar.rack.comp_SIZE=800,800_SITES=fikor,fivan,fiika_Z=1_A_S=2_M=9.png
+
+# ipython3
+# cd $NUTSHELL_DIR
+import nutshell.nutserver
+s = nutshell.nutshell.ProductServer('nutshell/nutshell.cnf')

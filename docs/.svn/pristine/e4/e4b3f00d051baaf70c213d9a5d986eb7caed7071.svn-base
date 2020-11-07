@@ -1,0 +1,50 @@
+
+TARGETS=nutshell-logo-small.png nutshell-logo.ico demo-images3.png demo-cloudy.png nutshell-scheme-dot.png nutshell-variables-dot.png
+
+test:
+	@echo ${PWD} 
+	@echo make ${TARGETS}
+
+#default: Makefile $(TARGET).pdf $(TARGET).png $(TARGET).html $(TARGET).txt
+#	@echo 'Ready.'
+
+# Send to SVN repository AND update the dir in elmo.
+#commit: all
+#	svn commit -m "Sadeanalyysi ${USER}@${HOSTNAME}"
+
+
+all: Makefile $(TARGETS)
+	@echo 'Ready.'
+
+clean:
+	@rm -v ${TARGETS}
+
+nutshell-logo-small.png:
+	convert nutshell-logo.png -resize 100x100  $@
+
+nutshell-logo.ico: nutshell-logo-small.png
+	convert $< -resize 32x32  $@
+
+
+#NUTSHELL_DIR=/fmi/dev/nutshell/
+#NUTSHELL=(python3 -m nutshell.nutshell --make)
+
+demo-map.png:
+	python3 -m nutshell.nutshell -m --move $@ -p demo.map_BBOX=19,59,32,71_WIDTH=300_HEIGHT=500_CONF=geoserver_PROJ=4326.png
+
+demo-ppmforge.png:
+	python3 -m nutshell.nutshell -m --move $@ -p 202005121245_demo.image.ppmforge_POWER=1.0_DIMENSION=2.0_INCLINATION=0_SEED=1234_WIDTH=300_HEIGHT=300_MODE=.png
+
+demo-pattern.png:
+	python3 -m nutshell.nutshell -m --move $@ -p demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+demo-images2.png: demo-ppmforge.png demo-pattern.png 
+	convert -frame 0 -append $^ $@
+
+demo-images3.png: demo-images2.png demo-map.png
+	convert -frame 1 +append $^ $@
+
+demo-cloudy.png:
+	python3 -m nutshell.nutshell -m --move $@ -p 2020050812145_demo.cloudy_BBOX=-5,45,32,71_SIZE=640,400.png
+
+include Makefile.dot

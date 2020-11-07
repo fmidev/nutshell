@@ -1,0 +1,11 @@
+CACHE_ROOT="/home/mpeura/venison/cache"
+
+# Mäki
+PRODUCT_ROOT="/home/mpeura/venison/products"
+
+HTML_ROOT="/home/mpeura/nutshell/python"
+
+HTTP_PORT=8088
+
+# Future prefix, for 
+# HTTP_ROOT=nutshell

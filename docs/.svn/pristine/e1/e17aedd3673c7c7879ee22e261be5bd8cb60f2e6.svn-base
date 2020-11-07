@@ -1,0 +1,37 @@
+#!/bin/python3
+# -*- coding: utf-8 -*-
+"""FMI code for using NutShell in AirFlow"""
+
+__version__ = '0.1beta'
+__author__ = 'Markus.Peura@fmi.fi'
+
+from . import product 
+
+
+class DummyPythonOperator:
+    """Imitates PythonOperator"""
+    
+    def __init__(python_callable, op_args=None, op_kwargs=None, 
+                 provide_context=False, templates_dict=None, 
+                 templates_exts=None, *args, **kwargs):
+        """Imitates PythonOperator"""
+        
+        print ()
+        pass
+    
+def create_operator(product_info, op_cls=DummyPythonOperator, **kwargs):
+    """ Entry should be an array or tuple.
+    """
+
+    if (type(product_info) == str):
+        product_info = product.Info()
+        task_id=keybase2,                                                                                                        
+            python_callable=make_nutshell_composite,                                                                                 
+            # 'TIMESTAMP': '{{ (execution_date - macros.timedelta(minutes=5)).strftime("%Y%m%d%H%M") }}'                             
+            op_kwargs={'SITE': SITE, 'TIMESTAMP': env['TIMESTAMP'], 'CONF': CONF},                                                   
+            dag=dag,         
+    op = op_cls()
+    return op
+
+
+    

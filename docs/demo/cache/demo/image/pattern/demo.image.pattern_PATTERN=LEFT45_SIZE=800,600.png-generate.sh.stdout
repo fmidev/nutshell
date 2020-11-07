@@ -1,0 +1,2 @@
+DEBUG: LEFT45 	forward diagonal line pattern (45 degrees slope), 8x8 
+LOG: executing: convert -size 800x600 pattern:LEFT45 /home/mpeura/nutshell/demo/cache/demo/image/pattern/tmp/demo.image.pattern_PATTERN=LEFT45_SIZE=800,600.png

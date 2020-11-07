@@ -1,0 +1,536 @@
+#/!bin/python
+
+__version__ = '0.1'
+__author__ = 'Markus.Peura@fmi.fi'
+
+#os.environ["http_proxy"]="" #
+
+import os
+import re
+import argparse
+import subprocess # for shell escape
+
+import nutils
+
+
+
+def parse_timestamp(timestamp, result = {}):
+    if (timestamp):
+        t = re.sub("\W", "", timestamp)
+        result['TIMESTAMP'] = t[0:12] # empty ok?
+        result['YEAR']      = t[0:4]
+        result['MONTH']     = t[4:6]
+        result['DAY']       = t[6:8]
+        result['HOUR']      = t[8:10]
+        result['MINUTE']    = t[10:12]
+    return result
+
+
+class Log:
+
+    log = []
+
+    def append(self, line, prefix = 'LOG: '):
+        self.log.append(prefix + line)
+
+    def extend(self, lines, prefix = ''):
+        # lines = lines.split('\n')
+        for i in lines:
+            self.append(i, prefix)
+
+    def extend2(self, array, prefix = ''):
+        for i in array:
+            self.append(i+' = '+ array[i], prefix)
+
+    def str(self):
+        #s = ''
+        #for i in self.log:
+        #    s += 'LOG: {0}\n'.format(i)
+        #return s
+        return '\n'.join(self.log)
+
+#def getAssignments(product_info):
+#    return ''.join("%s='%s' " % (key,value) for key,value in product_info.iteritems())
+
+"""Return a foobang
+
+Optional plotz says to frobnicate the bizbaz first.
+"""
+class ProductInfo:
+
+    TIMESTAMP = ''
+    ID = ''
+    PARAMETERS = {}
+    PARAMS = []
+    FORMAT = ''
+    COMPRESSION = ''
+    EXTENSION = ''
+
+    # Resolve compression, if any
+    compressionRe = re.compile("^(.*)\\.(zip|gz)$");
+
+    # Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
+    productRe = re.compile("^(([0-9]+)_)?([^_]+)(_(.*))?\\.(\\w+)$");
+
+    # 202004291845 or 2020/04/29 18:45 but in order
+    #def parseTimeStamp(self, timestamp):
+    #    timestamp = re.sub("\W", "", timestamp)
+    #    print timestamp
+    #    # TODO?
+        
+    def parse(self, filename):
+
+        m = self.compressionRe.match(filename)
+        if (m):
+            print 'Compression:', m.group(2)
+            self.COMPRESSION = m.group(2)
+            filename = m.group(1)
+        
+        m = self.productRe.match(filename)
+        if (m):
+
+            #print (m.groups()) # !DEBUG
+            
+            # Time variables
+            if (m.group(2)):
+                self.TIMESTAMP =  re.sub("\W", "", m.group(2))
+            else:
+                self.TIMESTAMP = ''
+            #parseTimestamp(timestamp, result)
+        
+            # Product id
+            self.ID = m.group(3)
+
+            # Product specific parameters
+            #if (len(m.groups()) > 5):
+            if (m.group(5)):
+                self.PARAMS = m.group(5).split('_')
+                pindex=0
+                for e in self.PARAMS:
+                    entry = e.split('=')
+                    if (len(entry) == 2):
+                        self.PARAMETERS[entry[0]] = entry[1]
+                    else:
+                        self.PARAMETERS['P'+str(pindex)] = entry[0]
+            else:
+                self.PARAMS = {}
+
+            # Format, excluding optional COMPRESSION (parsed above)
+            self.FORMAT = m.group(6)
+            self.EXTENSION = self.FORMAT
+            if (self.COMPRESSION):
+                self.EXTENSION = self.EXTENSION + '.' + self.COMPRESSION
+
+            # "Derived" variables
+            # result['TIMESTAMP_DIR'] = '{YEAR}/{MONTH}/{DAY}'.format(**result)
+            # result['PRODUCT_DIR']   = result['PRODUCT'].replace('.', '/')
+            #print (self.PARAMS)
+            #print (self.str())
+            
+        else:
+            print "{0}: ERROR in parsing {1}".format(__name__, filename)
+
+            #print 'TIMESTAMP_DIR={YEAR}/{MONTH}/{DAY}'.format(**result)
+        
+        return self
+        
+    
+    def filename(self):
+        body = []
+        if (self.TIMESTAMP):
+            body.append(self.TIMESTAMP)
+        body.append(self.ID)
+        if (self.PARAMS):
+            body.append("_".join(self.PARAMS))
+        return("_".join(body) + '.' + self.FORMAT)
+
+    
+    # Append or create dict with TIMESTAMP and params
+    # Does not contain ID
+    def get_param_env(self, env={}):
+        # env['ID'] = self.ID
+        # env['TIMESTAMP'] = self.TIMESTAMP
+        if (self.TIMESTAMP):
+            parse_timestamp(self.TIMESTAMP, env)
+            
+        for i in ['ID','FORMAT', 'COMPRESSION', 'EXTENSION']:
+            env[i] = getattr(self, i, "")            
+        env.update(self.PARAMETERS)
+        return env
+
+    def __init__(self, filename = ''):
+        if (filename):
+            self.parse(filename)
+
+    def __call__(self):
+        print('Print Something')
+
+        
+
+
+"""Service designed for generating image and data products served as files 
+
+"""
+class ProductServer:
+
+    PRODUCT_ROOT = '.'
+    CACHE_ROOT = '.'
+    TIME_DIR_SYNTAX = '{YEAR}/{MONTH}/{DAY}'
+    SHELL_GENERATOR = 'generate.sh'
+    SHELL_INPUT_CONF = 'input.sh'
+
+    # Optional (forward defs HTTP server )
+    HTTP_PORT = '8088'
+    HTML_ROOT = '.' # todo
+    HTML_TEMPLATE = 'template.html' 
+
+    """Container for storing information on requested product and server side resources derived thereof.
+    """
+    class ProductRequest:
+
+        """Server assigned for manufacturing this product"""
+        product_server = None
+
+        """Specification of a product instance."""
+        product_info = None
+
+        """System-side directory containing script () for generating the product"""
+        generator_dir = ''
+
+        """Optional: System-side full path to the generated file, the product."""
+        path = ''
+        
+        """Optional: Actual object (for example, python Image in the future) """
+        product = None
+        
+        # Later, use (dir + file) object
+        inputs = {}
+        
+        # Nutshell native log output
+        log = None
+        
+        # Std output of the generation
+        stdout = None
+        
+        # Error output of the generation
+        stderr = None
+        
+        # Return code of the generation
+        returncode = 0
+
+
+        
+        def __init__(self, product_server, product_info):
+
+            self.product_server = product_server
+            self.product_info = product_info
+
+            self.generator_dir = product_server.get_generator_dir(product_info)
+            self.generator_script = self.generator_dir+'/'+product_server.SHELL_GENERATOR
+            #self.path = ''
+            self.product = None
+            self.inputs = {}
+            self.log = Log()
+            #print "Succeeded: ", self.generator_dir
+            # Ensure dir (what about file?)
+            #if product_info:
+            self.cache_dir = product_server.get_cache_dir(product_info)
+            self.out_file  = product_info.filename() # todo: server provides syntax?
+            # Target path. Will be cleared (to None) if product generation fails.
+            self.path = self.cache_dir+'/'+self.out_file
+   
+    
+    def __init__(self, conffile = ''):
+
+        if (conffile):
+            self.read_conf(conffile)
+
+
+    def read_conf(self, conffile = 'nutshell.cnf'):
+        result = {}
+        nutils.read_conf(conffile, result)
+        # print result
+        members = dir(self) # or: limit to ["CACHE_ROOT", ...]
+        for i in result:
+            if i in members:
+                if not callable(i):
+                    setattr(self, i, result[i])
+            else:
+                print '# Warning: key not found for assignment: {0}="{1}"'.format(i, result[i])
+
+    def status(self):
+        result = {}
+        #members = 
+        for i in dir(self):
+            x = getattr(self, i)
+            if (not callable(x)):
+                result[i] = x
+        return result
+                
+                
+    def get_product_dir(self, product_info):
+
+        return product_info.ID.replace('.', '/')
+
+    
+    def get_time_dir(self, timestamp):
+        if (timestamp):
+            timevars = parse_timestamp(timestamp)
+            # print timevars
+            return self.TIME_DIR_SYNTAX.format(**timevars)+'/'
+        else:
+            return ''
+
+    
+    def get_generator_dir(self, product_info):
+        return self.PRODUCT_ROOT+'/'+product_info.ID.replace('.', '/')
+
+
+    # needed?
+    def get_cache_dir(self, product_info):
+        timedir = self.get_time_dir(product_info.TIMESTAMP)
+        return self.CACHE_ROOT+'/'+ timedir + self.get_product_dir(product_info)
+
+    # Creates, if non-existent
+    def ensure_cache_dir(self, cache_dir):
+        #timedir = self.getTimeDir(product_info.TIMESTAMP)
+        #cachedir = self.CACHE_ROOT+'/'+ timedir + self.getProductDir(product_info)
+        if (not os.path.exists(cache_dir)):
+            # print 'creating %s' % cacheDir
+            os.makedirs(cache_dir, 0777)
+        #else:
+        #    print 'dir exists %s' % cacheDir
+        return cache_dir
+
+
+    #def makeShellCmd(self, product_info):
+    #    cmd = ' '.join(product_info.PARAM)+' '+self.SHELL_GENERATOR
+        
+    
+    def read_script_output(self, generator_dir, result = {}, env={}):
+
+        p = subprocess.Popen('./'+self.SHELL_INPUT_CONF,
+                             cwd=generator_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=True,
+                             env=env)
+        
+        if (not p):
+            print "Could not execute path=" + path
+        
+        stdout,stderr = p.communicate()
+
+        # if (stderr): no good
+        #    raise SyntaxWarning(stderr.split('\n').pop()+'XXX')
+
+        lines = stdout.split('\n')
+        
+        if (p.returncode != 0):
+            print "Errors (code={0}):".format(p.returncode)
+            #print result
+            print '------------'
+            print stderr
+            print '------------'
+            print stdout
+            print 'pushd',generator_dir 
+            e=''
+            for k,v in env.items():
+                e += ' {0}="{1}"'.format(k,v)
+            print e, './'+self.SHELL_INPUT_CONF
+            raise SyntaxWarning(lines.pop())  #last
+
+        nutils.read_conf_text(lines, result)
+
+        return result
+
+    # Return path
+    def get_input_list(self, product_info):
+
+        gen_dir   = self.get_generator_dir(product_info)
+        gen_input = gen_dir + '/' + self.SHELL_INPUT_CONF
+        if (os.path.exists(gen_input)):
+            # TODO generalize (how)
+            env = product_info.get_param_env()
+            #print env # !DEBUG
+            try:
+                inputs = self.read_script_output(gen_dir, env=env) # yes dir               
+                return inputs
+            except BaseException as err:
+                print "error with: ", err
+            else:
+                print "error with", gen_dir
+            return {}
+        else:
+            return {}
+
+    """ Actually
+    Actually, only generator_dir is used as input. Then, stdout and stderr are used for output.
+    """
+    def run_generator(self, product_request, params={}):
+
+        p = subprocess.Popen('./'+self.SHELL_GENERATOR,
+                             cwd=product_request.generator_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=True,
+                             env=params)
+        if (not p):
+            print "Could not execute path=" + path
+            return -1
+        
+        (product_request.stdout, product_request.stderr) = p.communicate()
+
+        product_request.returncode = p.returncode
+        
+        return p.returncode
+
+
+    #
+    # Return path or log
+    # 'MAKE' - return the product, if in cache, else generate it and return
+    # 'GENERATE' - generate and store the product, also regenerate even if already exists
+    # 'TEST' - generate and store the product, also regenerate even if already exists
+    # 'INPUTS' - generate and store the product, also regenerate even if already exists
+    # RENAME handle
+    def handle_request(self, product_info, actions = ['MAKE']):
+
+        product_request = self.ProductRequest(self, product_info)
+        
+        if (os.path.exists(product_request.path)):
+            product_request.log.append('File exists: {0}'.format(product_request.path))
+            if ('MAKE' in actions): # PATH_ONLY
+                return product_request
+        else:
+            product_request.log.append('Making: {0}'.format(product_request.path))
+
+        # only check at this point
+        if (os.path.exists(product_request.generator_script)):
+            product_request.log.append('Generator script ok: ' + (product_request.generator_script))
+        else:
+            product_request.log.append('Generator script not found: ' + (product_request.generator_script), 'ERROR: ')
+            product_request.path = ''
+            return product
+        
+        # TODO: if not stream?
+        product_request.log.append('Ensuring cache dir for: ' + product_request.path)
+        self.ensure_cache_dir(product_request.cache_dir)
+
+        # TODO: what about true ENV?
+        params = product_info.get_param_env()
+        params['OUTDIR']  = product_request.cache_dir
+        params['OUTFILE'] = product_request.out_file
+            
+        # Retrieve inputs
+        product_request.inputs = self.get_input_list(product_info)
+
+        if ('MAKE' in actions):
+            product_request.log.extend2(product_request.inputs, 'INPUTFILE: ')
+            inputs = {}
+            for i in product_request.inputs:
+                input_info = ProductInfo(product_request.inputs[i])
+                inputs[i] = self.handle_request(input_info, ['MAKE'] ).path
+            product_request.inputs = inputs
+            product_request.log.extend2(product_request.inputs , 'INPUTPATH: ')
+            
+        params['INPUTKEYS'] = ','.join(product_request.inputs.keys())
+        params.update(product_request.inputs)
+
+        #product_request.log.append("----")
+     
+        # MAIN
+        if ('MAKE' in actions):
+            product_request.log.append(product_request.path, 'Generating: ')
+            #result = self.run_generator(product_request.generator_dir, params)
+            result = self.run_generator(product_request, params)
+            #product_request.log.extend(result[0].split('\n'), 'GEN-OUT: ')
+            #product_request.log.extend(result[1].split('\n'), 'GEN-ERR: ')
+            print "--- STDERR ------------------"
+            print product_request.stderr
+            print "--- STDOUT ------------------"
+            print product_request.stdout
+            print "MAKE result=",result
+
+        return product_request
+    
+        # print product_info.PARAMETERS
+
+        # def handle(product_info, actions = ['GENERATE']):
+        #     if ('INPUTS' in actions):
+        #        return 
+        
+        
+if __name__ == '__main__':
+
+    print ''
+    
+    parser = argparse.ArgumentParser()
+
+#    parser.add_argument("-l", "--linkfile", dest="LINKFILE",
+#        default="link.h5",
+#        help="read input from file", metavar="<file>")
+
+    parser.add_argument("-c", "--conf", dest="CONF",
+        default="nutshell.cnf", #ProductServer.CONF_FILE?
+        help="read config file", metavar="<file>")
+
+    parser.add_argument("-m", "--make", dest="MAKE",
+        default="",
+        help="make product", metavar="<file>")
+
+    parser.add_argument("-p", "--parse", dest="PRODUCT",
+        default="",
+        help="parse product (only)", metavar="<file>")
+
+    parser.add_argument("-i", "--inputConf", dest="INPUTCONF",
+        default="",
+        help="exec input config script", metavar="<file>")
+
+    parser.add_argument("-v", "--verbose", dest="VERBOSE", default=5, metavar="<level>",
+        help="Print status messages to stdout")
+
+
+    
+    #(options, args) = parser.parse_args()
+    options = parser.parse_args()
+
+    if (not options):
+        parser.print_help()
+        exit(1)
+    
+    if (options.VERBOSE > 10):
+        print options
+    #print args
+
+    product_info = ProductInfo()
+
+    if (options.PRODUCT):
+        product_info.parse(options.PRODUCT)
+        
+    product_server = ProductServer()
+    
+    if (options.CONF):
+        if (options.VERBOSE > 5):
+            print "reading conf file: {0}".format(options.CONF)
+        product_server.read_conf(options.CONF)
+
+    #print getAssignments(productInfo.parameters)
+
+    if (options.INPUTCONF):
+        product_info.parse(options.INPUTCONF)
+        #print product_info.str()
+        inputs = product_server.get_input_list(product_info)
+        print inputs
+
+    if (options.MAKE):
+        product_info.parse(options.MAKE)
+        #print product_info.str()
+        #inputs = product_server.getInputList(product_info)
+        #print inputs
+        product = product_server.handle_request(product_info)
+        print product.log.str()
+
+    if (options.VERBOSE > 1):
+        print product_server.status()
+         
+    exit(0)
