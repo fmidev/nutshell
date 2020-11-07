@@ -1,0 +1,303 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nutshell.shell &#8212; NutShell 0.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/nutshell-logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+          <p class="logo"><a href="../../index.html">
+            <img class="logo" src="../../_static/nutshell-logo-small.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="../../index.html">NutShell 0.3 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for nutshell.shell</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/bin/python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">Escape from Python -- nutshell.shell</span>
+<span class="sd">------------------------------------</span>
+
+<span class="sd">This module contains utilities for running shell scripts.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.2&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
+
+
+<span class="kn">import</span> <span class="nn">subprocess</span> <span class="c1"># shell escape</span>
+<span class="kn">import</span> <span class="nn">os</span>         <span class="c1"># pid</span>
+
+<span class="kn">from</span>   <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">from</span>   <span class="nn">http</span>    <span class="k">import</span> <span class="n">HTTPStatus</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="se">\t</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.shell.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Something that has a script, stdin, stdout, env, and log.&quot;&quot;&quot;</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">log</span>    <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">env</span>    <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># TODO: redesign this?! Now double behaviour:</span>
+    <span class="c1"># TODO: output control (-1 or stream) AND saved output text/stream</span>
+    <span class="n">stdout</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">script</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span> <span class="c1"># -1 , hence numeric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span> <span class="c1"># -1 , hence numeric</span>
+
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;Task&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="kc">False</span><span class="p">):</span>  <span class="c1"># TODO Exec p.stat().st_mode &amp; 0o77</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Script exist, but is not executable: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Script does not exist: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            
+<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.shell.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile_basename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logfile_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">directives</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs a task object containing task.script and task.stdout</span>
+<span class="sd">        </span>
+<span class="sd">        :param logfile_basename: Leading part of logs, &#39;.err&#39; and &#39;.out&#39; will be added.</span>
+<span class="sd">        :param logfile_level: Save stderr and stdout to logs, if</span>
+<span class="sd">            this threshold is at least logging.ERROR and logging.DEBUG, respecively </span>
+<span class="sd">        :param directives[dict]: Additional instructions to the script </span>
+<span class="sd">        :returns: Return code of the process. Will be also stored to ``self``.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">env</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>        
+        <span class="k">if</span> <span class="p">(</span><span class="n">directives</span><span class="p">):</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Running: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">))</span> 
+
+        <span class="c1">#new_d = {str(key): str(value) for key, value in d.items()}</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">):</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">),</span>
+                             <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span>
+                             <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="c1"># always</span>
+                             <span class="n">stderr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="c1"># stdout for cmd-line and subprocess.PIPE (separate) for http usage</span>
+                             <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="c1">#text=True,</span>
+                             <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>           
+ 
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">p</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Could not run process: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">))</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">NOT_FOUND</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stdout</span><span class="p">,</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Hey! Keyboard interrupt for </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">REQUEST_TIMEOUT</span>
+            <span class="k">raise</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Could not read stdout/stderr of </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">CONFLICT</span>
+            <span class="k">return</span> 
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span>        
+
+
+        <span class="c1"># TODO: test also stderr</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logfile_basename</span><span class="p">):</span>
+            <span class="n">logfile_basename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">logfile_basename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logfile_basename</span> <span class="o">=</span> <span class="s1">&#39;nutshell-</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>      
+
+        <span class="c1"># Add sensitivity</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">logfile_level</span> <span class="o">-=</span> <span class="mi">10</span>
+
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;LOG LEVEL: &quot;</span><span class="p">,</span> <span class="n">logfile_level</span><span class="p">)</span>            
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">stdout</span><span class="p">):</span> <span class="c1"># and (type(stdout) == str)): # 2020/10</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span> <span class="c1">#.decode(encoding=&#39;UTF-8&#39;) #.strip()</span>
+            <span class="c1">#self.stdout = str(stdout) #.strip()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="c1"># last line is empty</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_info</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Error code: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Error msg:  </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_info</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span> 
+                    <span class="n">status</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_info</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>                   
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Could not extract numeric HTTP error code from: </span><span class="si">{0}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_info</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">CONFLICT</span>
+                <span class="c1">#except FileError:</span>
+                <span class="c1">#    self.log.error(&#39;Failed writing log: {0} &#39;.format(log_stdout))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logfile_level</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+                <span class="n">log_stdout</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">logfile_basename</span> <span class="o">+</span> <span class="s2">&quot;.stdout&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Dumping log: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log_stdout</span><span class="p">))</span>
+                <span class="n">log_stdout</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+                    
+        <span class="k">if</span> <span class="p">(</span><span class="n">stderr</span><span class="p">):</span> <span class="c1"># and (type(stderr) == str)): # 2020/10</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span> <span class="c1"># .decode(encoding=&#39;UTF-8&#39;)</span>
+            <span class="c1">#self.stderr = str(stderr)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logfile_level</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">):</span>
+                <span class="n">log_stderr</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">logfile_basename</span> <span class="o">+</span> <span class="s2">&quot;.stderr&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Dumping log: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log_stderr</span><span class="p">))</span>
+                <span class="n">log_stderr</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                
+        <span class="k">return</span>  <span class="n">p</span><span class="o">.</span><span class="n">returncode</span>  </div></div>
+        
+
+        
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;Shell&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    
+    <span class="c1">#parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)</span>
+    
+    <span class="c1">#(options, args) = parser.parse_args()</span>
+<span class="c1">#    options = parser.parse_args()</span>
+<span class="c1">#    </span>
+<span class="c1">#    if (not options):</span>
+<span class="c1">#        parser.print_help()</span>
+<span class="c1">#        exit(1)</span>
+<span class="c1">#</span>
+<span class="c1">#    </span>
+<span class="c1">#    if (options.VERBOSE):</span>
+<span class="c1">#        options.LOG_LEVEL = &quot;DEBUG&quot;</span>
+<span class="c1">#        </span>
+<span class="c1">#    if (options.LOG_LEVEL):</span>
+<span class="c1">#        if hasattr(logging, options.LOG_LEVEL):</span>
+<span class="c1">#            logger.setLevel(getattr(logging, options.LOG_LEVEL))</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            logger.setLevel(int(options.LOG_LEVEL))</span>
+<span class="c1">#    </span>
+<span class="c1">#    logger.debug(options)   </span>
+    
+    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-usage.html">Using NutShell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-commands.html">Commands and status codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-generators.html">Product generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-demo.html">Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Markus Peura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
