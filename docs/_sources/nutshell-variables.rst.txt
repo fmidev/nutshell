@@ -12,25 +12,26 @@ NutShell Variables
 System variables
 ================
 
-=============== =========================== ==================
-Variable        Description                 Example  
-=============== =========================== ==================
-``PRODUCT``     Product id, eg.             "my.test.product"  
-``TIMESTAMP``\  Time attribute of a product "201708121600"
-\-- ``YEAR``    Year (4 digits)             "2017"
-\-- ``MONTH``   Month (2 digits)            "08"
-\-- ``DAY``     Day (2 digits)              "12"
-\-- ``HOUR``    Hour (2 digits)             "16"
-\-- ``MINUTE``  Minute (2 digits)           "00"
-``PARAMETERS``  Product specific variables  {"SIZE": "300", "NAME": "X"}
+=============== ============================ ==================
+Variable        Description                  Example  
+=============== ============================ ==================
+``PRODUCT``     Product id, eg.              "my.test.product"  
+``TIMESTAMP``   Numeric time or "LATEST"<br> "201708121600"
+                or "LATEST" or "TIMESTAMP"
+\\-- ``YEAR``    Year (4 digits)             "2017"
+\-- ``MONTH``   Month (2 digits)             "08"
+\-- ``DAY``     Day (2 digits)               "12"
+\-- ``HOUR``    Hour (2 digits)              "16"
+\-- ``MINUTE``  Minute (2 digits)            "00"
+``PARAMETERS``  Product specific variables   {"SIZE": "300", "NAME": "X"}
 \-- ``<KEY>``   Name of a variable           "300"             
 \-- ``<KEY>``   Name of a variable           "X"             
-\--  ...        ...                         ...             
+\--  ...        ...                          ...             
 ``EXTENSION``   File format, 
-                including compression       "txt.gz"
-``FORMAT``      File format                 "txt"
-``COMPRESSION`` File compression            "gz"
-=============== =========================== ==================
+                including compression        "txt.gz"
+``FORMAT``      File format                  "txt"
+``COMPRESSION`` File compression             "gz"
+=============== ============================ ==================
 
 In code, nutshell.product.Info provides parsing of above parameters.
 

@@ -88,6 +88,7 @@ Code  Standard Enum Name        NutShell   Comment
 200  OK                         x          Request completed successfully
 404  Not Found                  x          File not found (Generator may exist)
 405  Method Not Allowed         x 
+408  Request Timeout            x
 409  Conflict                              Contradicting parameters
 412  Precondition Failed                   Required input missing
 413  Payload Too Large                     Parameters imply expensive computation
