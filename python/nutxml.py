@@ -25,14 +25,18 @@ class TupleLayout:
             s += layout.format(k,v)
         return s
 
-def value_table(data, title=None, attributes={'border': 1}, layout=TupleLayout.tableTr):
-     s = ''
-     s = '<table ' + TupleLayout.get(attributes,  TupleLayout.attrs) + '>\n'
-     if (title):
-         s += '  <tr><th colspan="2" class="title">{0}</th></tr>\n'.format(title)
-     s += TupleLayout.get(data, layout)
-     s += '</table>\n'
-     return s
+def value_table(data, title=None, attributes=None, layout=TupleLayout.tableTr):
+    
+    if (attributes == None):
+        attributes={'border': 1}
+    
+    #s = ''
+    s = '<table ' + TupleLayout.get(attributes,  TupleLayout.attrs) + '>\n'
+    if (title):
+        s += '  <tr><th colspan="2" class="title">{0}</th></tr>\n'.format(title)
+    s += TupleLayout.get(data, layout)
+    s += '</table>\n'
+    return s
 
     
 #def key_value_row(key, value=None):
@@ -63,12 +67,20 @@ class KeyValueRowGenerator:
             attributes = {}
         return tr
     
-def get_table(data, attributes={}, row_generator = KeyValueRowGenerator):
+def get_table(data, attributes=None, row_generator = KeyValueRowGenerator):
+    
+    if (attributes == None):
+        attributes={}
+        
     table = ET.Element('table', attributes)
     append_table(table, data, attributes, row_generator)
     return table
 
-def append_table(table, data, attributes={}, row_generator = KeyValueRowGenerator):
+def append_table(table, data, attributes=None, row_generator = KeyValueRowGenerator):
+
+    if (attributes == None):
+        attributes={}
+
     if ('title' in attributes):
         tr = ET.Element('tr')
         elem = ET.Element('th', {'colspan':'2', 'class': 'lead'} )
@@ -81,7 +93,11 @@ def append_table(table, data, attributes={}, row_generator = KeyValueRowGenerato
 
 
     
-def get_by_tag(html, tag='span', attributes={}):
+def get_by_tag(html, tag='span', attributes=None):
+
+    if (attributes == None):
+        attributes={}
+
     for i in html:
         if i.tag == tag:
             return i

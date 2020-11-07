@@ -66,4 +66,4 @@ NutShell HTTP Server
 ====================
 
 
-Code documentation: :ref:`nutshell.httpd`
+Code documentation: :ref:`nutshell.httpd` :any:`nutshell.httpd`

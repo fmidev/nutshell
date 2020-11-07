@@ -29,11 +29,14 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
 from . import nutils
+#from . import shell
 
-from . import shell
 
-
-def parse_timestamp2(timestamp, result = {}):
+def parse_timestamp2(timestamp, result = None):
+    
+    if (result == None):
+        result = {}
+        
     if (timestamp):
         t = re.sub(r"\W", "", timestamp)
         result['TIMESTAMP'] = t[0:12] # empty ok?
@@ -42,6 +45,7 @@ def parse_timestamp2(timestamp, result = {}):
         result['DAY']       = t[6:8]
         result['HOUR']      = t[8:10]
         result['MINUTE']    = t[10:12]
+        
     return result
 
 
