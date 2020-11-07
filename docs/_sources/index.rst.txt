@@ -42,7 +42,7 @@ NutShell provides a platform for collecting programming efforts of developers an
 different languages and interfaces. It has been originally developed for generating weather radar products [Peura2008]_,
 but suits to product computation more generally.
 
-Installation: [GitHub](https://github.com/fmidev/nutshell)
+*  Installation: [GitHub](https://github.com/fmidev/nutshell)
 
 
 =========
