@@ -264,8 +264,9 @@ class ProductServer:
                     if (total_time > self.TIMEOUT):
                         pr.log.warn("timeout ({0}s) exceeded".format(self.TIMEOUT))
                         break
-
-                pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
+                
+                pr.set_status(HTTPStatus.REQUEST_TIMEOUT)
+                # pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
                 # return 
         else:
             pr.log.debug('File not found: {0}'.format(pr.path))
@@ -290,6 +291,7 @@ class ProductServer:
         
         """
         if (pr.status == HTTPStatus.OK):
+            pr.returncode = 0
             return
         
         # only TEST at this point
@@ -327,7 +329,14 @@ class ProductServer:
         pr.log.info('Generating:  {0}'.format(pr.path.name))
         pr.log.debug('Environment: {0}'.format(pr.env))
 
-        pr.run2(directives)
+        try:
+            pr.run2(directives)
+        except KeyboardInterrupt:
+            pr.log.warn('Hey, HEY! Keyboard interrupt on main level')
+            pr.status = HTTPStatus.REQUEST_TIMEOUT
+            pr.remove_files()
+            raise
+                
 
         if (pr.returncode != 0):
             pr.log.error("Error ({0}): '{1}'".format(pr.returncode, pr.error_info))
@@ -390,8 +399,6 @@ class ProductServer:
         if (type(directives) == list):
             directives = nutils.read_conf_text(directives)
             
-        #product_request = self.ProductRequest(self, product_info, actions, directives, log)
-        # Consider rename to Generator
         pr = request.Generator(self, product_info, log) #, actions, directives, log)
 
         # Future option
@@ -406,21 +413,17 @@ class ProductServer:
         SHORTCUT = ('SHORTCUT' in actions)
 
         LINK = actions.get('LINK') #   in actions)  
-        
         COPY = actions.get('COPY')  # in actions) # directives)
         MOVE = actions.get('MOVE') # in actions) # directives)
          
         if (SHORTCUT or LATEST or LINK or COPY or MOVE):
             actions['MAKE'] = True
             #actions['CHECK'] = True
-            #actions.add('MAKE')          
-            #actions.add('CHECK') # dont return...
         
-        MAKE = ('MAKE'   in actions)     
-        
+        MAKE   = ('MAKE'   in actions)     
         INPUTS = ('INPUTS' in actions)     
         DELETE = ('DELETE' in actions)     
-        TEST  = ('CHECK'  in actions) 
+        TEST   = ('CHECK'  in actions) 
                 
         # LOG =    ('LOG'    in pr.directives)        
         # DEBUG =  ('DEBUG'  in pr.directives)        
@@ -462,7 +465,7 @@ class ProductServer:
                 
         except Exception as err:
             pr.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
-            pr.log.warn("Linking file failed: {0}".format(err))               
+            pr.log.warn("Routine linking file failed: {0}".format(err))               
 
 
         try:
@@ -472,9 +475,12 @@ class ProductServer:
                 pr.log.info('Linking: {1} <=  {0}'.format(pr.path, LINK) )    
                 path = Path(LINK)
                 if (path.is_dir()): # shutil does not need this...
+                    if (not path.exists()):
+                        self.ensure_output_dir(path)
                     path = path.joinpath(pr.path.name)
                 if (path.exists()):
                     path.unlink()
+                    
                 #shutil.copy(str(pr.path), str(COPY))
                 nutils.symlink(path, pr.path, True)  
 
@@ -482,7 +488,9 @@ class ProductServer:
                 #COPY = directives['COPY']
                 pr.log.info('Copying: {1} <=  {0}'.format(pr.path, COPY) )    
                 path = Path(COPY)
-                if (path.is_dir()): # shutil does not need this...
+                if (path.is_dir()): # shutil does not need this here either...
+                    if (not path.exists()):
+                        self.ensure_output_dir(path)
                     path = path.joinpath(pr.path.name)
                 if (path.exists()):
                     path.unlink()
@@ -494,6 +502,8 @@ class ProductServer:
                 # product_request.path.rename(options.MOVE) does not accept plain dirname
                 path = Path(MOVE)
                 if (path.is_dir()): # ...but shutil needs this
+                    if (not path.exists()):
+                        self.ensure_output_dir(path)
                     path = path.joinpath(pr.path.name)
                 if (path.exists()):
                     path.unlink()
@@ -572,6 +582,11 @@ if __name__ == '__main__':
     
     parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
 
+    parser.add_argument("PRODUCTS",
+                        nargs='*',
+                        #dest="PRODaUCTS",
+                        help="Products to be requested")
+
     parser.add_argument("-S", "--shortcut",
                         dest="SHORTCUT",
                         action="store_true",
@@ -632,9 +647,13 @@ if __name__ == '__main__':
     product_info = product.Info()
 
     if (options.PRODUCT):
-        product_info.set_product(filename = options.PRODUCT)
-    else:
+        options.PRODUCTS.append(options.PRODUCT)
+        
+    if (not options.PRODUCT):
         logger.warning('Product not defined')
+    #    product_info.set_product(filename = options.PRODUCT)
+    #else:
+    logger.warning('Products: {0}'.format(options.PRODUCTS))
     
         
 
@@ -681,29 +700,33 @@ if __name__ == '__main__':
 #        if (value):
 #            actions[i] = value
 #            #actions.append(i)
+    logger.info('Requests:   {0}'.format(actions))
+    logger.info('Directives: {0}'.format(directives))
     
-        
-    if (product_info.PRODUCT_ID and product_info.FORMAT):
-        
-        logger.info('Requests:   {0}'.format(actions))
-        logger.info('Directives: {0}'.format(directives))
-
-        product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
-        #logger.debug(product_request)
-
-        if ('INPUTS' in actions): # or (options.VERBOSE > 6):
-            #nutils.print_dict(product_request.inputs)
-            logger.warn("Inputs:")
-            logger.info(product_request.inputs)
+    fail=False
     
-        logger.info(product_request.status)    
-        if (product_request.status == HTTPStatus.OK):
-            exit(0)
+    for PRODUCT in options.PRODUCTS:
+
+        logger.info('PRODUCT={0}'.format(PRODUCT))
+             
+        product_info.set_product(filename = PRODUCT)
+         
+        if (product_info.PRODUCT_ID and product_info.FORMAT):
+            
+            product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
+    
+            if ('INPUTS' in actions): # or (options.VERBOSE > 6):
+                #nutils.print_dict(product_request.inputs)
+                logger.warn("Inputs:")
+                logger.info(product_request.inputs)
+        
+            logger.info(product_request.status)    
+            if (product_request.status != HTTPStatus.OK):
+                fail = True
+
         else:
-            exit(1)  # consider STATUS / 10 etc
-    else:
-        logger.warning('Could not parse product')
-        exit(1)
-        #print('Could not parse product')
-        
+            logger.warning('Could not parse product')
+            fail = True
+            #exit(1)
+            
     exit(0)

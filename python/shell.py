@@ -104,6 +104,10 @@ class Task:
 
         try:
             stdout,stderr = p.communicate()
+        except KeyboardInterrupt:
+            self.log.warn('Hey! Keyboard interrupt for {0}'.format(self.script))
+            self.status = HTTPStatus.REQUEST_TIMEOUT
+            raise
         except:
             self.log.warn('Could not read stdout/stderr of {0}'.format(self.script))
             self.status = HTTPStatus.CONFLICT
