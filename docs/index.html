@@ -55,15 +55,19 @@
             
   <div class="section" id="welcome-to-nutshell-s-documentation">
 <h1>Welcome to NutShell’s documentation!<a class="headerlink" href="#welcome-to-nutshell-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>NutShell is a Python-based facility for generating product files: images, data files and text files.
-NutShell suits to generation of real time products as well as to regenerating products on-demand
-from archived data.</p>
-<p>The product generation scheme resembles that of <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>:
-if a product (or “target”) needs inputs (“dependencies”), they are generated first.
-The applied <em>product generators</em> are organized systematically in a directory tree.
-Each product has an ID of type <code class="docutils literal"><span class="pre">my.data.prod</span></code> that is associated with path component <code class="docutils literal"><span class="pre">my/test/prod/</span></code>.
-Hence, a product generator can be tracked to – and in a way also identified with – a unique
-subdirectory, which also contains a <em>generator script</em> with a fixed name (<code class="docutils literal"><span class="pre">generate.sh</span></code>).</p>
+<p>NutShell is a Python-based facility for generating product files:
+images, data files and text files.  NutShell suits to generation of
+real time products as well as to regenerating products on-demand from
+archived data.</p>
+<p>The product generation scheme resembles that of <code class="docutils literal"><span class="pre">make</span></code> and
+<code class="docutils literal"><span class="pre">Makefile</span></code>: if a product (or “target”) needs inputs
+(“dependencies”), they are generated first.  The applied <em>product
+generators</em> are organized systematically in a directory tree.  Each
+product has an ID of type <code class="docutils literal"><span class="pre">my.data.prod</span></code> that is associated with
+path component <code class="docutils literal"><span class="pre">my/test/prod/</span></code>.  Hence, a product generator can be
+tracked to – and in a way also identified with – a unique
+subdirectory, which also contains a <em>generator script</em> with a fixed
+name (<code class="docutils literal"><span class="pre">generate.sh</span></code>).</p>
 <p>Typically, Unix/Linux commands have a form like:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">command</span> <span class="o">-</span><span class="n">i</span> <span class="o">&lt;</span><span class="nb">input</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>  <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">parameter</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">o</span> <span class="o">&lt;</span><span class="n">output</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>
 </pre></div>
@@ -79,6 +83,9 @@ other dependencies beyond production itself are required.</p>
 <p>NutShell provides a platform for collecting programming efforts of developers and researchers using
 different languages and interfaces. It has been originally developed for generating weather radar products <a class="reference internal" href="#peura2008" id="id1">[Peura2008]</a>,
 but suits to product computation more generally.</p>
+<ul class="simple">
+<li>Installation: [GitHub](<a class="reference external" href="https://github.com/fmidev/nutshell">https://github.com/fmidev/nutshell</a>)</li>
+</ul>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
