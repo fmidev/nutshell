@@ -65,5 +65,4 @@ Simple example::
 NutShell HTTP Server
 ====================
 
-
-Code documentation: :ref:`nutshell.httpd` :any:`nutshell.httpd`
+See code documentation: :any:`nutshell.httpd`

@@ -75,11 +75,13 @@
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1&#39;</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span>   <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">urllib.request</span><span class="o">,</span> <span class="nn">urllib.parse</span><span class="o">,</span> <span class="nn">urllib.error</span>
 <span class="kn">import</span> <span class="nn">http.server</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
 <span class="c1">#from xml.dom import minidom  # Pretty printing</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="c1">#import mimetypes</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="se">\t</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1">:</span><span class="si">%(funcName)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -220,12 +222,13 @@
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;File found, forwarding to standard handler&quot;</span><span class="p">)</span> <span class="c1">#  -&gt; {0} &quot;.format(system_path))</span>
             <span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="o">.</span><span class="n">do_GET</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
             <span class="k">return</span>
-            
-        <span class="c1">#s.log.error(&quot;PRDOCUT? {0}&quot;.format(system_path.suffix))</span>
-        <span class="c1">#s.log.error(&quot;PRDOCUT? {0}&quot;.format(querydata))</span>
-        <span class="c1"># system_path.suffix == format extension, so smells like a filename</span>
+
+        <span class="c1"># If the path </span>
+        <span class="c1"># - starts with &quot;/cache/&quot;</span>
+        <span class="c1"># - is a file, that has not been found (checked above)</span>
+        <span class="c1"># - has a filename extension (system_path.suffix, like &quot;.png&quot;)</span>
+        <span class="c1"># - has no special parameters (like &quot;?redirect=None&quot;)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/cache/&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">and</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="c1"># and file not found (above)</span>
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;PRODUCT? </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
             <span class="n">url</span> <span class="o">=</span>  <span class="s2">&quot;/nutshell/server/?request=MAKE&amp;product=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="n">NutHandler</span><span class="o">.</span><span class="n">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
@@ -246,7 +249,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">product_name</span><span class="p">):</span>
             <span class="n">product_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">product_name</span><span class="p">)</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;MAKE&quot;</span><span class="p">])</span>
-            <span class="n">directives</span>      <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;directives&#39;</span><span class="p">]</span>
+            <span class="n">directives</span> <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;directives&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="n">querydata</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
             <span class="n">directives</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;directives&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;STATUS&quot;</span><span class="p">])</span>
@@ -277,7 +280,7 @@
                     <span class="n">NutHandler</span><span class="o">.</span><span class="n">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
                     <span class="k">return</span> 
                 <span class="k">else</span><span class="p">:</span>
-                     <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;MAKE failed for: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">filename</span><span class="p">()))</span>
+                     <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;MAKE failed for: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()))</span>
                     <span class="c1">#product_request.log</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">product_request</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span>
@@ -305,7 +308,7 @@
  
         <span class="k">if</span> <span class="n">product_request</span><span class="p">:</span>
             <span class="n">elem</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;product&#39;</span><span class="p">)</span>
-            <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">product_request</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">filename</span><span class="p">())</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">product_request</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">get_filename</span><span class="p">())</span>
         
         <span class="k">if</span> <span class="n">directives</span><span class="p">:</span>
             <span class="n">elem</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;directives&#39;</span><span class="p">)</span>
@@ -342,7 +345,7 @@
                     
             <span class="n">env</span> <span class="o">=</span> <span class="n">product_info</span><span class="o">.</span><span class="n">get_param_env</span><span class="p">()</span>
             <span class="n">elem</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;product_elem&#39;</span><span class="p">)</span>
-            <span class="n">elem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nutxml</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Product (</span><span class="si">{0}</span><span class="s2">) parameters&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">ID</span><span class="p">)}))</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nutxml</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Product (</span><span class="si">{0}</span><span class="s2">) parameters&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">)}))</span>
 
         <span class="c1">#elem = nutxml.get_by_tag(body, &#39;pre&#39;, {&#39;id&#39;: &#39;dump&#39;})</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;dump_elem&#39;</span><span class="p">)</span>
@@ -372,9 +375,17 @@
     <span class="n">httpd</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">HTTPServer</span><span class="p">((</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_NAME</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PORT</span><span class="p">)),</span> <span class="n">NutHandler</span><span class="p">)</span>
 
     <span class="c1">#if (options.VERBOSE &gt; 1):</span>
-    <span class="nb">print</span><span class="p">((</span> <span class="s1">&#39;Starting server (port=</span><span class="si">{0}</span><span class="s1">, root=</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PORT</span><span class="p">,</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">directory</span><span class="p">)</span> <span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting server (port=</span><span class="si">{0}</span><span class="s1">, root=</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PORT</span><span class="p">,</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">directory</span><span class="p">))</span>
     <span class="n">nutils</span><span class="o">.</span><span class="n">print_dict</span><span class="p">(</span><span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="n">httpd</span><span class="p">))</span>
 
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span><span class="p">,</span> <span class="s1">&#39;cache&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: cache dir does not exist: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cache</span><span class="p">))</span>
+    <span class="c1"># elif not writable:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting: http://</span><span class="si">{0}</span><span class="s1">:</span><span class="si">{1}</span><span class="s1">/nutshell/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">httpd</span><span class="o">.</span><span class="n">server_name</span><span class="p">,</span> <span class="n">httpd</span><span class="o">.</span><span class="n">server_port</span><span class="p">))</span>
+  
+    
     <span class="k">try</span><span class="p">:</span>
         <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
         <span class="c1"># httpd.handle_request() # single</span>

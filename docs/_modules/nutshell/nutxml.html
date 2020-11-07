@@ -78,14 +78,18 @@
             <span class="n">s</span> <span class="o">+=</span> <span class="n">layout</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">s</span>
 
-<span class="k">def</span> <span class="nf">value_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;border&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="n">layout</span><span class="o">=</span><span class="n">TupleLayout</span><span class="o">.</span><span class="n">tableTr</span><span class="p">):</span>
-     <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-     <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&lt;table &#39;</span> <span class="o">+</span> <span class="n">TupleLayout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span>  <span class="n">TupleLayout</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
-     <span class="k">if</span> <span class="p">(</span><span class="n">title</span><span class="p">):</span>
-         <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;  &lt;tr&gt;&lt;th colspan=&quot;2&quot; class=&quot;title&quot;&gt;</span><span class="si">{0}</span><span class="s1">&lt;/th&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-     <span class="n">s</span> <span class="o">+=</span> <span class="n">TupleLayout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
-     <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/table&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
-     <span class="k">return</span> <span class="n">s</span>
+<span class="k">def</span> <span class="nf">value_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">TupleLayout</span><span class="o">.</span><span class="n">tableTr</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">attributes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;border&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+    
+    <span class="c1">#s = &#39;&#39;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&lt;table &#39;</span> <span class="o">+</span> <span class="n">TupleLayout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span>  <span class="n">TupleLayout</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">title</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;  &lt;tr&gt;&lt;th colspan=&quot;2&quot; class=&quot;title&quot;&gt;</span><span class="si">{0}</span><span class="s1">&lt;/th&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">+=</span> <span class="n">TupleLayout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/table&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">s</span>
 
     
 <span class="c1">#def key_value_row(key, value=None):</span>
@@ -116,12 +120,20 @@
             <span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">return</span> <span class="n">tr</span></div></div>
     
-<span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">{},</span> <span class="n">row_generator</span> <span class="o">=</span> <span class="n">KeyValueRowGenerator</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">row_generator</span> <span class="o">=</span> <span class="n">KeyValueRowGenerator</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">attributes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="o">=</span><span class="p">{}</span>
+        
     <span class="n">table</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>
     <span class="n">append_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">row_generator</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">table</span>
 
-<span class="k">def</span> <span class="nf">append_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">{},</span> <span class="n">row_generator</span> <span class="o">=</span> <span class="n">KeyValueRowGenerator</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">append_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">row_generator</span> <span class="o">=</span> <span class="n">KeyValueRowGenerator</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">attributes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="o">=</span><span class="p">{}</span>
+
     <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;title&#39;</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">):</span>
         <span class="n">tr</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;th&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;colspan&#39;</span><span class="p">:</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;lead&#39;</span><span class="p">}</span> <span class="p">)</span>
@@ -134,7 +146,11 @@
 
 
     
-<span class="k">def</span> <span class="nf">get_by_tag</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;span&#39;</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">{}):</span>
+<span class="k">def</span> <span class="nf">get_by_tag</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;span&#39;</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">attributes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">attributes</span><span class="o">=</span><span class="p">{}</span>
+
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">html</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">tag</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">i</span>
