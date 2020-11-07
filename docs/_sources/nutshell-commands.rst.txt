@@ -16,20 +16,20 @@ Requests
 
 Also know as *actions*
 
-============ ============== ======
+============ ================= ============
  Request     Cmd line arg
-============ ============== ======
-``TEST``     --test         Check existence and permissions of directories and scripts
-``MAKE``     --make, -m     Generate file, if it does not exist (default request)
-``DELETE``   --delete, -d   Delete the product file in cache dir
-``GENERATE`` --generate, -g Remake file, even if it exists. Same as ``--delete --make``
-**           --copy, -C     Copy file 
-**           --move, -m     Move file 
-**           --link, -l     Link file 
-``SHORTCUT`` --shortcut     Link file to short directory
-``LATEST``   --latest, -L   Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
-``INPUTS``   --inputs, -I   Check inputs
-============ ============== ======
+============ ================= ============
+``TEST``     --test            Check existence and permissions of directories and scripts
+``MAKE``     --make, -m        Generate file, if it does not exist (default request)
+``DELETE``   --delete, -d      Delete the product file in cache dir
+``GENERATE`` --generate, -g    Remake file, even if it exists. Same as ``--delete --make``
+--           --copy, -C `file` Copy file 
+--           --move, -m `file` Move file 
+--           --link, -l `file` Link file 
+``SHORTCUT`` --shortcut        Link file to short directory
+``LATEST``   --latest, -L      Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
+``INPUTS``   --inputs, -I      Check inputs
+============ ================= ============
 
 
 
