@@ -1,7 +1,0 @@
-X=/home/mpeura/nutshell/demo/cache/2020/05/12/demo/image/ppmforge/202005121445_demo.image.ppmforge_DIMENSION=2_GRAY=True_MODE=clouds_SIZE=400,400.png
-
-Y=/home/mpeura/nutshell/demo/cache/demo/image/pattern/demo.image.pattern_PATTERN=LEFT45_SIZE=400,400.png
-
-convert $X -evaluate Threshold 12  $Y -negate -compose Multiply -composite   mika.png ; xv mika.png
-convert mika.png -negate  -fill red -colorize 80,10,0 sika.png -channel alpha mika.png -negate sika.png; display sika.png 
-convert mika.png -negate  -fill red -colorize 80,10,0 -separate mika.png -channel RGBA -combine sika.png

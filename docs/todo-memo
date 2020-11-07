@@ -1,4 +1,0 @@
-SCHEME=TILED => SCHEME=TILE in input
-
-202005101245_demo.cloudy.anim_SIZE=800,600__FRAMES=3_TIMESTEP=5.gif => input cut! =>
-  avoid: 202005101245_demo.cloudy__FRAMES=3_SIZE=800,600_TIMESTEP=5.png

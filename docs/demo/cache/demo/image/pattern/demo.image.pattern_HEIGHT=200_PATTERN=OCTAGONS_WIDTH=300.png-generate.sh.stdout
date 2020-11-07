@@ -1,2 +1,0 @@
-DEBUG: OCTAGONS 	octagons pattern, 16x16 
-LOG: executing: convert -size 300x200 pattern:OCTAGONS /home/mpeura/nutshell/demo/cache/demo/image/pattern/tmp/demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
