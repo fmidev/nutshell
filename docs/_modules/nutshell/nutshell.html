@@ -53,6 +53,8 @@
   <h1>Source code for nutshell.nutshell</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/bin/python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
+
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">Main module -- nutshell.nutshell</span>
@@ -63,12 +65,11 @@
 <span class="sd">instance also manages disk resources defined in </span>
 <span class="sd">:ref:`configuration`.</span>
 
-<span class="sd">The module uses classes of :ref:`nutshell.product` for defining products </span>
-<span class="sd">( nutshell.product.Info ) and for generating them using </span>
-<span class="sd">nutshell.product.Generator. </span>
+<span class="sd">The module uses :any:`nutshell.product`  for defining products (:any:`nutshell.product.Info`) </span>
+<span class="sd">and :any:`nutshell.request` for generating them using :any:`nutshell.request.Generator` . </span>
 
-<span class="sd">HTTP server provided by :ref:`nutshell.httpd` essentially forwards</span>
-<span class="sd">HTTP requests to ProductServer.</span>
+<span class="sd">HTTP server provided by :any:`nutshell.httpd` essentially forwards</span>
+<span class="sd">HTTP requests to :any:`nutshell.ProductServer`.</span>
 
 
 

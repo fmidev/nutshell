@@ -32,7 +32,6 @@ Also know as *actions*
 ============ ================= ============
 
 
-
 .. _directives:
 
 Directives

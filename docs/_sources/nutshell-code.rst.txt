@@ -15,7 +15,10 @@ NutShell Code
 
 .. automodule:: nutshell.product
    :members:
-      
+
+.. automodule:: nutshell.request
+   :members:
+
 .. automodule:: nutshell.shell
    :members:
 
