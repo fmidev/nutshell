@@ -17,8 +17,8 @@ import re
 
 import argparse
 
-from pathlib import Path
-from http import HTTPStatus
+#from pathlib import Path
+#from http import HTTPStatus
 #import http.server
 #HTTPresponses = http.server.SimpleHTTPRequestHandler.responses
 
@@ -116,7 +116,7 @@ class Info:
         :returns: instance (possibly incomplete, to be adjusted with separate 
              method calls) 
     
-        See :ref:`product.info`. Parameters equivalent at initialisation.
+        See :ref:`product.Info`. Parameters equivalent at initialisation.
         """
         
         self.FORMAT = 'xxx'
@@ -361,7 +361,7 @@ class Info:
 
     # Todo: params
     def __init__(self, product=None, filename=None, product_id=None, **kwargs):
-        """See :ref:`product.info`. Parameters equivalent with those of set_product()."""
+        """See :ref:`product.Info`. Parameters equivalent with those of set_product()."""
         self.set_product(product, filename, product_id, **kwargs)
         self.log = logging.getLogger('Info')
         self.log.setLevel(logging.WARN)

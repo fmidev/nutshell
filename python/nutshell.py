@@ -1,5 +1,7 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
+
+
 """
 
 Main module -- nutshell.nutshell
@@ -10,12 +12,11 @@ requests and forwards them to product generators. A ProductServer
 instance also manages disk resources defined in 
 :ref:`configuration`.
 
-The module uses classes of :ref:`nutshell.product` for defining products 
-( nutshell.product.Info ) and for generating them using 
-nutshell.product.Generator. 
+The module uses :any:`nutshell.product`  for defining products (:any:`nutshell.product.Info`) 
+and :any:`nutshell.request` for generating them using :any:`nutshell.request.Generator` . 
 
-HTTP server provided by :ref:`nutshell.httpd` essentially forwards
-HTTP requests to ProductServer.
+HTTP server provided by :any:`nutshell.httpd` essentially forwards
+HTTP requests to :any:`nutshell.ProductServer`.
 
 
 

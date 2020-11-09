@@ -35,6 +35,8 @@ from . import shell
 
 
 class Tasklet(shell.Task):
+    """Base class for shell operations (:any:`InputQuery` and :any:`Generator`)
+    """
     
     def __init__(self, product_server, product_info, script_filename, log = None):
 
