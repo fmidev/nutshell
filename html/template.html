@@ -1,11 +1,9 @@
+<?xml version="1.0"?>
 <html>
-
   <head>
-    <meta charset="utf-8" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-
+    <meta charset="utf-8"/>
+    <link rel="shortcut icon" href="./favicon.ico"/>
     <title>Nutshell Product Server</title>
-    
     <style>
 
       BODY {
@@ -32,9 +30,8 @@
       }
       
     </style>
-
     <!-- NOTE: ET parser fails in reading lt and gt characters -->
-    <script language="javascript" type="text/javascript" >
+    <script language="javascript" type="text/javascript">
       console.log('TEST')
       var DEBUG = {}
       // var requests
@@ -57,74 +54,87 @@
       elem.form.submit()
       }
     </script>
-
-    
   </head>
-  
   <body>
-    
-    <h1 id="greeting"><a href="/nutshell/server"><img src="/img/nutshell-logo.png" alt="home" border="0" width="64" height="64" style="vertical-align:middle" /></a> NutShell Server</h1>
-
-    <p id="notif_head_elem" style="color: gray; font-family: monospace"></p>
+    <h1 id="greeting"><a href="/nutshell/NutShell"><img src="img/nutshell-logo.png" alt="home" border="0" width="64" height="64" style="vertical-align:middle"/></a> NutShell Server</h1>
+    <p id="notif_head_elem" style="color: gray; font-family: monospace"/>
     <!--h3 id="notif_elem"></h3 -->
-   
-    <form id="form" method="GET" target="product" action="/nutshell/server" >
-
+    <form id="form" method="GET" target="product" action="/nutshell/NutShell">
       <table astyle="border-radius: 5x; background-color: lightblue">
-	
-	<tr>
-	  <th class="LEAD" colspan="2">Request</th>
-	</tr>
-	<tr>
-	  <td class="LEAD">Request</td>
-	  <td>
-	    <input type="text" id="request" name="request" value="" />
-	    <button type="button" value="MAKE" onclick="send_request(this)">Make</button>
-	    <button type="button" value="DELETE" onclick="send_request(this)">Delete</button>    
-	    <button type="button" value="DELETE,MAKE" onclick="send_request(this)">Remake</button>    
-	    <!-- button type="button" value="STATUS" onclick="send_request(this)">Status</button -->
-	    <!-- button type="button" value="STATUS,INPUTS" onclick="send_request(this)">Status2</button -->
-    	  </td>
-	</tr>
-	<tr>
-	  <td class="LEAD">Product</td>
-	  <td>
-	    <input id="product" name="product" type="text" size="80" value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png" ></input>
-	  </td>
-	</tr>
-	<tr>
-	  <td class="LEAD">Directives</td>
-	  <td>
-	    <input type="text" id="directives" name="directives" value="" />
-	    <button type="button" onclick="this.form.directives.value = 'STATUS'">Status</button>
-	    <button type="button" onclick="this.form.directives.value = 'LOG'">Log</button>
-	    <button type="button" onclick="this.form.directives.value = 'SHORTCUT'">Shortcut</button>
-	    <button type="button" onclick="this.form.directives.value = 'LATEST'">Latest</button>
-    	  </td>
-	</tr>
+        <tr>
+          <th class="LEAD" colspan="2">Request</th>
+        </tr>
+        <tr>
+          <td class="LEAD">Request</td>
+          <td>
+            <!-- input type="text" id="request" name="request" value="" /-->
+            <label><input type="checkbox" name="request" value="MAKE"/>Make</label>
+            <label><input type="checkbox" name="request" value="GENERATE"/>Generate</label>
+            <label><input type="checkbox" name="request" value="REDIRECT"/>Redirect</label>
+            <label><input type="checkbox" name="request" value="DELETE"/>Delete</label>
+            <label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label>
+            <!-- label><input type="checkbox" name="request" value="SHORTCUT" />Shortcut</label -->
+            <!-- label><input type="checkbox" name="request" value="LATEST" />Latest</label -->
+            <label><input type="submit" value="Ok"/>Submit</label>
+            <!-- button type="button" value="STATUS" onclick="send_request(this)">Status</button -->
+            <!-- button type="button" value="STATUS,INPUTS" onclick="send_request(this)">Status2</button -->
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Product</td>
+          <td>
+            <input id="product" name="product" list="prods" type="text" size="80" value="201012170840_test.ppmforge.png"/>
+            <datalist id="prods">
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png">Radar Composite</option>
+              <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
+              <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>
+              <option value="maps.wms_PROJ=4326_BBOX=20,57,25,62_SIZE=512,512_CONF=geoserver_LAYERS=world-map-combo-en.png">Map</option>
+              <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
+              <option value="demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png">Geoserver</option>
+              <option value="2020050800_demo.cloudy_SIZE=800,600.jpg">Cloudy</option>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+            </datalist>
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Directives</td>
+          <td>
+            <label>
+              <input type="text" name="directives" value="" size="40"/>
+            </label>
+            <label><input type="checkbox" name="directives" value="STATUS"/>Status</label>
+            <label><input type="checkbox" name="directives" value="LOG"/>Log</label>
+          </td>
+        </tr>
       </table>
       <!--a href="/stop">STOP</a-->
     </form>
-
-    <span id="request_elem"></span>
-
-    <pre id="error_elem" style="color: red"></pre>
-
-    <TT id="sproduct_link" href=""></TT>
-    
-    <span id="product_elem"></span>
-
-    <span id="inputs_elem"></span>
-
-    <span id="status_elem"></span>
-
+    <span id="request_elem"/>
+    <pre id="error_elem" style="color: red"/>
+    <TT id="sproduct_link" href=""/>
+    <span id="product_elem"/>
+    <span id="inputs_elem"/>
+    <span id="status_elem"/>
     <!-- button type="button" onclick="if (window.confirm('Stop NutShell Server?')) document.location='/stop' " >Stop server</button -->
-
-    <hr />
-
-    <span id="version_elem"></span>
-
-    <pre id="dump_elem"></pre>
-    
+    <hr/>
+    <span id="version_elem"/>
+    <pre id="dump_elem"/>
+    <h1>Directories</h1>
+    <ul>
+      <li>
+        <a href="products/" target="venisonDir">product directory</a>
+      </li>
+      <li>
+        <a href="cache/" target="venisonDir">cache directory</a>
+      </li>
+      <li>
+        <a href="WEB_INF/">WEB_INF</a>
+      </li>
+    </ul>
   </body>
 </html>

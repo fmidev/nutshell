@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>NutShell Product Server</title>
+</head>
+<body>
+
+<h1>NutShell Product Server</h1>
+
+<h2>Tomcat version</h2>
+
+<hr />
+
+<ul>
+<li><a href="NutShell" target="venisonMonitor" >status</a> - a conscise description</li>
+<li>Test product query (misc.ppmforge fractal image)
+  <ul>
+    <li><a href="NutShell?product=201012170840_test.ppmforge.png&request=MAKE" target="venisonProduct" >simple query</a></li>
+    <li><a href="NutShell?product=201012161600_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5.png" target="venisonProduct" >several parameters</a></li>
+<li><a href="NutShell?product=201012170840_test.ppmforge_WIDTH=1005.png" target="venisonProduct" >query producing an error message</a> (too large image)</li>
+<li><a href="NutShell?product=201012170850_test.ppmforge_WIDTH=466.png&request=MAKE,REDIRECT" target="venisonProduct" >query with client redirect</a></li>
+<li><a href="NutShell?product=201012170850_test.ppmforge_WIDTH=466.png&request=DELETE" target="venisonMonitor" >product deletion request</a></li>
+<li><a href="cache/2010/12/17/test/ppmforge/201012170850_test.ppmforge_WIDTH=466.png" target="venisonProduct" >query using target dir and file</a></li>
+</ul>
+<li><a href="NutShell?product=201012170840_test.clock.png" target="venisonProduct">test.clock</a> -test product</li>
+<li><a href="products/" target="venisonDir">product directory</a></li
+
+<li><a href="cache/" target="venisonDir">cache directory</a></li>
+<li><a href="notes-peura.txt" >some notes</a></li>
+<li><a href="WEB_INF/" >WEB_INF</a></li>
+</ul>
+
+<H2>Examples</H2>
+
+Some <a href="examples.html">examples</a> may illustrate the usage of NutShell.
+<br clear="all" />
+
+<img src="NutShell?product=201012170840_test.checkboard.png" alt="NutShell test image" />
+<img src="NutShell?product=201012170840_test.ppmforge.png" alt="NutShell test image" />
+
+</body>
+</html>

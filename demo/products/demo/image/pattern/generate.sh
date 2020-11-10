@@ -24,9 +24,9 @@ fi
 
 # Check 2: format 
 FORMAT=${FORMAT:-'png'}
-if [ $FORMAT != 'png' ] && [ $FORMAT != 'jpg' ]; then
+if [ $FORMAT != 'png' ] && [ $FORMAT != 'jpg' ] && [ $FORMAT != 'sh' ]; then
     # 415 Unsupported Media Type
-    echo "415 Format not 'png' or 'jpg' "
+    echo "416 Format not 'png' or 'jpg' (or .sh)"
     exit 1
 fi
     
@@ -41,11 +41,18 @@ if [ "$PATTERN_INFO" == '' ]; then
     exit 1
 fi
 
+echo "# $OUTDIR/$OUTFILE "
+
 OUTDIR=${OUTDIR:-'.'}
 OUTFILE=${OUTFILE:-"image.pattern.png"}
 
 #cmd="convert -size 8x8 pattern:gray50 -filter Point -resize ${WIDTH},${HEIGHT} $OUTDIR/$OUTFILE"
 cmd="convert -size ${WIDTH}x${HEIGHT} pattern:${PATTERN//-/_} $OUTDIR/$OUTFILE"
+
+if [ "$FORMAT" == 'sh' ]; then
+    echo ${cmd%.*}.png > $OUTDIR/$OUTFILE
+    exit 0
+fi
 
 echo "LOG: executing: $cmd"
 

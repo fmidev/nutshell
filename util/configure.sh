@@ -94,6 +94,9 @@ PKG_ROOT=${PWD}
 ask_variable NUTSHELL_DIR "$PWD/nutshell" "Directory for NutShell Python files:"
 ls -d $NUTSHELL_DIR
 
+ask_variable TOMCAT_CONF_DIR "/etc/tomcat8/Catalina/localhost" "Directory for nutshell.xml"
+
+
 ask_variable CACHE_ROOT "$PKG_ROOT/cache" "Root of cache directory, often on separate resource:"
 mkdir -v --parents --mode a+rwx $CACHE_ROOT
 
@@ -108,7 +111,7 @@ if [ $? == 0 ]; then
 fi
 
 
-ask_variable HTTP_PORT "8088" "Port for HTTP server."
+ask_variable HTTP_PORT "8088" "Port for HTTP server (Python)."
 
 ask_variable HTTP_PREFIX "nutshell/" "URL directory prefix (future option)."
 
