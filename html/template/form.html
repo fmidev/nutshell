@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+  </head>
+  <body>
+    <form id="form" method="GET" target="product" action="/nutshell/NutShell">
+      <table astyle="border-radius: 5x; background-color: lightblue">
+        <tr>
+          <th class="LEAD" colspan="2">Request</th>
+        </tr>
+        <tr>
+          <td class="LEAD">Request</td>
+          <td>
+            <!-- input type="text" id="request" name="request" value="" /-->
+            <label><input type="checkbox" name="request" value="MAKE"/>Make</label>
+            <label><input type="checkbox" name="request" value="GENERATE"/>Generate</label>
+            <label><input type="checkbox" name="request" value="REDIRECT"/>Redirect</label>
+            <label><input type="checkbox" name="request" value="DELETE"/>Delete</label>
+            <label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label>
+            <label><input type="submit" value="Ok"/>Submit</label>
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Product</td>
+          <td>
+            <input id="product" name="product" list="prods" type="text" size="80" value="201012170840_test.ppmforge.png"/>
+            <datalist id="prods">
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png">Radar Composite</option>
+              <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
+              <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>
+              <option value="maps.wms_PROJ=4326_BBOX=20,57,25,62_SIZE=512,512_CONF=geoserver_LAYERS=world-map-combo-en.png">Map</option>
+              <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
+              <option value="demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png">Geoserver</option>
+              <option value="2020050800_demo.cloudy_SIZE=800,600.jpg">Cloudy</option>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+              <option value=""/>
+            </datalist>
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Directives</td>
+          <td>
+            <label>
+              <input type="text" name="directives" value="" size="40"/>
+            </label>
+            <label><input type="checkbox" name="directives" value="STATUS"/>Status</label>
+            <label><input type="checkbox" name="directives" value="LOG"/>Log</label>
+          </td>
+        </tr>
+      </table>
+      <!--a href="/stop">STOP</a-->
+    </form>
+  </body>
+</html>

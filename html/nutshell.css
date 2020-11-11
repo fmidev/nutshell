@@ -1,0 +1,22 @@
+BODY {
+    margin: 40px 40px 40px 20px;
+}
+
+H1, .LEAD, .KEY {
+    font-family: Helvetica,Arial,SansSerif;
+}
+
+TD {
+    border: 1px solid black;
+}
+
+.LEAD, .KEY {
+    border: none;
+    horizontal-align: right;
+    font-weight: bold;
+    background-color: lightgray;
+}
+
+TH.LEAD {
+    font-size: x-large;
+}
