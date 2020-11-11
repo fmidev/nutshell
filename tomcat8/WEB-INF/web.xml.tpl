@@ -14,8 +14,9 @@
     <servlet-name>NutShell</servlet-name>
     <servlet-class>nutshell.Nutlet</servlet-class>
     <init-param>
+      <!-- For nutshell.ProductServer -->
       <param-name>confDir</param-name>
-      <param-value>/opt/nutshell/</param-value>
+      <param-value>${HTML_ROOT}</param-value>
     </init-param>
     <init-param>
       <param-name>htmlRoot</param-name>
