@@ -11,14 +11,15 @@
         </tr>
         <tr>
           <td class="LEAD">Request</td>
-          <td>
-            <!-- input type="text" id="request" name="request" value="" /-->
-            <label><input type="checkbox" name="request" value="MAKE"/>Make</label>
-            <label><input type="checkbox" name="request" value="GENERATE"/>Generate</label>
-            <label><input type="checkbox" name="request" value="REDIRECT"/>Redirect</label>
+          <td><!-- input type="text" id="request" name="request" value="" /--><label><input type="submit" value="Submit"/></label>
+	    &#xA0;
             <label><input type="checkbox" name="request" value="DELETE"/>Delete</label>
+            <label><input type="checkbox" name="request" value="GENERATE" checked="true"/>Generate</label>
+            <label><input type="checkbox" name="request" value="MAKE"/>Make</label>
+	    <label><input type="radio" name="request" value="STREAM"/>Stream</label>
+            <label><input type="radio" name="request" value="REDIRECT"/>Redirect</label>
+	    <label><input type="radio" name="request" value="CHECK"/>Info page</label>
             <label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label>
-            <label><input type="submit" value="Ok"/>Submit</label>
           </td>
         </tr>
         <tr>
