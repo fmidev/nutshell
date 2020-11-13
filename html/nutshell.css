@@ -10,6 +10,10 @@ TD {
     border: 1px solid black;
 }
 
+CODE {
+    background-color: lightgray;
+}
+
 .LEAD, .KEY {
     border: none;
     horizontal-align: right;
