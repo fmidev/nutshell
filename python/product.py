@@ -312,7 +312,8 @@ class Info:
                 else:
                     body.append("{0}={1}".format(key, value))
             if (self.PARAMETERS):
-                body.append(':')
+                body.append('')
+                #body.append(':')
 
         if (self.PARAMETERS):
             for key,value in sorted(self.PARAMETERS.items()):

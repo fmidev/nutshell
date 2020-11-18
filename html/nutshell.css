@@ -1,5 +1,6 @@
 BODY {
     margin: 40px 40px 40px 20px;
+    text-decoration: none;
 }
 
 H1, .LEAD, .KEY {
@@ -16,11 +17,27 @@ CODE {
 
 .LEAD, .KEY {
     border: none;
-    horizontal-align: right;
     font-weight: bold;
     background-color: lightgray;
 }
 
 TH.LEAD {
     font-size: x-large;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+    background-color: lightgreen;
+    /* text-decoration: underline;*/
 }
