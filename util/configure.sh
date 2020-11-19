@@ -57,6 +57,25 @@ function ask_variable(){
     echo >> $CONF_FILE
 }
 
+# Add leading '/' and remove trailing '/'
+function check_dir_syntax(){
+    local key=$1
+    eval value=\${$key}
+    value_orig=$value
+    if [ ${value:0:1} != '/' ]; then
+	value="/$value"
+	echo "# NOTE: adding leading '/'" >> $CONF_FILE
+    fi
+    if [ ${value} != ${value%/} ]; then
+	value=${value%/}
+	echo "# NOTE: removing trailing '/'" >> $CONF_FILE
+    fi
+    if [ ${value} != ${value_orig} ]; then
+	eval "$key='$value'" # needed?
+	echo "$key='$value'" >> $CONF_FILE
+    fi
+}
+
 function warn_if_unfound(){
   if [ ! -d "$1" ]; then
       echo "Warning: $1 not found"
@@ -80,30 +99,36 @@ function clone_dir {
 
 
 
-echo "Accept or modify the directories detected above:"
+echo "Accept or modify the directories detected above."
+echo "Directory and url paths must have a leading but no trailing slash '/'."
 echo 
 
 
 
 # Root dir of this installation package
 #PKG_ROOT=${PWD%/*}
-PKG_ROOT=${PWD}
+#PKG_ROOT=${PWD}
+PKG_ROOT=`pwd -P`
 
 #echo $PKG_ROOT
-
-ask_variable NUTSHELL_DIR "$PWD/nutshell" "Directory for NutShell Python files:"
+#DIR=`pwd -P`
+ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for NutShell Python files:"
+check_dir_syntax NUTSHELL_DIR
 ls -d $NUTSHELL_DIR
 
 ask_variable TOMCAT_CONF_DIR "/etc/tomcat8/Catalina/localhost" "Directory for nutshell.xml"
-
+check_dir_syntax TOMCAT_CONF_DIR
 
 ask_variable CACHE_ROOT "$PKG_ROOT/cache" "Root of cache directory, often on separate resource:"
+check_dir_syntax CACHE_ROOT
 mkdir -v --parents --mode a+rwx $CACHE_ROOT
 
 ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator (script) directories"
+check_dir_syntax PRODUCT_ROOT
 mkdir -v --parents $PRODUCT_ROOT
 
 ask_variable HTML_ROOT "$PKG_ROOT/html" "Root directory for HTTP server (optional)."
+check_dir_syntax HTML_ROOT
 mkdir -v --parents $HTML_ROOT
 if [ $? == 0 ]; then
     echo "Linking CACHE_ROOT to HTML_ROOT/cache"
@@ -113,13 +138,13 @@ fi
 
 ask_variable HTTP_PORT "8088" "Port for HTTP server (Python)."
 
-ask_variable HTTP_PREFIX "nutshell/" "URL directory prefix (future option)."
-
-
+ask_variable HTTP_PREFIX "/nutshell" "URL prefix (with leading '/' but without trailing '/')"
+check_dir_syntax HTTP_PREFIX
 
 
 
 echo "Created $CONF_FILE with contents:"
+echo "---------------------------------"
 echo
 cat  $CONF_FILE
 

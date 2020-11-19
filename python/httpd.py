@@ -154,10 +154,23 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         if (basepath == '/test'):
             s.send_response(HTTPStatus.OK.value)
             s.end_headers()
-            s.wfile.write("<html><body>Test</body></html>\n")
+            s.wfile.write("<html><body>Test</body></html>\n".encode())
             s.log.warning("test {0}".format(basepath))
             return 
 
+        # Strip HTTP_PREFIX
+        if (basepath.startswith(product_server.HTTP_PREFIX)):
+            basepath = basepath[len(product_server.HTTP_PREFIX):]
+        else:
+            s.send_response(HTTPStatus.OK.value)
+            s.end_headers()
+            html = "<html><body>Error: path {0} does not start with {1}</body></html>\n"
+            html = html.format(basepath, product_server.HTTP_PREFIX)
+            s.wfile.write(html.encode())
+            s.log.warning("test {0}".format(basepath))
+            return  
+            
+       
         # Directory and file requests are directed to default HTTP handler
         # NOTE: use plus, otherways collapses to root
         system_path = nutshell.Path(s.directory + basepath) 
@@ -177,7 +190,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # - has no special parameters (like "?redirect=None")
         if (basepath.find('/cache/') == 0) and system_path.suffix and (s.path.find('?') == -1):
             s.log.error("PRODUCT? {0}".format(system_path.suffix))
-            url =  "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
+            url = '/' + product_server.HTTP_PREFIX + "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
             NutHandler._redirect(s, url)
             return 
                    
@@ -221,7 +234,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             if ('MAKE' in actions) and ('STATUS' not in directives):
                 if (product_request.status == HTTPStatus.OK) and (product_request.path != ''):
                     # Redirect 
-                    url = '/cache/' + str(product_request.path_relative) + '?no_redirect'
+                    url = '/' + product_server.HTTP_PREFIX + '/cache/' + str(product_request.path_relative) + '?no_redirect'
                     #url = '/'+product_server.get_relative_path(product_info)+'?no_redirect'
                     #print('CONSIDER', url)
                     NutHandler._redirect(s, url)

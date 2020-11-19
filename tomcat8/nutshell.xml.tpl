@@ -1,5 +1,5 @@
 <!-- TomCat 8 syntax -->
-<Context path="/nutshell" docBase="$HTML_ROOT" >
+<Context path="$HTTP_PREFIX" docBase="$HTML_ROOT" >
   <!-- Enable symbolic links -->
   <Resources allowLinking="true"/>
 </Context>

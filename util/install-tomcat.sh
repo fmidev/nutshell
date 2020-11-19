@@ -8,9 +8,9 @@ function goodbye {
 }
 trap goodbye EXIT
 
-trap "virhe" ILL
+trap "echo virhe" ILL
 
-function ask_variable(){
+function check_variable(){
     local var_name=$1
     local def_value=$2
     shift 2
@@ -22,25 +22,22 @@ function ask_variable(){
     fi
 }
 
-export HTML_ROOT CACHE_ROOT TOMCAT_CONF_DIR
+export HTTP_PREFIX HTML_ROOT CACHE_ROOT TOMCAT_CONF_DIR 
 if [ -e ./nutshell.cnf ]; then
     source ./nutshell.cnf
 fi
 
 
-ask_variable HTML_ROOT "/opt/nutshell" "Give HTML servlet installation root"
+check_variable HTTP_PREFIX "/nutshell" "Give prefix for all HTTP requests for NutShell"
+
+check_variable HTML_ROOT "/opt/nutshell" "Give HTML servlet installation root"
 
 CACHE_ROOT=${CACHE_ROOT:-$HTML_ROOT/cache}
-ask_variable CACHE_ROOT "$CACHE_ROOT" "Give product file cache root"
+check_variable CACHE_ROOT "$CACHE_ROOT" "Give product file cache root"
 
 TOMCAT_CONF_DIR=${TOMCAT_CONF_DIR:-/etc/tomcat8/Catalina/localhost}
-ask_variable TOMCAT_CONF_DIR "$TOMCAT_CONF_DIR" "Tomcat8 Catalina dir for nutshell.xml"
+check_variable TOMCAT_CONF_DIR "$TOMCAT_CONF_DIR" "Tomcat8 Catalina dir for nutshell.xml"
 NUTSHELL_XML=$TOMCAT_CONF_DIR/nutshell.xml
-if [ ! -f $TOMCAT_CONF_DIR/ ]; then
-    if [ ! -w $NUTSHELL_XML/ ]; then
-	echo "# WARNING: cannot write $NUTSHELL_XML"
-    fi
-fi
 
 
 mkdir -v --parents $HTML_ROOT
@@ -90,6 +87,15 @@ else
     ln -sv $PRODUCT_ROOT $PRODUCT_LINK
 fi
 
+#if [ ! -f $TOMCAT_CONF_DIR/ ]; then
+if [ ! -w $NUTSHELL_XML/ ]; then
+    NUTSHELL_XML_NEW=./tomcat8/nutshell.xml.new
+    echo "# WARNING: cannot write: $NUTSHELL_XML"
+    echo "# WARNING: writing to:   $NUTSHELL_XML_NEW"
+    echo "# Consider: diff $NUTSHELL_XML  $NUTSHELL_XML_NEW"
+    NUTSHELL_XML=$NUTSHELL_XML_NEW
+fi
+
 cat ./tomcat8/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
 
-echo "consider: sudo /etc/init.d/tomcat8  restart"
+#echo "consider: sudo /etc/init.d/tomcat8  restart"

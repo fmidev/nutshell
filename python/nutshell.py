@@ -62,7 +62,7 @@ class ProductServer:
     # HTTP Server Options (forward defs HTTP server, so perhaps later moved to NutServer )
     HTTP_PORT = 8088
     HTTP_NAME = ''
-    HTTP_PATH_PREFIX = 'nutshell/' # TODO
+    HTTP_PREFIX = 'nutshell/' # TODO
     HTML_ROOT = '.' 
     HTML_TEMPLATE = 'template.html' 
 
