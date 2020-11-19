@@ -119,7 +119,7 @@ fi
 
 
 
-wget_cmd="wget ${proxy:+--proxy=$proxy} --no-clobber '$WMS_URLBASE${MAP:+map=$MAP&}${WMS_TRANSPARENT}layers=$LAYERS&srs=EPSG:$EPSG&bbox=$BBOX&width=$WIDTH&height=$HEIGHT$bgcolor$TRAILER'"
+wget_cmd="wget ${proxy:+--proxy=$proxy} --no-clobber --tries=2 '$WMS_URLBASE${MAP:+map=$MAP&}${WMS_TRANSPARENT}layers=$LAYERS&srs=EPSG:$EPSG&bbox=$BBOX&width=$WIDTH&height=$HEIGHT$bgcolor$TRAILER'"
 
 echo $wget_cmd
 

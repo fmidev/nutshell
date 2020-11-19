@@ -18,7 +18,7 @@ function run_image_op(){
     fi
 }
 
-date >  $OUTDIR/$OUTFILE
+#date >  $OUTDIR/$OUTFILE
 
 echo "# Pale map"
 MAP2=$TMP_FILEBASE-map.png
