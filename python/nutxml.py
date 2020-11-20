@@ -108,15 +108,16 @@ def get_by_tag(html, tag='span', attributes=None):
     return elem
 
 def get_head(html):
-    return get_by_tag(html, 'head')
+    return get_by_tag(html, 'head')  # !HTML!
 
 def get_body(html):
-    return get_by_tag(html, 'body')
+    return get_by_tag(html, 'body') # !HTML!
 
     
-def get_by_id(html, id, tag='*'):
-    #query = ".//{0}[@id='{1}']".format(tag,id)
-    #query = './/{0}[@id="{1}"]'.format(tag,id)
+def get_by_id(html, id, tag='span'): # !HTML!
+    """
+    tag: if create
+    """
     query = './/*[@id="{0}"]'.format(id)
     try:
         elems = html.findall(query)
@@ -127,7 +128,7 @@ def get_by_id(html, id, tag='*'):
         #print err
 
     #if tag=='*':
-    tag = 'span' # neutral element
+    #tag = 'span' # neutral element
     elem = ET.Element(tag, {'id': id})
     html.append(elem)
     return elem

@@ -64,7 +64,8 @@ class ProductServer:
     HTTP_NAME = ''
     HTTP_PREFIX = 'nutshell/' # TODO
     HTML_ROOT = '.' 
-    HTML_TEMPLATE = 'template.html' 
+    #HTML_TEMPLATE = 'template.html' 
+    HTML_TEMPLATE = 'index.html' 
 
     stdout = subprocess.PIPE
     stderr = subprocess.PIPE

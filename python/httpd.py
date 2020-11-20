@@ -68,14 +68,66 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         except IOError as err:
             html = ET.Element('html')
             body = ET.Element('body')
+            
+            main = ET.Element('span')
+            main.set('id', 'main')
+            body.append(main)
+            
             pre  = ET.Element('pre')
             pre.set('style', 'color:red')
             pre.text = 'Note: Template file "{0}" not found: '.format(product_server.HTML_TEMPLATE)
             pre.text += str(err)
             body.append(pre)
+            
             html.append(body)
         return html
 
+    @staticmethod
+    def _include_html(elem, page):
+        """Read HTML for modifications."""
+        content = None
+        try:
+            os.chdir(product_server.HTML_ROOT) # !!
+            html_include = ET.parse(page).getroot()
+            content = nutxml.get_body(html_include)
+        except IOError as err:
+            content  = ET.Element('pre')
+            content.set('style', 'color:red')
+            content.text = 'Note: Included HTML file "{0}" not found: '.format(page)
+        elem.append(content)
+      
+    @staticmethod
+    def _send_status_html(s, status, title, description):
+        """
+        """
+        
+        html = NutHandler._get_html_template()
+        
+        #body = nutxml.get_body(html)
+        main = nutxml.get_by_id(html, 'main')
+        
+        h1 = ET.Element('h1')
+        h1.text = "{0} {1}".format(status, title)
+        main.append(h1)
+
+        #HTTPStatus.ACCEPTED.value
+        pre  = ET.Element('pre')
+        pre.set("style", "color: gray")
+        pre.text = '{0} {1}'.format(status.value, status.name)
+        main.append(pre)
+        
+        pre  = ET.Element('pre')
+        pre.text = description
+        main.append(pre)
+        
+
+        # Send
+        s.send_response(status.value)   
+        s.end_headers()
+        s.wfile.write(ET.tostring(html))
+        
+        
+ 
 
     @staticmethod
     def parse_url(url, data=None):
@@ -152,10 +204,13 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         s.log.info(querydata)
 
         if (basepath == '/test'):
+            NutHandler._send_status_html(s, HTTPStatus.OK, "Test", basepath)
+            """
             s.send_response(HTTPStatus.OK.value)
             s.end_headers()
             s.wfile.write("<html><body>Test</body></html>\n".encode())
             s.log.warning("test {0}".format(basepath))
+            """
             return 
 
         # Strip HTTP_PREFIX
@@ -234,7 +289,12 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             if ('MAKE' in actions) and ('STATUS' not in directives):
                 if (product_request.status == HTTPStatus.OK) and (product_request.path != ''):
                     # Redirect 
-                    url = '/' + product_server.HTTP_PREFIX + '/cache/' + str(product_request.path_relative) + '?no_redirect'
+                    # server_name	mpeura10kl
+                    # server_port 	8088
+                    context = '{0}:{1}'.format(s.server.server_name, s.server.server_port)
+                    path = Path(context, product_server.HTTP_PREFIX, 'cache', str(product_request.path_relative))
+                    url = str(path) + '?no_redirect'
+                    #url = '/' + product_server.HTTP_PREFIX + '/cache/' + str(product_request.path_relative) + '?no_redirect'
                     #url = '/'+product_server.get_relative_path(product_info)+'?no_redirect'
                     #print('CONSIDER', url)
                     NutHandler._redirect(s, url)
@@ -259,6 +319,9 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         #head = nutxml.get_head(html)
         body = nutxml.get_body(html)
 
+        main = nutxml.get_by_id(body, 'main', 'span')
+        NutHandler._include_html(main, 'template/form.html')
+        
         # Consider single table for all
         # table = ET.Element('table')
         # append_table(table, data, attributes)
@@ -277,19 +340,19 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         if product_request and (product_request.returncode != 0):
             responses = http.server.SimpleHTTPRequestHandler.responses
             msg, desc = responses.get(product_request.status, ('Unknown', 'Not a valid HTTP return code'))
-            elem = nutxml.get_by_id(body, 'notif_head_elem')
+            elem = nutxml.get_by_id(main, 'notif_head_elem', 'pre')
             elem.text = 'HTTP {0}: {1} -- {2}'.format(product_request.status.value, msg, desc)
-            #lem.text = 'HTTP {0}'.format(product_request.status)
-            #elem = nutxml.get_by_id(body, 'notif_elem')
-            #elem.text = '"{0}"'.format(desc)
-            elem = nutxml.get_by_id(body, 'error_elem')
-            elem.text = str(product_request.log)
+           
+            #elem = nutxml.get_by_id(body, 'error_info', 'pre')
+            # No log stored, it's flushed: elem.text = str(product_request.log) # last status?
+        main.append(nutxml.get_table(product_server.get_status(), {"title": "NutServer status"}))
+            
+        main.append(nutxml.get_table(nutils.get_entries(s), {"title": "HttpRequest"}))
+
+        main.append(nutxml.get_table(nutils.get_entries(s.server), {"title": "HttpServer"}))
  
-        elem =  nutxml.get_by_id(body, 'status_elem')
-        elem.append(nutxml.get_table(product_server.get_status(), {"title": "Server status"}))
+        #elem =  nutxml.get_by_id(body, 'status_elem')
     
-        elem =  nutxml.get_by_id(body, 'version_elem', 'p')
-        elem.text = product_server.__class__.__name__ + ' : ' + product_server.__doc__
 
         #elem =  nutxml.get_by_id(body, 'misc', 'pre')
         #elem.text = "Cwd: " + os.cwd + '\n'
@@ -300,20 +363,25 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     product_request.inputs = product_server.get_input_list(product_info).inputs
 
                 #layout = '<tr><td>{0}</td><td><a href="/nutshell/server?request=INPUTS&product={1}">{1}</a></td></tr>\n'
-                elem = nutxml.get_by_id(body, 'inputs_elem')
-                elem.append(nutxml.get_table(product_request.inputs, {"title": "Product inputs", "border": "1"}))
+                #elem = nutxml.get_by_id(body, 'inputs_elem')
+                main.append(nutxml.get_table(product_request.inputs, {"title": "Product inputs", "border": "1"}))
                     
             env = product_info.get_param_env()
-            elem = nutxml.get_by_id(body, 'product_elem')
-            elem.append(nutxml.get_table(env, {"title": "Product ({0}) parameters".format(product_info.PRODUCT_ID)}))
+            #elem = nutxml.get_by_id(body, 'product_elem')
+            main.append(nutxml.get_table(env, {"title": "Product ({0}) parameters".format(product_info.PRODUCT_ID)}))
 
         #elem = nutxml.get_by_tag(body, 'pre', {'id': 'dump'})
-        elem = nutxml.get_by_id(body, 'dump_elem')
+        elem = nutxml.get_by_id(main, 'dump_elem', 'pre')
+        
         elem.text = str(dir(product_server)) + '\n'
         elem.text += str(dir(s)) + '\n'
         elem.text += "Load: " + str(os.getloadavg()) + '\n'
         elem.text += "Cwd: " + s.directory + '\n'
         elem.text += "System side path: " + str(system_path) + '\n'
+        elem.text += "HttpRequest: " + str(s) + '\n'
+
+        elem =  nutxml.get_by_id(body, 'version', 'span')
+        elem.text = product_server.__class__.__name__ + ' : ' + product_server.__doc__ + " (Python version)"
 
         s.wfile.write(ET.tostring(html))
         #s.wfile.write(minidom.parseString(ET.tostring(html)).toprettyxml(indent = "   "))
@@ -329,6 +397,8 @@ def run_http(product_server):
     """
     NutHandler.directory = product_server.HTML_ROOT # has no effect as such...
     http.server.SimpleHTTPRequestHandler.directory = product_server.HTML_ROOT # has no effect...
+    
+    #http.server.SimpleHTTPRequestHandler.
 
     # server_class = http.server.HTTPServer  
     # httpd = server_class((product_server.HTTP_NAME, int(product_server.HTTP_PORT)), NutHandler)
