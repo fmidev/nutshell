@@ -65,7 +65,8 @@ rsync -vau --exclude '*~' --exclude '*.HTML' html/  $HTML_ROOT/
 #cp -vau template/*.html $HTML_ROOT/template/
 #popd &> /dev/null
 
-
+echo "# Adding alias link 'nutshell/nutshell -> .', to comply with Python httpd"
+ln -s . /opt/nutshell/nutshell
 
 echo "# Creating/linking cache root"
 mkdir -v --parents $CACHE_ROOT/
