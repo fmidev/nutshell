@@ -9,6 +9,7 @@ H1, .LEAD, .KEY {
 
 TD {
     border: 1px solid black;
+    font-family: Courier,monospace;
 }
 
 CODE {
