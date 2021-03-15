@@ -26,9 +26,11 @@ Online help is optained with ``-h``::
     
 Simple query using configuration file and product definition::
 
-    python3 -m nutshell.nutshell --request 'MAKE' \
-      -p 201708121500_radar.rack.comp_SIZE=800,800_SITES=fi_BBOX=20,62,30,70.png 
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
+In the above example, options ``--make`` and ``--product`` are left implicit: making a product is the default action, and
+free arguments are handled as files ie. product definitions.
+  
 Other commands       
 
 .. _nutshell-api:

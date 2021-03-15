@@ -161,15 +161,16 @@
     <span class="k">return</span> <span class="n">elem</span>
 
 <span class="k">def</span> <span class="nf">get_head</span><span class="p">(</span><span class="n">html</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">get_by_tag</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;head&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">get_by_tag</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;head&#39;</span><span class="p">)</span>  <span class="c1"># !HTML!</span>
 
 <span class="k">def</span> <span class="nf">get_body</span><span class="p">(</span><span class="n">html</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">get_by_tag</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">get_by_tag</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">)</span> <span class="c1"># !HTML!</span>
 
     
-<span class="k">def</span> <span class="nf">get_by_id</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
-    <span class="c1">#query = &quot;.//{0}[@id=&#39;{1}&#39;]&quot;.format(tag,id)</span>
-    <span class="c1">#query = &#39;.//{0}[@id=&quot;{1}&quot;]&#39;.format(tag,id)</span>
+<div class="viewcode-block" id="get_by_id"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutxml.get_by_id">[docs]</a><span class="k">def</span> <span class="nf">get_by_id</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;span&#39;</span><span class="p">):</span> <span class="c1"># !HTML!</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    tag: if create</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;.//*[@id=&quot;</span><span class="si">{0}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">elems</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
@@ -180,10 +181,10 @@
         <span class="c1">#print err</span>
 
     <span class="c1">#if tag==&#39;*&#39;:</span>
-    <span class="n">tag</span> <span class="o">=</span> <span class="s1">&#39;span&#39;</span> <span class="c1"># neutral element</span>
+    <span class="c1">#tag = &#39;span&#39; # neutral element</span>
     <span class="n">elem</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">id</span><span class="p">})</span>
     <span class="n">html</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">elem</span>
+    <span class="k">return</span> <span class="n">elem</span></div>
 </pre></div>
 
           </div>

@@ -3,7 +3,7 @@ BODY {
     text-decoration: none;
 }
 
-H1, .LEAD, .KEY {
+H1, H2, H3, .LEAD, .KEY {
     font-family: Helvetica,Arial,SansSerif;
 }
 

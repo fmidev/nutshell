@@ -53,14 +53,16 @@ The demo products can be generated using the command line, for example: ::
   python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
     --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
-  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
-    --product 202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png
+  # 'make' is default action, and --product can be omitted:
+  
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf \
+    202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png
 
-  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
-    --product demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf \
+    demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png
 
-  python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
-    --product 2020050800_demo.cloudy_SIZE=800,600.jpg
+  python3 -m nutshell.nutshell -c nutshell-demo.cnf \
+    2020050800_demo.cloudy_SIZE=800,600.jpg
 
 
 

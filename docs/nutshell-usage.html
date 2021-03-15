@@ -73,10 +73,11 @@ A file in other location is given with <code class="docutils literal"><span clas
 </pre></div>
 </div>
 <p>Simple query using configuration file and product definition:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">nutshell</span> <span class="o">--</span><span class="n">request</span> <span class="s1">&#39;MAKE&#39;</span> \
-  <span class="o">-</span><span class="n">p</span> <span class="mi">201708121500</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mi">800</span><span class="n">_SITES</span><span class="o">=</span><span class="n">fi_BBOX</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="mi">62</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mf">70.</span><span class="n">png</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">nutshell</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">-</span><span class="n">demo</span><span class="o">.</span><span class="n">cnf</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
+<p>In the above example, options <code class="docutils literal"><span class="pre">--make</span></code> and <code class="docutils literal"><span class="pre">--product</span></code> are left implicit: making a product is the default action, and
+free arguments are handled as files ie. product definitions.</p>
 <p>Other commands</p>
 </div>
 <div class="section" id="nutshell-api">
