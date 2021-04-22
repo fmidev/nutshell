@@ -25,6 +25,9 @@ import logging
 logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 # todo: redesign, now overwriting general settings?
 
+
+import secrets # for random hex string secrets.token_hex(12)
+
 #logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
@@ -62,7 +65,7 @@ class Tasklet(shell.Task):
         
         s.path_relative = Path(              s.TIME_DIR, s.PROD_DIR, filename)
         s.path          = Path(s.CACHE_ROOT, s.TIME_DIR, s.PROD_DIR, filename)
-        s.path_tmp      = Path(s.CACHE_ROOT, s.TIME_DIR, s.PROD_DIR, 'tmp', filename)  
+        s.path_tmp      = Path(s.CACHE_ROOT, s.TIME_DIR, s.PROD_DIR, 'tmp-' + secrets.token_hex(4),  filename)  
         s.path_static   = Path(s.CACHE_ROOT,             s.PROD_DIR, filename)
         s.path_latest   = Path(s.CACHE_ROOT,             s.PROD_DIR, filename_latest)
 

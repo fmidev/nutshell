@@ -368,6 +368,12 @@ class ProductServer:
             pr.log.debug("move {0}".format(p))
             p.replace(pr.path.parent.joinpath(p.name))
         
+        pr.log.debug("Removing tmp dir: {0}".format(pr.path_tmp.parent))
+        try:
+            os.rmdir(pr.path_tmp.parent)
+        except Exception as err:
+            pr.log.error("RmDir failed: {0}".format(err))
+            
         pr.set_status(HTTPStatus.OK)
 
 
