@@ -4,11 +4,10 @@
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	 version="2.5" > 
 
-  <!-- Venison conf BEGIN mpeura 2020/08/14 /-->
+  <!-- NutShell conf $USER $HOSTNAME $DATE /-->
 
   <description>NutShell product demo - experimental </description>
   <display-name>NutShell Servlet</display-name>
-
 
   <servlet>
     <servlet-name>NutShell</servlet-name>
