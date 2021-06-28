@@ -24,6 +24,7 @@ function check_variable(){
 
 export HTTP_PREFIX HTML_ROOT CACHE_ROOT TOMCAT_CONF_DIR 
 if [ -e ./nutshell.cnf ]; then
+    echo "# Using ./nutshell.cnf as basis"
     source ./nutshell.cnf
 fi
 
@@ -41,24 +42,44 @@ NUTSHELL_XML=$TOMCAT_CONF_DIR/nutshell.xml
 
 
 mkdir -v --parents $HTML_ROOT
+mkdir -v --parents $HTML_ROOT/template
+mkdir -v --parents $HTML_ROOT/img
 mkdir -v --parents $HTML_ROOT/WEB-INF
 mkdir -v --parents $HTML_ROOT/WEB-INF/lib
-cp -vi {./tomcat8,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
+#cp -vi {./tomcat8,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
+cp -v ./nutshell.cnf ${HTML_ROOT}/
 
+unset -e
+
+echo
+echo "# Configure XML"
+export DATE=`date +'%Y-%m-%y_%H:%M'`
 WEB_XML=$HTML_ROOT/WEB-INF/web.xml
-cp -v $WEB_XML{,.bak} 
-cat ./tomcat8/WEB-INF/web.xml.tpl | envsubst > $WEB_XML
-
-
-pushd $HTML_ROOT/WEB-INF &> /dev/null
-diff web.xml.bak web.xml
-if [ $? != 0 ]; then
-    echo "Notice above changes in $HTML_ROOT/WEB-INF/web.xml"
+cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
+if [ -f $WEB_XML ]; then
+    cp -va $WEB_XML{,.old}
+    pushd $HTML_ROOT/WEB-INF &> /dev/null
+    diff web.xml.old web.xml.new
+    if [ $? != 0 ]; then
+	echo "Notice above changes in $HTML_ROOT/WEB-INF/web"
+    fi
+    mv -v web.xml.new web.xml
+    popd &> /dev/null
 fi
-popd &> /dev/null
 
-echo "# Updating HTML structure"
-rsync -vau --exclude '*~' --exclude '*.HTML' html/  $HTML_ROOT/
+
+echo
+echo "# Updating HTML structure $HTML_ROOT"
+# rsync -vau --exclude '*~' --exclude '*.HTML' html/  $HTML_ROOT/
+pushd html &> /dev/null
+cp -vau favicon.ico nutshell.css $HTML_ROOT/
+cp -vau img/*.png $HTML_ROOT/img/
+cp -vau template/*.html $HTML_ROOT/template/
+ln -vfs template/main.html $HTML_ROOT/index.html
+cp -vau {.,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
+#cp -vauR WEB-INF $HTML_ROOT/
+popd &> /dev/null
+#cp -vau html $HTML_ROOT/
 #pushd ./html &> /dev/null
 #cp -vaux . $HTML_ROOT/
 #mkdir --parents  $HTML_ROOT/template
@@ -66,7 +87,7 @@ rsync -vau --exclude '*~' --exclude '*.HTML' html/  $HTML_ROOT/
 #popd &> /dev/null
 
 echo "# Adding alias link 'nutshell/nutshell -> .', to comply with Python httpd"
-ln -s . /opt/nutshell/nutshell
+ln -s . /opt/nutshell/nutshell  #???
 
 echo "# Creating/linking cache root"
 mkdir -v --parents $CACHE_ROOT/
@@ -88,15 +109,14 @@ else
     ln -sv $PRODUCT_ROOT $PRODUCT_LINK
 fi
 
-#if [ ! -f $TOMCAT_CONF_DIR/ ]; then
 if [ ! -w $NUTSHELL_XML/ ]; then
-    NUTSHELL_XML_NEW=./tomcat8/nutshell.xml.new
+    NUTSHELL_XML_NEW=./html/nutshell.xml.new
     echo "# WARNING: cannot write: $NUTSHELL_XML"
     echo "# WARNING: writing to:   $NUTSHELL_XML_NEW"
     echo "# Consider: diff $NUTSHELL_XML  $NUTSHELL_XML_NEW"
     NUTSHELL_XML=$NUTSHELL_XML_NEW
 fi
 
-cat ./tomcat8/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
+cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
 
 #echo "consider: sudo /etc/init.d/tomcat8  restart"
