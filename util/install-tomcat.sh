@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -e
 
 function goodbye {
     echo "consider: sudo /etc/init.d/tomcat8  restart"
@@ -52,7 +52,7 @@ mkdir -v --parents $HTML_ROOT/WEB-INF/lib
 #cp -vi {./tomcat8,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
 cp -v ./nutshell.cnf ${HTML_ROOT}/
 
-unset -e
+#unset -e
 
 echo
 echo "# Configure XML"
