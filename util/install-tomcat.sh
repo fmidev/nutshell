@@ -61,14 +61,15 @@ WEB_XML=$HTML_ROOT/WEB-INF/web.xml
 cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 if [ -f $WEB_XML ]; then
     cp -va $WEB_XML{,.old}
-    pushd $HTML_ROOT/WEB-INF &> /dev/null
+    pushd $HTML_ROOT/WEB-INF/ &> /dev/null
     diff web.xml.old web.xml.new
     if [ $? != 0 ]; then
 	echo "Notice above changes in $HTML_ROOT/WEB-INF/web"
     fi
-    mv -v web.xml.new web.xml
+    #    mv -v web.xml.new web.xml
     popd &> /dev/null
 fi
+mv -v $WEB_XML.new $WEB_XML
 
 
 echo
