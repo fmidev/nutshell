@@ -79,6 +79,7 @@ cp -vau favicon.ico nutshell.css $HTML_ROOT/
 cp -vau img/*.png $HTML_ROOT/img/
 cp -vau template/*.html $HTML_ROOT/template/
 ln -vfs template/main.html $HTML_ROOT/index.html
+cp -vau {.,$HTML_ROOT}/WEB-INF/web.xml
 cp -vau {.,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
 #cp -vauR WEB-INF $HTML_ROOT/
 popd &> /dev/null
