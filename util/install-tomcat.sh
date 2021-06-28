@@ -26,6 +26,9 @@ export HTTP_PREFIX HTML_ROOT CACHE_ROOT TOMCAT_CONF_DIR
 if [ -e ./nutshell.cnf ]; then
     echo "# Using ./nutshell.cnf as basis"
     source ./nutshell.cnf
+else
+    echo "# Main conf file ./nutshell.cnf missing, run util/configure.sh first"
+    exit 1
 fi
 
 
