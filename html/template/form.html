@@ -13,13 +13,8 @@
           <td class="LEAD">Request</td>
           <td><!-- input type="text" id="request" name="request" value="" /--><label><input type="submit" value="Submit"/></label>
 	    &#xA0;
-            <label><input type="checkbox" name="request" value="DELETE"/>Delete</label>
-            <label><input type="checkbox" name="request" value="GENERATE" checked="true"/>Generate</label>
-            <label><input type="checkbox" name="request" value="MAKE" selected="true"/>Make</label>
-	    <label><input type="radio" name="request" value="STREAM"/>Stream</label>
-            <label><input type="radio" name="request" value="REDIRECT"/>Redirect</label>
-	    <label><input type="radio" name="request" value="CHECK"/>Info page</label>
-	    <label><input type="checkbox" name="request" value="INPUTLIST"/>Input list</label>
+	    <fieldset class="inline"><legend>Main action</legend><label><input type="checkbox" name="request" value="DELETE" title="Only delete"/>Delete</label><br/><label><input type="checkbox" name="request" value="MAKE" title="Generate only if not existing" selected="true"/>Make</label><br/><label><input type="checkbox" name="request" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label><br/></fieldset>
+	    <fieldset class="inline"><legend>Return type</legend><label><input type="radio" name="request" value="STREAM"/>Stream</label><br/><label><input type="radio" name="request" value="REDIRECT" selected="true"/>Redirect</label><br/><label><input type="radio" name="request" value="CHECK"/>Info page</label><label><input type="checkbox" name="request" value="INPUTLIST"/>Input list</label><br/></fieldset>
             <!-- label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label -->
           </td>
         </tr>
@@ -49,8 +44,8 @@
             <input id="product" name="product" list="prods" type="text" size="80" value="201012170840_test.ppmforge.png"/>
             <select id="product_presets" onchange="this.form.product.value = this[selectedIndex].value">
               <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png">Radar Composite</option>
-              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default.png">Radar Composite 2</option>
-              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default_TRANSP2=0.1,0.8.png">Radar Composite 2</option>
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default.png">Radar Composite (color)</option>
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default_TRANSP2=0.1,0.8.png">Radar Composite (color, transp)</option>
               <option value="201708121600_radar.rack.doppler.vis_SITE=fikor_COORD=C_STEP=20__COLORS=white,blue,dark-blue:0_SCALE=2_LINEWIDTH=1_BGCOLOR=white.png">Doppler</option>
               <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
               <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>

@@ -43,3 +43,19 @@ a:hover {
     opacity: 0.5;
     /* text-decoration: underline;*/
 }
+
+fieldset {
+}
+
+fieldset {
+}
+
+fieldset.inline {
+    height:120px;
+    float:left;
+    margin:15px;      
+    radius: 5px;
+    font-family: arial;
+    display: inline;
+}
+
