@@ -56,7 +56,7 @@ cp -v ./nutshell.cnf ${HTML_ROOT}/
 
 echo
 echo "# Configure XML"
-export DATE=`date +'%Y-%m-%y_%H:%M'`
+export DATE=`date +'%Y-%m-%d_%H:%M'`
 WEB_XML=$HTML_ROOT/WEB-INF/web.xml
 cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 if [ -f $WEB_XML ]; then
