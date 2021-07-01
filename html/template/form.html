@@ -11,11 +11,31 @@
         </tr>
         <tr>
           <td class="LEAD">Request</td>
-          <td><!-- input type="text" id="request" name="request" value="" /--><label><input type="submit" value="Submit"/></label>
-	    &#xA0;
-	    <fieldset class="inline"><legend>Main action</legend><label><input type="checkbox" name="request" value="DELETE" title="Only delete"/>Delete</label><br/><label><input type="checkbox" name="request" value="MAKE" title="Generate only if not existing" selected="true"/>Make</label><br/><label><input type="checkbox" name="request" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label><br/></fieldset>
-	    <fieldset class="inline"><legend>Return type</legend><label><input type="radio" name="request" value="STREAM"/>Stream</label><br/><label><input type="radio" name="request" value="REDIRECT" selected="true"/>Redirect</label><br/><label><input type="radio" name="request" value="CHECK"/>Info page</label><label><input type="checkbox" name="request" value="INPUTLIST"/>Input list</label><br/></fieldset>
+          <td>
+            <!-- NOTE: originally consisted of "request" widgets only /-->
+            <fieldset class="inline">
+              <legend>Main action</legend>
+              <label><input type="radio" name="action" value="DELETE" title="Only delete"/>Delete</label>
+              <br/>
+              <label><input type="radio" name="action" value="MAKE" title="Generate only if not existing" selected="true"/>Make</label>
+              <br/>
+              <label><input type="radio" name="action" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label>
+              <br/>
+            </fieldset>
+            <fieldset class="inline">
+              <legend>Return type</legend>
+              <label><input type="radio" name="output" value="STREAM"/>Stream</label>
+              <br/>
+              <label><input type="radio" name="output" value="REDIRECT" selected="true"/>Redirect</label>
+              <br/>
+              <label><input type="radio" name="output" value="CHECK"/>Info page</label>
+              <label><input type="checkbox" name="output" value="INPUTLIST"/>Input list</label>
+              <br/>
+            </fieldset>
             <!-- label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label -->
+            <fieldset class="inline"><label><input type="submit" value="Submit"/></label>
+	      &#xA0;
+	    </fieldset>
           </td>
         </tr>
         <!-- tr>

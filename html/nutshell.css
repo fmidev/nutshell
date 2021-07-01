@@ -47,15 +47,22 @@ a:hover {
 fieldset {
 }
 
-fieldset {
+legend, label {
+    font-family: Helvetica,Arial,SansSerif;
 }
 
-fieldset.inline {
-    height:120px;
-    float:left;
-    margin:15px;      
-    radius: 5px;
-    font-family: arial;
+legend {
+    font-weight: bold;
+    font-size: small;
+}
+
+.inline {
     display: inline;
+    /* height:120px; */
+    /* float:left; */
+    margin: 5px;
+    border-width: 3px;
+    border-radius: 10px;
+   
 }
 
