@@ -68,7 +68,7 @@ legend {
 }
 
 .error {
-    color: red;
+    color: darkred;
     font-size: x-large;
     /* margin: 2px; */
     /* border: 1px solid black; */
