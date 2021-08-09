@@ -364,8 +364,11 @@ class ProductServer:
 
         globber = "{0}*".format(pr.path_tmp.stem) # note: dot omitten on purpose
         pr.log.debug("Move remaiming (auxiliary) files from tmp: {0}".format(globber))
+        #pr.log.warn(pr.path_tmp.parent)
+        #pr.log.warn(pr.path_tmp.parent.glob(globber))
         for p in pr.path_tmp.parent.glob(globber):
-            pr.log.debug("move {0}".format(p))
+            pr.log.debug("Moving {0}".format(p))
+            #pr.log.debug("move {0}".format(p))
             p.replace(pr.path.parent.joinpath(p.name))
         
         pr.log.debug("Removing tmp dir: {0}".format(pr.path_tmp.parent))
