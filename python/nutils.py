@@ -12,7 +12,9 @@ __version__ = '0.1'
 __author__ = 'Markus.Peura@fmi.fi'
 
 import re
+import os
 #from pathlib import Path
+from pathlib import Path
 
 
 def read_conf(path, result = None): 
@@ -118,6 +120,32 @@ def set_entries(obj, entries=None, lenient = True):
         elif not lenient:
             raise KeyError("Object has no key '{0}'".format(i))
             # print '# Warning: key not found for assignment: {0}="{1}"'.format(i, result[i])
+
+
+
+def make_subdirs(rootdir, subdir=None, mode=0o755):
+    """Creates a writable directory, if non-existent
+        :param rootdir[pathlike]: 
+        :param subdir[str]: 
+        currently, uses mask 777
+        """
+
+    # Note: https://docs.python.org/3/library/os.html
+    # version 3.7: The mode argument no longer affects the file permission bits of newly-created intermediate-level directories
+    
+    if (not subdir):
+        subdir = rootdir
+        rootdir = os.curdir
+
+    #print(rootdir, subdir)
+    m = umask(0)
+    p = Path(rootdir)
+    for i in str(subdir).split('/'):
+        p = p.joinpath(i)
+        p.mkdir(mode, True, True)
+    umask(m) # needed?
+    return p 
+    
 
 
 #class Log:

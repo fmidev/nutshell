@@ -82,7 +82,7 @@ class ProductServer:
         """ Expand relative path to absolute, optionally check that exists. """ 
         #if (hasattr(self, dirname)):
         path = Path(getattr(self, dirname)).absolute()
-        self.logger.warn('  {0} =>  {1}'.format(dirname, path))
+        self.logger.warning('  {0} =>  {1}'.format(dirname, path))
         if (verify) and not (path.exists()):
             raise FileNotFoundError(__name__ + str(path))
         setattr(self, dirname, str(path)) # TODO -> Path obj
@@ -158,13 +158,21 @@ class ProductServer:
 
     # Generalize?
     def ensure_output_dir(self, outdir):
-        """Creates a writable directory, if non-existent
         """
+        Creates a writable directory, if non-existent
+
+        Currently, uses mask 777
+        """
+
+        # Note: https://docs.python.org/3/library/os.html
+        # version 3.7: The mode argument no longer affects the file permission bits of newly-created intermediate-level directories
+
         try:
-            original_umask = os.umask(0)
-            os.makedirs(str(outdir), 0o775, True)
+            m = os.umask(0)
+            #os.makedirs(str(outdir), 0o775, True)
+            os.makedirs(outdir, 0o777, True)
         finally:
-            os.umask(original_umask)
+            os.umask(m)
         return outdir
 
 #        
@@ -245,10 +253,10 @@ class ProductServer:
                 pr.log.info('File found (age {1}mins, size {2}): {0}'.format(pr.path, age_mins, stat.st_size))
                 pr.set_status(HTTPStatus.OK)
             elif (age_mins > 10):
-                pr.log.warn("Empty file found, but over 10 mins old...")
+                pr.log.warning("Empty file found, but over 10 mins old...")
                 # set status? WAIT?
             else:    
-                pr.log.warn('BUSY (empty file, under generation?)') # TODO raise (prevent deletion)
+                pr.log.warning('BUSY (empty file, under generation?)') # TODO raise (prevent deletion)
                 pr.product_obj  = '' # BUSY
                 total_time = 0
                 for i in range(1,10):
@@ -264,7 +272,7 @@ class ProductServer:
                         time.sleep(i)
 
                     if (total_time > self.TIMEOUT):
-                        pr.log.warn("timeout ({0}s) exceeded".format(self.TIMEOUT))
+                        pr.log.warning("timeout ({0}s) exceeded".format(self.TIMEOUT))
                         break
                 
                 pr.set_status(HTTPStatus.REQUEST_TIMEOUT)
@@ -273,7 +281,7 @@ class ProductServer:
         else:
             pr.log.debug('File not found: {0}'.format(pr.path))
             if (pr.product_info.TIMESTAMP == 'LATEST'):
-                pr.log.warn("LATEST-file not found (cannot generate it)")
+                pr.log.warning("LATEST-file not found (cannot generate it)")
                 pr.set_status(HTTPStatus.NOT_FOUND) 
                 # return 
         
@@ -334,7 +342,7 @@ class ProductServer:
         try:
             pr.run2(directives)
         except KeyboardInterrupt:
-            pr.log.warn('Hey, HEY! Keyboard interrupt on main level')
+            pr.log.warning('Hey, HEY! Keyboard interrupt on main level')
             pr.status = HTTPStatus.REQUEST_TIMEOUT
             pr.remove_files()
             raise
@@ -364,8 +372,8 @@ class ProductServer:
 
         globber = "{0}*".format(pr.path_tmp.stem) # note: dot omitten on purpose
         pr.log.debug("Move remaiming (auxiliary) files from tmp: {0}".format(globber))
-        #pr.log.warn(pr.path_tmp.parent)
-        #pr.log.warn(pr.path_tmp.parent.glob(globber))
+        #pr.log.warning(pr.path_tmp.parent)
+        #pr.log.warning(pr.path_tmp.parent.glob(globber))
         for p in pr.path_tmp.parent.glob(globber):
             pr.log.debug("Moving {0}".format(p))
             #pr.log.debug("move {0}".format(p))
@@ -456,9 +464,9 @@ class ProductServer:
             pr.log.info("NOT Making... {0}".format(pr.path.name)) 
 
         if (pr.status != HTTPStatus.OK):
-            pr.log.warn("Make status: {0}".format(pr.status)) 
-            pr.log.warn(pr.status) 
-            pr.log.warn("Make failed: {0}".format(pr.path)) 
+            pr.log.warning("Make status: {0}".format(pr.status)) 
+            pr.log.warning(pr.status) 
+            pr.log.warning("Make failed: {0}".format(pr.path)) 
             return pr              
             
           
@@ -476,7 +484,7 @@ class ProductServer:
                 
         except Exception as err:
             pr.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
-            pr.log.warn("Routine linking file failed: {0}".format(err))               
+            pr.log.warning("Routine linking file failed: {0}".format(err))               
 
 
         try:
@@ -522,7 +530,7 @@ class ProductServer:
 
         except Exception as err:
             pr.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
-            pr.log.warn("Copying/moving/linking file failed: {0}".format(err))               
+            pr.log.warning("Copying/moving/linking file failed: {0}".format(err))               
 
         pr.log.info('Success: {0}'.format(pr.path))
               
@@ -728,7 +736,7 @@ if __name__ == '__main__':
     
             if ('INPUTS' in actions): # or (options.VERBOSE > 6):
                 #nutils.print_dict(product_request.inputs)
-                logger.warn("Inputs:")
+                logger.warning("Inputs:")
                 logger.info(product_request.inputs)
         
             logger.info(product_request.status)    

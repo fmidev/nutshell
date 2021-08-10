@@ -112,7 +112,7 @@ PKG_ROOT=`pwd -P`
 
 #echo $PKG_ROOT
 #DIR=`pwd -P`
-ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for NutShell Python files:"
+ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for NutShell files:"
 check_dir_syntax NUTSHELL_DIR
 ls -d $NUTSHELL_DIR
 
