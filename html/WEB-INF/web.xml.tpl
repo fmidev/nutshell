@@ -15,11 +15,16 @@
     <init-param>
       <!-- For nutshell.ProductServer -->
       <param-name>confDir</param-name>
+      <!-- param-value>${TOMCAT_CONF_DIR}</param-value -->
       <param-value>${HTML_ROOT}</param-value>
     </init-param>
     <init-param>
       <param-name>htmlRoot</param-name>
       <param-value>${HTML_ROOT}</param-value>
+    </init-param>
+    <init-param>
+      <param-name>installDate</param-name>
+      <param-value>${DATE}</param-value>
     </init-param>
   </servlet>
 

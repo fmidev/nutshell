@@ -3,12 +3,14 @@
 # set -e
 
 function goodbye {
-    echo "consider: sudo /etc/init.d/tomcat8  restart"
+    echo "# Consider Tomcat restart, like:  sudo /etc/init.d/tomcat8 restart"
     echo "# Exiting installation"
 }
 trap goodbye EXIT
 
 trap "echo virhe" ILL
+
+
 
 function check_variable(){
     local var_name=$1
@@ -31,6 +33,16 @@ else
     exit 1
 fi
 
+answer='y'
+read -e  -i "$answer" -p "Install NutShell (NutLet.jar) to $HTML_ROOT [Y/n]? " answer
+echo
+
+if [ ${answer,} != 'y' ]; then
+    echo "# Installation quitted"
+    exit 0
+fi
+
+
 
 check_variable HTTP_PREFIX "/nutshell" "Give prefix for all HTTP requests for NutShell"
 
@@ -51,12 +63,12 @@ mkdir -v --parents $HTML_ROOT/WEB-INF
 mkdir -v --parents $HTML_ROOT/WEB-INF/lib
 #cp -vi {./tomcat8,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
 cp -v ./nutshell.cnf ${HTML_ROOT}/
-
+echo
 #unset -e
 
-echo
+
 echo "# Configure XML"
-export DATE=`date +'%Y-%m-%d_%H:%M'`
+export DATE=`date +'%Y-%m-%d %H:%M'`
 WEB_XML=$HTML_ROOT/WEB-INF/web.xml
 cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 if [ -f $WEB_XML ]; then
@@ -70,9 +82,8 @@ if [ -f $WEB_XML ]; then
     popd &> /dev/null
 fi
 mv -v $WEB_XML.new $WEB_XML
-
-
 echo
+
 echo "# Updating HTML structure $HTML_ROOT"
 # rsync -vau --exclude '*~' --exclude '*.HTML' html/  $HTML_ROOT/
 pushd html &> /dev/null
@@ -82,21 +93,17 @@ cp -vau template/*.html $HTML_ROOT/template/
 ln -vfs template/main.html $HTML_ROOT/index.html
 cp -vau {.,$HTML_ROOT}/WEB-INF/web.xml
 cp -vau {.,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
-#cp -vauR WEB-INF $HTML_ROOT/
 popd &> /dev/null
-#cp -vau html $HTML_ROOT/
-#pushd ./html &> /dev/null
-#cp -vaux . $HTML_ROOT/
-#mkdir --parents  $HTML_ROOT/template
-#cp -vau template/*.html $HTML_ROOT/template/
-#popd &> /dev/null
+echo
 
-echo "# Adding alias link 'nutshell/nutshell -> .', to comply with Python httpd"
+echo "# Adding alias link 'nutshell/nutshell -> .', for optional Python httpd"
 ln -s . /opt/nutshell/nutshell  #???
+echo
 
 echo "# Creating/linking cache root"
 mkdir -v --parents $CACHE_ROOT/
 chmod -v    a+rwsx $CACHE_ROOT/
+echo
 
 echo "# Linking CACHE_ROOT under HTML_ROOT"
 CACHE_LINK=$HTML_ROOT/cache
@@ -105,6 +112,7 @@ if [ -e $CACHE_LINK ]; then
 else
     ln -sv $CACHE_ROOT $CACHE_LINK
 fi
+echo
 
 echo "# Optional: Linking PRODUCT_ROOT under HTML_ROOT"
 PRODUCT_LINK=$HTML_ROOT/products
@@ -113,15 +121,17 @@ if [ -e $PRODUCT_LINK ]; then
 else
     ln -sv $PRODUCT_ROOT $PRODUCT_LINK
 fi
+echo
 
-if [ ! -w $NUTSHELL_XML/ ]; then
+if [ -w $NUTSHELL_XML/ ]; then
+    cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
+else
     NUTSHELL_XML_NEW=./html/nutshell.xml.new
-    echo "# WARNING: cannot write: $NUTSHELL_XML"
-    echo "# WARNING: writing to:   $NUTSHELL_XML_NEW"
+    echo "# WARNING: cannot write directly to: $NUTSHELL_XML"
+    echo "# WARNING: writing a draft to:   $NUTSHELL_XML_NEW"
     echo "# Consider: diff $NUTSHELL_XML  $NUTSHELL_XML_NEW"
     NUTSHELL_XML=$NUTSHELL_XML_NEW
 fi
-
-cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
+echo
 
 #echo "consider: sudo /etc/init.d/tomcat8  restart"
