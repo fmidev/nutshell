@@ -124,7 +124,7 @@ class ProductServer:
             self.logger.error("Conf file not found: " + conffile)
             raise FileNotFoundError("Conf file not found: ", conffile)
         else:
-            self.logger.log("Local conf file not found (ok): " + conffile)
+            self.logger.debug("Local conf file not found (ok): " + conffile)
             #print ("Conf file not found: ", conffile)  
         return False
 
