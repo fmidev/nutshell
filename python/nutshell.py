@@ -102,11 +102,18 @@ class ProductServer:
         # self._init_dir('HTML_ROOT') # not here!
         # self._init_dir('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
         
-    def read_conf(self, conffile = 'nutshell.cnf', strict=True):
+    #def read_conf(self, conffile = 'nutshell.cnf', strict=True):
+    def read_conf(self, conffile = None):
         """
         Read given conf file, if it exists. Raise error, if strict.
         The entries are copied to respective member of self.
         """
+
+        strict = True
+        if not conffile:
+            conffile = 'nutshell.cnf'
+            strict   = False
+            
         if (os.path.exists(conffile)):
             self.logger.debug("reading conf file {0} ".format(conffile))
             result = nutils.read_conf(conffile)
@@ -117,7 +124,7 @@ class ProductServer:
             self.logger.error("Conf file not found: " + conffile)
             raise FileNotFoundError("Conf file not found: ", conffile)
         else:
-            self.logger.warning("Conf file not found: " + conffile)
+            self.logger.log("Local conf file not found (ok): " + conffile)
             #print ("Conf file not found: ", conffile)  
         return False
 
@@ -684,7 +691,7 @@ if __name__ == '__main__':
     if (options.CONF):
         product_server.read_conf(options.CONF)
     else:
-        if not product_server.read_conf("nutshell.cnf", False):  # Local, lenient
+        if not product_server.read_conf(): # "nutshell.cnf", False):  # Local, lenient
             if NUTSHELL_DIR:
                 logger.warning('Reading ' + NUTSHELL_DIR + "/nutshell.cnf")
                 product_server.read_conf(NUTSHELL_DIR + "/nutshell.cnf", False)
