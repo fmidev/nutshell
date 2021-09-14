@@ -574,6 +574,11 @@ class ProductServer:
                             #default=False,
                             help="Make product, same as -r MAKE")
     
+        parser.add_argument("-g", "--generate",
+                            dest="GENERATE",
+                            action="store_true",
+                            help="Generate product, same as -r DELETE,MAKE")
+    
         parser.add_argument("-t", "--timeout",
                             dest="TIMEOUT",
                             default=90,
@@ -668,8 +673,8 @@ if __name__ == '__main__':
     if (options.PRODUCT):
         options.PRODUCTS.append(options.PRODUCT)
         
-    if (not options.PRODUCT):
-        logger.warning('Product not defined')
+    #if (not options.PRODUCT):
+    #    logger.warning('Product not defined')
     #    product_info.set_product(filename = options.PRODUCT)
     #else:
     logger.warning('Products: {0}'.format(options.PRODUCTS))
@@ -695,7 +700,7 @@ if __name__ == '__main__':
         actions = nutils.read_conf_text(options.REQUEST.split(',')) # No values using ','?
     
     # , 'TEST'
-    for i in ['DELETE', 'MAKE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
+    for i in ['DELETE', 'MAKE', 'GENERATE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
         value = getattr(options, i)
         if (value): # Boolean ok, no numeric args expected, especially not zero
             actions[i] = value
