@@ -694,7 +694,7 @@ if __name__ == '__main__':
         if not product_server.read_conf(): # "nutshell.cnf", False):  # Local, lenient
             if NUTSHELL_DIR:
                 logger.warning('Reading ' + NUTSHELL_DIR + "/nutshell.cnf")
-                product_server.read_conf(NUTSHELL_DIR + "/nutshell.cnf", False)
+                product_server.read_conf(NUTSHELL_DIR + "/nutshell.cnf") #, False)
                 
     #if (options.VERBOSE > 4):
     #nutils.print_dict(product_server.get_status())
