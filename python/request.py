@@ -76,7 +76,7 @@ class Tasklet(shell.Task):
     #MEMBER_ENV_RE = re.compile("[A-Z]+[A-Z_]*")
 
     def get_param_env(self):
-        return nutils.get_entries(self, product.Info.MEMBER_ENV_RE, str)        
+        return nutils.get_entries(self, product.Info._MEMBER_ENV_RE, str)        
         
     def run2(self, directives = None):
             super().run(str(self.path)+'-'+self.script.name, # short

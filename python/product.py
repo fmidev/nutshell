@@ -277,7 +277,7 @@ class Info:
                 for e in m.group(5).split('_'): #self.PARAMS:
                     entry = e.split('=')
                     if (entry[0] == ''):
-                        print ("INPUT_PARAMETERS => {0}".format(self.PARAMETERS))
+                        print ("# INPUT_PARAMETERS => {0}".format(self.PARAMETERS))
                         self.INPUT_PARAMETERS = self.PARAMETERS                        
                         self.PARAMETERS = {}
                     else:
@@ -345,10 +345,10 @@ class Info:
         return("_".join(body) + '.' + self.EXTENSION) #FORMAT)
  
     #MEMBER_ENV_RE = re.compile("[A-Z]+[A-Z_]*")
-    MEMBER_ENV_RE = re.compile("[A-Z]+[A-Z_]*")
+    _MEMBER_ENV_RE = re.compile("[A-Z]+[A-Z_]*")
 
     def get_param_env(self):
-        env = nutils.get_entries(self, self.MEMBER_ENV_RE, str)   #Tasklet.MEMBER_ENV_RE
+        env = nutils.get_entries(self, self._MEMBER_ENV_RE, str)   #Tasklet.MEMBER_ENV_RE
         env['PARAMETERS'] = '' # overwrite kludge
         if (self.INPUT_PARAMETERS):
             env.update(self.INPUT_PARAMETERS) 
@@ -388,12 +388,7 @@ class Info:
                             action="store_true",
                             help="Same as --log_level 0 : print all status messages")
 
-        #        parser.add_argument("-f", "--product_filename", metavar="<filename>",
-        #                            dest="OUTFILE",
-        #                            default="",
-        #                            help="product to be handled")
-
-        parser.add_argument("-p", "--product", metavar="[<filename>|<id>]",
+        parser.add_argument("-p", "--product", metavar="filename",
                             dest="PRODUCT",
                             default="",
                             help="product to be handled")

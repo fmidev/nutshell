@@ -115,7 +115,7 @@ class ProductServer:
             strict   = False
             
         if (os.path.exists(conffile)):
-            self.logger.debug("reading conf file {0} ".format(conffile))
+            self.logger.info("Reading conf file {0} ".format(conffile))
             result = nutils.read_conf(conffile)
             # print(result)
             nutils.set_entries(self, result)
@@ -334,7 +334,7 @@ class ProductServer:
         pr.log.debug('Querying input list (dependencies)')
         input_info = pr.get_input_list(directives)
         if (input_info.returncode != 0):
-            pr.log.debug('Input scipt problem, return code: {0}'.format(input_info.returncode))
+            pr.log.debug('Input script problem, return code: {0}'.format(input_info.returncode))
             if (not TEST):
                 pr.set_status(HTTPStatus.PRECONDITION_FAILED)
                 pr.remove_files()
@@ -604,18 +604,15 @@ if __name__ == '__main__':
             
     product_server = ProductServer()
 
-    #print()
-    #logger = logging.getLogger(__name__ + str(++product_server.counter))
     logger = logging.getLogger('NutShell')
-    #logger.setLevel(30)
     logger.setLevel(logging.INFO)
     #logger.debug("parsing arguments")
-    
-    parser = ProductServer.get_arg_parser() # ProductInfo.get_arg_parser(parser)
+
+    # ProductInfo.get_arg_parser(parser)
+    parser = ProductServer.get_arg_parser() 
 
     parser.add_argument("PRODUCTS",
                         nargs='*',
-                        #dest="PRODaUCTS",
                         help="Products to be requested")
 
     parser.add_argument("-S", "--shortcut",
@@ -650,10 +647,7 @@ if __name__ == '__main__':
                         help="additional instructions: LOG,LINK,LATEST")
     
     
-    
-    #(options, args) = parser.parse_args()
     options = parser.parse_args()
-    #logger.warning(*options.__dict__)  
     
     if (not options):
         parser.print_help()
@@ -665,7 +659,6 @@ if __name__ == '__main__':
         
     if (options.LOG_LEVEL):
         if hasattr(logging, options.LOG_LEVEL):
-            #nutils.VERBOSITY_LEVELS[options.VERBOSE]
             logger.setLevel(getattr(logging, options.LOG_LEVEL))
         else:
             logger.setLevel(int(options.LOG_LEVEL))
@@ -680,11 +673,13 @@ if __name__ == '__main__':
     if (options.PRODUCT):
         options.PRODUCTS.append(options.PRODUCT)
         
-    #if (not options.PRODUCT):
-    #    logger.warning('Product not defined')
-    #    product_info.set_product(filename = options.PRODUCT)
-    #else:
-    logger.warning('Products: {0}'.format(options.PRODUCTS))
+    if (not options.PRODUCTS):
+        logger.debug('Product(s) not defined')
+        parser.print_help()
+        exit(1)
+
+        
+    logger.info('Products: {0}'.format(options.PRODUCTS))
     
         
 
@@ -693,11 +688,9 @@ if __name__ == '__main__':
     else:
         if not product_server.read_conf(): # "nutshell.cnf", False):  # Local, lenient
             if NUTSHELL_DIR:
-                logger.warning('Reading ' + NUTSHELL_DIR + "/nutshell.cnf")
+                #logger.info('Reading ' + NUTSHELL_DIR + "/nutshell.cnf")
                 product_server.read_conf(NUTSHELL_DIR + "/nutshell.cnf") #, False)
                 
-    #if (options.VERBOSE > 4):
-    #nutils.print_dict(product_server.get_status())
     logger.debug(product_server.get_status())
      
     actions = {} # []
@@ -711,13 +704,10 @@ if __name__ == '__main__':
         value = getattr(options, i)
         if (value): # Boolean ok, no numeric args expected, especially not zero
             actions[i] = value
-#       #if (getattr(options, i)):
-        #    actions[i] = True  # Bool ok, not exported to env
     
-
     if (not actions):
         actions['MAKE'] = True
-        #actions.append('MAKE')
+
 
     directives = {}
     if (options.DIRECTIVES):
