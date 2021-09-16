@@ -711,10 +711,12 @@ if __name__ == '__main__':
     logger.info('Requests:   {0}'.format(actions))
 
     directives = {}
+    if (options.DIRECTIVES):
+        # directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
+        # directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
         directives =  nutils.read_conf_text(options.DIRECTIVES.split('|')) 
         logger.info('Directives: {0}'.format(directives))
 
-    
     
     fail=False
     
