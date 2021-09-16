@@ -644,7 +644,7 @@ if __name__ == '__main__':
     parser.add_argument("-D", "--directives",
                         dest="DIRECTIVES",
                         default='',
-                        help="additional instructions: LOG,LINK,LATEST")
+                        help="pipe-separated instructions: TILE|LATEST")
     
     
     options = parser.parse_args()
@@ -708,21 +708,13 @@ if __name__ == '__main__':
     if (not actions):
         actions['MAKE'] = True
 
+    logger.info('Requests:   {0}'.format(actions))
 
     directives = {}
-    if (options.DIRECTIVES):
-        # directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
-        # directives = nutils.read_conf_text(options.DIRECTIVES.split(',')) # whattabout comma in arg?
         directives =  nutils.read_conf_text(options.DIRECTIVES.split('|')) 
-        print(directives)
+        logger.info('Directives: {0}'.format(directives))
 
-#    for i in ['MOVE', 'COPY']:
-#        value = getattr(options, i)
-#        if (value):
-#            actions[i] = value
-#            #actions.append(i)
-    logger.info('Requests:   {0}'.format(actions))
-    logger.info('Directives: {0}'.format(directives))
+    
     
     fail=False
     
