@@ -16,6 +16,17 @@ NutShell delegates making the files to independent _product generators_
 
 ### Interfaces
 
+## Java version
+
+* Command line:
+`java -cp Nutlet.jar nutshell.ProductServer --config nutshell/nutshell.cnf --request MAKE --product 201708121600_my.product_SIZE=800x800.png`
+* HTTP server:
+`http://127.0.0.1:8080/nutshell/NutShell?action=GENERATE&output=STREAM&product=201708121600_my.product_SIZE=800x800.png`
+* Java API:
+`Task task = productServer.new Task("201708121600_my.product_SIZE=800x800.png", actions.value, null); task.start()`
+
+## Python version
+
 * Command line:
 `python3 -m nutshell.nutshell -c nutshell/nutshell.cnf --request MAKE --product 201708121600_my.product_SIZE=800x800.png`
 * HTTP server:
