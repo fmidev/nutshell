@@ -2,7 +2,6 @@ package nutshell;
 
 import sun.misc.Signal;
 
-import javax.swing.*;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -159,6 +158,7 @@ public class ProductServer { //extends Cache {
 
 		/**
 		 *  HTTP only: client will be redirected to URL of generated product
+		 *  Strictly speaking - needs no file, but a result (file or object).
 		 *
 		 * @see Nutlet#doGet
 		 */
@@ -193,6 +193,10 @@ public class ProductServer { //extends Cache {
 		 * @see Nutlet#doGet
 		*/
 		public static final int STREAM = 256;
+
+		public boolean isEmpty() {
+			return (value == 0);
+		}
 
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 512;
@@ -274,7 +278,6 @@ public class ProductServer { //extends Cache {
 					logFile.createNewFile();
 					FileOutputStream fw = new FileOutputStream(this.logFile);
 					this.log.printStream = new PrintStream(fw);
-					this.log.warn("started");
 					//System.err.println("LOG FILE:" + logFile.getAbsolutePath());
 				} catch (IOException e) {
 					e.printStackTrace(this.log.printStream);
@@ -283,7 +286,8 @@ public class ProductServer { //extends Cache {
 				// Close upon destruction of this Task?
 			}
 
-			this.log.debug(this.toString());
+			this.log.debug("started" + this.actions.toString() + " " + this.toString());
+			//this.log.debug(this.toString());
 			this.result = null;
 	
 		}
@@ -292,6 +296,20 @@ public class ProductServer { //extends Cache {
 			return "";
 			//return String.format("%s-%d-", getClass().getSimpleName(), getId());
 		}
+
+		/*
+		public void setDirectives(Map<String, String> map){
+			for (Map.Entry<String,String> entry : map.entrySet() ){ //parameters.entrySet()) {
+				String key = entry.getKey().toString();
+				if (key.equals(key.toUpperCase())){
+					String value = entry.getValue();
+					if ((value != null) && (!value.isEmpty()))
+						directives.put(key, value);
+				}
+			}
+		}
+		 */
+
 
 		public void setDirectives(Map<String,String[]> map){
 			for (Map.Entry<String,String[]> entry : map.entrySet() ){ //parameters.entrySet()) {
@@ -315,6 +333,7 @@ public class ProductServer { //extends Cache {
 			return file.delete();
 		}
 
+
 		/** Runs a thread generating and/or otherways handling a product
 		 *
 		 * @see #execute()
@@ -325,8 +344,17 @@ public class ProductServer { //extends Cache {
 				Signal.handle(new Signal("INT"), this::handleInterrupt);
 				//handle(this);
 				execute();
-			} catch (InterruptedException | IndexedException e) {
+			}
+			catch (InterruptedException e) {
+				//this.log.status
+				this.log.warn("Interrupted");
 				e.printStackTrace(log.printStream);
+			}
+			catch (IndexedException e) {
+				this.log.warn("NutShell indexed exception --->");
+				//e.printStackTrace(log.printStream);
+				this.log.error(e.getMessage());
+				this.log.warn("NutShell indexed exception <---");
 			}
 		}
 
@@ -395,9 +423,20 @@ public class ProductServer { //extends Cache {
 
 				// if (this.hasAction(this.MEMORY)) { load(this.outputPath ...)
 
+				// WHen making a file, default output action is REDIRECT.
+				/*
+				if (this.actions.involves(Actions.MAKE && ! this.actions.involves(Actions.CHECK|Actions.STREAM|Actions.REDIRECT))){
+					this.actions.add(Actions.REDIRECT);
+				}
+
+				 */
+
 				if (this.actions.isSet(Actions.DELETE)) {
 					// TODO: delete only after waiting?
 					this.delete(fileFinal);
+					if (!this.actions.involves(Actions.MAKE)){
+						this.actions.add(Actions.CHECK);
+					}
 				}
 				else if (this.actions.isSet(Actions.FILE)){
 					if (queryFile(fileFinal,  90, this.log)){
@@ -469,12 +508,11 @@ public class ProductServer { //extends Cache {
 					//System.err.println("## " + this.inputs);
 				}
 				catch (Exception e){
-					this.log.warn("Input list retrieval failed: ");
+					this.log.warn("Input list retrieval failed");
 					//e.printStackTrace(this.log.printStream);
 					this.log.error(e.getMessage());
-					//this.actions.set(Actions.CHECK); // at least remove GENERATE
-					//return;
-					throw e;
+					this.log.warn("Removing GENERATE from actions");
+					this.actions.remove(Actions.GENERATE);
 				}
 				//this.inputs = generator.getInputList(this.info, this.log.printStream); // this.getParamEnv(), log.printStream);
 				// DEBUG this.setStatus(HttpServletResponse.SC_OK, "Determining input list for: " + this.info.PRODUCT_ID);
@@ -483,28 +521,12 @@ public class ProductServer { //extends Cache {
 
 					/// Assume Generator uses input similar to output (File or Object)
 					final int inputActions = this.actions.value & (Actions.MEMORY | Actions.FILE);
-					//System.err.println("inputActions: " + inputActions);
-					Map<String,Task> tasks = new HashMap<>();
 
-					for (Entry<String,String> input : this.inputs.entrySet()){
-						try {
-							String key = input.getKey();
-							// Log subLog = this.log.child(key);
-							Task inputTask = new Task(input.getValue(), inputActions, null);
-							tasks.put(key, inputTask);
-							this.log.note(String.format("Starting thread: %d %s(%s)", inputTask.getId(), key, inputTask.info.PRODUCT_ID));
-							inputTask.start();
-						} catch (ParseException e) {
-							/// TODO: is it a fatal error if a product defines its input wrong?
-							this.log.error(e.getLocalizedMessage()); // RETURN?
-						}
-					}
+					Map<String,Task> tasks = executeMany(this.inputs, inputActions, null, this.log);
 
 					for (Entry<String,Task> entry : tasks.entrySet()){
 						String key = entry.getKey();
 						Task inputTask = entry.getValue();
-						inputTask.join();
-						this.log.note(String.format("Finished thread: %d ", inputTask.getId()));
 						if (inputTask.result != null){
 							this.retrievedInputs.put(key, inputTask.result.toString());
 						}
@@ -516,7 +538,6 @@ public class ProductServer { //extends Cache {
 
 					try {
 						generator.generate(this);
-						//generator.generateFile(this.info, this.retrievedInputs, dummyContext, this.outputPath, this.log.printStream);
 					}
 					catch (IndexedException e) {
 						e.printStackTrace(this.log.printStream);
@@ -534,11 +555,11 @@ public class ProductServer { //extends Cache {
 
 					if (fileTmp.length() > 0){
 						// this.info.getFilename()
-						this.log.debug("OK, generator produced file: " + fileTmp.getName());
+						this.log.debug("OK, generator produced tmp file: " + fileTmp.getName());
 						this.move(fileTmp, fileFinal);
 					}
 					else {
-						this.log.error("Generator failed in producing file: " + fileTmp.getName());
+						this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
 						try {
 							this.delete(fileFinal);
 							this.delete(fileTmp);
@@ -567,8 +588,7 @@ public class ProductServer { //extends Cache {
 					// TODO: save file (of JavaGenerator)
 					this.log.error("Failed in generating: " + fileFinal.getAbsolutePath());
 					this.delete(fileFinal);
-					// TODO: delete
-					return; // false;
+					return;
 				}
 			}
 			else {
@@ -631,7 +651,11 @@ public class ProductServer { //extends Cache {
 
 		@Override
 		public String toString() {
-			return String.format("%s?%s", this.outputPath.getFileName(), actions.toString());
+			if (directives.isEmpty())
+				return String.format("%s", this.outputPath.getFileName());
+			else
+				return String.format("%s?%s", this.outputPath.getFileName(), directives.toString());
+			//return String.format("%s?%s", this.outputPath.getFileName(), actions.toString());
 			//return MapUtils.getMap(this).toString();
 		}
 
@@ -639,7 +663,7 @@ public class ProductServer { //extends Cache {
 		
 		public Object result;
 
-	}
+	}  // Task
 
 
 
@@ -669,6 +693,67 @@ public class ProductServer { //extends Cache {
 
 	}
 
+	/** Run a set of tasks in parallel.
+	 *
+	 * This function is called by
+	 * 1) tasks, to obtain inputs
+	 * 2) demo (main function)
+	 *
+	 * @param taskRequests
+	 * @param actions
+	 * @param log
+	 * @return - the completed set of tasks, including failed ones.
+	 *
+	 */
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, Log log){
+
+		Map<String,Task> tasks = new HashMap<>();
+		log.note("Inits (" + tasks.size() + ") tasks ");
+
+		for (Entry<String,String> input : taskRequests.entrySet()){
+			String key   = input.getKey();
+			String value = input.getValue();
+			try {
+				Log subLog = null;
+				if (taskRequests.size() == 1)
+					subLog = log.child(key);
+				Task task = new Task(value, actions, subLog);
+				if (directives != null)
+					task.directives.putAll(directives);
+				//if (log)
+				task.log.verbosity = log.verbosity;
+				tasks.put(key, task);
+				log.note(String.format("Starting thread: %d %s(%s)", task.getId(), key, task.info.PRODUCT_ID));
+				task.start();
+			}
+			catch (ParseException e) {
+				/// TODO: is it a fatal error if a product defines its input wrong?
+				log.warn(String.format("Could not parse product: %s(%s)",  key, value));
+				//log.warn(e.getMessage());
+				log.error(e.getLocalizedMessage()); // RETURN?
+			}
+			catch (Exception e) {
+				log.error("Unexpected exception... " + e.getLocalizedMessage());
+			}
+		}
+
+		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");
+
+		for (Entry<String,Task> entry : tasks.entrySet()){
+			String key = entry.getKey();
+			Task task = entry.getValue();
+			try {
+				task.join();
+				log.note(String.format("Finished thread: %s-%d ", key, task.getId()));
+			}
+			catch (InterruptedException e) {
+				log.note(String.format("Interrupted thread: %s-%d ", key, task.getId()));
+			}
+		}
+
+		return tasks;
+	}
+
 	/** Searches for shell side (and later, Java) generators
 	 *
 	 * @param productID
@@ -680,6 +765,7 @@ public class ProductServer { //extends Cache {
 		return generator;
 	};
 
+	/// Checks if a file exists, return if non-empty, else wait for an empty file to complete.
 	/**
 	 * @param file
 	 * @param maxEmptySec maximum age of empty file in seconds
@@ -787,7 +873,7 @@ public class ProductServer { //extends Cache {
 
 		String confFile = null;
 
-		List<String> products = new ArrayList<>();
+		Map<String,String> products = new HashMap<>();
 		Actions actions = new Actions();
 		Map<String ,String> directives = new HashMap();
 
@@ -799,23 +885,24 @@ public class ProductServer { //extends Cache {
 				String arg = args[i];
 
 				if (arg.charAt(0) == '-') {
+
 					if (arg.charAt(1) != '-') {
 						throw new IllegalArgumentException("Short options (-x) not suppported");
 					}
 
-					String a = arg.substring(2);
+					String opt = arg.substring(2);
 
-					if (a.equals("help")) {
+					if (opt.equals("help")) {
 						help();
 						return;
 					}
 
-					if (a.equals("debug")) {
+					if (opt.equals("debug")) {
 						log.verbosity = Log.DEBUG;
 						continue;
 					}
 
-					if (a.equals("verbose")) {
+					if (opt.equals("verbose")) {
 						arg = args[++i];
 						try {
 							int level = Integer.parseInt(arg);
@@ -840,7 +927,7 @@ public class ProductServer { //extends Cache {
 					}
 
 					/// It is recommended to give --config among the first options, unless default used.
-					if (a.equals("config")) {
+					if (opt.equals("config")) {
 						if (confFile != null){
 							log.warn("Reading second conf file (already read: " + confFile + ")");
 						}
@@ -858,7 +945,7 @@ public class ProductServer { //extends Cache {
 					}
 
 
-					if (a.equals("directives")) {
+					if (opt.equals("directives")) {
 						for (String d : args[++i].split("\\|")) { // Note: regexp
 							log.info("Adding directive: " + d);
 							int j = d.indexOf('=');
@@ -869,21 +956,24 @@ public class ProductServer { //extends Cache {
 							}
 						}
 					}
+					else if (opt.equals("product")) {
+						products.put("product", args[++i]);
+					}
 					else {
 						// Actions
 						try {
-							if (a.equals("actions")) {
-								a = args[++i];
-								log.info("Adding actions: " + a);
-								actions.set(a);
+							if (opt.equals("actions")) {
+								opt = args[++i];
+								log.info("Adding actions: " + opt);
+								actions.set(opt);
 							}
 							else {
 								// Set actions from invidual args: --make --delete --generate
-								a = a.toUpperCase();
+								opt = opt.toUpperCase();
 								//Field field =
-								log.info("Adding action:" + a);
-								Actions.class.getField(a); // ensure field exists
-								actions.add(a);
+								log.info("Adding action:" + opt);
+								Actions.class.getField(opt); // ensure field exists
+								actions.add(opt);
 							}
 						}
 						catch (NoSuchFieldException|IllegalAccessException e) {
@@ -898,14 +988,14 @@ public class ProductServer { //extends Cache {
 									}
 								}
 							}
-							log.error("No such action code: " + a);
+							log.error("No such action code: " + opt);
 							System.exit(2);
 						}
 
 					}
 				}
 				else {  // Argument does not start with "--"
-					products.add(arg);
+					products.put("product" + products.size(), arg);
 				}
 
 			}
@@ -917,123 +1007,30 @@ public class ProductServer { //extends Cache {
 			System.exit(1);
 		}
 
+		if (actions.isEmpty()){
+			actions.set(Actions.MAKE);
+		}
+
 		log.note("Actions: " + actions);
 		log.note("Directives: " + directives);
 		//System.out.println(directives);
 
-		List<ProductServer.Task> tasks = new ArrayList<>();
+		//Log taskLog = (products.size() == 1) ? log : null;
 
-		try {
-			for (String p : products) {
-				Task task = null;
-				try {
-					//task = server.new Task(p, actions.value, log);
-					task = server.new Task(p, actions.value, null); //So, goes to file (like for TomCat)
-					tasks.add(task);
-				} catch (ParseException e) {
-					log.warn(e.getMessage());
-					log.error("Could not parse product: " + p);
-					//e.printStackTrace();
-					// return;
-					System.exit(3);
-				}
-				task.log.verbosity = log.verbosity;
-				log.note("Starting: " + task.toString());
-				task.start();
-				//task.log.ok("Started: " + task.toString());
-
-				//task.join();
-				//log.note("Finished. Log: " + task.logFile.getAbsolutePath());
-
-
-			}
-		}
-		catch (Exception e) {
-			log.error(e.getLocalizedMessage());
-			log.error("Failed in starting task for product(s)");
-			System.exit(4);
-		}
+		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions.value, directives, log);
 
 		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");
 
-		for (Task task: tasks) {
-			try {
-				task.join();
-			} catch (InterruptedException e) {
-				log.warn("Interrupted");
-				log.warn(e.getLocalizedMessage());
-				e.printStackTrace();
-				System.exit(5);
-			}
-			catch (Exception e){
-				task.log.fail();
-				log.warn(e.getLocalizedMessage());
-			}
-			log.ok("Completed: " + task.toString());
+		for (Entry<String,Task> entry: tasks.entrySet()) {
+			String key = entry.getKey();
+			Task  task = entry.getValue();
+
+			log.note("status(" + task.info.PRODUCT_ID + "): " + task.log.status);
 			if (task.logFile != null)
 				log.info("Log: "  + task.logFile.getAbsolutePath());
 			log.note("File: " + task.outputPath.toString());
 		}
 
-
-		/*
-		final String filename = args[0];
-		try {
-
-			//final int action = args.length == 2 ? parseActionCode(args[1]) : Task.MAKE;
-			//Task task = server.new Task(filename, action, server.serverLog);
-			//task.log.verbosity = Log.DEBUG;
-
-
-			try {
-
-
-				if (args.length >= 2){
-
-					try {
-						task.actions.set(args[1]);
-					}
-					catch (Exception e){ // | IndexedException e) {
-						log.error("Key(s): " + args[1]);
-						e.printStackTrace(log.printStream);
-					}
-
-
-				}
-
-				if (args.length > 2) {
-					// The loop needs no check, but the dump below does.
-					for (int i = 2; i < args.length; i++) {
-						String arg = args[i];
-						int j = arg.indexOf('=');
-						if (j > 1) {
-							task.directives.put(arg.substring(0, j), arg.substring(j+1));
-						}
-					}
-					log.note("Directives: " + task.directives);
-				}
-
-				log.note("Starting: " + task.toString());
-        		task.start();
-				log.note("Started: " + task.toString());
-
-        		task.join();
-				log.note("Finished. Log: " + task.logFile.getAbsolutePath());
-				//task.run();
-				//server.handle(task);
-			}
-			catch (Exception e) {
-				//System.err.println("Interrupted");
-				e.printStackTrace(log.printStream);
-
-			}
-
-
-		} 
-		catch (ParseException e){ // | IndexedException e) {
-			e.printStackTrace(log.printStream);
-		}
-		*/
 
 	}
 

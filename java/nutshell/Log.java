@@ -198,7 +198,7 @@ public class Log {
 
 	long startTime;
 	//String lastMessage = null;
-	int status = 0;
+	protected int status = 0;
 	final StringBuffer buffer = new StringBuffer();
 	final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
 	

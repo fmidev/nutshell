@@ -552,39 +552,46 @@ class ProductServer:
 
         parser = product.Info.get_arg_parser(parser)
         # parser = argparse.ArgumentParser()
- 
+
+        supported_actions = 'DELETE,MAKE,GENERATE,INPUTS,SHORTCUT,LATEST,LINK,MOVE,COPY'
+        
         parser.add_argument("-c", "--conf", dest="CONF",
                             default=None, # "nutshell.cnf", #ProductServer.CONF_FILE?
                             help="Read config file", 
                             metavar="<file>")
      
-        parser.add_argument("-r", "--request", metavar="<string>",
-                            dest="REQUEST",
+        parser.add_argument("-a", "--actions", metavar="<string>",
+                            dest="ACTIONS",
                             default="",
-                            help="Comma-separated string of [DELETE|MAKE|INPUTS]")
+                            help=f"Comma-separated string of actions: {supported_actions}")
+
+        parser.add_argument("-r", "--request", metavar="<string>",
+                            dest="ACTIONS",
+                            default="",
+                            help="(Deprecating) Use --actions")
     
         parser.add_argument("-d", "--delete",
                             dest="DELETE",
                             action="store_true",
                             #default=False,
-                            help="Delete product file, same as -r DELETE")
+                            help="Delete product file, same as --actions DELETE")
 
         
         parser.add_argument("-i", "--inputList",
                             dest="INPUTS",
                             action="store_true",
-                            help="list input for a product, same as -r INPUTS")
+                            help="list input for a product, same as --actions INPUTS")
     
         parser.add_argument("-m", "--make",
                             dest="MAKE",
                             action="store_true",
                             #default=False,
-                            help="Make product, same as -r MAKE")
+                            help="Make product, same as --actions MAKE")
     
         parser.add_argument("-g", "--generate",
                             dest="GENERATE",
                             action="store_true",
-                            help="Generate product, same as -r DELETE,MAKE")
+                            help="Generate product, same as --actions DELETE,MAKE")
     
         parser.add_argument("-t", "--timeout",
                             dest="TIMEOUT",
@@ -609,7 +616,9 @@ if __name__ == '__main__':
     #logger.debug("parsing arguments")
 
     # ProductInfo.get_arg_parser(parser)
-    parser = ProductServer.get_arg_parser() 
+    parser = ProductServer.get_arg_parser()
+
+    #supported_actions = 'DELETE,MAKE,GENERATE,INPUTS,SHORTCUT,LATEST,LINK,MOVE,COPY'
 
     parser.add_argument("PRODUCTS",
                         nargs='*',
@@ -644,7 +653,7 @@ if __name__ == '__main__':
     parser.add_argument("-D", "--directives",
                         dest="DIRECTIVES",
                         default='',
-                        help="pipe-separated instructions: TILE|LATEST")
+                        help="pipe-separated app instructions: DOUBLE|SCHEME=TILE|...")
     
     
     options = parser.parse_args()
@@ -695,9 +704,9 @@ if __name__ == '__main__':
      
     actions = {} # []
 
-    if (options.REQUEST):
-        # actions.extend(options.REQUEST.split(','))
-        actions = nutils.read_conf_text(options.REQUEST.split(',')) # No values using ','?
+    if (options.ACTIONS):
+        # actions.extend(options.ACTIONS.split(','))
+        actions = nutils.read_conf_text(options.ACTIONS.split(',')) # No values using ','?
     
     # , 'TEST'
     for i in ['DELETE', 'MAKE', 'GENERATE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:

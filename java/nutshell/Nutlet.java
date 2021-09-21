@@ -163,7 +163,7 @@ public class Nutlet extends HttpServlet {
 		Actions actions = new Actions();
 		// NUEVO 2021/07/01
 		// String[] actions = request.getParameterValues("request");
-		for (String key: new String[]{"request", "action", "output"}) {
+		for (String key: new String[]{"actions", "output",  "request", "action"}) {  // request and action deprecating!
 			String[] a = request.getParameterValues(key);
 			if (a != null) {
 				try {
@@ -255,20 +255,17 @@ public class Nutlet extends HttpServlet {
 					task.execute();
 					task.log.ok("-------- see separate log <---");
 
-					if (task.log.getStatus() >= Log.NOTE) {
+					task.log.ok("Completed task: " + task.toString());
 
-						task.log.ok("Generated: " + task.toString());
+
+					if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
 						if (task.actions.isSet(Actions.STREAM)) {
 							sendToStream(task, response);
 							return;
 						}
 
-						// EXPRERIMENTAL redirect (failed)
-						// TODO: Paths
-						//relativePath = Paths.get("cache", productTask.relativeOutputDir.toString(), filename);
 						if (task.actions.isSet(Actions.REDIRECT)) {
-							// Path u = Paths.get(request.getContextPath(), "cache", productTask.relativeOutputDir, ""
 							String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
 							response.sendRedirect(url);
 							return;
@@ -279,8 +276,9 @@ public class Nutlet extends HttpServlet {
 						 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
 						 * This problem can sometimes be caused by disabling or refusing to accept cookies.
 						 */
-					} else {
-						task.log.note("Completed");
+					}
+					else {
+
 						if (!task.actions.isSet(ProductServer.Actions.CHECK)) {
 							sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 									os.toString("UTF8"), request, response);
@@ -332,7 +330,7 @@ public class Nutlet extends HttpServlet {
 				}
 
 				html.appendElement(SimpleHtml.H1, "Product info: " + productInfo.PRODUCT_ID);
-				//html.createElement(SimpleHtml.P, "No STREAM or REDIRECT were requested, so this page appears.");
+				//html.createElement(SimpleHtml.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
 				if (task.actions.isSet(Actions.CHECK)) {
 

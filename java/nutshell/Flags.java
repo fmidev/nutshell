@@ -122,6 +122,12 @@ public class Flags {
         add(s.split(","));
     }
 
+    public void remove(int i) {
+
+        value = (value & ~i);
+
+    }
+
     public String[] toStrings() {
         try {
             //return Flags.getFlags(AccessFlags.class, value);

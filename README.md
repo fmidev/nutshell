@@ -2,7 +2,7 @@
 ## Service for generating image and data products
 
 ### Makefile-like concept
-* Given a filename, derives a product generator that can build the file
+* Given a filename, derives the product generator building the file
 * A product file can require other product files which are generated recursively
 
 ### Product generators
