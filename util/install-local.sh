@@ -57,7 +57,7 @@ echo "# Creating/linking cache root"
 mkdir -v --parents $CACHE_ROOT/
 chmod -v    a+rwsx $CACHE_ROOT/
 
-NUTSHELL_SH=$BIN_DIR/nutsola.sh
+NUTSHELL_SH=$BIN_DIR/nutshell.sh
 
 #cat > $NUTSHELL_SH <<EOF
 ##!/bin/bash
@@ -66,7 +66,7 @@ NUTSHELL_SH=$BIN_DIR/nutsola.sh
 #python3.6 -m nutshell.nutshell -c $NUTSHELL_DIR/nutshell.cnf \$*
 #EOF
 
-cat $DIR/nutshell.sh.tpl | envsubst > $NUTSHELL_SH
+cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR' > $NUTSHELL_SH
 
 chmod -v gu+x $NUTSHELL_SH
 echo "# Installed $NUTSHELL_SH"

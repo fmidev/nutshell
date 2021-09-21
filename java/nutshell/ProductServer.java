@@ -897,12 +897,12 @@ public class ProductServer { //extends Cache {
 						return;
 					}
 
-					if (opt.equals("debug")) {
+					if (opt.equals("verbose")) {
 						log.verbosity = Log.DEBUG;
 						continue;
 					}
 
-					if (opt.equals("verbose")) {
+					if (opt.equals("log_level")) {
 						arg = args[++i];
 						try {
 							int level = Integer.parseInt(arg);
@@ -927,7 +927,7 @@ public class ProductServer { //extends Cache {
 					}
 
 					/// It is recommended to give --config among the first options, unless default used.
-					if (opt.equals("config")) {
+					if (opt.equals("conf")) {
 						if (confFile != null){
 							log.warn("Reading second conf file (already read: " + confFile + ")");
 						}
