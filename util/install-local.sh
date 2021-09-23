@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 function goodbye {
     echo "# Exiting installation"
