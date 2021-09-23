@@ -711,6 +711,7 @@ public class ProductServer { //extends Cache {
 
 			// Consider keeping Objects, and calling .toString() only upon ExternalGenerator?
 			env.put("PATH", String.format("%s:%s", System.getenv("PATH"), cmdPath));
+			env.put("PATH2", String.format("%s:%s", System.getenv("PATH"), cmdPath));
 			env.put("OUTDIR",  this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
 
