@@ -18,8 +18,10 @@ import java.util.regex.Pattern;
 public class ExternalGenerator implements ProductServer.Generator {
 	
 	// TODO: override these from ProductServer.conf?
-	static public final String scriptName = "./generate.sh";
-	static public final String inputDeclarationScript = "./input.sh";
+	//static public final String scriptName = "./generate.sh";
+	static public final String scriptName = "generate.sh";
+	//static public final String inputDeclarationScript = "./input.sh";
+	static public final String inputDeclarationScript = "input.sh";
 	final String id;
 
 	//final protected File dir;
@@ -180,7 +182,8 @@ public class ExternalGenerator implements ProductServer.Generator {
 
 		if (inputScript.exists()){
 			if (inputScript.canExecute()){
-				int exitValue = exec(inputDeclarationScript, env, reader);
+				//int exitValue = exec(inputDeclarationScript, env, reader);
+				int exitValue = exec(inputScript.toString(), env, reader);
 				if (exitValue != 0){
 					throw extractErrorMsg(exitValue, reader);
 				}
