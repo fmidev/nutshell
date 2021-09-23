@@ -138,7 +138,8 @@ public class ExternalGenerator implements ProductServer.Generator {
 		//ShellUtils.ProcessReader
 		OutputReader reader = new OutputReader(log);
 
-		int exitValue = exec(scriptName, envArray, reader);
+		//int exitValue = exec(scriptName, envArray, reader);
+		int exitValue = exec(generatorScript.toString(), envArray, reader);
 		if (exitValue != 0){
 			throw extractErrorMsg(exitValue, reader);
 		}
