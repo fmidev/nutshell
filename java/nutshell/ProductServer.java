@@ -82,6 +82,10 @@ public class ProductServer { //extends Cache {
 		return  ++counter;
 	};
 
+	/** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
+	 *
+	 */
+	public String cmdPath = "";
 
 	protected void readConfig(){
 		readConfig(confFile);
@@ -111,6 +115,7 @@ public class ProductServer { //extends Cache {
 
 		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
+		this.cmdPath     = setup.getOrDefault("PATH", ".").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
 	}
@@ -702,7 +707,10 @@ public class ProductServer { //extends Cache {
 				}
 			}
 
-			// COnsider keeping Objects, and calling .toString() only upon ExternalGenerator?
+
+
+			// Consider keeping Objects, and calling .toString() only upon ExternalGenerator?
+			env.put("PATH", String.format("%s:%s", System.getenv("PATH"), cmdPath));
 			env.put("OUTDIR",  this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
 
