@@ -3,14 +3,14 @@
 export NUTSHELL_DIR=$NUTSHELL_DIR
 export PYTHONPATH=$PYTHONPATH:$NUTSHELL_DIR
 
-NUTSHELL=${NUTSHELL:-'java'}
+NUTSHELL=${NUTSHELL:-'python'}
 
 case $NUTSHELL in
     python)
-	NUTSHELL="python3.6 -m nutshell.nutshell"
+	NUTSHELL="python3.6 -m nutshell.nutshell --log_level DEBUG"
 	;;
     java)
-	NUTSHELL="java -cp Nutlet.jar nutshell.ProductServer"
+	NUTSHELL="java -cp Nutlet.jar nutshell.ProductServer --log_level DEBUG"
 	;;
     *)
 	#echo "NUTSHELL must be 'java' or 'python'"
@@ -18,4 +18,4 @@ case $NUTSHELL in
 esac     
 
 
-${NUTSHELL} --log_level DEBUG --conf $NUTSHELL_DIR/nutshell.cnf $*
+${NUTSHELL} --conf $NUTSHELL_DIR/nutshell.cnf $*

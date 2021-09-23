@@ -67,6 +67,12 @@ public class Flags {
         return getFlags(this, value);
     }
 
+    static
+    public String[] getKeys(Class c){
+        //return getFlags(this, value);
+        return ClassUtils.getConstants(c).keySet().toArray(new String[0]);
+    }
+
     public String[] getEntries() {
         return ClassUtils.getConstants(getClass()).entrySet().toArray(new String[0]);
     }

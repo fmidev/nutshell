@@ -122,14 +122,17 @@ class ProductInfo extends ProductParameters {
 	public String toString() {
 		return getFilename();
 	}
-	
+
 	public String getFilename() {
+		return getFilename(TIMESTAMP);
+	}
+
+	public String getFilename(String prefix) {
 
 		StringBuffer b = new StringBuffer();
 		//b.append("Time: ").append("<not implemented>").append('\n');
-		if (TIMESTAMP != null)
-			if (!TIMESTAMP.isEmpty())
-				b.append(TIMESTAMP).append("_");
+		if ((prefix != null) && !prefix.isEmpty())
+			b.append(prefix).append("_");
 		
 		b.append(this.PRODUCT_ID);
 
