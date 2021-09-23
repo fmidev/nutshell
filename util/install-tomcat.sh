@@ -5,7 +5,7 @@
 function goodbye {
     echo "# Consider Tomcat restart, like: "
     echo "#   sudo /etc/init.d/tomcat8 restart"
-    echo "#   sudo systemctl restart httpd
+    echo "#   sudo systemctl restart httpd"
     echo "# Exiting installation"
 }
 trap goodbye EXIT
