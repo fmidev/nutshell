@@ -78,7 +78,7 @@ if [ -f $WEB_XML ]; then
     if [ $? != 0 ]; then
 	echo "Notice above changes in $HTML_ROOT/WEB-INF/web"
     fi
-    #    mv -v web.xml.new web.xml
+    mv -v web.xml.new web.xml
     popd &> /dev/null
 fi
 mv -v $WEB_XML.new $WEB_XML
