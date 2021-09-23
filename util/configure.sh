@@ -141,7 +141,7 @@ ask_variable HTTP_PORT "8088" "Port for HTTP server (Python)."
 ask_variable HTTP_PREFIX "/nutshell" "URL prefix (with leading '/' but without trailing '/')"
 check_dir_syntax HTTP_PREFIX
 
-ask_variable PATH "/var/bin:/opt/bin" "Additional command search path appended to $PATH: ."
+ask_variable PATH2 "" "Additional command search path appended to $PATH: ."
 
 echo "Created $CONF_FILE with contents:"
 echo "---------------------------------"
