@@ -960,7 +960,7 @@ public class ProductServer { //extends Cache {
 			for (int i = 0; i < args.length; i++) {
 
 				String arg = args[i];
-				log.info(String.format("ARGS[%d]: %s", i, arg));
+				//log.info(String.format("ARGS[%d]: %s", i, arg));
 
 				if (arg.charAt(0) == '-') {
 
@@ -1004,7 +1004,6 @@ public class ProductServer { //extends Cache {
 						continue;
 					}
 
-					log.info(String.format("ARGH(%d): %s", i, arg));
 
 					/// It is recommended to give --config among the first options, unless default used.
 					if (opt.equals("conf")) {
@@ -1012,17 +1011,17 @@ public class ProductServer { //extends Cache {
 							log.warn("Reading second conf file (already read: " + confFile + ")");
 						}
 						confFile = args[++i];
-						log.info("Reading --conf file: " + confFile);
+						// log.info("Reading --conf file: " + confFile);
 						server.readConfig(confFile);
 						continue; // Note
 					}
 
-					log.info("ARGH2: " + arg);
+					// log.info("ARGH2: " + arg);
 
 					// Now, read conf file if not read this far.
 					if (confFile == null){
 						confFile = "nutshell.cnf";
-						log.info("Reading conf file: " + confFile);
+						// log.info("Reading conf file: " + confFile);
 						server.readConfig(confFile);
 					}
 
@@ -1105,6 +1104,7 @@ public class ProductServer { //extends Cache {
 
 		//Log taskLog = (products.size() == 1) ? log : null;
 
+		// TODO: actions as Object
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions.value, directives, log);
 
 		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");

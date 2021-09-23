@@ -300,15 +300,7 @@ public class Nutlet extends HttpServlet {
 						default:
 							html.appendElement(SimpleHtml.H1, "Product generator error");
 					}
-					/*
-					if (e.index == HttpServletResponse.SC_PRECONDITION_FAILED) {
-						html.appendElement(SimpleHtml.H2, "Input problem(s)");
-						html.appendElement(SimpleHtml.P, "See input list further below");
-					}
-					else {
-						html.appendElement(SimpleHtml.H2, "Input problem(s)");
-					}
-					 */
+
 					html.appendElement(SimpleHtml.PRE, e.getMessage()).setAttribute("class", "error");
 					//html.appendElement(SimpleHtml.PRE, e.getMessage());
 					//html.appendElement(msgElem);
@@ -367,8 +359,10 @@ public class Nutlet extends HttpServlet {
 					if (!task.inputs.isEmpty()) {
 						Map<String, Element> linkMap = new HashMap<>();
 						for (Map.Entry<String, String> e : task.inputs.entrySet()) {
+							String inputFilename = e.getValue();
 							//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
-							linkMap.put(e.getKey(), html.createAnchor("?request=CHECK&product=" + e.getValue(), e.getValue()));
+							String url = String.format("%s%s?actions=CHECK&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
+							linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
 							//Object inp = task.retrievedInputs.get(e.getKey());
 							//if ()
 							//linkMap.put("", html.createAnchor(task.retrievedInputs, "log"));
