@@ -116,7 +116,9 @@ ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for NutShell files:"
 check_dir_syntax NUTSHELL_DIR
 ls -d $NUTSHELL_DIR
 
-ask_variable TOMCAT_CONF_DIR "/etc/tomcat8/Catalina/localhost" "Directory for nutshell.xml"
+# /usr/local/tomcat/conf/Catalina/localhost/
+# /etc/tomcat8/Catalina/localhost
+ask_variable TOMCAT_CONF_DIR "/usr/local/tomcat/conf/Catalina/localhost/" "Directory for nutshell.xml"
 check_dir_syntax TOMCAT_CONF_DIR
 
 ask_variable CACHE_ROOT "$PKG_ROOT/cache" "Root of cache directory, often on separate resource:"

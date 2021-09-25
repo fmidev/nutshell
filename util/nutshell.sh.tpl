@@ -17,5 +17,10 @@ case $NUTSHELL in
 	;;
 esac     
 
+if [ $# == 0 ]; then
+    ${NUTSHELL} --help
+else
+    ${NUTSHELL} --conf $NUTSHELL_DIR/nutshell.cnf $*
+fi
 
-${NUTSHELL} --conf $NUTSHELL_DIR/nutshell.cnf $*
+

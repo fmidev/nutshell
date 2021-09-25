@@ -1,5 +1,6 @@
 package nutshell;
 
+import sun.font.DelegatingShape;
 import sun.misc.Signal;
 
 import java.io.*;
@@ -171,6 +172,14 @@ public class ProductServer { //extends Cache {
 
 	public static class Actions extends Flags implements ResultType, OutputType {
 
+		public Actions(){
+
+		}
+
+		public Actions(int a){
+			this.value = a;
+		}
+
 		/**
 		 *   The object will be generated, resulting native output (FILE or MEMORY)..
 		 *
@@ -231,15 +240,17 @@ public class ProductServer { //extends Cache {
 		//  public static final int BATCH = 512;
 
 		public void addCopy(String filename){
-			copies.add(filename);
+			copies.add(Paths.get(filename)); // filename
 		}
 
 		public void addLink(String filename){
-			links.add(filename);
+			links.add(Paths.get(filename)); // filename
 		}
 
-		protected List<String> copies = new ArrayList<>();
-		protected List<String> links  = new ArrayList<>();
+		protected List<Path> copies = new ArrayList<>();
+		protected List<Path> links  = new ArrayList<>();
+		// protected List<String> copies = new ArrayList<>();
+		// protected List<String> links  = new ArrayList<>();
 	}
 
 
@@ -354,7 +365,10 @@ public class ProductServer { //extends Cache {
 		}
 		 */
 
-
+		/** Imports map to directives map, converting array values to comma-separated strings.
+		 *
+		 * @param map
+		 */
 		public void setDirectives(Map<String,String[]> map){
 			for (Map.Entry<String,String[]> entry : map.entrySet() ){ //parameters.entrySet()) {
 				String key = entry.getKey().toString();
@@ -366,22 +380,27 @@ public class ProductServer { //extends Cache {
 			}
 		}
 
-		public boolean move(File fileSrc, File fileDst){
-			this.log.note(String.format("Move: from: %s ", fileSrc.getName()));
-			this.log.note(String.format("        to: %s ", fileDst.getName()));
-			return fileSrc.renameTo(fileDst);
+		public boolean move(File src, File dst){
+			this.log.note(String.format("Move: from: %s ", src.getName()));
+			this.log.note(String.format("        to: %s ", dst.getName()));
+			return src.renameTo(dst);
 		}
 
-		public Path copy(Path fileSrc, Path fileDst) throws IOException {
-			this.log.note(String.format("Copy: from: %s ", fileSrc));
-			this.log.note(String.format("        to: %s ", fileDst));
-			return Files.copy(fileSrc, fileDst, StandardCopyOption.REPLACE_EXISTING);   //(fileSrc, fileDst, StandardCopyOption.REPLACE_EXISTING);
+		public Path copy(Path src, Path dst) throws IOException {
+			this.log.note(String.format("Copy: from: %s ", src));
+			this.log.note(String.format("        to: %s ", dst));
+			if (dst.toFile().isDirectory())
+				dst = dst.resolve(src.getFileName());
+			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
-		public Path link(Path fileSrc, Path fileDst) throws IOException {
-			this.log.note(String.format("Link: from: %s ", fileSrc));
-			this.log.note(String.format("        to: %s ", fileDst));
-			return Files.createLink(fileSrc, fileDst);   //(fileSrc, fileDst, StandardCopyOption.REPLACE_EXISTING);
+		public Path link(Path src, Path dst) throws IOException {
+			this.log.note(String.format("Link: from: %s ", src));
+			this.log.note(String.format("        to: %s ", dst));
+			if (dst.toFile().isDirectory())
+				dst = dst.resolve(src.getFileName());
+			return Files.createSymbolicLink(dst, src);
+			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
 		public boolean delete(File file){
@@ -443,8 +462,16 @@ public class ProductServer { //extends Cache {
 			Generator generator = getGenerator(this.info.PRODUCT_ID);
 			this.log.note(String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
 
+			if (! this.actions.copies.isEmpty())
+				this.actions.add(Actions.FILE);
+
+			if (! this.actions.links.isEmpty())
+				this.actions.add(Actions.FILE);
+
+
 			// Implicit action request
-			if (this.actions.isSet(Actions.GENERATE)){ // == MAKE ?!
+			// MAKE = lazy: do not generate if exists
+			if (this.actions.involves(Actions.MAKE | Actions.GENERATE)){ // == MAKE ?!
 				if (generator instanceof ExternalGenerator)
 					this.actions.add(Actions.FILE); // PREPARE dir & empty file
 				else
@@ -470,6 +497,59 @@ public class ProductServer { //extends Cache {
 			// These are file paths, not committing to provide to actual physical files
 			File fileFinal = this.outputPath.toFile();
 
+			if (this.actions.involves(Actions.DELETE | Actions.FILE)) {
+				// Wait
+				if (queryFile(fileFinal,  90, this.log) && !this.actions.isSet(Actions.DELETE)){
+					// Order? Does it delete immediately?
+					this.result = this.outputPath;
+				}
+				else {
+					this.delete(fileFinal);
+				}
+
+			}
+
+			// Mark this task being processed (empty file)
+			if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
+
+				this.actions.add(Actions.GENERATE);
+
+				try {
+					this.log.debug("Creating dir: " + cacheRoot+"/./"+this.relativeOutputDir);
+					//Path outDir =
+					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
+					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDirTmp);
+					this.log.debug("Creating file: " + fileFinal);
+					fileFinal.createNewFile();
+				}
+				catch (Exception e) {
+					this.log.error(e.getLocalizedMessage());
+					return;
+				}
+			}
+
+			// Generate or at least list inputs
+			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST)) { //
+
+				this.log.note("Determining input list for: " + this.info.PRODUCT_ID);
+				//Map<String,String>
+				this.inputs.clear(); // needed?
+				//this.inputs.putAll(generator.getInputList(this.info, dummyContext, this.log.printStream));
+				try {
+					this.inputs.putAll(generator.getInputList(this));
+					this.log.debug(this.inputs.toString());
+					//System.err.println("## " + this.inputs);
+				} catch (Exception e) {
+					this.log.warn("Input list retrieval failed");
+					//e.printStackTrace(this.log.printStream);
+					this.log.error(e.getMessage());
+					this.log.warn("Removing GENERATE from actions");
+					this.actions.remove(Actions.GENERATE);
+				}
+			}
+
+
+			/*
 			if (fileFinal.exists()){
 				this.log.debug("File exists: " + this.outputPath.toString());
 
@@ -487,12 +567,6 @@ public class ProductServer { //extends Cache {
 				else if (this.actions.isSet(Actions.FILE) && !this.actions.isSet(Actions.GENERATE)){
 					if (queryFile(fileFinal,  90, this.log)){
 						this.log.note("File query completed: " + fileFinal.toString());
-						/*
-						if (this.actions.isSet(Actions.GENERATE)){
-							this.log.note("Continue to re-generate file");
-						}
-						else {
-						 */
 						this.log.ok("Returning file");
 						this.result = this.outputPath;
 						return; // redesign this (allowing LINK and COPY)
@@ -526,101 +600,85 @@ public class ProductServer { //extends Cache {
 					return;
 				}
 			}
+			*/
 
 
-			// Generate or at least list inputs
-			if (this.actions.isSet(Actions.GENERATE) || this.actions.isSet(Actions.INPUTLIST)){ //
 
-				this.log.note("Determining input list for: " + this.info.PRODUCT_ID);
-				//Map<String,String>
-				this.inputs.clear(); // needed?
-				//this.inputs.putAll(generator.getInputList(this.info, dummyContext, this.log.printStream));
-				try {
-					this.inputs.putAll(generator.getInputList(this));
-					this.log.debug(this.inputs.toString());
-					//System.err.println("## " + this.inputs);
-				}
-				catch (Exception e){
-					this.log.warn("Input list retrieval failed");
-					//e.printStackTrace(this.log.printStream);
-					this.log.error(e.getMessage());
-					this.log.warn("Removing GENERATE from actions");
-					this.actions.remove(Actions.GENERATE);
-				}
-
-				if (this.actions.isSet(Actions.GENERATE)){
-
-					File fileTmp   = this.outputPathTmp.toFile();
-
-					/// Assume Generator uses input similar to output (File or Object)
-					final int inputActions = this.actions.value & (Actions.MEMORY | Actions.FILE);
-
-					Map<String,Task> tasks = executeMany(this.inputs, inputActions, null, this.log);
-
-					// Collect
-					for (Entry<String,Task> entry : tasks.entrySet()){
-						String key = entry.getKey();
-						Task inputTask = entry.getValue();
-						if (inputTask.result != null){
-							String r = inputTask.result.toString();
-							this.log.note(String.format("Retrieved: %s = %s", key, r));
-							this.retrievedInputs.put(key, r);
-						}
-						else {
-							this.log.note(String.format("Failed with: %s = %s", key, inputTask.getName()));
-						}
-					}
+			if (this.actions.isSet(Actions.GENERATE)){
 
 
-					/// MAIN
-					this.log.note("Running Generator: " + this.info.PRODUCT_ID);
+				/// Assume Generator uses input similar to output (File or Object)
+				final int inputActions = this.actions.value & (Actions.MEMORY | Actions.FILE);
 
-					try {
-						generator.generate(this);
-					}
-					catch (IndexedException e) {
-						this.log.error(e.getMessage());
-						//e.printStackTrace(this.log.printStream);
-						try {
-							this.delete(fileTmp);
-							this.delete(fileFinal);
-						}
-						catch (Exception e2) {
-							this.log.error(e2.getLocalizedMessage());
-						}
-						//this.log.error(e.getMessage());
-						throw e;
-						//return false;
-					}
+				Map<String,Task> tasks = executeMany(this.inputs, inputActions, null, this.log);
 
-					if (fileTmp.length() > 0){
-						// this.info.getFilename()
-						this.log.debug("OK, generator produced tmp file: " + fileTmp.getName());
-						this.move(fileTmp, fileFinal);
-
+				// Collect
+				for (Entry<String,Task> entry : tasks.entrySet()){
+					String key = entry.getKey();
+					Task inputTask = entry.getValue();
+					if (inputTask.result != null){
+						String r = inputTask.result.toString();
+						this.log.note(String.format("Retrieved: %s = %s", key, r));
+						this.retrievedInputs.put(key, r);
 					}
 					else {
-						this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
-						try {
-							//this.delete(fileFinal);
-							this.delete(fileTmp);
-						}
-						catch (Exception e) {
-							/// TODO: is it a fatal error if a product defines its input wrong?
-							this.log.error(e.getLocalizedMessage()); // RETURN?
-						}
+						this.log.note(String.format("Failed with: %s = %s", key, inputTask.getName()));
 					}
+				}
 
+
+				/// MAIN
+				this.log.note("Running Generator: " + this.info.PRODUCT_ID);
+				File fileTmp   = this.outputPathTmp.toFile();
+
+				try {
+					generator.generate(this);
+				}
+				catch (IndexedException e) {
+					this.log.error(e.getMessage());
+					//e.printStackTrace(this.log.printStream);
+					try {
+						this.delete(fileTmp);
+						//this.delete(fileFinal);
+					}
+					catch (Exception e2) {
+						this.log.error(e2.getLocalizedMessage());
+					}
+					//this.log.error(e.getMessage());
+					//throw e;
+					//return false;
+				}
+
+
+				if (fileTmp.length() > 0){
+					// this.info.getFilename()
+					this.log.debug("OK, generator produced tmp file: " + fileTmp.getName());
+					this.move(fileTmp, fileFinal);
+					//this.result = this.outputPath;
 				}
 				else {
-					this.log.note("Input list was requested (only)");
-					this.result = this.inputs;
+					this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
+					try {
+						//this.delete(fileFinal);
+						this.delete(fileTmp);
+					}
+					catch (Exception e) {
+						/// TODO: is it a fatal error if a product defines its input wrong?
+						this.log.error(e.getLocalizedMessage()); // RETURN?
+					}
 				}
 
 			}
+			else {
+				this.log.note("Input list was requested (only)");
+				this.result = this.inputs;
+			}
+
 
 			if (this.actions.isSet(Actions.FILE)){
+
 				if (fileFinal.length() > 0) {
+
 					this.result = this.outputPath;
 					this.log.ok("Generated: " + this.result.toString());
 
@@ -646,17 +704,17 @@ public class ProductServer { //extends Cache {
 					}
 
 
-					for (String path: this.actions.copies) {
+					for (Path path: this.actions.copies) {
 						try {
-							this.copy(this.outputPath, Paths.get(path));
+							this.copy(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.error(String.format("Copying failed: %s", path));
 						}
 					}
 
-					for (String path: this.actions.links) {
+					for (Path path: this.actions.links) {
 						try {
-							this.link(this.outputPath, Paths.get(path));
+							this.link(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.error(String.format("Linking failed: %s", path));
 						}
@@ -710,8 +768,8 @@ public class ProductServer { //extends Cache {
 
 
 			// Consider keeping Objects, and calling .toString() only upon ExternalGenerator?
-			//env.put("PATH", String.format("%s:%s", System.getenv("PATH"), cmdPath));
-			env.put("PATH2", String.format("%s:%s", System.getenv("PATH"), cmdPath));
+			// env.put("PATH", String.format("%s:%s", System.getenv("PATH"), cmdPath));
+			// env.put("PATH2", String.format("%s:%s", System.getenv("PATH"), cmdPath));
 			env.put("OUTDIR",  this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
 
@@ -788,25 +846,61 @@ public class ProductServer { //extends Cache {
 	 * @return - the completed set of tasks, including failed ones.
 	 *
 	 */
-	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, Log log){
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, Log log) {
+		return executeMany(taskRequests, new Actions(actions), directives, log);
+	}
+
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, Actions actions, Map directives, Log log){
 
 		Map<String,Task> tasks = new HashMap<>();
-		log.note("Inits (" + tasks.size() + ") tasks ");
+
+		final int count = taskRequests.size();
+
+		log.info(String.format("Inits (%d) tasks ", count));
+
+		/// Check COPY & LINK targets (must be directories, if several tasks)
+		if (count > 1){
+
+			for (Path p : actions.copies){
+				if (!p.toFile().isDirectory()) {
+					log.warn(String.format("Several tasks (%d), but single COPY target: %s", count, p));
+				}
+			}
+
+			for (Path p : actions.links){
+				if (!p.toFile().isDirectory()){
+					log.warn(String.format("Several tasks (%d), but single LINK target: %s", count, p));
+				}
+			}
+
+		}
+
 
 		for (Entry<String,String> input : taskRequests.entrySet()){
 			String key   = input.getKey();
 			String value = input.getValue();
 			try {
-				Log subLog = null;
-				if (taskRequests.size() == 1)
-					subLog = log.child(key);
-				Task task = new Task(value, actions, subLog);
+
+				Log subLog = (taskRequests.size()==1) ? log.child(key) : null;
+
+				Task task = new Task(value, actions.value, subLog);
+
 				if (directives != null)
 					task.directives.putAll(directives);
+
+				if (actions.copies != null)
+					task.actions.copies.addAll(actions.copies);
+
+				if (actions.links != null)
+					task.actions.links.addAll(actions.links);
+
+
 				//if (log)
 				task.log.verbosity = log.verbosity;
 				tasks.put(key, task);
-				log.note(String.format("Starting thread: %d %s(%s)", task.getId(), key, task.info.PRODUCT_ID));
+				log.note(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				if (task.log != log)
+					log.info(String.format("See separate log: %s",  task.logFile));
 				task.start();
 			}
 			catch (ParseException e) {
@@ -827,10 +921,11 @@ public class ProductServer { //extends Cache {
 			Task task = entry.getValue();
 			try {
 				task.join();
-				log.note(String.format("Finished thread: %s-%d ", key, task.getId()));
+				log.note(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
 			}
 			catch (InterruptedException e) {
-				log.note(String.format("Interrupted thread: %s-%d ", key, task.getId()));
+				log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				log.warn(String.format("Pending file? : ", task.outputPathTmp));
 			}
 		}
 
@@ -1108,13 +1203,17 @@ public class ProductServer { //extends Cache {
 		}
 
 		log.note("Actions: " + actions);
+		log.note(String.format("   COPY(%d): %s", actions.copies.size(), actions.copies));
+		log.note(String.format("   LINK(%d): %s", actions.links.size(),  actions.links));
+
 		log.note("Directives: " + directives);
 		//System.out.println(directives);
 
 		//Log taskLog = (products.size() == 1) ? log : null;
+		int result = 0;
 
-		// TODO: actions as Object
-		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions.value, directives, log);
+		//Map<String,ProductServer.Task> tasks = server.executeMany(products, actions.value, directives, log);
+		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions, directives, log);
 
 		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");
 
