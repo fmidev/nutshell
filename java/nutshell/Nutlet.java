@@ -257,9 +257,9 @@ public class Nutlet extends HttpServlet {
 					//task.log.ok("-------- see separate log <---");
 
 
-					if (task.pendingException.index >= HttpServletResponse.SC_BAD_REQUEST){
+					if (task.log.pendingException.index >= HttpServletResponse.SC_BAD_REQUEST){
 						task.log.warn(String.format("Failed task: %s", task.toString()));
-						throw task.pendingException;
+						throw task.log.pendingException;
 					}
 					else {
 						task.log.ok(String.format("Completed task: %s", task.toString()));

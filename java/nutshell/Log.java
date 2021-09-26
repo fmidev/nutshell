@@ -1,5 +1,6 @@
 package nutshell;
 
+import javax.xml.ws.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,18 +16,21 @@ public class Log {
 	public Log() {
 		startTime = System.currentTimeMillis();
 		numberFormat.setMinimumIntegerDigits(5);
+		printStream = System.err;
 	}
 
 	public Log(String s) {
 		startTime = System.currentTimeMillis();
 		numberFormat.setMinimumIntegerDigits(5);
 		this.setOwner(s);
+		printStream = System.err;
 	}
 
 	public Log(int verbosity) {
 		this.verbosity = verbosity;
 		startTime = System.currentTimeMillis();
 		numberFormat.setMinimumIntegerDigits(5);
+		printStream = System.err;
 	}
 
 	String owner = "";
@@ -47,7 +51,7 @@ public class Log {
 	}
 
 	public Log error(String message){
-		return append(ERROR, message);
+		return log(ERROR, message);
 	}
 
 	/*
@@ -59,35 +63,35 @@ public class Log {
 	 */
 
 	public Log warn(String message){
-		return append(WARNING, message);
+		return log(WARNING, message);
 	}
 
 	public Log fail(){
-		return append(FAIL, null);
+		return log(FAIL, null);
 	}
 
 	public Log note(String message){
-		return append(NOTE, message);
+		return log(NOTE, message);
 	}
 
 	public Log info(String message){
-		return append(INFO, message);
+		return log(INFO, message);
 	}
 
 
 	public Log success(boolean isTrue){
 		if (isTrue)
-			return append(OK, null);
+			return log(OK, null);
 		else
-			return append(FAIL, null);
+			return log(FAIL, null);
 	}
 
 	public Log ok(String msg){
-		return append(OK, msg);
+		return log(OK, msg);
 	}
 	
 	public Log debug(String message){
-		return append(DEBUG, message);
+		return log(DEBUG, message);
 	}
 	
 	// Consider INFO?
@@ -132,6 +136,8 @@ public class Log {
 	/// Verbose level. Messages equal or lower value than will be communicated.
 	public int verbosity = VERBOSE;
 
+	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
+	public boolean VT100 = false;
 
 	//final static Map<String, Integer> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 	final static Map<Integer, String> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
@@ -156,27 +162,62 @@ public class Log {
 
 
 
+
 	/// Add a log entry with a message.
-	public <E> Log append(int status, E message){
+
+	/**
+	 *
+	 * @param status
+	 * @param message
+	 * @param <E>
+	 * @return
+	 */
+	public <E> Log log(int status, E message){
+
+		/// Consider validate() cf. HttpLog.handleHttpMsg()
+		if ((status < 0) || (status > 10)) {
+			// or warn? (with infinite loop risk)
+			log(String.format("Illegal LOG level: %d", status));  // Or: return false?
+		}
+
 		set(status);
-		//if (this.status <= verbosity){}
-		return append(message);
+
+		return log(message);
+
 	}
 
-	public <E> Log append(E message){
+	/**
+	 *
+	 * @param message
+	 * @param <E>
+	 * @return
+	 */
+	public <E> Log log(E message){
 
 		if (this.status <= verbosity){
 			buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
 			buffer.append(String.format("%7s", statusCodes.get(this.status)));
 			if (owner != null)
 				buffer.append(':').append(' ').append(owner);
+
+			// Ensure printStream to avoid infinite buffer growth
+			// TODO: design control for buffer size.
+			// TODO: consider: if (size > 1M), clear(), and only light warning in stderr...
+			if (printStream == null){
+				printStream = System.err;
+				printStream.print(buffer.toString()); // "copy" prefix (ie. not do clear it)
+				printStream.append("NOTE: printStream undefined, using standard error.\n");
+			}
+
+
+
 			if (message != null)
 				buffer.append('\t').append(message);
 			buffer.append('\n');
-			if (printStream != null){
-				printStream.print(buffer.toString());
-				buffer.setLength(0);  // TODO CLEAR?
-			}
+			//if (printStream != null){
+			printStream.print(buffer.toString());
+			buffer.setLength(0);  // TODO CLEAR?
+			//}
 		}
 		return this;
 	}
@@ -220,7 +261,7 @@ public class Log {
 			}
 			if (line.charAt(0) == 'q')
 				break;
-			log.append((int)(Math.random()*5.0),line);
+			log.log((int)(Math.random()*5.0),line);
 			
 		}
 		System.out.println(log);

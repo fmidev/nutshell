@@ -1,6 +1,5 @@
 package nutshell;
 
-import sun.font.DelegatingShape;
 import sun.misc.Signal;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,8 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
-import static java.nio.file.StandardCopyOption.*;
 
 //import javax.servlet.http.HttpServletResponse;
 
@@ -55,11 +52,12 @@ import static java.nio.file.StandardCopyOption.*;
 
 public class ProductServer { //extends Cache {
 
-
-	final public Log serverLog;
+	/// consider "log"
+	//final public Log serverLog;
+	final public HttpLog serverLog;
 
 	ProductServer(){
-		serverLog = new Log(getClass().getSimpleName());
+		serverLog = new HttpLog(getClass().getSimpleName());
 	}
 
 	/// System side settings.
@@ -262,7 +260,7 @@ public class ProductServer { //extends Cache {
 	 */
 	public class Task extends Thread { //implements Runnable {
 		
-		final Log log;
+		final HttpLog log;
 		final ProductInfo info;
 
 		///
@@ -289,39 +287,32 @@ public class ProductServer { //extends Cache {
 
 		public File logFile = null;
 
+		/**
+		 *
+		 * @param i
+		 * @param msg
 		void setStatus(int i, String msg){
-			if (i >= 500){
-				this.log.error(msg);
-			}
-			else if (i >= 400){
-				this.log.warn(msg);
-			}
-			else if (i >= 300){
-				this.log.note(msg);
-			}
-
-			if (i > this.pendingException.index)
-				this.pendingException = new IndexedException(i, msg);
-
 		}
+		 */
 
+		/** Set status according to predefined {@link IndexedException}
+		 *
+		 * @param e
 		void setStatus(IndexedException e){
-			if (e.index >= 500){
-				this.log.error(e.getMessage());
-			}
-			else if (e.index >= 400){
-				this.log.warn(e.getMessage());
-			}
-			else if (e.index >= 300){
-				this.log.note(e.getMessage());
-			}
 
-			if (e.index > this.pendingException.index)
-				this.pendingException = e;
+			if (handleHttpMsg(e.index, e.getMessage())){
+				if (e.index > this.pendingException.index)
+					this.pendingException = e;
+			}
+			else {
+				handleStandardMsg(e.index, e.getMessage());
+			}
 
 		}
+		 */
 
-		public IndexedException pendingException = new IndexedException(HttpServletResponse.SC_CONTINUE, "Ok");
+
+
 
 		/** Product generation task defining a product instance and alternative operations for retreaving it.
 		 *
@@ -330,7 +321,7 @@ public class ProductServer { //extends Cache {
 		 * @param parentLog - utility for logging
 		 * @throws ParseException - if parsing productStr fails
 		 */
-		public Task(String productStr, int actions, Log parentLog) throws ParseException {
+		public Task(String productStr, int actions, HttpLog parentLog) throws ParseException {
 
 			this.info = new ProductInfo(productStr);
 
@@ -365,7 +356,7 @@ public class ProductServer { //extends Cache {
 				this.logFile = null;
 			}
 			else {
-				this.log = new Log(this.info.PRODUCT_ID);
+				this.log = new HttpLog(this.info.PRODUCT_ID);
 				this.logFile = cacheRoot.resolve(relativeLogPath).toFile();
 				try {
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
@@ -539,7 +530,7 @@ public class ProductServer { //extends Cache {
 						this.delete(this.outputPath);
 					}
 					catch (IOException e) {
-						setStatus(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
+						log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
 					}
 				}
 
@@ -560,7 +551,7 @@ public class ProductServer { //extends Cache {
 					//fileFinal.createNewFile();
 				}
 				catch (Exception e) {
-					setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating file: %s", e.getMessage()));
+					log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating file: %s", e.getMessage()));
 					//return;
 				}
 			}
@@ -577,7 +568,7 @@ public class ProductServer { //extends Cache {
 					this.log.debug(this.inputs.toString());
 					//System.err.println("## " + this.inputs);
 				} catch (Exception e) {
-					setStatus(HttpServletResponse.SC_CONFLICT, "Input list retrieval failed");
+					log.log(HttpServletResponse.SC_CONFLICT, "Input list retrieval failed");
 					this.log.error(e.getMessage());
 
 					this.log.warn("Removing GENERATE from actions");
@@ -602,13 +593,13 @@ public class ProductServer { //extends Cache {
 						String r = inputTask.result.toString();
 						this.log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
-						if (inputTask.pendingException.index > 300){
-							this.log.warn("errors in input generation: " + inputTask.pendingException.getMessage());
+						if (inputTask.log.pendingException.index > 300){
+							this.log.warn("errors in input generation: " + inputTask.log.pendingException.getMessage());
 						}
 					}
 					else {
-						this.log.error(inputTask.pendingException.getMessage());
-						setStatus(HttpServletResponse.SC_PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
+						this.log.error(inputTask.log.pendingException.getMessage());
+						log.log(HttpServletResponse.SC_PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 					}
 				}
 
@@ -622,7 +613,7 @@ public class ProductServer { //extends Cache {
 				}
 				catch (IndexedException e) {
 
-					setStatus(e);
+					log.log(e);
 
 					try {
 						this.delete(this.outputPathTmp);
@@ -645,14 +636,14 @@ public class ProductServer { //extends Cache {
 						this.move(this.outputPathTmp, this.outputPath);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
-						setStatus(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
+						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
 
 						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
 					// this.result = this.outputPath;
 				}
 				else {
-					setStatus(HttpServletResponse.SC_CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
+					log.log(HttpServletResponse.SC_CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
 					// this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
 					try {
 						this.delete(this.outputPathTmp);
@@ -660,13 +651,13 @@ public class ProductServer { //extends Cache {
 					catch (Exception e) {
 						/// TODO: is it a fatal error if a product defines its input wrong?
 						this.log.error(e.getMessage()); // RETURN?
-						setStatus(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
+						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
 					}
 				}
 
 			}
 			else {
-				this.log.note("Input list was requested (only)");
+				this.log.note("Input list: requested");
 				this.result = this.inputs;
 			}
 
@@ -694,7 +685,7 @@ public class ProductServer { //extends Cache {
 
 						}
 						catch (IOException e) {
-							setStatus(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+							log.log(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
 						}
 
 					}
@@ -705,7 +696,7 @@ public class ProductServer { //extends Cache {
 							this.copy(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.error(String.format("Copying failed: %s", path));
-							setStatus(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+							log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 							//this.log.error(String.format("Copying failed: %s", path));
 						}
 					}
@@ -715,7 +706,7 @@ public class ProductServer { //extends Cache {
 							this.link(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.error(String.format("Linking failed: %s", path));
-							setStatus(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+							log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 						}
 					}
 
@@ -724,12 +715,13 @@ public class ProductServer { //extends Cache {
 				else {
 					// TODO: save file (of JavaGenerator)
 					// this.log.error(String.format("Failed in generating: %s ", this.outputPath));
-					setStatus(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
+					log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
 					try {
 						this.delete(this.outputPath);
 					} catch (IOException e) {
-						this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
-						setStatus(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+						//this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
+						log.log(Log.ERROR, String.format("Failed in deleting: %s ", this.outputPath));
+						log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 					}
 					return;
 				}
@@ -851,11 +843,11 @@ public class ProductServer { //extends Cache {
 	 * @return - the completed set of tasks, including failed ones.
 	 *
 	 */
-	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, Log log) {
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, HttpLog log) {
 		return executeMany(taskRequests, new Actions(actions), directives, log);
 	}
 
-	public Map<String,Task> executeMany(Map<String,String> taskRequests, Actions actions, Map directives, Log log){
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, Actions actions, Map directives, HttpLog log){
 
 		Map<String,Task> tasks = new HashMap<>();
 
@@ -886,7 +878,7 @@ public class ProductServer { //extends Cache {
 			String value = input.getValue();
 			try {
 
-				Log subLog = (taskRequests.size()==1) ? log.child(key) : null;
+				HttpLog subLog = (taskRequests.size()==1) ? log.child(key) : null;
 
 				Task task = new Task(value, actions.value, subLog);
 
@@ -1018,6 +1010,8 @@ public class ProductServer { //extends Cache {
 		System.err.println("Examples: ");
 		System.err.println("    java -cp $NUTLET_PATH 201012161615_test.ppmforge_DIMENSION=2.5.png");
 
+		//System.err.println(HttpLog.messages);
+
 	}
 
 	/*
@@ -1054,7 +1048,7 @@ public class ProductServer { //extends Cache {
 		server.serverLog.verbosity = Log.DEBUG;
 		server.timeOut = 20;
 
-		Log log = server.serverLog; //.child("CmdLine");
+		HttpLog log = server.serverLog; //.child("CmdLine");
 		//server.readConfig();
 
 		String confFile = null;
@@ -1184,7 +1178,8 @@ public class ProductServer { //extends Cache {
 									}
 								}
 							}
-							log.error("No such action code: " + opt);
+							//log.log(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("No such action code: %s", opt));
+							log.error(String.format("No such action code: %s", opt));
 							System.exit(2);
 						}
 
@@ -1225,7 +1220,7 @@ public class ProductServer { //extends Cache {
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
-			log.note(String.format("exception: %s", task.pendingException.getMessage()));
+			log.note(String.format("exception: %s", task.log.pendingException.getMessage()));
 			log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.logFile != null)
 				log.info("Log: "  + task.logFile.getAbsolutePath());
