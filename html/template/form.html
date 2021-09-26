@@ -63,16 +63,21 @@
           <td>
             <input id="product" name="product" list="prods" type="text" size="80" value="201012170840_test.ppmforge.png"/>
             <select id="product_presets" onchange="this.form.product.value = this[selectedIndex].value">
+              <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
+              <option value="demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png">Image Pattern (error: too large)</option>
+              <option value="demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png">Image Pattern (error: illegal parameter values)</option>
+              <option value="demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.pdf">Image Pattern (error: unsupported parameter values)</option>
+              <option value="demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf">Image Pattern (error: unsupported format)</option>
+              <option value="demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png">Geoserver</option>
+              <option value="202005080000_demo.cloudy_SIZE=800,600.jpg">Cloudy</option>
+              <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
+              <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>
+              <option value="maps.wms_PROJ=4326_BBOX=20,57,25,62_SIZE=512,512_CONF=geoserver_LAYERS=world-map-combo-en.png">Map</option>
+              <option value="201708121600_radar.rack_SIZE=500_ENCODING=S_PROJ=AEQD_SITE=fikor.png">Radar Composite</option>
               <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png">Radar Composite</option>
               <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default.png">Radar Composite (color)</option>
               <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default_TRANSP2=0.1,0.8.png">Radar Composite (color, transp)</option>
               <option value="201708121600_radar.rack.doppler.vis_SITE=fikor_COORD=C_STEP=20__COLORS=white,blue,dark-blue:0_SCALE=2_LINEWIDTH=1_BGCOLOR=white.png">Doppler</option>
-              <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
-              <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>
-              <option value="maps.wms_PROJ=4326_BBOX=20,57,25,62_SIZE=512,512_CONF=geoserver_LAYERS=world-map-combo-en.png">Map</option>
-              <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
-              <option value="demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png">Geoserver</option>
-              <option value="202005080000_demo.cloudy_SIZE=800,600.jpg">Cloudy</option>
               <option value=""/>
               <option value=""/>
             </select>

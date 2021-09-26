@@ -98,9 +98,9 @@ cp -vau {.,$HTML_ROOT}/WEB-INF/lib/Nutlet.jar
 popd &> /dev/null
 echo
 
-echo "# Adding alias link 'nutshell/nutshell -> .', for optional Python httpd"
-ln -s . /opt/nutshell/nutshell  #???
-echo
+#echo "# Adding alias link 'nutshell/nutshell -> .', for optional Python httpd"
+#ln -s . /opt/nutshell/nutshell  #???
+#echo
 
 echo "# Creating/linking cache root"
 mkdir -v --parents $CACHE_ROOT/

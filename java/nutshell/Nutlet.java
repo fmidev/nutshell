@@ -251,12 +251,19 @@ public class Nutlet extends HttpServlet {
 
 				try {
 					// track esp. missing inputs
-					task.log.ok("-------- see separate log --->");
+					//task.log.ok("-------- see separate log --->");
+					task.log.ok("Executing...");
 					task.execute();
-					task.log.ok("-------- see separate log <---");
+					//task.log.ok("-------- see separate log <---");
 
-					task.log.ok("Completed task: " + task.toString());
 
+					if (task.pendingException.index >= HttpServletResponse.SC_BAD_REQUEST){
+						task.log.warn(String.format("Failed task: %s", task.toString()));
+						throw task.pendingException;
+					}
+					else {
+						task.log.ok(String.format("Completed task: %s", task.toString()));
+					}
 
 					if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
@@ -326,13 +333,7 @@ public class Nutlet extends HttpServlet {
 
 				if (task.actions.isSet(Actions.CHECK)) {
 
-					Map<String,Object> map = new HashMap<>();
-
-					// NOTE: these assume ExternalGenerator?
-					Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
-					map.put("Generator dir", html.createAnchor(gen.getParent(),null));
-					map.put("Generator file", html.createAnchor(gen, null));
-
+					Map<String,Object> map = new LinkedHashMap<>();
 
 					//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
 					if (task.relativeOutputDir != null) {
@@ -352,6 +353,11 @@ public class Nutlet extends HttpServlet {
 					else {
 						map.put("Output file", "???");
 					}
+
+					// NOTE: these assume ExternalGenerator?
+					Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
+					map.put("Generator dir", html.createAnchor(gen.getParent(),null));
+					map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
 
 					html.appendTable(map, "Product generator");
 

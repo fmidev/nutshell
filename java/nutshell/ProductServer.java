@@ -3,6 +3,7 @@ package nutshell;
 import sun.font.DelegatingShape;
 import sun.misc.Signal;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -288,6 +289,40 @@ public class ProductServer { //extends Cache {
 
 		public File logFile = null;
 
+		void setStatus(int i, String msg){
+			if (i >= 500){
+				this.log.error(msg);
+			}
+			else if (i >= 400){
+				this.log.warn(msg);
+			}
+			else if (i >= 300){
+				this.log.note(msg);
+			}
+
+			if (i > this.pendingException.index)
+				this.pendingException = new IndexedException(i, msg);
+
+		}
+
+		void setStatus(IndexedException e){
+			if (e.index >= 500){
+				this.log.error(e.getMessage());
+			}
+			else if (e.index >= 400){
+				this.log.warn(e.getMessage());
+			}
+			else if (e.index >= 300){
+				this.log.note(e.getMessage());
+			}
+
+			if (e.index > this.pendingException.index)
+				this.pendingException = e;
+
+		}
+
+		public IndexedException pendingException = new IndexedException(HttpServletResponse.SC_CONTINUE, "Ok");
+
 		/** Product generation task defining a product instance and alternative operations for retreaving it.
 		 *
 		 * @param productStr
@@ -306,6 +341,8 @@ public class ProductServer { //extends Cache {
 
 			final String filename = info.getFilename();
 
+
+
 			// Relative
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
 			this.timeStampDir = getTimestampDir(this.info.time);
@@ -313,13 +350,15 @@ public class ProductServer { //extends Cache {
 			this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve("tmp" + getId());
 			this.relativeOutputPath = relativeOutputDir.resolve(filename);
 
-			this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getId() + ".log");
+			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getId() + ".log");
+			this.relativeLogPath    = relativeOutputDir.resolve(filename + "." + getId() + ".log");
 
 			// Absolute
 			this.outputDir     = cacheRoot.resolve(this.relativeOutputDir);
 			this.outputDirTmp  = cacheRoot.resolve(this.relativeOutputDirTmp);
 			this.outputPath    = outputDir.resolve(filename);
-			this.outputPathTmp = outputDirTmp.resolve(getFilePrefix() + filename);
+			//this.outputPathTmp = outputDirTmp.resolve(getFilePrefix() + filename);
+			this.outputPathTmp = outputDirTmp.resolve(filename);
 
 			if (parentLog != null){
 				this.log = parentLog.child("["+this.info.PRODUCT_ID+"]");
@@ -347,23 +386,7 @@ public class ProductServer { //extends Cache {
 	
 		}
 
-		protected String getFilePrefix() {
-			return "";
-			//return String.format("%s-%d-", getClass().getSimpleName(), getId());
-		}
 
-		/*
-		public void setDirectives(Map<String, String> map){
-			for (Map.Entry<String,String> entry : map.entrySet() ){ //parameters.entrySet()) {
-				String key = entry.getKey().toString();
-				if (key.equals(key.toUpperCase())){
-					String value = entry.getValue();
-					if ((value != null) && (!value.isEmpty()))
-						directives.put(key, value);
-				}
-			}
-		}
-		 */
 
 		/** Imports map to directives map, converting array values to comma-separated strings.
 		 *
@@ -380,10 +403,12 @@ public class ProductServer { //extends Cache {
 			}
 		}
 
-		public boolean move(File src, File dst){
-			this.log.note(String.format("Move: from: %s ", src.getName()));
-			this.log.note(String.format("        to: %s ", dst.getName()));
-			return src.renameTo(dst);
+		//public boolean move(File src, File dst){
+		public Path move(Path src, Path dst) throws IOException {
+			this.log.note(String.format("Move: from: %s ", src));
+			this.log.note(String.format("        to: %s ", dst));
+			return Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			//return src.renameTo(dst);
 		}
 
 		public Path copy(Path src, Path dst) throws IOException {
@@ -403,9 +428,10 @@ public class ProductServer { //extends Cache {
 			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
-		public boolean delete(File file){
-			this.log.note(String.format("Deleting: %s ", file.getAbsolutePath()));
-			return file.delete();
+		public boolean delete(Path dst) throws IOException {
+			this.log.note(String.format("Deleting: %s ", dst));
+			return Files.deleteIfExists(dst);
+			//return file.delete();
 		}
 
 
@@ -442,8 +468,13 @@ public class ProductServer { //extends Cache {
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
 			// System.out.println("Interrupted by Ctrl+C: " + this.outputPath.getFileName());
 			if (actions.involves(Actions.FILE)) {
-				delete(this.outputPath.toFile());
-				delete(this.outputPathTmp.toFile()); // what about tmpdir?
+				try {
+					delete(this.outputPath);
+					delete(this.outputPathTmp); // what about tmpdir?
+				} catch (IOException e) {
+					log.warn(e.getMessage());
+					//e.printStackTrace();
+				}
 			}
 		}
 
@@ -504,7 +535,12 @@ public class ProductServer { //extends Cache {
 					this.result = this.outputPath;
 				}
 				else {
-					this.delete(fileFinal);
+					try {
+						this.delete(this.outputPath);
+					}
+					catch (IOException e) {
+						setStatus(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
+					}
 				}
 
 			}
@@ -519,12 +555,13 @@ public class ProductServer { //extends Cache {
 					//Path outDir =
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDirTmp);
-					this.log.debug("Creating file: " + fileFinal);
-					fileFinal.createNewFile();
+					this.log.debug(String.format("Creating file: %s", this.relativeOutputPath));
+					Files.createFile(this.outputPath);
+					//fileFinal.createNewFile();
 				}
 				catch (Exception e) {
-					this.log.error(e.getLocalizedMessage());
-					return;
+					setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating file: %s", e.getMessage()));
+					//return;
 				}
 			}
 
@@ -540,72 +577,17 @@ public class ProductServer { //extends Cache {
 					this.log.debug(this.inputs.toString());
 					//System.err.println("## " + this.inputs);
 				} catch (Exception e) {
-					this.log.warn("Input list retrieval failed");
-					//e.printStackTrace(this.log.printStream);
+					setStatus(HttpServletResponse.SC_CONFLICT, "Input list retrieval failed");
 					this.log.error(e.getMessage());
+
 					this.log.warn("Removing GENERATE from actions");
 					this.actions.remove(Actions.GENERATE);
 				}
 			}
 
 
-			/*
-			if (fileFinal.exists()){
-				this.log.debug("File exists: " + this.outputPath.toString());
-
-				// if (this.hasAction(this.MEMORY)) { load(this.outputPath ...)
-
-				if (this.actions.isSet(Actions.DELETE)) {
-					// TODO: delete only after waiting?
-					this.delete(fileFinal);
-
-					// If DELETE is the main action, the output should be a status report.
-					if (!this.actions.involves(Actions.MAKE)){ // = no result object requested
-						this.actions.add(Actions.CHECK);
-					}
-				}
-				else if (this.actions.isSet(Actions.FILE) && !this.actions.isSet(Actions.GENERATE)){
-					if (queryFile(fileFinal,  90, this.log)){
-						this.log.note("File query completed: " + fileFinal.toString());
-						this.log.ok("Returning file");
-						this.result = this.outputPath;
-						return; // redesign this (allowing LINK and COPY)
-					}
-					else {
-						this.log.warn("Gave up waiting...");
-						this.delete(fileFinal);
-					}
-				}
-			}
-			else {
-				this.log.debug("File does not exist: " + this.outputPath.toString());
-			}
-
-			// At this stage product does not exist (anymore/yet).
-			if (this.actions.involves(Actions.MAKE)){
-				this.actions.add(Actions.GENERATE);
-			}
-
-			/// Prepare directory and empty file (marker).
-			if (this.actions.isSet(Actions.FILE)){ // (this.hasAction(this.FILE)){ // && this.hasAction(this.GENERATE)){
-				try {
-					this.log.debug("Creating dir: " + cacheRoot+"/./"+this.relativeOutputDir);
-					//Path outDir =
-					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
-					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDirTmp);
-					this.log.debug("Creating file: " + fileFinal);
-					fileFinal.createNewFile();
-				} catch (Exception e) {
-					this.log.error(e.getLocalizedMessage());
-					return;
-				}
-			}
-			*/
-
-
 
 			if (this.actions.isSet(Actions.GENERATE)){
-
 
 				/// Assume Generator uses input similar to output (File or Object)
 				final int inputActions = this.actions.value & (Actions.MEMORY | Actions.FILE);
@@ -620,9 +602,13 @@ public class ProductServer { //extends Cache {
 						String r = inputTask.result.toString();
 						this.log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
+						if (inputTask.pendingException.index > 300){
+							this.log.warn("errors in input generation: " + inputTask.pendingException.getMessage());
+						}
 					}
 					else {
-						this.log.note(String.format("Failed with: %s = %s", key, inputTask.getName()));
+						this.log.error(inputTask.pendingException.getMessage());
+						setStatus(HttpServletResponse.SC_PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 					}
 				}
 
@@ -635,10 +621,11 @@ public class ProductServer { //extends Cache {
 					generator.generate(this);
 				}
 				catch (IndexedException e) {
-					this.log.error(e.getMessage());
-					//e.printStackTrace(this.log.printStream);
+
+					setStatus(e);
+
 					try {
-						this.delete(fileTmp);
+						this.delete(this.outputPathTmp);
 						//this.delete(fileFinal);
 					}
 					catch (Exception e2) {
@@ -652,19 +639,28 @@ public class ProductServer { //extends Cache {
 
 				if (fileTmp.length() > 0){
 					// this.info.getFilename()
-					this.log.debug("OK, generator produced tmp file: " + fileTmp.getName());
-					this.move(fileTmp, fileFinal);
-					//this.result = this.outputPath;
+					this.log.debug(String.format("OK, generator produced tmp file: %s", this.outputPath));
+					// this.move(fileTmp, fileFinal);
+					try {
+						this.move(this.outputPathTmp, this.outputPath);
+					} catch (IOException e) {
+						this.log.warn(e.toString());
+						setStatus(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
+
+						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+					}
+					// this.result = this.outputPath;
 				}
 				else {
-					this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
+					setStatus(HttpServletResponse.SC_CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
+					// this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
 					try {
-						//this.delete(fileFinal);
-						this.delete(fileTmp);
+						this.delete(this.outputPathTmp);
 					}
 					catch (Exception e) {
 						/// TODO: is it a fatal error if a product defines its input wrong?
-						this.log.error(e.getLocalizedMessage()); // RETURN?
+						this.log.error(e.getMessage()); // RETURN?
+						setStatus(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
 					}
 				}
 
@@ -698,7 +694,7 @@ public class ProductServer { //extends Cache {
 
 						}
 						catch (IOException e) {
-							this.log.error(e.getMessage());
+							setStatus(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
 						}
 
 					}
@@ -709,6 +705,8 @@ public class ProductServer { //extends Cache {
 							this.copy(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.error(String.format("Copying failed: %s", path));
+							setStatus(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+							//this.log.error(String.format("Copying failed: %s", path));
 						}
 					}
 
@@ -717,6 +715,7 @@ public class ProductServer { //extends Cache {
 							this.link(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.error(String.format("Linking failed: %s", path));
+							setStatus(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 						}
 					}
 
@@ -724,8 +723,14 @@ public class ProductServer { //extends Cache {
 				}
 				else {
 					// TODO: save file (of JavaGenerator)
-					this.log.error("Failed in generating: " + fileFinal.getAbsolutePath());
-					this.delete(fileFinal);
+					// this.log.error(String.format("Failed in generating: %s ", this.outputPath));
+					setStatus(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
+					try {
+						this.delete(this.outputPath);
+					} catch (IOException e) {
+						this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
+						setStatus(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+					}
 					return;
 				}
 			}
@@ -1049,7 +1054,7 @@ public class ProductServer { //extends Cache {
 		server.serverLog.verbosity = Log.DEBUG;
 		server.timeOut = 20;
 
-		Log log = server.serverLog.child("CmdLine");
+		Log log = server.serverLog; //.child("CmdLine");
 		//server.readConfig();
 
 		String confFile = null;
@@ -1186,7 +1191,7 @@ public class ProductServer { //extends Cache {
 					}
 				}
 				else {  // Argument does not start with "--"
-					products.put("product" + products.size(), arg);
+					products.put("product" + (products.size()+1), arg);
 				}
 
 			}
@@ -1220,8 +1225,8 @@ public class ProductServer { //extends Cache {
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
-
-			log.note("status(" + task.info.PRODUCT_ID + "): " + task.log.status);
+			log.note(String.format("exception: %s", task.pendingException.getMessage()));
+			log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.logFile != null)
 				log.info("Log: "  + task.logFile.getAbsolutePath());
 			log.note("File: " + task.outputPath.toString());
