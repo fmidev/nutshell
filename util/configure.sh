@@ -138,17 +138,21 @@ check_dir_syntax TOMCAT_CONF_DIR
 ask_variable CACHE_ROOT "$PKG_ROOT/cache" "Root of cache directory, often on separate resource:"
 check_dir_syntax CACHE_ROOT
 mkdir -v --parents --mode a+rwx $CACHE_ROOT
-if [ $? == 0 ]; then
-    echo "Linking CACHE_ROOT to HTML_ROOT/cache"
+echo "Linking CACHE_ROOT to HTML_ROOT/cache"
+if [ $? == 0 ] && [ ! -w $HTML_ROOT/ ]; then
     ln -svi $CACHE_ROOT $HTML_ROOT/
+else
+    echo "# Failed: write-protected"
 fi
 
 ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator (script) directories"
 check_dir_syntax PRODUCT_ROOT
 mkdir -v --parents $PRODUCT_ROOT
-if [ $? == 0 ]; then
-    echo "Linking PRODUCT_ROOT to HTML_ROOT/cache"
+echo "Linking PRODUCT_ROOT to HTML_ROOT/cache"
+if [ $? == 0 ] && [ ! -w $HTML_ROOT/ ]; then
     ln -svi $PRODUCT_ROOT $HTML_ROOT/
+else
+    echo "# Failed: write-protected"
 fi
 
 
