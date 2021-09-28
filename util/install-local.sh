@@ -26,20 +26,38 @@ export NUTSHELL_DIR
 #SCRIPT=$0
 DIR=${0%/*}
 DIR=`realpath ${DIR}`
-#NUTSHELL_DIR=${NUTSHELL_DIR:-${CUR_DIR%/*}}
-check_variable NUTSHELL_DIR ${DIR%/*}  "Directory containing nutshell.cnf and ./nutshell/*.py"
 
-if [ ! -e $NUTSHELL_DIR/nutshell/ ]; then
-    echo "# NUTSHELL_DIR=$NUTSHELL_DIR invalid (contains no ./nutshell/ sub directory)"
-    exit 1
-fi
-
-if [ -f $NUTSHELL_DIR/nutshell.cnf ]; then
-    source $NUTSHELL_DIR/nutshell.cnf
+if [ -f ./nutshell.cnf ]; then
+    source ./nutshell.cnf
 else
-    echo "# Main conf file $NUTSHELL_DIR/nutshell.cnf missing, run util/configure.sh first"
+    echo "# Initial conf file ./nutshell.cnf missing, run util/configure.sh first"
     exit 1
 fi
+
+
+export NUTSHELL_DEFAULT='java'
+check_variable NUTSHELL_DEFAULT "$NUTSHELL_DEFAULT" "Default language version"
+
+if [ $NUTSHELL_DEFAULT == 'java' ]; then
+    echo '# NutShell JAVA version will serve from $NUTSHELL_DIR/WEB_INF/lib/Nutlet.jar .'
+    echo '# This is compliant with Tomcat httpd, installation of which is however optional.'
+    check_variable NUTSHELL_DIR $HTML_ROOT  "Directory for nutshell.cnf and ./WEB_INF/lib/"
+    ls -ltr $NUTSHELL_DIR/WEB_INF/lib/Nutlet.jar
+    if [ $? != 0 ]; then
+	echo "# Required JAR file not found. Run util/install-java.sh first."
+	exit 1
+    fi
+else
+    check_variable NUTSHELL_DIR ${DIR%/*}  "Directory containing nutshell.cnf and Python files ./nutshell/"
+    if [ ! -e $NUTSHELL_DIR/nutshell/ ]; then
+	echo "# NUTSHELL_DIR=$NUTSHELL_DIR invalid (contains no ./nutshell/ sub directory)"
+	exit 1
+    fi
+fi
+
+
+
+
 
 
 check_variable BIN_DIR "/usr/local/bin" "Directory for the script "
@@ -47,7 +65,9 @@ eval BIN_DIR=$BIN_DIR
 mkdir -v --parents --mode u+x  $BIN_DIR/
 
 CACHE_ROOT=${CACHE_ROOT:-$HTML_ROOT/cache}
-check_variable CACHE_ROOT "$CACHE_ROOT" "Give product file cache root"
+check_variable CACHE_ROOT "$CACHE_ROOT" "Root directory for produced files"
+
+
 
 
 #echo "# Adding alias link 'nutshell/nutshell -> .', to comply with Python httpd"
@@ -57,7 +77,8 @@ echo "# Creating/linking cache root"
 mkdir -v --parents $CACHE_ROOT/
 chmod -v    a+rwsx $CACHE_ROOT/
 
-NUTSHELL_SH=$BIN_DIR/nutshell.sh
+#NUTSHELL_SH=$BIN_DIR/nutshell.sh
+NUTSHELL_SH=$BIN_DIR/nutshell
 
 #cat > $NUTSHELL_SH <<EOF
 ##!/bin/bash
@@ -66,7 +87,10 @@ NUTSHELL_SH=$BIN_DIR/nutshell.sh
 #python3.6 -m nutshell.nutshell -c $NUTSHELL_DIR/nutshell.cnf \$*
 #EOF
 
-cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR' > $NUTSHELL_SH
+
+cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR $NUTSHELL_DEFAULT' > $NUTSHELL_SH
 
 chmod -v gu+x $NUTSHELL_SH
+
 echo "# Installed $NUTSHELL_SH"
+echo "# Test using: $NUTSHELL_SH --help"

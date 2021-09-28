@@ -1,9 +1,14 @@
 #!/bin/bash
 
+# NutShelll wrapper script
+#
+# Markus.Peura@fmi.fi
+#
+
 export NUTSHELL_DIR=$NUTSHELL_DIR
 export PYTHONPATH=$PYTHONPATH:$NUTSHELL_DIR
 
-NUTSHELL=${NUTSHELL:-'python'}
+NUTSHELL=${NUTSHELL:-'$NUTSHELL_DEFAULT'}
 
 case $NUTSHELL in
     python)
