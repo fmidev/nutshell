@@ -139,10 +139,11 @@ public class Log {
 	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
 	public boolean VT100 = false;
 
-	//final static Map<String, Integer> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
+	//final static Map<String, Integer> ssCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 	final static Map<Integer, String> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 
 	static {
+
 
 		//statusCodes = ClassUtils.getConstants(Log.class);
 		statusCodes = new HashMap<>();

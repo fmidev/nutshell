@@ -3,14 +3,18 @@
 # set -e
 
 function goodbye {
-    echo "# Consider Tomcat restart, like: "
+    echo "# Exiting installation"
+    echo
+    echo "# Tomcat users, consider restart: "
     echo "#   sudo /etc/init.d/tomcat8 restart"
     echo "#   sudo systemctl restart httpd"
-    echo "# Exiting installation"
+    echo
+    echo "# For local (script) installation: "
+    echo "#   [sudo] NUTSHELL_VERSION=java util/install-local.sh"
 }
 trap goodbye EXIT
 
-trap "echo virhe" ILL
+trap "#echo Undefined error" ILL
 
 
 
@@ -36,7 +40,7 @@ else
 fi
 
 answer='y'
-read -e  -i "$answer" -p "Install NutShell (NutLet.jar) to $HTML_ROOT [Y/n]? " answer
+read -e  -i "$answer" -p "Install NutShell (NutLet.jar) under $HTML_ROOT [Y/n]? " answer
 echo
 
 if [ ${answer,} != 'y' ]; then
@@ -80,10 +84,11 @@ if [ -f $WEB_XML ]; then
     if [ $? != 0 ]; then
 	echo "Notice above changes in $HTML_ROOT/WEB-INF/web"
     fi
-    mv -v web.xml.new web.xml
+    #mv -v web.xml.new web.xml
     popd &> /dev/null
+    mv -v $WEB_XML.new $WEB_XML
 fi
-mv -v $WEB_XML.new $WEB_XML
+#
 echo
 
 echo "# Updating HTML structure $HTML_ROOT"

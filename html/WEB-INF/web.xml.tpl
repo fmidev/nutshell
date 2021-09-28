@@ -4,7 +4,7 @@
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	 version="2.5" > 
 
-  <!-- NutShell conf $USER $HOSTNAME $DATE /-->
+  <!-- NutShell conf $USER $HOSTNAME /-->
 
   <description>NutShell product demo - experimental </description>
   <display-name>NutShell Servlet</display-name>
@@ -25,6 +25,10 @@
     <init-param>
       <param-name>installDate</param-name>
       <param-value>${DATE}</param-value>
+    </init-param>
+    <init-param>
+      <param-name>installedBy</param-name>
+      <param-value>${USER}@${HOSTNAME}</param-value>
     </init-param>
   </servlet>
 

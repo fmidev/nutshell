@@ -54,10 +54,10 @@ public class ProductServer { //extends Cache {
 
 	/// consider "log"
 	//final public Log serverLog;
-	final public HttpLog serverLog;
+	final public HttpLog log;
 
 	ProductServer(){
-		serverLog = new HttpLog(getClass().getSimpleName());
+		log = new HttpLog(getClass().getSimpleName());
 	}
 
 	/// System side settings.
@@ -101,7 +101,7 @@ public class ProductServer { //extends Cache {
 
 		try {
 			if (path != null) {
-				serverLog.debug("Reading setup: " + path.toString());
+				log.debug("Reading setup: " + path.toString());
 				MapUtils.read(path.toFile(), setup);
 			}
 			confFile = path; //Paths.get(path);
@@ -111,7 +111,7 @@ public class ProductServer { //extends Cache {
 			setup.put("confFileError", e.getLocalizedMessage());
 		}
 
-		serverLog.debug(setup.toString());
+		log.debug(setup.toString());
 
 		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
@@ -593,12 +593,12 @@ public class ProductServer { //extends Cache {
 						String r = inputTask.result.toString();
 						this.log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
-						if (inputTask.log.pendingException.index > 300){
-							this.log.warn("errors in input generation: " + inputTask.log.pendingException.getMessage());
+						if (inputTask.log.indexedException.index > 300){
+							this.log.warn("errors in input generation: " + inputTask.log.indexedException.getMessage());
 						}
 					}
 					else {
-						this.log.error(inputTask.log.pendingException.getMessage());
+						this.log.error(inputTask.log.indexedException.getMessage());
 						log.log(HttpServletResponse.SC_PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 					}
 				}
@@ -1044,12 +1044,11 @@ public class ProductServer { //extends Cache {
 		}
 
 		final ProductServer server = new ProductServer();
-		server.serverLog.printStream = System.err;  // System.out  Note: testing STREAM action needs clean stdout
-		server.serverLog.verbosity = Log.DEBUG;
+		server.log.printStream = System.err;  // System.out  Note: testing STREAM action needs clean stdout
+		server.log.verbosity = Log.DEBUG;
 		server.timeOut = 20;
 
-		HttpLog log = server.serverLog; //.child("CmdLine");
-		//server.readConfig();
+		HttpLog log = server.log; //.child("CmdLine");
 
 		String confFile = null;
 
@@ -1114,17 +1113,13 @@ public class ProductServer { //extends Cache {
 							log.warn("Reading second conf file (already read: " + confFile + ")");
 						}
 						confFile = args[++i];
-						// log.info("Reading --conf file: " + confFile);
 						server.readConfig(confFile);
 						continue; // Note
 					}
 
-					// log.info("ARGH2: " + arg);
-
 					// Now, read conf file if not read this far.
 					if (confFile == null){
 						confFile = "nutshell.cnf";
-						// log.info("Reading conf file: " + confFile);
 						server.readConfig(confFile);
 					}
 
@@ -1192,8 +1187,7 @@ public class ProductServer { //extends Cache {
 			}
 		}
 		catch (Exception e) {
-			log.error("Unhandled exception: " + e.getMessage());
-			//System.err.println("Interrupted");
+			log.error(String.format("Unhandled exception: %s", e.getMessage()));
 			e.printStackTrace(log.printStream);
 			System.exit(1);
 		}
@@ -1209,24 +1203,31 @@ public class ProductServer { //extends Cache {
 		log.note("Directives: " + directives);
 		//System.out.println(directives);
 
-		//Log taskLog = (products.size() == 1) ? log : null;
 		int result = 0;
 
-		//Map<String,ProductServer.Task> tasks = server.executeMany(products, actions.value, directives, log);
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions, directives, log);
 
-		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");
+		log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
-			log.note(String.format("exception: %s", task.log.pendingException.getMessage()));
-			log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
+			if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
+				log.warn("Some problem(s) occurred:");
+				log.note(String.format("exception: %s", task.log.indexedException.getMessage()));
+				if (result < 20)
+				++result;
+			}
+			else {
+				log.note(String.format("status: %s", task.log.indexedException.getMessage()));
+			}
+			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.logFile != null)
 				log.info("Log: "  + task.logFile.getAbsolutePath());
 			log.note("File: " + task.outputPath.toString());
 		}
 
+		System.exit(result);
 
 	}
 

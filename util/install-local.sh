@@ -20,8 +20,10 @@ function check_variable(){
     fi
 }
 
+export NUTSHELL_DIR # Python
+export HTML_ROOT 
 export CACHE_ROOT 
-export NUTSHELL_DIR
+
 
 #SCRIPT=$0
 DIR=${0%/*}
@@ -39,10 +41,10 @@ export NUTSHELL_DEFAULT='java'
 check_variable NUTSHELL_DEFAULT "$NUTSHELL_DEFAULT" "Default language version"
 
 if [ $NUTSHELL_DEFAULT == 'java' ]; then
-    echo '# NutShell JAVA version will serve from $NUTSHELL_DIR/WEB_INF/lib/Nutlet.jar .'
+    echo '# NutShell JAVA version will serve from $NUTSHELL_DIR/WEB-INF/lib/Nutlet.jar .'
     echo '# This is compliant with Tomcat httpd, installation of which is however optional.'
-    check_variable NUTSHELL_DIR $HTML_ROOT  "Directory for nutshell.cnf and ./WEB_INF/lib/"
-    ls -ltr $NUTSHELL_DIR/WEB_INF/lib/Nutlet.jar
+    check_variable HTML_ROOT $HTML_ROOT  "Directory for nutshell.cnf and ./WEB_INF/lib/"
+    ls -ltr $HTML_ROOT/WEB-INF/lib/Nutlet.jar
     if [ $? != 0 ]; then
 	echo "# Required JAR file not found. Run util/install-java.sh first."
 	exit 1
@@ -88,9 +90,9 @@ NUTSHELL_SH=$BIN_DIR/nutshell
 #EOF
 
 
-cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR $NUTSHELL_DEFAULT' > $NUTSHELL_SH
+cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR $NUTSHELL_DEFAULT $HTML_ROOT' > $NUTSHELL_SH
 
 chmod -v gu+x $NUTSHELL_SH
 
 echo "# Installed $NUTSHELL_SH"
-echo "# Test using: $NUTSHELL_SH --help"
+echo "# Test with: $NUTSHELL_SH --help"
