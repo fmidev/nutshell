@@ -482,12 +482,14 @@ if __name__ == '__main__':
         else:
             product_server.logger.setLevel(int(options.LOG_LEVEL))
     
-    conf = ("nutshell.cnf", False) # lenient, skip silently if missing
-    if (options.CONF):
-        conf = (options.CONF, True) # strict, explicit 
+    #conf = ("nutshell.cnf", False) # lenient, skip silently if missing
+    #if (options.CONF):
+    #    conf = (options.CONF, True) # strict, explicit 
 
-    #    print("Reading conf: {0} = ".format(*conf))
-    product_server.read_conf(*conf)
+    #print("Reading conf: {0} = {1} {2}".format(*conf))
+    #product_server.read_conf(*conf)
+    print("Reading conf: {0}".format(options.CONF))
+    product_server.read_conf(options.CONF)
         
     # Override confs
     opts = options.__dict__  #nutils.get_entries(options)

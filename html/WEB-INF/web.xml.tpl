@@ -23,11 +23,11 @@
       <param-value>${HTML_ROOT}</param-value>
     </init-param>
     <init-param>
-      <param-name>installDate</param-name>
+      <param-name>buildDate</param-name>
       <param-value>${DATE}</param-value>
     </init-param>
     <init-param>
-      <param-name>installedBy</param-name>
+      <param-name>buildBy</param-name>
       <param-value>${USER}@${HOSTNAME}</param-value>
     </init-param>
   </servlet>

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NutShelll wrapper script
+# NutShell wrapper script
 #
 # Markus.Peura@fmi.fi
 #
@@ -14,11 +14,11 @@ NUTSHELL=${NUTSHELL:-'$NUTSHELL_DEFAULT'}
 case $NUTSHELL in
     python)
 	NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_DIR}
-	NUTSHELL="python3.6 -m nutshell.nutshell --log_level DEBUG"
+	NUTSHELL="python3.6 -m nutshell.nutshell"
 	;;
     java)
 	NUTSHELL_DIR=${NUTSHELL_DIR:-$HTML_ROOT}
-	NUTSHELL="java -cp $HTML_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer --log_level DEBUG"
+	NUTSHELL="java -cp $HTML_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
 	;;
     *)
 	#echo "NUTSHELL must be 'java' or 'python'"
@@ -28,7 +28,7 @@ esac
 if [ $# == 0 ]; then
     ${NUTSHELL} --help
 else
-    ${NUTSHELL} --conf ${NUTSHELL_DIR:-'.'}/nutshell.cnf $*
+    ${NUTSHELL} --log_level DEBUG --conf ${NUTSHELL_DIR:-'.'}/nutshell.cnf $*
 fi
 
 

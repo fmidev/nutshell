@@ -4,8 +4,8 @@
 
 CONF_FILE='nutshell.cnf'
 
-echo "Creating/updating NutShell python config file '$CONF_FILE'."
-echo "(Modifiable later with text editor, for example.)"
+echo "Creating/updating NutShell config file '$CONF_FILE'."
+echo "Modifiable later with text editor.)"
 echo
 
 # Bash special
@@ -18,6 +18,10 @@ trap goodbye EXIT
 
 
 if [ -f "$CONF_FILE" ]; then
+
+    echo "Reading: '$CONF_FILE'"
+    source $CONF_FILE
+
     echo "Saving back-up:"
     BACKUP_INDEX=`ls -1 nutshell.cnf.[0-9]*.bak | tail -1 | tr -cd '[0-9]'` &> /dev/null
     echo $BACKUP_INDEX
@@ -27,7 +31,7 @@ if [ -f "$CONF_FILE" ]; then
 	BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
     fi
     cp -vi $CONF_FILE $CONF_FILE.$BACKUP_INDEX.bak
-    source $CONF_FILE
+
     echo 
 fi
 
