@@ -508,8 +508,12 @@ public class Nutlet extends HttpServlet {
 	}
 
 	protected void addServerStatus(SimpleHtml html) throws IOException{
-		html.appendElement(SimpleHtml.H1, "Server setup");
+
+		html.appendElement(SimpleHtml.H1, "Nutlet setup");
 		html.appendTable(setup, null);
+
+		html.appendElement(SimpleHtml.H1, "ProductServer setup");
+		html.appendTable(productServer.setup, null);
 	}
 
 	protected void addRequestStatus(SimpleHtml html, HttpServletRequest request) {

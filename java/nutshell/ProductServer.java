@@ -60,6 +60,8 @@ public class ProductServer { //extends Cache {
 		log = new HttpLog(getClass().getSimpleName());
 	}
 
+	public final Map<String,Object> setup = new HashMap<>();
+
 	/// System side settings.
 	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
 	public Path cacheRoot   = Paths.get(".");
@@ -97,7 +99,7 @@ public class ProductServer { //extends Cache {
 
 	protected void readConfig(Path path){
 
-		Map<String, Object> setup = new HashMap<>();
+		//Map<String, Object> setup = new HashMap<>();
 
 		try {
 			if (path != null) {
