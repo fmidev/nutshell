@@ -102,21 +102,24 @@ free arguments are handled as files ie. product definitions.</p>
 <span id="http-server"></span><h2>NutShell HTTP Server<a class="headerlink" href="#nutshell-http-server" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="java-version">
 <h3>Java version<a class="headerlink" href="#java-version" title="Permalink to this headline">¶</a></h3>
-<p>Installation</p>
-<blockquote>
-<div>util/configure.sh
-util/install-java.sh</div></blockquote>
+<p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">util</span><span class="o">/</span><span class="n">configure</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">util</span><span class="o">/</span><span class="n">install</span><span class="o">-</span><span class="n">java</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="python-version">
 <h3>Python version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h3>
 <p>This version is for test use only. No specific installation procedure is required, all the required information
 is in the conf file (nutshell.cnf).</p>
-<p>The server can be started with</p>
-<blockquote>
-<div>python3 -m nutshell.httpd</div></blockquote>
-<p>or</p>
-<blockquote>
-<div>python3 -m nutshell.httpd -c nutshell.cnf</div></blockquote>
+<p>The server can be started with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span> <span class="o">--</span><span class="n">conf</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">cnf</span>
+</pre></div>
+</div>
 <p>The process responses with a line of type:</p>
 <blockquote>
 <div>Starting: <a class="reference external" href="http://localhost:8088/nutshell/">http://localhost:8088/nutshell/</a></div></blockquote>

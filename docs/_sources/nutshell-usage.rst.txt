@@ -70,7 +70,7 @@ NutShell HTTP Server
 Java version
 ------------
 
-Installation
+Installation::
 
   util/configure.sh
   util/install-java.sh
@@ -83,13 +83,13 @@ Python version
 This version is for test use only. No specific installation procedure is required, all the required information
 is in the conf file (nutshell.cnf).
 
-The server can be started with
+The server can be started with::
 
   python3 -m nutshell.httpd 
 
-or 
+or::
   
-  python3 -m nutshell.httpd -c nutshell.cnf
+  python3 -m nutshell.httpd --conf nutshell.cnf
 
 The process responses with a line of type:
 
