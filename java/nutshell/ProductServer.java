@@ -106,7 +106,8 @@ public class ProductServer { //extends Cache {
 				log.debug("Reading setup: " + path.toString());
 				MapUtils.read(path.toFile(), setup);
 			}
-			confFile = path; //Paths.get(path);
+			this.confFile = path; //Paths.get(path);
+			setup.put("confFile", path);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,7 +118,7 @@ public class ProductServer { //extends Cache {
 
 		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
-		this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
+		// this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
 	}
