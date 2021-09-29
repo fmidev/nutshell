@@ -53,7 +53,7 @@ The demo products can be generated using the command line, for example: ::
   python3 -m nutshell.nutshell -c nutshell-demo.cnf --make \
     --product demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
-  # 'make' is default action, and --product can be omitted:
+  # 'make' is default action, and also --product can be omitted:
   
   python3 -m nutshell.nutshell -c nutshell-demo.cnf \
     202005121245_demo.image.ppmforge_SEED=1234_WIDTH=300.png

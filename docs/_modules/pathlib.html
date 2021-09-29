@@ -4,28 +4,20 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pathlib &#8212; NutShell 0.3 documentation</title>
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="shortcut icon" href="../_static/nutshell-logo.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
           <p class="logo"><a href="../index.html">
@@ -59,9 +51,8 @@
 <span class="kn">import</span> <span class="nn">posixpath</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">contextmanager</span>
-<span class="kn">from</span> <span class="nn">errno</span> <span class="k">import</span> <span class="n">EINVAL</span><span class="p">,</span> <span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span>
+<span class="kn">from</span> <span class="nn">_collections_abc</span> <span class="k">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">errno</span> <span class="k">import</span> <span class="n">EINVAL</span><span class="p">,</span> <span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">,</span> <span class="n">EBADF</span><span class="p">,</span> <span class="n">ELOOP</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">attrgetter</span>
 <span class="kn">from</span> <span class="nn">stat</span> <span class="k">import</span> <span class="n">S_ISDIR</span><span class="p">,</span> <span class="n">S_ISLNK</span><span class="p">,</span> <span class="n">S_ISREG</span><span class="p">,</span> <span class="n">S_ISSOCK</span><span class="p">,</span> <span class="n">S_ISBLK</span><span class="p">,</span> <span class="n">S_ISCHR</span><span class="p">,</span> <span class="n">S_ISFIFO</span>
 <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">quote_from_bytes</span> <span class="k">as</span> <span class="n">urlquote_from_bytes</span>
@@ -87,6 +78,20 @@
 <span class="c1">#</span>
 <span class="c1"># Internals</span>
 <span class="c1">#</span>
+
+<span class="c1"># EBADF - guard against macOS `stat` throwing EBADF</span>
+<span class="n">_IGNORED_ERROS</span> <span class="o">=</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">,</span> <span class="n">EBADF</span><span class="p">,</span> <span class="n">ELOOP</span><span class="p">)</span>
+
+<span class="n">_IGNORED_WINERRORS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mi">21</span><span class="p">,</span>  <span class="c1"># ERROR_NOT_READY - drive exists but is not accessible</span>
+    <span class="mi">123</span><span class="p">,</span> <span class="c1"># ERROR_INVALID_NAME - fix for bpo-35306</span>
+    <span class="mi">1921</span><span class="p">,</span>  <span class="c1"># ERROR_CANT_RESOLVE_FILENAME - fix for broken symlink pointing to itself</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_ignore_error</span><span class="p">(</span><span class="n">exception</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="s1">&#39;errno&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_IGNORED_ERROS</span> <span class="ow">or</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="s1">&#39;winerror&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_IGNORED_WINERRORS</span><span class="p">)</span>
+
 
 <span class="k">def</span> <span class="nf">_is_wildcard_pattern</span><span class="p">(</span><span class="n">pat</span><span class="p">):</span>
     <span class="c1"># Whether this pattern needs actual matching using fnmatch, or can</span>
@@ -168,10 +173,7 @@
 
     <span class="n">is_supported</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nt&#39;</span><span class="p">)</span>
 
-    <span class="n">drive_letters</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="nb">set</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">),</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">|</span>
-        <span class="nb">set</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">),</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="p">)</span>
+    <span class="n">drive_letters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="s1">&#39;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&#39;</span><span class="p">)</span>
     <span class="n">ext_namespace_prefix</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">?</span><span class="se">\\</span><span class="s1">&#39;</span>
 
     <span class="n">reserved_names</span> <span class="o">=</span> <span class="p">(</span>
@@ -230,6 +232,9 @@
 
     <span class="k">def</span> <span class="nf">casefold_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parts</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">compile_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pattern</span><span class="p">),</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span><span class="o">.</span><span class="n">fullmatch</span>
 
     <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -294,9 +299,7 @@
             <span class="k">return</span> <span class="s1">&#39;file:&#39;</span> <span class="o">+</span> <span class="n">urlquote_from_bytes</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">gethomedir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;HOME&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-            <span class="n">userhome</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="s1">&#39;USERPROFILE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;USERPROFILE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
             <span class="n">userhome</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;USERPROFILE&#39;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="s1">&#39;HOMEPATH&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -353,6 +356,9 @@
     <span class="k">def</span> <span class="nf">casefold_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parts</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">parts</span>
 
+    <span class="k">def</span> <span class="nf">compile_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span><span class="o">.</span><span class="n">fullmatch</span>
+
     <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">sep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sep</span>
         <span class="n">accessor</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">_accessor</span>
@@ -369,7 +375,10 @@
                     <span class="c1"># parent dir</span>
                     <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="n">newpath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">sep</span> <span class="o">+</span> <span class="n">name</span>
+                <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">sep</span><span class="p">):</span>
+                    <span class="n">newpath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">name</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">newpath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">sep</span> <span class="o">+</span> <span class="n">name</span>
                 <span class="k">if</span> <span class="n">newpath</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
                     <span class="c1"># Already seen this path</span>
                     <span class="n">path</span> <span class="o">=</span> <span class="n">seen</span><span class="p">[</span><span class="n">newpath</span><span class="p">]</span>
@@ -434,49 +443,44 @@
 
 <span class="k">class</span> <span class="nc">_NormalAccessor</span><span class="p">(</span><span class="n">_Accessor</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">_wrap_strfunc</span><span class="p">(</span><span class="n">strfunc</span><span class="p">):</span>
-        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">strfunc</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="n">pathobj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">strfunc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pathobj</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">wrapped</span><span class="p">)</span>
+    <span class="n">stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span>
 
-    <span class="k">def</span> <span class="nf">_wrap_binary_strfunc</span><span class="p">(</span><span class="n">strfunc</span><span class="p">):</span>
-        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">strfunc</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="n">pathobjA</span><span class="p">,</span> <span class="n">pathobjB</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">strfunc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pathobjA</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">pathobjB</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">wrapped</span><span class="p">)</span>
+    <span class="n">lstat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">lstat</span>
 
-    <span class="n">stat</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">)</span>
+    <span class="nb">open</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">open</span>
 
-    <span class="n">lstat</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">lstat</span><span class="p">)</span>
+    <span class="n">listdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span>
 
-    <span class="nb">open</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">open</span><span class="p">)</span>
+    <span class="n">scandir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span>
 
-    <span class="n">listdir</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">)</span>
-
-    <span class="n">scandir</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">)</span>
-
-    <span class="n">chmod</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">)</span>
+    <span class="n">chmod</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">chmod</span>
 
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">&quot;lchmod&quot;</span><span class="p">):</span>
-        <span class="n">lchmod</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">lchmod</span><span class="p">)</span>
+        <span class="n">lchmod</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">lchmod</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">lchmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathobj</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;lchmod() not available on this system&quot;</span><span class="p">)</span>
 
-    <span class="n">mkdir</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">)</span>
+    <span class="n">mkdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span>
 
-    <span class="n">unlink</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">)</span>
+    <span class="n">unlink</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">unlink</span>
 
-    <span class="n">rmdir</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">&quot;link&quot;</span><span class="p">):</span>
+        <span class="n">link_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">link</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;os.link() not available on this system&quot;</span><span class="p">)</span>
 
-    <span class="n">rename</span> <span class="o">=</span> <span class="n">_wrap_binary_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">)</span>
+    <span class="n">rmdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span>
 
-    <span class="n">replace</span> <span class="o">=</span> <span class="n">_wrap_binary_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">)</span>
+    <span class="n">rename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">rename</span>
+
+    <span class="n">replace</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">replace</span>
 
     <span class="k">if</span> <span class="n">nt</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">supports_symlinks</span><span class="p">:</span>
-            <span class="n">symlink</span> <span class="o">=</span> <span class="n">_wrap_binary_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">)</span>
+            <span class="n">symlink</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">symlink</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">symlink</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;symlink() not available on this system&quot;</span><span class="p">)</span>
@@ -484,9 +488,9 @@
         <span class="c1"># Under POSIX, os.symlink() takes two args</span>
         <span class="nd">@staticmethod</span>
         <span class="k">def</span> <span class="nf">symlink</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 
-    <span class="n">utime</span> <span class="o">=</span> <span class="n">_wrap_strfunc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">utime</span><span class="p">)</span>
+    <span class="n">utime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">utime</span>
 
     <span class="c1"># Helper for resolve()</span>
     <span class="k">def</span> <span class="nf">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
@@ -500,7 +504,7 @@
 <span class="c1"># Globbing helpers</span>
 <span class="c1">#</span>
 
-<span class="k">def</span> <span class="nf">_make_selector</span><span class="p">(</span><span class="n">pattern_parts</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_make_selector</span><span class="p">(</span><span class="n">pattern_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">):</span>
     <span class="n">pat</span> <span class="o">=</span> <span class="n">pattern_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">child_parts</span> <span class="o">=</span> <span class="n">pattern_parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
     <span class="k">if</span> <span class="n">pat</span> <span class="o">==</span> <span class="s1">&#39;**&#39;</span><span class="p">:</span>
@@ -511,7 +515,7 @@
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">_WildcardSelector</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">_PreciseSelector</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">pat</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">pat</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">functools</span><span class="p">,</span> <span class="s2">&quot;lru_cache&quot;</span><span class="p">):</span>
     <span class="n">_make_selector</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">()(</span><span class="n">_make_selector</span><span class="p">)</span>
@@ -521,10 +525,10 @@
     <span class="sd">&quot;&quot;&quot;A selector matches a specific glob pattern part against the children</span>
 <span class="sd">    of a given path.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">child_parts</span> <span class="o">=</span> <span class="n">child_parts</span>
         <span class="k">if</span> <span class="n">child_parts</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">successor</span> <span class="o">=</span> <span class="n">_make_selector</span><span class="p">(</span><span class="n">child_parts</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">successor</span> <span class="o">=</span> <span class="n">_make_selector</span><span class="p">(</span><span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dironly</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">successor</span> <span class="o">=</span> <span class="n">_TerminatingSelector</span><span class="p">()</span>
@@ -550,9 +554,9 @@
 
 <span class="k">class</span> <span class="nc">_PreciseSelector</span><span class="p">(</span><span class="n">_Selector</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">_Selector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">)</span>
+        <span class="n">_Selector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_select_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_path</span><span class="p">,</span> <span class="n">is_dir</span><span class="p">,</span> <span class="n">exists</span><span class="p">,</span> <span class="n">scandir</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -566,38 +570,53 @@
 
 <span class="k">class</span> <span class="nc">_WildcardSelector</span><span class="p">(</span><span class="n">_Selector</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pat</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pat</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pat</span><span class="p">))</span>
-        <span class="n">_Selector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pat</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">match</span> <span class="o">=</span> <span class="n">flavour</span><span class="o">.</span><span class="n">compile_pattern</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
+        <span class="n">_Selector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_select_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_path</span><span class="p">,</span> <span class="n">is_dir</span><span class="p">,</span> <span class="n">exists</span><span class="p">,</span> <span class="n">scandir</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">cf</span> <span class="o">=</span> <span class="n">parent_path</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">casefold</span>
-            <span class="n">entries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scandir</span><span class="p">(</span><span class="n">parent_path</span><span class="p">))</span>
+            <span class="k">with</span> <span class="n">scandir</span><span class="p">(</span><span class="n">parent_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">scandir_it</span><span class="p">:</span>
+                <span class="n">entries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scandir_it</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dironly</span> <span class="ow">or</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span>
-                    <span class="n">casefolded</span> <span class="o">=</span> <span class="n">cf</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">casefolded</span><span class="p">):</span>
-                        <span class="n">path</span> <span class="o">=</span> <span class="n">parent_path</span><span class="o">.</span><span class="n">_make_child_relpath</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">successor</span><span class="o">.</span><span class="n">_select_from</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">is_dir</span><span class="p">,</span> <span class="n">exists</span><span class="p">,</span> <span class="n">scandir</span><span class="p">):</span>
-                            <span class="k">yield</span> <span class="n">p</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dironly</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># &quot;entry.is_dir()&quot; can raise PermissionError</span>
+                        <span class="c1"># in some cases (see bpo-38894), which is not</span>
+                        <span class="c1"># among the errors ignored by _ignore_error()</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                            <span class="k">continue</span>
+                    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                            <span class="k">raise</span>
+                        <span class="k">continue</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">parent_path</span><span class="o">.</span><span class="n">_make_child_relpath</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">successor</span><span class="o">.</span><span class="n">_select_from</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">is_dir</span><span class="p">,</span> <span class="n">exists</span><span class="p">,</span> <span class="n">scandir</span><span class="p">):</span>
+                        <span class="k">yield</span> <span class="n">p</span>
         <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
             <span class="k">return</span>
 
 
-
 <span class="k">class</span> <span class="nc">_RecursiveWildcardSelector</span><span class="p">(</span><span class="n">_Selector</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pat</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">):</span>
-        <span class="n">_Selector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pat</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">):</span>
+        <span class="n">_Selector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_parts</span><span class="p">,</span> <span class="n">flavour</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_iterate_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_path</span><span class="p">,</span> <span class="n">is_dir</span><span class="p">,</span> <span class="n">scandir</span><span class="p">):</span>
         <span class="k">yield</span> <span class="n">parent_path</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">entries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scandir</span><span class="p">(</span><span class="n">parent_path</span><span class="p">))</span>
+            <span class="k">with</span> <span class="n">scandir</span><span class="p">(</span><span class="n">parent_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">scandir_it</span><span class="p">:</span>
+                <span class="n">entries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scandir_it</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="n">entry_is_dir</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">entry_is_dir</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                        <span class="k">raise</span>
+                <span class="k">if</span> <span class="n">entry_is_dir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
                     <span class="n">path</span> <span class="o">=</span> <span class="n">parent_path</span><span class="o">.</span><span class="n">_make_child_relpath</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterate_directories</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">is_dir</span><span class="p">,</span> <span class="n">scandir</span><span class="p">):</span>
                         <span class="k">yield</span> <span class="n">p</span>
@@ -763,7 +782,7 @@
     <span class="k">def</span> <span class="nf">__bytes__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the bytes representation of the path.  This is only</span>
 <span class="sd">        recommended to use under Unix.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">fsencode</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">fsencode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{!r}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
@@ -837,7 +856,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">suffix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The final component&#39;s last suffix, if any.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The final component&#39;s last suffix, if any.</span>
+
+<span class="sd">        This includes the leading period. For example: &#39;.txt&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="n">i</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -847,7 +870,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">suffixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;A list of the final component&#39;s suffixes, if any.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A list of the final component&#39;s suffixes, if any.</span>
+
+<span class="sd">        These include the leading periods. For example: [&#39;.tar&#39;, &#39;.gz&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -882,7 +909,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">sep</span> <span class="ow">in</span> <span class="n">suffix</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">altsep</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">altsep</span> <span class="ow">in</span> <span class="n">suffix</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid suffix </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">suffix</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid suffix </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">suffix</span><span class="p">,))</span>
         <span class="k">if</span> <span class="n">suffix</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">suffix</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid suffix </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">suffix</span><span class="p">))</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -949,10 +976,16 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_child</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_child</span><span class="p">((</span><span class="n">key</span><span class="p">,))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_child</span><span class="p">((</span><span class="n">key</span><span class="p">,))</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
 
     <span class="k">def</span> <span class="nf">__rtruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_parts</span><span class="p">([</span><span class="n">key</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_parts</span><span class="p">([</span><span class="n">key</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1141,27 +1174,26 @@
 
     <span class="k">def</span> <span class="nf">glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterate over this subtree and yield all existing files (of any</span>
-<span class="sd">        kind, including directories) matching the given pattern.</span>
+<span class="sd">        kind, including directories) matching the given relative pattern.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unacceptable pattern: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
-        <span class="n">pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">casefold</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
         <span class="n">drv</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">pattern_parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">parse_parts</span><span class="p">((</span><span class="n">pattern</span><span class="p">,))</span>
         <span class="k">if</span> <span class="n">drv</span> <span class="ow">or</span> <span class="n">root</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Non-relative patterns are unsupported&quot;</span><span class="p">)</span>
-        <span class="n">selector</span> <span class="o">=</span> <span class="n">_make_selector</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">pattern_parts</span><span class="p">))</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="n">_make_selector</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">pattern_parts</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">selector</span><span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">p</span>
 
     <span class="k">def</span> <span class="nf">rglob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Recursively yield all existing files (of any kind, including</span>
-<span class="sd">        directories) matching the given pattern, anywhere in this subtree.</span>
+<span class="sd">        directories) matching the given relative pattern, anywhere in</span>
+<span class="sd">        this subtree.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">casefold</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
         <span class="n">drv</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">pattern_parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">parse_parts</span><span class="p">((</span><span class="n">pattern</span><span class="p">,))</span>
         <span class="k">if</span> <span class="n">drv</span> <span class="ow">or</span> <span class="n">root</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Non-relative patterns are unsupported&quot;</span><span class="p">)</span>
-        <span class="n">selector</span> <span class="o">=</span> <span class="n">_make_selector</span><span class="p">((</span><span class="s2">&quot;**&quot;</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pattern_parts</span><span class="p">))</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="n">_make_selector</span><span class="p">((</span><span class="s2">&quot;**&quot;</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pattern_parts</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">selector</span><span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">p</span>
 
@@ -1232,7 +1264,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">mode</span><span class="p">,</span> <span class="n">buffering</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">newline</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">buffering</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">newline</span><span class="p">,</span>
                        <span class="n">opener</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_opener</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">read_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1327,14 +1359,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">lchmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove this file or link.</span>
 <span class="sd">        If the path is a directory, use rmdir() instead.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">missing_ok</span><span class="p">:</span>
+                <span class="k">raise</span>
 
     <span class="k">def</span> <span class="nf">rmdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1355,29 +1391,56 @@
 
     <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Rename this path to the given path.</span>
+<span class="sd">        Rename this path to the target path.</span>
+
+<span class="sd">        The target path may be absolute or relative. Relative paths are</span>
+<span class="sd">        interpreted relative to the current working directory, *not* the</span>
+<span class="sd">        directory of the Path object.</span>
+
+<span class="sd">        Returns the new Path instance pointing to the target path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Rename this path to the given path, clobbering the existing</span>
-<span class="sd">        destination if it exists.</span>
+<span class="sd">        Rename this path to the target path, overwriting if that path exists.</span>
+
+<span class="sd">        The target path may be absolute or relative. Relative paths are</span>
+<span class="sd">        interpreted relative to the current working directory, *not* the</span>
+<span class="sd">        directory of the Path object.</span>
+
+<span class="sd">        Returns the new Path instance pointing to the target path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">symlink_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make this path a symlink pointing to the given path.</span>
-<span class="sd">        Note the order of arguments (self, target) is the reverse of os.symlink&#39;s.</span>
+<span class="sd">        Make this path a symlink pointing to the target path.</span>
+<span class="sd">        Note the order of arguments (link, target) is the reverse of os.symlink.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make the target path a hard link pointing to this path.</span>
+
+<span class="sd">        Note this function does not make this path a hard link to *target*,</span>
+<span class="sd">        despite the implication of the function and argument names. The order</span>
+<span class="sd">        of arguments (target, link) is the reverse of Path.symlink_to, but</span>
+<span class="sd">        matches that of os.link.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
     <span class="c1"># Convenience functions for querying the stat results</span>
 
@@ -1388,8 +1451,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
@@ -1400,10 +1466,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISDIR</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
             <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1414,11 +1483,35 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISREG</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
             <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
             <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">is_mount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if this path is a POSIX mount point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Need to exist and be a dir</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parent_dev</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_dev</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_dev</span>
+        <span class="k">if</span> <span class="n">dev</span> <span class="o">!=</span> <span class="n">parent_dev</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="n">ino</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_ino</span>
+        <span class="n">parent_ino</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_ino</span>
+        <span class="k">return</span> <span class="n">ino</span> <span class="o">==</span> <span class="n">parent_ino</span>
 
     <span class="k">def</span> <span class="nf">is_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1427,9 +1520,12 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISLNK</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lstat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">is_block_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1439,10 +1535,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISBLK</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
             <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">is_char_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1452,10 +1551,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISCHR</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
             <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">is_fifo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1465,10 +1567,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISFIFO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
             <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">is_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1478,10 +1583,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">S_ISSOCK</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ENOENT</span><span class="p">,</span> <span class="n">ENOTDIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
             <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-encodable path</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1515,6 +1623,9 @@
 
     <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.group() is unsupported on this system&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">is_mount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.is_mount() is unsupported on this system&quot;</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -1522,7 +1633,7 @@
       </div>
         </div>
         <div class="sidebar">
-          <h3>Table Of Contents</h3>
+          <h3>Table of Contents</h3>
           <ul>
 <li class="toctree-l1"><a class="reference internal" href="../nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nutshell-usage.html">Using NutShell</a></li>
@@ -1565,7 +1676,7 @@
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020, Markus Peura.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
         </div>
         <div class="clearer"></div>

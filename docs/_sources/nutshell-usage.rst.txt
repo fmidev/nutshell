@@ -15,14 +15,14 @@ Command-line usage
 
 Basic format for all the command line invocations is::
 
-    python3 -m nutshell.nutshell  <args>
+  python3 -m nutshell.nutshell  <args>
     
 By default, NutShell tries to read configuration file ``nutshell.cnf`` in the current directory.
 A file in other location is given with ``-c <config-file>`` .    
     
 Online help is optained with ``-h``::
 
-    python3 -m nutshell.nutshell -h
+  python3 -m nutshell.nutshell -h
     
 Simple query using configuration file and product definition::
 
@@ -67,4 +67,34 @@ Simple example::
 NutShell HTTP Server
 ====================
 
+Java version
+------------
+
+Installation
+
+  util/configure.sh
+  util/install-java.sh
+
+
+
+Python version
+--------------
+
+This version is for test use only. No specific installation procedure is required, all the required information
+is in the conf file (nutshell.cnf).
+
+The server can be started with
+
+  python3 -m nutshell.httpd 
+
+or 
+  
+  python3 -m nutshell.httpd -c nutshell.cnf
+
+The process responses with a line of type:
+
+  Starting: http://localhost:8088/nutshell/
+
+The port (8088) and prefix ( nutshell/ ) are defined in the conf file.
+  
 See code documentation: :any:`nutshell.httpd`

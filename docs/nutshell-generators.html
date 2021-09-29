@@ -4,30 +4,22 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Product generators &#8212; NutShell 0.3 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="NutShell Variables" href="nutshell-variables.html" />
     <link rel="prev" title="Configuration" href="nutshell-config.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
           <p class="logo"><a href="index.html">
@@ -61,44 +53,44 @@
 <p>In NutShell, a <em>product generator</em> is a shell script that computes something with given parameters and
 saves the result as a file in a given path. As a precondition, a generator may need
 <em>product inputs</em> and will request NutShell to compute them first. In this sense,
-NutShell functions much like <code class="docutils literal"><span class="pre">make</span></code> and <code class="docutils literal"><span class="pre">Makefile</span></code>, where respective inputs are called <em>dependencies</em>.</p>
+NutShell functions much like <code class="docutils literal notranslate"><span class="pre">make</span></code> and <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>, where respective inputs are called <em>dependencies</em>.</p>
 <p>Typical Unix/Linux commands have a form like:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">command</span> <span class="o">-</span><span class="n">i</span> <span class="o">&lt;</span><span class="nb">input</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>  <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">parameter</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">o</span> <span class="o">&lt;</span><span class="n">output</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">command</span> <span class="o">-</span><span class="n">i</span> <span class="o">&lt;</span><span class="nb">input</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>  <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">parameter</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">o</span> <span class="o">&lt;</span><span class="n">output</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>Much in a way <code class="docutils literal"><span class="pre">Makefile</span></code> does, a generator script wraps such a line to something like:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>command -i $INPUT  -p $PARAMETER -o $OUTDIR/$OUTFILE
+<p>Much in a way <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> does, a generator script wraps such a line to something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>command -i $INPUT  -p $PARAMETER -o $OUTDIR/$OUTFILE
 </pre></div>
 </div>
 <div class="section" id="product-id-s-files-and-directories">
 <h2>Product ID’s, files and directories<a class="headerlink" href="#product-id-s-files-and-directories" title="Permalink to this headline">¶</a></h2>
 <p>Each product generator is associated with a unique <em>product id</em> consisting of lowercase literals and periods,
-for example <code class="docutils literal"><span class="pre">test.image.product</span></code>.
+for example <code class="docutils literal notranslate"><span class="pre">test.image.product</span></code>.
 The system will automatically use directory derievd from the product id, replacing periods with slashes;
-for the example case: <code class="docutils literal"><span class="pre">test/image/product</span></code>.</p>
+for the example case: <code class="docutils literal notranslate"><span class="pre">test/image/product</span></code>.</p>
 <p>In NutShell, output files with dynamic content have syntax:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">TIMESTAMP</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PRODUCT_ID</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PARAMETERS</span><span class="o">&gt;.&lt;</span><span class="n">EXTENSION</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">TIMESTAMP</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PRODUCT_ID</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PARAMETERS</span><span class="o">&gt;.&lt;</span><span class="n">EXTENSION</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">200508091630</span><span class="n">_test</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">product_SIZE</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span><span class="mf">400.</span><span class="n">png</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">200508091630</span><span class="n">_test</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">product_SIZE</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span><span class="mf">400.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p>Static products do not have a timestamp, so they have syntax:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">TIMESTAMP</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PRODUCT_ID</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PARAMETERS</span><span class="o">&gt;.&lt;</span><span class="n">EXTENSION</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">TIMESTAMP</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PRODUCT_ID</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">PARAMETERS</span><span class="o">&gt;.&lt;</span><span class="n">EXTENSION</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>Variable parsing scheme is explained in <a class="reference internal" href="nutshell-variables.html#nutshell-variables"><span class="std std-ref">NutShell Variables</span></a> .
 In code, <span class="xref std std-ref">nutshell.product.INFO</span> parses the filenames.</p>
-<p>The generator has script has a fixed name, <code class="docutils literal"><span class="pre">generate.sh</span></code> .</p>
+<p>The generator has script has a fixed name, <code class="docutils literal notranslate"><span class="pre">generate.sh</span></code> .</p>
 </div>
 <div class="section" id="setting-up-product-generators">
 <h2>Setting up product generators<a class="headerlink" href="#setting-up-product-generators" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Move to product generator root directory, <code class="docutils literal"><span class="pre">GENERATOR_ROOT</span></code>. (See <a class="reference internal" href="nutshell-config.html#configuration"><span class="std std-ref">Configuration</span></a>.)</li>
-<li>Create shell script file <code class="docutils literal"><span class="pre">generate.sh</span></code> with execution permission.</li>
-<li>Preferably, use <strong>bash</strong>, starting the script with <code class="docutils literal"><span class="pre">#!/bin/bash</span></code></li>
-<li>Edit the script such that it finally writes its result in path <code class="docutils literal"><span class="pre">$OUTDIR/$OUTFILE</span></code></li>
+<li>Move to product generator root directory, <code class="docutils literal notranslate"><span class="pre">GENERATOR_ROOT</span></code>. (See <a class="reference internal" href="nutshell-config.html#configuration"><span class="std std-ref">Configuration</span></a>.)</li>
+<li>Create shell script file <code class="docutils literal notranslate"><span class="pre">generate.sh</span></code> with execution permission.</li>
+<li>Preferably, use <strong>bash</strong>, starting the script with <code class="docutils literal notranslate"><span class="pre">#!/bin/bash</span></code></li>
+<li>Edit the script such that it finally writes its result in path <code class="docutils literal notranslate"><span class="pre">$OUTDIR/$OUTFILE</span></code></li>
 </ol>
 <p>The generator scripts can and should be designed so that they can be
 executed off-line, ie. independently of NutShell.</p>
@@ -111,7 +103,7 @@ executed off-line, ie. independently of NutShell.</p>
 </ul>
 <p>It is recommended that variables contain default values. In <strong>bash</strong>, they can be set for example
 as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>if [ &quot;$WIDTH&quot; == &#39;&#39; ]; then
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if [ &quot;$WIDTH&quot; == &#39;&#39; ]; then
    WIDTH=&#39;640&#39;
 fi
 if [ &quot;$HEIGHT&quot; == &#39;&#39; ]; then
@@ -120,7 +112,7 @@ fi
 </pre></div>
 </div>
 <p>or more compactly:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>WIDTH=${WIDTH:-&#39;640&#39;}
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>WIDTH=${WIDTH:-&#39;640&#39;}
 HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
 </pre></div>
 </div>
@@ -128,10 +120,10 @@ HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
 <div class="section" id="input-queries">
 <h3>Input queries<a class="headerlink" href="#input-queries" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li>Create shell script file <code class="docutils literal"><span class="pre">input.sh</span></code> with execution permission.</li>
-<li>Design it to echo out lines of type <code class="docutils literal"><span class="pre">&lt;key&gt;=&lt;product&gt;</span></code> where
-<code class="docutils literal"><span class="pre">&lt;key&gt;</span></code> is the variable name you want to use for this input in
-<code class="docutils literal"><span class="pre">generate.sh</span></code> and <code class="docutils literal"><span class="pre">&lt;product&gt;</span></code> is an input product file to be retrieved.</li>
+<li>Create shell script file <code class="docutils literal notranslate"><span class="pre">input.sh</span></code> with execution permission.</li>
+<li>Design it to echo out lines of type <code class="docutils literal notranslate"><span class="pre">&lt;key&gt;=&lt;product&gt;</span></code> where
+<code class="docutils literal notranslate"><span class="pre">&lt;key&gt;</span></code> is the variable name you want to use for this input in
+<code class="docutils literal notranslate"><span class="pre">generate.sh</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;product&gt;</span></code> is an input product file to be retrieved.</li>
 <li><dl class="first docutils">
 <dt>In addition, for debugging purposes, the script can echo out comment lines starting with ‘#’ but it</dt>
 <dd><em>should not print any other output</em>.</dd>
@@ -146,7 +138,7 @@ HEIGHT=${HEIGHT:-&quot;$WIDTH&quot;}  # double hyphens to allow expansion
 MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png</dd>
 </dl>
 <p>Will print out:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">RADAR</span><span class="o">=</span><span class="mi">202005121845</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack_SITE</span><span class="o">=</span><span class="n">fikor</span><span class="o">.</span><span class="n">h5</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RADAR</span><span class="o">=</span><span class="mi">202005121845</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack_SITE</span><span class="o">=</span><span class="n">fikor</span><span class="o">.</span><span class="n">h5</span>
 <span class="n">MAP</span><span class="o">=</span><span class="n">maps</span><span class="o">.</span><span class="n">wfs_CONF</span><span class="o">=</span><span class="n">openstreetmap_BBOX</span><span class="o">=</span><span class="n">radar</span><span class="p">:</span><span class="n">fikor</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
@@ -164,9 +156,10 @@ MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png</dd>
       </div>
         </div>
         <div class="sidebar">
-          <h3>Table Of Contents</h3>
+          <h3>Table of Contents</h3>
           <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-commands.html">Commands and status codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Product generators</a><ul>
@@ -221,7 +214,7 @@ MAP=maps.wfs_CONF=openstreetmap_BBOX=radar:${SITE}.png</dd>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020, Markus Peura.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
         </div>
         <div class="clearer"></div>

@@ -9,7 +9,7 @@ Welcome to NutShell's documentation!
 ====================================
 
 
-NutShell is a Python-based facility for generating product files:
+NutShell is software for generating product files:
 images, data files and text files.  NutShell suits to generation of
 real time products as well as to regenerating products on-demand from
 archived data.
@@ -18,9 +18,9 @@ The product generation scheme resembles that of ``make`` and
 ``Makefile``: if a product (or "target") needs inputs
 ("dependencies"), they are generated first.  The applied *product
 generators* are organized systematically in a directory tree.  Each
-product has an ID of type ``my.data.prod`` that is associated with
-path component ``my/test/prod/``.  Hence, a product generator can be
-tracked to -- and in a way also identified with -- a unique
+product has an ID of type ``my.good.product`` that is associated with
+path component ``my/good/product/``.  Hence, a product generator can be
+tracked to -- and also identified with -- a unique
 subdirectory, which also contains a *generator script* with a fixed
 name (``generate.sh``).
 

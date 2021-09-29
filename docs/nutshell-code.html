@@ -4,29 +4,21 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>NutShell Code &#8212; NutShell 0.3 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Demo" href="nutshell-demo.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
           <p class="logo"><a href="index.html">
@@ -61,10 +53,10 @@
 requests and forwards them to product generators. A ProductServer
 instance also manages disk resources defined in 
 <a class="reference internal" href="nutshell-config.html#configuration"><span class="std std-ref">Configuration</span></a>.</p>
-<p>The module uses <a class="reference internal" href="#module-nutshell.product" title="nutshell.product"><code class="xref any py py-mod docutils literal"><span class="pre">nutshell.product</span></code></a>  for defining products (<a class="reference internal" href="#nutshell.product.Info" title="nutshell.product.Info"><code class="xref any py py-class docutils literal"><span class="pre">nutshell.product.Info</span></code></a>) 
-and <a class="reference internal" href="#module-nutshell.request" title="nutshell.request"><code class="xref any py py-mod docutils literal"><span class="pre">nutshell.request</span></code></a> for generating them using <a class="reference internal" href="#nutshell.request.Generator" title="nutshell.request.Generator"><code class="xref any py py-class docutils literal"><span class="pre">nutshell.request.Generator</span></code></a> .</p>
-<p>HTTP server provided by <a class="reference internal" href="#module-nutshell.httpd" title="nutshell.httpd"><code class="xref any py py-mod docutils literal"><span class="pre">nutshell.httpd</span></code></a> essentially forwards
-HTTP requests to <a class="reference internal" href="#nutshell.nutshell.ProductServer" title="nutshell.nutshell.ProductServer"><code class="xref any py py-class docutils literal"><span class="pre">nutshell.ProductServer</span></code></a>.</p>
+<p>The module uses <a class="reference internal" href="#module-nutshell.product" title="nutshell.product"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">nutshell.product</span></code></a>  for defining products (<a class="reference internal" href="#nutshell.product.Info" title="nutshell.product.Info"><code class="xref any py py-class docutils literal notranslate"><span class="pre">nutshell.product.Info</span></code></a>) 
+and <a class="reference internal" href="#module-nutshell.request" title="nutshell.request"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">nutshell.request</span></code></a> for generating them using <a class="reference internal" href="#nutshell.request.Generator" title="nutshell.request.Generator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">nutshell.request.Generator</span></code></a> .</p>
+<p>HTTP server provided by <a class="reference internal" href="#module-nutshell.httpd" title="nutshell.httpd"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">nutshell.httpd</span></code></a> essentially forwards
+HTTP requests to <a class="reference internal" href="#nutshell.nutshell.ProductServer" title="nutshell.nutshell.ProductServer"><code class="xref any py py-class docutils literal notranslate"><span class="pre">nutshell.ProductServer</span></code></a>.</p>
 <dl class="class">
 <dt id="nutshell.nutshell.ProductServer">
 <em class="property">class </em><code class="descclassname">nutshell.nutshell.</code><code class="descname">ProductServer</code><span class="sig-paren">(</span><em>conffile=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer" title="Permalink to this definition">¶</a></dt>
@@ -73,6 +65,7 @@ HTTP requests to <a class="reference internal" href="#nutshell.nutshell.ProductS
 <dt id="nutshell.nutshell.ProductServer.ensure_output_dir">
 <code class="descname">ensure_output_dir</code><span class="sig-paren">(</span><em>outdir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.ensure_output_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.ensure_output_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a writable directory, if non-existent</p>
+<p>Currently, uses mask 777</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -132,7 +125,7 @@ directives determine how the product is generated.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>product_info</strong> – description of the product (string or nutshell.product.Info)</li>
 <li><strong>actions</strong> – what should be done about the product 
-(<code class="docutils literal"><span class="pre">MAKE</span></code>, <code class="docutils literal"><span class="pre">DELETE</span></code>, <code class="docutils literal"><span class="pre">CHECK</span></code> , <code class="docutils literal"><span class="pre">RETURN</span></code>), see <a class="reference internal" href="nutshell-commands.html#commands"><span class="std std-ref">Commands and status codes</span></a> .</li>
+(<code class="docutils literal notranslate"><span class="pre">MAKE</span></code>, <code class="docutils literal notranslate"><span class="pre">DELETE</span></code>, <code class="docutils literal notranslate"><span class="pre">CHECK</span></code> , <code class="docutils literal notranslate"><span class="pre">RETURN</span></code>), see <a class="reference internal" href="nutshell-commands.html#commands"><span class="std std-ref">Commands and status codes</span></a> .</li>
 <li><strong>directives</strong> – how the product is generated etc</li>
 <li><strong>log</strong> – optional logging.logger</li>
 </ul>
@@ -162,7 +155,7 @@ the file (if succefully generated) and information about the process.</p>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.read_conf">
-<code class="descname">read_conf</code><span class="sig-paren">(</span><em>conffile='nutshell.cnf'</em>, <em>strict=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.read_conf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.read_conf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_conf</code><span class="sig-paren">(</span><em>conffile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.read_conf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.read_conf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read given conf file, if it exists. Raise error, if strict.
 The entries are copied to respective member of self.</p>
 </dd></dl>
@@ -173,7 +166,7 @@ The entries are copied to respective member of self.</p>
 <span class="target" id="module-nutshell.httpd"></span><div class="section" id="http-server-nutshell-httpd">
 <h2>HTTP Server – nutshell.httpd<a class="headerlink" href="#http-server-nutshell-httpd" title="Permalink to this headline">¶</a></h2>
 <p>Server can be started with command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span>  <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">cnf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span>  <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">cnf</span>
 </pre></div>
 </div>
 <p>By default, it returns a status page (HTML) containing</p>
@@ -186,11 +179,11 @@ The entries are copied to respective member of self.</p>
 </ul>
 <dl class="class">
 <dt id="nutshell.httpd.NutHandler">
-<em class="property">class </em><code class="descclassname">nutshell.httpd.</code><code class="descname">NutHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">nutshell.httpd.</code><code class="descname">NutHandler</code><span class="sig-paren">(</span><em>*args</em>, <em>directory=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Forwards a HTTP request to  nutshell.ProductServer instance</p>
 <dl class="method">
 <dt id="nutshell.httpd.NutHandler.do_GET">
-<code class="descname">do_GET</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.do_GET" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_GET</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/httpd.html#NutHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.httpd.NutHandler.do_GET" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function. Receives the http request and sends a response.</p>
 </dd></dl>
 
@@ -215,21 +208,21 @@ The entries are copied to respective member of self.</p>
 <dl class="class">
 <dt id="nutshell.product.Info">
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stores product information, especially <code class="docutils literal"><span class="pre">PRODUCT_ID</span></code>, 
-<code class="docutils literal"><span class="pre">TIMESTAMP</span></code> (if applicable), file <code class="docutils literal"><span class="pre">FORMAT</span></code>, 
+<dd><p>Stores product information, especially <code class="docutils literal notranslate"><span class="pre">PRODUCT_ID</span></code>, 
+<code class="docutils literal notranslate"><span class="pre">TIMESTAMP</span></code> (if applicable), file <code class="docutils literal notranslate"><span class="pre">FORMAT</span></code>, 
 and product-specific free parameters.</p>
 <p><strong>Parameters</strong> handled as with Info.set_product(). Key parameters are 
 mutually exclusive.</p>
 <dl class="docutils">
-<dt>Examples of allowed calls, with <code class="docutils literal"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
-<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.image.product.png&quot;</span><span class="p">)</span>
+<dt>Examples of allowed calls, with <code class="docutils literal notranslate"><span class="pre">Info</span> <span class="pre">=</span> <span class="pre">nutshell.product.Info</span></code> :</dt>
+<dd><div class="first last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;my.image.product.png&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;SIZE&quot;</span><span class="p">:</span> <span class="s2">&quot;640,400&quot;</span><span class="p">})</span>
 </pre></div>
 </div>
 </dd>
 <dt>A plain string argument is ambiguous, and raises an exception:</dt>
-<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>       <span class="c1"># Looks understandable, but...</span>
+<dd><div class="first last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product&quot;</span><span class="p">)</span>       <span class="c1"># Looks understandable, but...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product.jpeg&quot;</span><span class="p">)</span>  <span class="c1"># ... is this a product ID or file?</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="s2">&quot;my.image.product_.jpeg&quot;</span><span class="p">)</span> <span class="c1"># This could be parsed as a file.</span>
 </pre></div>
@@ -381,9 +374,14 @@ Setting is logged.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="nutshell.request.InputQuery">
+<em class="property">class </em><code class="descclassname">nutshell.request.</code><code class="descname">InputQuery</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/request.html#InputQuery"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.request.InputQuery" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
 <dt id="nutshell.request.Tasklet">
 <em class="property">class </em><code class="descclassname">nutshell.request.</code><code class="descname">Tasklet</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>script_filename</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/request.html#Tasklet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.request.Tasklet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for shell operations (<code class="xref any docutils literal"><span class="pre">InputQuery</span></code> and <a class="reference internal" href="#nutshell.request.Generator" title="nutshell.request.Generator"><code class="xref any py py-class docutils literal"><span class="pre">Generator</span></code></a>)</p>
+<dd><p>Base class for shell operations (<a class="reference internal" href="#nutshell.request.InputQuery" title="nutshell.request.InputQuery"><code class="xref any py py-class docutils literal notranslate"><span class="pre">InputQuery</span></code></a> and <a class="reference internal" href="#nutshell.request.Generator" title="nutshell.request.Generator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>)</p>
 </dd></dl>
 
 </div>
@@ -410,7 +408,7 @@ this threshold is at least logging.ERROR and logging.DEBUG, respecively</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Return code of the process. Will be also stored to <code class="docutils literal"><span class="pre">self</span></code>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Return code of the process. Will be also stored to <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
 </td>
 </tr>
 </tbody>
@@ -439,6 +437,15 @@ this threshold is at least logging.ERROR and logging.DEBUG, respecively</li>
 <dt id="nutshell.nutils.get_entries">
 <code class="descclassname">nutshell.nutils.</code><code class="descname">get_entries</code><span class="sig-paren">(</span><em>obj</em>, <em>regexp=None</em>, <em>dst_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutils.html#get_entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutils.get_entries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets member values as a dictionary</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="nutshell.nutils.make_subdirs">
+<code class="descclassname">nutshell.nutils.</code><code class="descname">make_subdirs</code><span class="sig-paren">(</span><em>rootdir</em>, <em>subdir=None</em>, <em>mode=493</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutils.html#make_subdirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutils.make_subdirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a writable directory, if non-existent
+:param rootdir[pathlike]: 
+:param subdir[str]: 
+currently, uses mask 777</p>
 </dd></dl>
 
 <dl class="function">
@@ -496,7 +503,7 @@ this threshold is at least logging.ERROR and logging.DEBUG, respecively</li>
       </div>
         </div>
         <div class="sidebar">
-          <h3>Table Of Contents</h3>
+          <h3>Table of Contents</h3>
           <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
@@ -553,7 +560,7 @@ this threshold is at least logging.ERROR and logging.DEBUG, respecively</li>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020, Markus Peura.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
         </div>
         <div class="clearer"></div>

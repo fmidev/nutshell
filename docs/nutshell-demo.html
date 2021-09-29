@@ -4,30 +4,22 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Demo &#8212; NutShell 0.3 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="NutShell Code" href="nutshell-code.html" />
     <link rel="prev" title="NutShell Variables" href="nutshell-variables.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
           <p class="logo"><a href="index.html">
@@ -58,17 +50,17 @@
             
   <div class="section" id="demo">
 <h1>Demo<a class="headerlink" href="#demo" title="Permalink to this headline">¶</a></h1>
-<p>NutShell installation package comes with five demo products under directory <code class="docutils literal"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>.
-This directory is set also in configuration file <code class="docutils literal"><span class="pre">nutshell-demo.cnf</span></code> .</p>
+<p>NutShell installation package comes with five demo products under directory <code class="docutils literal notranslate"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>.
+This directory is set also in configuration file <code class="docutils literal notranslate"><span class="pre">nutshell-demo.cnf</span></code> .</p>
 <div class="section" id="demo-products">
 <h2>Demo products<a class="headerlink" href="#demo-products" title="Permalink to this headline">¶</a></h2>
 <p>The demo contains five sample products (with requirements shown as footnotes):</p>
 <ol class="arabic simple">
-<li><code class="docutils literal"><span class="pre">demo.image.ppmforge</span></code> – Linux/Unix program generating fractal clouds and planets <a class="reference internal" href="#ppmforge" id="id1">[ppmforge]</a>, <a class="reference internal" href="#convert" id="id2">[convert]</a></li>
-<li><code class="docutils literal"><span class="pre">demo.image.pattern</span></code> – Image Magick’s convert creating built-in patterns <a class="reference internal" href="#convert" id="id3">[convert]</a></li>
-<li><code class="docutils literal"><span class="pre">demo.maps</span></code> – Map creation based on open map data and WMS servers <a class="reference internal" href="#wget" id="id4">[wget]</a>, <a class="reference internal" href="#convert" id="id5">[convert]</a></li>
-<li><code class="docutils literal"><span class="pre">demo.cloudy</span></code> – An artifical “weather map” combining outputs of the above three <a class="reference internal" href="#convert" id="id6">[convert]</a></li>
-<li><code class="docutils literal"><span class="pre">demo.cloudy.anim</span></code> – Animated (GIF) series of <code class="docutils literal"><span class="pre">demo.cloudy</span></code> <a class="reference internal" href="#convert" id="id7">[convert]</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">demo.image.ppmforge</span></code> – Linux/Unix program generating fractal clouds and planets <a class="reference internal" href="#ppmforge" id="id1">[ppmforge]</a>, <a class="reference internal" href="#convert" id="id2">[convert]</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">demo.image.pattern</span></code> – Image Magick’s convert creating built-in patterns <a class="reference internal" href="#convert" id="id3">[convert]</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">demo.maps</span></code> – Map creation based on open map data and WMS servers <a class="reference internal" href="#wget" id="id4">[wget]</a>, <a class="reference internal" href="#convert" id="id5">[convert]</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">demo.cloudy</span></code> – An artifical “weather map” combining outputs of the above three <a class="reference internal" href="#convert" id="id6">[convert]</a></li>
+<li><code class="docutils literal notranslate"><span class="pre">demo.cloudy.anim</span></code> – Animated (GIF) series of <code class="docutils literal notranslate"><span class="pre">demo.cloudy</span></code> <a class="reference internal" href="#convert" id="id7">[convert]</a></li>
 </ol>
 <p>Examples of the three first products are shown in the image below.</p>
 <img alt="_images/demo-images3.png" src="_images/demo-images3.png" />
@@ -76,14 +68,14 @@ This directory is set also in configuration file <code class="docutils literal">
 <div class="section" id="html-demo-page">
 <h2>HTML demo page<a class="headerlink" href="#html-demo-page" title="Permalink to this headline">¶</a></h2>
 <p>The demo includes an interactive HTML page which can be started with</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python3</span>  <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">-</span><span class="n">demo</span><span class="o">.</span><span class="n">cnf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span>  <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">-</span><span class="n">demo</span><span class="o">.</span><span class="n">cnf</span>
 </pre></div>
 </div>
 <p>and appears in <a class="reference external" href="http://127.0.0.1:8088/index.html">http://127.0.0.1:8088/index.html</a>
 or other address configured (see <a class="reference internal" href="nutshell-config.html#configuration"><span class="std std-ref">Configuration</span></a>).</p>
 <p>On the HTML demo page, one can change the values using HTML widgets and
-then click <code class="docutils literal"><span class="pre">Update</span></code> to regenerate them. The respective
-filename – that is, <code class="docutils literal"><span class="pre">$OUTFILE</span></code> which <em>identifies a product instance</em> in NutShell –
+then click <code class="docutils literal notranslate"><span class="pre">Update</span></code> to regenerate them. The respective
+filename – that is, <code class="docutils literal notranslate"><span class="pre">$OUTFILE</span></code> which <em>identifies a product instance</em> in NutShell –
 becomes updated in the text slot at the top of the page.
 There, it can be further edited for testing purposes. The HTML widgets
 on the page do not cover all the options supported by the generator scripts.
@@ -93,12 +85,12 @@ original programs.</p>
 <div class="section" id="command-line-examples">
 <h2>Command line examples<a class="headerlink" href="#command-line-examples" title="Permalink to this headline">¶</a></h2>
 <p>The demo products can be generated using the command line, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># cd $NUTSHELL_DIR/</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># cd $NUTSHELL_DIR/</span>
 
 <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">nutshell</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">-</span><span class="n">demo</span><span class="o">.</span><span class="n">cnf</span> <span class="o">--</span><span class="n">make</span> \
   <span class="o">--</span><span class="n">product</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
 
-<span class="c1"># &#39;make&#39; is default action, and --product can be omitted:</span>
+<span class="c1"># &#39;make&#39; is default action, and also --product can be omitted:</span>
 
 <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">nutshell</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">-</span><span class="n">demo</span><span class="o">.</span><span class="n">cnf</span> \
   <span class="mi">202005121245</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">ppmforge_SEED</span><span class="o">=</span><span class="mi">1234</span><span class="n">_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
@@ -113,16 +105,16 @@ original programs.</p>
 </div>
 <div class="section" id="a-quick-look-behind-the-hood">
 <h2>A quick look behind the hood<a class="headerlink" href="#a-quick-look-behind-the-hood" title="Permalink to this headline">¶</a></h2>
-<p>On the system side, the product generators – the <code class="docutils literal"><span class="pre">generate.sh</span></code> scripts generating the products –
-can be found under <code class="docutils literal"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>. All of them reside under directory
-<code class="docutils literal"><span class="pre">./demo</span></code> meaning that one can include them in an operative NutShell product directory
-simply by linking: <code class="docutils literal"><span class="pre">$NUTSHELL_DIR/products/demo</span> <span class="pre">-&gt;</span> <span class="pre">$NUTSHELL_DIR/demo/products/demo/</span></code> .</p>
+<p>On the system side, the product generators – the <code class="docutils literal notranslate"><span class="pre">generate.sh</span></code> scripts generating the products –
+can be found under <code class="docutils literal notranslate"><span class="pre">$NUTSHELL_DIR/demo/products/</span></code>. All of them reside under directory
+<code class="docutils literal notranslate"><span class="pre">./demo</span></code> meaning that one can include them in an operative NutShell product directory
+simply by linking: <code class="docutils literal notranslate"><span class="pre">$NUTSHELL_DIR/products/demo</span> <span class="pre">-&gt;</span> <span class="pre">$NUTSHELL_DIR/demo/products/demo/</span></code> .</p>
 <div class="section" id="product-generators">
 <h3>Product generators<a class="headerlink" href="#product-generators" title="Permalink to this headline">¶</a></h3>
 <p>The first three are independent products in a sense that they do not need other NutShell
 products as input. In addition, following NutShell design recommendation, the scripts
 can be run on the command line. For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>cd $NUTSHELL_DIR/demo/products/demo/image/ppmforge/
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $NUTSHELL_DIR/demo/products/demo/image/ppmforge/
 ./generate.sh
 
 # The script essentially constructs and runs a command line...
@@ -134,22 +126,22 @@ convert ppm:- ./test.png
 </pre></div>
 </div>
 <p>Further, one can (in bash) add parameters – communicated as environment variables in Nutshell –
-as a prefix, for example: <code class="docutils literal"><span class="pre">HOUR=15</span> <span class="pre">MINUTE=45</span>&#160; <span class="pre">SIZE=512,512</span> <span class="pre">./generate.sh</span></code> .</p>
-<p>The fourth product, “Cloudy” or <code class="docutils literal"><span class="pre">demo.cloudy</span></code>, combines outputs of the first three ones.
-It overlays a fractal cloud image by <code class="docutils literal"><span class="pre">demo.image.ppmforge</span></code> masked with a hatch pattern by
-<code class="docutils literal"><span class="pre">demo.image.pattern</span></code> over a map generated by <code class="docutils literal"><span class="pre">demo.maps</span></code> .</p>
+as a prefix, for example: <code class="docutils literal notranslate"><span class="pre">HOUR=15</span> <span class="pre">MINUTE=45</span>&#160; <span class="pre">SIZE=512,512</span> <span class="pre">./generate.sh</span></code> .</p>
+<p>The fourth product, “Cloudy” or <code class="docutils literal notranslate"><span class="pre">demo.cloudy</span></code>, combines outputs of the first three ones.
+It overlays a fractal cloud image by <code class="docutils literal notranslate"><span class="pre">demo.image.ppmforge</span></code> masked with a hatch pattern by
+<code class="docutils literal notranslate"><span class="pre">demo.image.pattern</span></code> over a map generated by <code class="docutils literal notranslate"><span class="pre">demo.maps</span></code> .</p>
 <img alt="_images/demo-cloudy.png" src="_images/demo-cloudy.png" />
 </div>
 <div class="section" id="input-queries">
 <h3>Input queries<a class="headerlink" href="#input-queries" title="Permalink to this headline">¶</a></h3>
 <p>Product input requests are communicated to NutShell server with <em>input declaration script</em>
-<code class="docutils literal"><span class="pre">input.sh</span></code> which the developer can freely
-design to produce <code class="docutils literal"><span class="pre">&lt;KEY=VALUE&gt;</span></code> lines <em>as output</em>. As initialisation from NutShell,
+<code class="docutils literal notranslate"><span class="pre">input.sh</span></code> which the developer can freely
+design to produce <code class="docutils literal notranslate"><span class="pre">&lt;KEY=VALUE&gt;</span></code> lines <em>as output</em>. As initialisation from NutShell,
 this script gets the
-same parameters (environment variables) as the actual generator script (<code class="docutils literal"><span class="pre">generate.sh</span></code>).
+same parameters (environment variables) as the actual generator script (<code class="docutils literal notranslate"><span class="pre">generate.sh</span></code>).
 Again, a good policy is to define default values for variables so that input declarations
 can be tested on command line without parameters, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>cd $NUTSHELL_DIR/demo/products/demo/cloudy
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $NUTSHELL_DIR/demo/products/demo/cloudy
 ./input.sh
 
 # Answers:
@@ -159,22 +151,22 @@ MAP=demo.map_BBOX=0,45,32,71_SIZE=256,256_CONF=geoserver_PROJ=4326.png
 </pre></div>
 </div>
 <p>Again, one can experiment with parameters with prefixes, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">TIMESTAMP</span><span class="o">=</span><span class="mi">201708121600</span> <span class="n">SIZE</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span><span class="mi">512</span> <span class="n">PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span> <span class="o">./</span><span class="nb">input</span><span class="o">.</span><span class="n">sh</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TIMESTAMP</span><span class="o">=</span><span class="mi">201708121600</span> <span class="n">SIZE</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span><span class="mi">512</span> <span class="n">PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span> <span class="o">./</span><span class="nb">input</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>In building the product (here <code class="docutils literal"><span class="pre">demo.cloudy</span></code>), NutShell calls first its input declaration script and generates
+<p>In building the product (here <code class="docutils literal notranslate"><span class="pre">demo.cloudy</span></code>), NutShell calls first its input declaration script and generates
 the desired products. Then, it assigns their <em>full system side paths in desired variables</em>
-– <code class="docutils literal"><span class="pre">HATCH</span></code>, <code class="docutils literal"><span class="pre">CLOUD</span></code>, and <code class="docutils literal"><span class="pre">MAP</span></code> in this case – in environment variables and forwards them
-among other product parameters to <code class="docutils literal"><span class="pre">generate.sh</span></code> for generating the actual product.
-The developer can rather freely select variable names, excluding system variables like <code class="docutils literal"><span class="pre">TIMESTAMP</span></code>.
-In input variable names, one may also use underscores <code class="docutils literal"><span class="pre">'_'</span></code>
+– <code class="docutils literal notranslate"><span class="pre">HATCH</span></code>, <code class="docutils literal notranslate"><span class="pre">CLOUD</span></code>, and <code class="docutils literal notranslate"><span class="pre">MAP</span></code> in this case – in environment variables and forwards them
+among other product parameters to <code class="docutils literal notranslate"><span class="pre">generate.sh</span></code> for generating the actual product.
+The developer can rather freely select variable names, excluding system variables like <code class="docutils literal notranslate"><span class="pre">TIMESTAMP</span></code>.
+In input variable names, one may also use underscores <code class="docutils literal notranslate"><span class="pre">'_'</span></code>
 since they will not end up filename parsing using splitting by underscore.
 More on system and user variables is explained in <a class="reference internal" href="nutshell-variables.html#nutshell-variables"><span class="std std-ref">NutShell Variables</span></a>.</p>
 </div>
 </div>
 <div class="section" id="helper-programs">
 <h2>Helper programs<a class="headerlink" href="#helper-programs" title="Permalink to this headline">¶</a></h2>
-<p>These packages can be installed from standard distributions for example with <code class="docutils literal"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">&lt;package&gt;</span></code> .</p>
+<p>These packages can be installed from standard distributions for example with <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">&lt;package&gt;</span></code> .</p>
 <table class="docutils citation" frame="void" id="convert" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -203,7 +195,7 @@ re-sample, and much more.</em>  ImageMagick, 1 October 2009</td></tr>
       </div>
         </div>
         <div class="sidebar">
-          <h3>Table Of Contents</h3>
+          <h3>Table of Contents</h3>
           <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
@@ -264,7 +256,7 @@ re-sample, and much more.</em>  ImageMagick, 1 October 2009</td></tr>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020, Markus Peura.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
         </div>
         <div class="clearer"></div>

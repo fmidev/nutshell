@@ -17,9 +17,8 @@ Requests
 Also know as *actions*
 
 ============ ================= ============
- Request     Cmd line arg
+ Action      Cmd line option
 ============ ================= ============
-``TEST``     --test            Check existence and permissions of directories and scripts
 ``MAKE``     --make, -m        Generate file, if it does not exist (default request)
 ``DELETE``   --delete, -d      Delete the product file in cache dir
 ``GENERATE`` --generate, -g    Remake file, even if it exists. Same as ``--delete --make``
