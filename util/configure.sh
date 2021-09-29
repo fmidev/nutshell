@@ -10,7 +10,7 @@ echo
 
 # Bash special
 function goodbye {
-    echo "# Installation stopped, exiting $0..."
+    echo "# Exiting $0"
 }
 trap goodbye EXIT
 
@@ -114,7 +114,7 @@ PKG_ROOT=`pwd -P`
 
 #echo $PKG_ROOT
 #DIR=`pwd -P`
-ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for Python files:"
+ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for Python and (optionally) conf files:"
 check_dir_syntax NUTSHELL_DIR
 ls -d $NUTSHELL_DIR
 
