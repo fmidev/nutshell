@@ -43,8 +43,8 @@ check_variable NUTSHELL_DEFAULT "$NUTSHELL_DEFAULT" "Default language version"
 if [ $NUTSHELL_DEFAULT == 'java' ]; then
     echo '# NutShell JAVA version will serve from $NUTSHELL_DIR/WEB-INF/lib/Nutlet.jar .'
     echo '# This is compliant with Tomcat httpd, installation of which is however optional.'
-    check_variable HTML_ROOT $HTML_ROOT  "Directory for nutshell.cnf and ./WEB_INF/lib/"
-    ls -ltr $HTML_ROOT/WEB-INF/lib/Nutlet.jar
+    check_variable HTTP_ROOT $HTTP_ROOT  "Directory for nutshell.cnf and ./WEB_INF/lib/"
+    ls -ltr $HTTP_ROOT/WEB-INF/lib/Nutlet.jar
     if [ $? != 0 ]; then
 	echo "# Required JAR file not found. Run util/install-java.sh first."
 	exit 1
@@ -62,11 +62,11 @@ fi
 
 
 
-check_variable BIN_DIR "/usr/local/bin" "Directory for the script "
+check_variable CMD_SCRIPT_DIR "/usr/local/bin" "Directory for the script "
 eval BIN_DIR=$BIN_DIR
-mkdir -v --parents --mode u+x  $BIN_DIR/
+mkdir -v --parents --mode u+x  $CMD_SCRIPT_DIR/
 
-CACHE_ROOT=${CACHE_ROOT:-$HTML_ROOT/cache}
+CACHE_ROOT=${CACHE_ROOT:-$HTTP_ROOT/cache}
 check_variable CACHE_ROOT "$CACHE_ROOT" "Root directory for produced files"
 
 
@@ -90,7 +90,7 @@ NUTSHELL_SH=$BIN_DIR/nutshell
 #EOF
 
 
-cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR $NUTSHELL_DEFAULT $HTML_ROOT' > $NUTSHELL_SH
+cat $DIR/nutshell.sh.tpl | envsubst '$NUTSHELL_DIR $NUTSHELL_DEFAULT $HTTP_ROOT' > $NUTSHELL_SH
 
 chmod -v gu+x $NUTSHELL_SH
 

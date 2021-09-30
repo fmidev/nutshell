@@ -108,6 +108,8 @@ echo "Directory and url paths must have a leading but no trailing slash '/'."
 echo 
 
 
+ask_variable NUTSHELL_DEFAULT "python" "Default language version: 'java' or 'python'"
+
 
 # Root dir of this installation package
 #PKG_ROOT=${PWD%/*}
@@ -115,19 +117,27 @@ echo
 PKG_ROOT=`pwd -P`
 
 
-
-#echo $PKG_ROOT
-#DIR=`pwd -P`
-ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for Python and (optionally) conf files:"
+if [ ${NUTSHELL_DEFAULT} == 'java' ]; then
+    echo " Optional:"
+fi
+ask_variable NUTSHELL_DIR "$PKG_ROOT/nutshell" "Directory for Python files:"
 check_dir_syntax NUTSHELL_DIR
 ls -d $NUTSHELL_DIR
 
+ask_variable NUTSHELL_CONF_DIR "$PKG_ROOT" "Directory for primary configuration file:"
+check_dir_syntax NUTSHELL_CONF_DIR
+mkdir -v --parent $NUTSHELL_CONF_DIR
+
+
+if [ ${NUTSHELL_DEFAULT} == 'python' ]; then
+    echo "The following HTTP settings are optional for Python version"
+fi
+
 ask_variable HTTP_PORT "8088" "Port for HTTP server, Python version (optional)"
 
-#ask_variable HTML_ROOT "$PKG_ROOT/www" "Directory for HTTP server and Java JAR file:"
-ask_variable HTML_ROOT "/opt/nutshell" "Root directory for HTTP server (incl. Nutlet.jar):"
-check_dir_syntax HTML_ROOT
-mkdir -v --parents $HTML_ROOT
+ask_variable HTTP_ROOT "/opt/nutshell" "Root directory for HTTP server (including ./WEB-INF/lib/Nutlet.jar):"
+check_dir_syntax HTTP_ROOT
+mkdir -v --parents $HTTP_ROOT
 
 ask_variable HTTP_PREFIX "/nutshell" "URL prefix (with leading '/' but without trailing '/')"
 check_dir_syntax HTTP_PREFIX
@@ -135,30 +145,33 @@ check_dir_syntax HTTP_PREFIX
 
 # /usr/local/tomcat/conf/Catalina/localhost/
 # /etc/tomcat8/Catalina/localhost
-ask_variable TOMCAT_CONF_DIR "/usr/local/tomcat/conf/Catalina/localhost/" "Directory for nutshell.xml"
+ask_variable TOMCAT_CONF_DIR "/usr/local/tomcat/conf/Catalina/localhost/" "Optional: directory for nutshell.xml"
 check_dir_syntax TOMCAT_CONF_DIR
 
 
 ask_variable CACHE_ROOT "$PKG_ROOT/cache" "Root of cache directory, often on separate resource:"
 check_dir_syntax CACHE_ROOT
 mkdir -v --parents --mode a+rwx $CACHE_ROOT
-echo "Linking CACHE_ROOT to HTML_ROOT/cache"
-if [ $? == 0 ] && [ ! -w $HTML_ROOT/ ]; then
-    ln -svi $CACHE_ROOT $HTML_ROOT/
+echo "Linking CACHE_ROOT to HTTP_ROOT/cache"
+if [ $? == 0 ] && [ ! -w $HTTP_ROOT/ ]; then
+    ln -svi $CACHE_ROOT $HTTP_ROOT/
 else
     echo "# Failed: write-protected"
 fi
 
-ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator (script) directories"
+ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator directories"
 check_dir_syntax PRODUCT_ROOT
 mkdir -v --parents $PRODUCT_ROOT
-echo "Linking PRODUCT_ROOT to HTML_ROOT/cache"
-if [ $? == 0 ] && [ ! -w $HTML_ROOT/ ]; then
-    ln -svi $PRODUCT_ROOT $HTML_ROOT/
+echo "Linking PRODUCT_ROOT to HTTP_ROOT/cache"
+if [ $? == 0 ] && [ ! -w $HTTP_ROOT/ ]; then
+    ln -svi $PRODUCT_ROOT $HTTP_ROOT/
 else
     echo "# Failed: write-protected"
 fi
 
+ask_variable CMD_SCRIPT_DIR '/usr/local/bin' "Optional: directory for 'nutshell' wrapper script"
+check_dir_syntax PRODUCT_ROOT
+mkdir -v --parents $PRODUCT_ROOT
 
 
 
