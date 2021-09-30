@@ -63,7 +63,7 @@ class ProductServer:
     HTTP_PORT = 8088
     HTTP_NAME = ''
     HTTP_PREFIX = 'nutshell/' # TODO
-    HTML_ROOT = '.' 
+    HTTP_ROOT = '.' 
     #HTML_TEMPLATE = 'template.html' 
     HTML_TEMPLATE = 'index.html' 
 
@@ -99,8 +99,8 @@ class ProductServer:
             self.stderr = os.sys.stderr
         # self._init_dir('PRODUCT_ROOT')
         # self._init_dir('CACHE_ROOT')
-        # self._init_dir('HTML_ROOT') # not here!
-        # self._init_dir('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
+        # self._init_dir('HTTP_ROOT') # not here!
+        # self._init_dir('HTTP_ROOT'+'/'+'HTML_TEMPLATE') # not here!
         
     #def read_conf(self, conffile = 'nutshell.cnf', strict=True):
     def read_conf(self, conffile = None):

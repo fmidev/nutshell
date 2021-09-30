@@ -70,7 +70,7 @@ public class Nutlet extends HttpServlet {
 		//readNutShellConfig();  //  NutShell
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
 		//htmlRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
-		htmlRoot = setup.getOrDefault("HTTP_ROOT", ".").toString();
+		htmlRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 	}
 	
 
@@ -442,7 +442,7 @@ public class Nutlet extends HttpServlet {
 		html.main = html.getUniqueElement(SimpleHtml.SPAN, "main"); // html.createElement(SimpleHtml.SPAN)	;
 
 		Element elem = html.getUniqueElement(SimpleHtml.SPAN, "version");
-		elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") compiled " + getServletConfig().getInitParameter("compileDate") + htmlRoot);
+		elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") built " + getServletConfig().getInitParameter("buildDate") + htmlRoot);
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") installed " + getServletConfig().getInitParameter("installDate"));
 		return html;
 	}

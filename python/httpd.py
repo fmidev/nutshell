@@ -23,8 +23,7 @@ __version__ = '0.1'
 __author__ = 'Markus.Peura@fmi.fi'
 
 import os
-from   pathlib import Path
-
+from pathlib import Path
 import urllib.request, urllib.parse, urllib.error
 import http.server
 import xml.etree.ElementTree as ET
@@ -63,7 +62,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
     def _get_html_template():
         """Read HTML template dir and return it for modifications."""
         try:
-            os.chdir(product_server.HTML_ROOT) # !!
+            os.chdir(product_server.HTTP_ROOT) # !!
             html = ET.parse(product_server.HTML_TEMPLATE).getroot()
         except IOError as err:
             html = ET.Element('html')
@@ -87,7 +86,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         """Read HTML for modifications."""
         content = None
         try:
-            os.chdir(product_server.HTML_ROOT) # !!
+            os.chdir(product_server.HTTP_ROOT) # !!
             html_include = ET.parse(page).getroot()
             content = nutxml.get_body(html_include)
         except IOError as err:
@@ -95,7 +94,17 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             content.set('style', 'color:red')
             content.text = 'Note: Included HTML file "{0}" not found: '.format(page)
         elem.append(content)
-      
+
+    @staticmethod
+    def _get_html_file(file_name):
+        """Read HTML template dir and return it for modifications."""
+        html = NutHandler._get_html_template()
+        body = nutxml.get_body(html)
+        main = nutxml.get_by_id(body, 'main', 'span')
+        NutHandler._include_html(main, 'template/' + file_name)
+        # TODO: footer remarks
+        return html
+        
     @staticmethod
     def _send_status_html(s, status, title, description):
         """
@@ -138,7 +147,10 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         sep = ','
         #  splitquery('/path?query') --> '/path', 'query'.
         #  (path,query) = urllib.parse.splitquery(url)
-        (path,query) = urllib.parse.splitquery(urllib.parse.unquote(url))
+        # urllib.parse.urlparse() 
+        # (path,query) = urllib.parse.splitquery(urllib.parse.unquote(url))
+        result = urllib.parse.urlparse(urllib.parse.unquote(url))
+        (path,query) = (result.path, result.query)
         if (not data):
             data = {}
         if (query):
@@ -204,6 +216,8 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         s.log.info(querydata)
 
         if (basepath == '/test'):
+            s.log.info('Testing (info)!')
+            s.log.warning('Testing (warn)!')
             NutHandler._send_status_html(s, HTTPStatus.OK, "Test", basepath)
             """
             s.send_response(HTTPStatus.OK.value)
@@ -213,22 +227,38 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             """
             return 
 
+        nutshell_path = ''
+
         # Strip HTTP_PREFIX
         if (basepath.startswith(product_server.HTTP_PREFIX)):
-            basepath = basepath[len(product_server.HTTP_PREFIX):]
+            nutshell_path = basepath[len(product_server.HTTP_PREFIX):]
         else:
             s.send_response(HTTPStatus.OK.value)
             s.end_headers()
-            html = "<html><body>Error: path {0} does not start with {1}</body></html>\n"
-            html = html.format(basepath, product_server.HTTP_PREFIX)
+            html = '<html><body>Error: path {0} does not start with <a href="{1}">{1}</a></body></html>\n'
+            html = html.format(nutshell_path, product_server.HTTP_PREFIX)
             s.wfile.write(html.encode())
-            s.log.warning("test {0}".format(basepath))
+            s.log.warning("test {0}".format(nutshell_path))
             return  
             
+        if (nutshell_path == '/NutShell'):
+            # Imitate Tomcat Servlet (Nutlet)
+            url = product_server.HTTP_PREFIX + "/menu.html"; # .format(system_path.name)
+            NutHandler._redirect(s, url)
+            return 
+            #NutHandler._include_html(main, 'template/form.html')
+            #NutHandler._send_status_html(s, HTTPStatus.OK, "Test", nutshell_path)
+            """
+            s.send_response(HTTPStatus.OK.value)
+            s.end_headers()
+            s.wfile.write("<html><body>Test</body></html>\n".encode())
+            s.log.warning("test {0}".format(nutshell_path))
+            """
        
         # Directory and file requests are directed to default HTTP handler
         # NOTE: use plus, otherways collapses to root
-        system_path = nutshell.Path(s.directory + basepath) 
+        #system_path = nutshell.Path(s.directory + nutshell_path)
+        system_path = Path(s.directory + nutshell_path) 
         s.log.info("system_path: {0}".format(system_path))
         if (system_path.exists()):
             # TODO: if empty product, allow generation
@@ -243,13 +273,13 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # - is a file, that has not been found (checked above)
         # - has a filename extension (system_path.suffix, like ".png")
         # - has no special parameters (like "?redirect=None")
-        if (basepath.find('/cache/') == 0) and system_path.suffix and (s.path.find('?') == -1):
+        if (nutshell_path.find('/cache/') == 0) and system_path.suffix and (s.path.find('?') == -1):
             s.log.error("PRODUCT? {0}".format(system_path.suffix))
             url = '/' + product_server.HTTP_PREFIX + "/nutshell/server/?request=MAKE&product={0}".format(system_path.name)
             NutHandler._redirect(s, url)
             return 
                    
-        if (basepath == '/stop'):
+        if (system_path.name == 'stop'):
             s.send_response(HTTPStatus.OK.value)
             s.end_headers()
             s.wfile.write(b"<html>Stopped server</html>")
@@ -257,6 +287,18 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             s.log.info('Goodbye, world!')
             raise SystemExit  #KeyboardInterrupt
 
+        #s.log.warning('Suffix?')
+        #s.log.warning(system_path.suffix)
+
+        # TODO: fix - this does not recognize query param. /nutshell/NutShell?menu.html
+        if (system_path.suffix == '.html'):
+            #s.log.warn('Goodbye, HTML')
+            html = NutHandler._get_html_file(system_path.name)
+            s.send_response(HTTPStatus.OK.value)
+            s.end_headers()
+            s.wfile.write(ET.tostring(html))
+            return
+        
         actions = None
         directives = []
         product_name = querydata.get('product', None)
@@ -376,8 +418,8 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         elem.text = str(dir(product_server)) + '\n'
         elem.text += str(dir(s)) + '\n'
         elem.text += "Load: " + str(os.getloadavg()) + '\n'
-        elem.text += "Cwd: " + s.directory + '\n'
-        elem.text += "System side path: " + str(system_path) + '\n'
+        elem.text += "Cwd (s.directory): " + s.directory + '\n'
+        elem.text += "System side path (system_path): " + str(system_path) + '\n'
         elem.text += "HttpRequest: " + str(s) + '\n'
 
         elem =  nutxml.get_by_id(body, 'version', 'span')
@@ -395,8 +437,8 @@ def run_http(product_server):
     """A convenience function for starting and stopping the HTTP server.
 
     """
-    NutHandler.directory = product_server.HTML_ROOT # has no effect as such...
-    http.server.SimpleHTTPRequestHandler.directory = product_server.HTML_ROOT # has no effect...
+    NutHandler.directory = product_server.HTTP_ROOT # has no effect as such...
+    http.server.SimpleHTTPRequestHandler.directory = product_server.HTTP_ROOT # has no effect...
     
     #http.server.SimpleHTTPRequestHandler.
 
@@ -408,7 +450,7 @@ def run_http(product_server):
     print('Starting server (port={0}, root={1})'.format(product_server.HTTP_PORT, NutHandler.directory))
     nutils.print_dict(nutils.get_entries(httpd))
 
-    cache = Path(product_server.HTML_ROOT, 'cache')
+    cache = Path(product_server.HTTP_ROOT, 'cache')
     if (not cache.exists()):
         print('Warning: cache dir does not exist: {0}'.format(cache))
     # elif not writable:
@@ -461,8 +503,8 @@ if __name__ == '__main__':
                         default=None,
                         help="Template file for html responses", metavar="<file>.html")
     
-    parser.add_argument("-R", "--html_root",
-                        dest="HTML_ROOT",
+    parser.add_argument("-R", "--http_root",
+                        dest="HTTP_ROOT",
                         default=None,
                         help="HTML document root", metavar="<dir>")
     
@@ -503,8 +545,8 @@ if __name__ == '__main__':
 
     product_server.init_path('PRODUCT_ROOT')
     product_server.init_path('CACHE_ROOT')
-    product_server.init_path('HTML_ROOT') # not here!
-    #product_server.init_path('HTML_ROOT'+'/'+'HTML_TEMPLATE') # not here!
+    product_server.init_path('HTTP_ROOT') # not here!
+    #product_server.init_path('HTTP_ROOT'+'/'+'HTML_TEMPLATE') # not here!
 
     #if (options.VERBOSE > 6):
     #    nutils.print_dict(product_server.get_status())
