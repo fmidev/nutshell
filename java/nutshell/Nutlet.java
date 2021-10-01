@@ -35,10 +35,11 @@ public class Nutlet extends HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static public String version = "1.1";
+	static final public String version = "1.2";
 
 	final Map<String,Object> setup;
 	final ProductServer productServer;
+	//final GregorianCalendar startTime;
 
 	/**
 	 * param arg Input
@@ -47,17 +48,22 @@ public class Nutlet extends HttpServlet {
 	 */
 	public Nutlet() {
 		setup = new HashMap<>();
-		startTime = new GregorianCalendar();
+		GregorianCalendar startTime = new GregorianCalendar();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 		setup.put("startTime", simpleDateFormat.format(startTime.getTime()));
 		setup.put("startTimeMs", startTime.getTimeInMillis());
 		setup.put("version", version);  // TODO
 		productServer = new ProductServer();
+		productServer.log.setVerbosity(Log.DEBUG);
+		// catalina.out
+		//System.out.println("Hey, started Nutlet");
+		//System.err.println("Hey, errata");
+		productServer.log.warn("What about me?");
 	}
 
 
 	String confDir = "";
-	String htmlRoot = "";
+	String httpRoot = "";
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -70,7 +76,7 @@ public class Nutlet extends HttpServlet {
 		//readNutShellConfig();  //  NutShell
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
 		//htmlRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
-		htmlRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
+		httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 	}
 	
 
@@ -141,16 +147,7 @@ public class Nutlet extends HttpServlet {
 				pageName = "menu.html";
 			}
 
-			/*
-			if ((pageName == null) || pageName.isEmpty()){
-				pageName = "menu.html";
-			}
-			else if (pageName.equals("status")) {
-				sendStatusPage(HttpServletResponse.SC_OK, "Status page",
-						"NutShell server is running since " + setup.get("startTime"), request, response);
-				return;
-			}
-			*/
+
 			includeHtml(html, pageName); // fail?
 			if (parameterMap.size() > 1){
 				html.appendTable(request.getParameterMap(), "Several parameters");
@@ -232,7 +229,7 @@ public class Nutlet extends HttpServlet {
 			ProductInfo productInfo = new ProductInfo(productStr);
 
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			PrintStream printStream = new PrintStream(os);
+			//PrintStream printStream = new PrintStream(os);
 
 			final String filename = productInfo.getFilename();  // productStr;
 			try {
@@ -240,7 +237,7 @@ public class Nutlet extends HttpServlet {
 				// IMPORTANT: ordering may cause  filename != productStr
 				// TODO: -> link equivalent files?
 				Log log = new Log(String.format("%s-%d", getClass().getSimpleName(), ++productServer.counter));
-				log.printStream = printStream;
+				log.printStream = new PrintStream(os); // printStream;
 
 				// Logging: save logs (disk) with instantaneous or save always?
 				//Task task = productServer.new Task(filename, action.value,  log);
@@ -248,12 +245,17 @@ public class Nutlet extends HttpServlet {
 
 				//String[] directives = request.getParameterValues("directives");
 				task.setDirectives(request.getParameterMap());
+				task.log.setVerbosity(log.verbosity);
+
+				log.note(task.toString());
 
 				// Consider Generator gen =
 
 				try {
 					// track esp. missing inputs
 					//task.log.ok("-------- see separate log --->");
+					productServer.log.warn(String.format("Yes, Executing... %s", task));
+					log.warn(String.format("Executing... %s", task));
 					task.log.ok("Executing...");
 					task.execute();
 					//task.log.ok("-------- see separate log <---");
@@ -311,23 +313,9 @@ public class Nutlet extends HttpServlet {
 					}
 
 					html.appendElement(SimpleHtml.PRE, e.getMessage()).setAttribute("class", "error");
-					//html.appendElement(SimpleHtml.PRE, e.getMessage());
-					//html.appendElement(msgElem);
 					task.actions.add(Actions.CHECK);
 					task.actions.add(Actions.INPUTLIST);
-					/* NUEVO 2021/07
-						// html.appendAnchor(request.getContextPath() +"?request=INPUTLIST&product="+request.getParameter("product"), "inputs");
-						html.appendElement(SimpleHtml.PRE, e.getMessage());
-						task.actions.add(Actions.CHECK);
-						task.actions.add(Actions.INPUTLIST);
-						//sendToStream(html.document, response);
-						//return;
-					}
-					else {
-						sendStatusPage(e.index, "Product generation error", e, request, response);
-						return;
-					}
-					*/
+
 				}
 
 				html.appendElement(SimpleHtml.H1, "Product info: " + productInfo.PRODUCT_ID);
@@ -360,8 +348,11 @@ public class Nutlet extends HttpServlet {
 					Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
 					map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 					map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
+					map.put("actions", actions);
+					map.put("directives", task.directives);
 
 					html.appendTable(map, "Product generator");
+
 
 					// INPUTS
 					if (!task.inputs.isEmpty()) {
@@ -383,6 +374,7 @@ public class Nutlet extends HttpServlet {
 
 				html.appendElement(SimpleHtml.H2, "Log");
 				if (task.logFile.exists()){
+					html.appendElement(SimpleHtml.H3, "Task log");
 					StringBuilder builder = new StringBuilder();
 					BufferedReader reader = new BufferedReader(new FileReader(task.logFile));
 					String line = null;
@@ -393,9 +385,30 @@ public class Nutlet extends HttpServlet {
 						builder.append(line).append('\n');
 					}
 					html.appendElement(SimpleHtml.PRE, builder.toString()).setAttribute("class", "code");
+
 				}
+				html.appendElement(SimpleHtml.H3, "NutLet log");
+				// log.warn("Nyt jotain");
 				html.appendElement(SimpleHtml.PRE, os.toString("UTF-8")).setAttribute("class", "code");
+				// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
+
+				html.appendElement(SimpleHtml.H3, "ProductServer log");
+				//log.warn("Nyt jotain");
+				productServer.log.warn("Empty?");
+				html.appendElement(SimpleHtml.PRE, ""+productServer.log.buffer.length()).setAttribute("class", "code");
+				html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
+
+				html.appendElement(SimpleHtml.H3, "Corresponding command line");
+				String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --actions %s %s";
+				//  if (!task.directives.isEmpty())
+				//	cmdLine += String.format("--directives %s", task.directives.toString());
+				String name = productServer.getClass().getCanonicalName();
+				html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, actions, task.info)).setAttribute("class", "code");
+
 				html.appendTable(productInfo.getParamEnv(null), "Product parameters");
+
+				//log.warn("Nyt jotain");
+
 				// 2
 				addRequestStatus(html, request);
 				addServerStatus(html);
@@ -427,7 +440,7 @@ public class Nutlet extends HttpServlet {
 	 */
 	protected SimpleHtml getHtmlPage(){ // throws IOException, SAXException, ParserConfigurationException {
 
-		Path path = Paths.get(htmlRoot,"template", "main.html");
+		Path path = Paths.get(httpRoot,"template", "main.html");
 
 		SimpleHtml html = null;
 		try {
@@ -442,7 +455,7 @@ public class Nutlet extends HttpServlet {
 		html.main = html.getUniqueElement(SimpleHtml.SPAN, "main"); // html.createElement(SimpleHtml.SPAN)	;
 
 		Element elem = html.getUniqueElement(SimpleHtml.SPAN, "version");
-		elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") built " + getServletConfig().getInitParameter("buildDate") + htmlRoot);
+		elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") built " + getServletConfig().getInitParameter("buildDate") + httpRoot);
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") installed " + getServletConfig().getInitParameter("installDate"));
 		return html;
 	}
@@ -454,7 +467,7 @@ public class Nutlet extends HttpServlet {
 	 */
 	protected void includeHtml(SimpleHtml html, String filename){
 		try {
-			NodeList list = SimpleHtml.readBody(Paths.get(htmlRoot, "template", filename).toString());
+			NodeList list = SimpleHtml.readBody(Paths.get(httpRoot, "template", filename).toString());
 			for (int i=0; i< list.getLength(); ++i) {
 				Node node = list.item(i);
 				//System.out.println(node.getNodeName() + ':' + node.getTextContent());
@@ -637,26 +650,6 @@ public class Nutlet extends HttpServlet {
 
 	}
 
-	
-	/** Reads local ProductServer configuration file
-	 * 
-	 */
-	/*
-	private void readNutShellConfig(){
-
-		String filename = setup.getOrDefault("confDir", ".").toString() + File.separator + "nutshell.cnf";
-		setup.put("confFile", filename);
-		
-		try {
-			MapUtils.read(filename, setup);
-			setup.put("HTTP_PORT", "automatic"); // override
-		} catch (IOException e) {
-			e.printStackTrace();
-			setup.put("confFileError", e.getLocalizedMessage());
-		}
-
-	}
-	*/
 
 
 
@@ -698,7 +691,6 @@ public class Nutlet extends HttpServlet {
 	}
 	
 
-	final GregorianCalendar startTime; 
 
 	/**
 	 * @param args

@@ -16,10 +16,6 @@
       <param-name>confDir</param-name>
       <param-value>${NUTSHELL_CONF_DIR}</param-value>
     </init-param>
-    <!--init-param>
-      <param-name>htmlRootOLD</param-name>
-      <param-value>${HTTP_ROOT}</param-value>
-    </init-param -->
     <init-param>
       <param-name>buildDate</param-name>
       <param-value>${DATE}</param-value>
@@ -33,7 +29,6 @@
   <servlet-mapping>
     <servlet-name>NutShell</servlet-name>
     <url-pattern>/NutShell</url-pattern>
-    <!-- url-pattern>/Venison</url-pattern -->
   </servlet-mapping>
 
   <error-page>
@@ -62,6 +57,6 @@
     <url-pattern>/</url-pattern>
   </servlet-mapping>
 
-  <!-- Venison conf END /-->
+  <!-- NutShell conf END /-->
 
 </web-app>

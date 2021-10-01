@@ -54,11 +54,13 @@ public class ProductServer { //extends Cache {
 
 	/// consider "log"
 	//final public Log serverLog;
-	final public HttpLog log;
+	final public HttpLog log = new HttpLog(getClass().getSimpleName());
 
+	/*
 	ProductServer(){
 		log = new HttpLog(getClass().getSimpleName());
 	}
+	*/
 
 	public final Map<String,Object> setup = new HashMap<>();
 
@@ -290,32 +292,6 @@ public class ProductServer { //extends Cache {
 
 		public File logFile = null;
 
-		/**
-		 *
-		 * @param i
-		 * @param msg
-		void setStatus(int i, String msg){
-		}
-		 */
-
-		/** Set status according to predefined {@link IndexedException}
-		 *
-		 * @param e
-		void setStatus(IndexedException e){
-
-			if (handleHttpMsg(e.index, e.getMessage())){
-				if (e.index > this.pendingException.index)
-					this.pendingException = e;
-			}
-			else {
-				handleStandardMsg(e.index, e.getMessage());
-			}
-
-		}
-		 */
-
-
-
 
 		/** Product generation task defining a product instance and alternative operations for retreaving it.
 		 *
@@ -327,15 +303,10 @@ public class ProductServer { //extends Cache {
 		public Task(String productStr, int actions, HttpLog parentLog) throws ParseException {
 
 			this.info = new ProductInfo(productStr);
-
 			this.creationTime = System.currentTimeMillis();
-
-			//this.actions = actions;
 			this.actions.set(actions);
 
 			final String filename = info.getFilename();
-
-
 
 			// Relative
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
@@ -363,18 +334,22 @@ public class ProductServer { //extends Cache {
 				this.logFile = cacheRoot.resolve(relativeLogPath).toFile();
 				try {
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
-					logFile.createNewFile();
-					FileOutputStream fw = new FileOutputStream(this.logFile);
-					this.log.printStream = new PrintStream(fw);
-					//System.err.println("LOG FILE:" + logFile.getAbsolutePath());
+					final boolean exists = logFile.createNewFile();
+
+					System.err.println(String.format("LOG FILE: exists=%b %s", exists, logFile.getAbsolutePath()));
+					//FileOutputStream fw = new FileOutputStream(this.logFile);
+					//this.log.printStream = new PrintStream(fw);
+					this.log.printStream = System.err;
+					//
+					this.log.setVerbosity(Log.DEBUG);
 				} catch (IOException e) {
 					e.printStackTrace(this.log.printStream);
 					this.log.error("Failed in creating log file: " + this.logFile);
 				}
 				// Close upon destruction of this Task?
 			}
-
-			this.log.debug("started" + this.actions.toString() + " " + this.toString());
+			//this.log.warn("Where am I?");
+			this.log.debug(String.format("started %s [%d] [%s] %s ", this.info.getFilename(), this.getId(), this.actions, this.directives)); //  this.toString()
 			//this.log.debug(this.toString());
 			this.result = null;
 	
@@ -540,14 +515,15 @@ public class ProductServer { //extends Cache {
 			}
 
 			// Mark this task being processed (empty file)
-			if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
+			//if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
+			if (this.actions.isSet(Actions.FILE) && (fileFinal.length()==0)){
 
 				this.actions.add(Actions.GENERATE);
 
 				try {
-					this.log.debug("Creating dir: " + cacheRoot+"/./"+this.relativeOutputDir);
-					//Path outDir =
+					this.log.debug(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDir));
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
+					this.log.debug(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDirTmp);
 					this.log.debug(String.format("Creating file: %s", this.relativeOutputPath));
 					Files.createFile(this.outputPath);
@@ -558,14 +534,17 @@ public class ProductServer { //extends Cache {
 					//return;
 				}
 			}
+			else {
+				this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
+			}
 
 			// Generate or at least list inputs
 			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST)) { //
 
-				this.log.note("Determining input list for: " + this.info.PRODUCT_ID);
-				//Map<String,String>
+				this.log.note(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
+
 				this.inputs.clear(); // needed?
-				//this.inputs.putAll(generator.getInputList(this.info, dummyContext, this.log.printStream));
+
 				try {
 					this.inputs.putAll(generator.getInputList(this));
 					this.log.debug(this.inputs.toString());
@@ -633,14 +612,13 @@ public class ProductServer { //extends Cache {
 
 				if (fileTmp.length() > 0){
 					// this.info.getFilename()
-					this.log.debug(String.format("OK, generator produced tmp file: %s", this.outputPath));
+					this.log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
 					// this.move(fileTmp, fileFinal);
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
 						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
-
 						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
 					// this.result = this.outputPath;
@@ -670,7 +648,7 @@ public class ProductServer { //extends Cache {
 				if (fileFinal.length() > 0) {
 
 					this.result = this.outputPath;
-					this.log.ok("Generated: " + this.result.toString());
+					this.log.ok(String.format("Generated : %s (%d bytes)", this.result, fileFinal.length() ));
 
 					if (this.actions.involves(Actions.LATEST|Actions.SHORTCUT)){
 
@@ -856,6 +834,11 @@ public class ProductServer { //extends Cache {
 
 		final int count = taskRequests.size();
 
+		if (count == 0){
+			//log.info(String.format("Inits (%d) tasks "));
+			return tasks;
+		}
+
 		log.info(String.format("Inits (%d) tasks ", count));
 
 		/// Check COPY & LINK targets (must be directories, if several tasks)
@@ -899,7 +882,7 @@ public class ProductServer { //extends Cache {
 				task.log.verbosity = log.verbosity;
 				tasks.put(key, task);
 				log.note(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
-				if (task.log != log)
+				if (task.logFile != null)
 					log.info(String.format("See separate log: %s",  task.logFile));
 				task.start();
 			}
@@ -1048,7 +1031,7 @@ public class ProductServer { //extends Cache {
 
 		final ProductServer server = new ProductServer();
 		server.log.printStream = System.err;  // System.out  Note: testing STREAM action needs clean stdout
-		server.log.verbosity = Log.DEBUG;
+		server.log.setVerbosity(Log.DEBUG);
 		server.timeOut = 20;
 
 		HttpLog log = server.log; //.child("CmdLine");
@@ -1089,7 +1072,7 @@ public class ProductServer { //extends Cache {
 						arg = args[++i];
 						try {
 							int level = Integer.parseInt(arg);
-							log.verbosity = level;
+							log.setVerbosity(level);
 						} catch (NumberFormatException e) {
 							try {
 								Field field = Log.class.getField(arg);
@@ -1205,6 +1188,9 @@ public class ProductServer { //extends Cache {
 
 		log.note("Directives: " + directives);
 		//System.out.println(directives);
+
+
+		/// "MAIN"
 
 		int result = 0;
 

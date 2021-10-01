@@ -213,7 +213,9 @@ public class Log {
 
 
 			if (message != null)
-				buffer.append('\t').append(message);
+				buffer.append(' ').append(message);
+				//buffer.append('\t').append(message);
+
 			buffer.append('\n');
 			//if (printStream != null){
 			printStream.print(buffer.toString());
@@ -241,10 +243,13 @@ public class Log {
 	long startTime;
 	//String lastMessage = null;
 	protected int status = 0;
-	final StringBuffer buffer = new StringBuffer();
+	final protected StringBuffer buffer = new StringBuffer();
 	final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
-	
-			
+
+	public void setVerbosity(int verbosity) {
+		this.verbosity = verbosity;
+	}
+
 	public static void main(String[] args) {
 		
 		Log log = new Log();
