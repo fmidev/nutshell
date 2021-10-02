@@ -41,6 +41,7 @@ public class Nutlet extends HttpServlet {
 	final ProductServer productServer;
 	//final GregorianCalendar startTime;
 
+
 	/**
 	 * param arg Input
 	 *
@@ -68,14 +69,9 @@ public class Nutlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		//this.getServletConfig();
 		confDir  = config.getInitParameter("confDir");
-		// htmlRoot = config.getInitParameter("htmlRoot");
-		//productServer.
 		setup.putAll(readTomcatParameters()); // from ho
-		//readNutShellConfig();  //  NutShell
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
-		//htmlRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
 		httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 	}
 	
@@ -105,19 +101,13 @@ public class Nutlet extends HttpServlet {
 		/// Respond with an HTML page, if query contains no product request Try to load (include)
 		if ((productStr == null) || productStr.isEmpty()){
 
-			// Retrieve the empty HTML template
 			/**  TODO: rename main.html to sth like layout.html or template.html
 			 *   Note: main.html is also utilied as index.html -> template/main.html (ie. linked)
 			 */
-			SimpleHtml html = getHtmlPage();
+			// Retrieve the empty HTML template
+			//SimpleHtml html = getHtmlPage();
 
-			//String pageName = request.getQueryString();
 			String pageName = null; //"menu.html";
-
-			/** http://localhost:8080/nutshell/NutShell?
-			 *  Note:
-			 *  -
-			 */
 
 			Map<String, String[]> parameterMap = request.getParameterMap();
 			if (!parameterMap.isEmpty()){
@@ -130,14 +120,15 @@ public class Nutlet extends HttpServlet {
 
 					if (queryString.endsWith(".html")) {
 						pageName = queryString;
-					} else if (queryString.equals("status")) {
+					}
+					else if (queryString.equals("status")) {
 						sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 								"NutShell server is running since " + setup.get("startTime"), request, response);
 						return;
-					} else {
-						// Odd request
+					}
+					else {
 						sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
-								"Query: " + queryString, request, response);
+								String.format("Query: %s", queryString), request, response);
 						return;
 					}
 				}
@@ -148,29 +139,26 @@ public class Nutlet extends HttpServlet {
 			}
 
 
-			includeHtml(html, pageName); // fail?
+			SimpleHtml html = includeHtml(pageName); // fail?
+
 			if (parameterMap.size() > 1){
 				html.appendTable(request.getParameterMap(), "Several parameters");
 			}
+
 			response.setStatus(HttpServletResponse.SC_OK); // tes
 			sendToStream(html.document, response);
 			return;
 		}
 
 
-		//int action = 0;
 		Actions actions = new Actions();
-		// NUEVO 2021/07/01
-		// String[] actions = request.getParameterValues("request");
 		for (String key: new String[]{"actions", "output",  "request", "action"}) {  // request and action deprecating!
 			String[] a = request.getParameterValues(key);
 			if (a != null) {
 				try {
-					//action.set(actions);
-					actions.add(a); // NUEVO 2021/07
-					//action = ProductServer.parseActionCode(actions);
+					actions.add(a);
 				} catch (Exception e) {
-					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parsing 'request' failed:" + Arrays.toString(a), e.getLocalizedMessage(), response);
+					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parsing 'request' failed:" + Arrays.toString(a), e.getMessage(), response);
 					return;
 				}
 			}
@@ -184,11 +172,6 @@ public class Nutlet extends HttpServlet {
 		/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
 		if (productStr.equals("resolve")){
 
-			/*
-			Path imgPath2 = Paths.get(htmlRoot, "img/nutshell-logo.png");
-			System.err.println(imgPath2.toString());
-			sendToStream(imgPath2, response);
-			*/
 			final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
 
 			if (requestUri == null){
@@ -201,236 +184,229 @@ public class Nutlet extends HttpServlet {
 			for (int i = 0; i < path.getNameCount(); i++) {
 				if (path.getName(i).toString().equals("cache")){
 					productStr = path.getFileName().toString();
-					//action = Actions.MAKE | Actions.STREAM;
 					actions.set(Actions.MAKE | Actions.STREAM);
 					break;
 				}
 			}
 
 			if (productStr.isEmpty()){
+				/*
 				StringBuffer sb = new StringBuffer();
 				sb.append(requestUri);
 				sb.append(": ").append(path.getName(1));
 				sb.append(" -> ").append(path.getFileName());
+				 */
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,
 						"Could not resolve not found (404) request.",
-						sb.toString(),
+						String.format("%s: %s -> %s", requestUri, path.getName(1), path.getFileName()),
+						//sb.toString(),
 						response);
 				return;
 			}
 
 		}
 
-		SimpleHtml html = getHtmlPage(); // slows production?
 
 
 		try {
-			
-			ProductInfo productInfo = new ProductInfo(productStr);
+			SimpleHtml html = getHtmlPage(); // slows production?
 
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			//PrintStream printStream = new PrintStream(os);
+			final String filename = productStr;
 
-			final String filename = productInfo.getFilename();  // productStr;
+			// IMPORTANT: ordering may cause  filename != productStr
+			// TODO: -> link equivalent files?
+
+			//Log log = new Log(String.format("%s-%d", getClass().getSimpleName(), ++productServer.counter));
+			//log.printStream = new PrintStream(os); // printStream;
+
+			// Logging: save logs (disk) with instantaneous or save always?
+			//Task task = productServer.new Task(filename, action.value,  log);
+			Task task = productServer.new Task(filename, actions.value,null);
+
+			//String[] directives = request.getParameterValues("directives");
+			task.setDirectives(request.getParameterMap());
+			//task.log.setVerbosity(log.verbosity);
+
+			task.log.note(task.toString());
+
+			// Consider Generator gen =
+
 			try {
-
-				// IMPORTANT: ordering may cause  filename != productStr
-				// TODO: -> link equivalent files?
-				Log log = new Log(String.format("%s-%d", getClass().getSimpleName(), ++productServer.counter));
-				log.printStream = new PrintStream(os); // printStream;
-
-				// Logging: save logs (disk) with instantaneous or save always?
-				//Task task = productServer.new Task(filename, action.value,  log);
-				Task task = productServer.new Task(filename, actions.value,null);
-
-				//String[] directives = request.getParameterValues("directives");
-				task.setDirectives(request.getParameterMap());
-				task.log.setVerbosity(log.verbosity);
-
-				log.note(task.toString());
-
-				// Consider Generator gen =
-
-				try {
-					// track esp. missing inputs
-					//task.log.ok("-------- see separate log --->");
-					productServer.log.warn(String.format("Yes, Executing... %s", task));
-					log.warn(String.format("Executing... %s", task));
-					task.log.ok("Executing...");
-					task.execute();
-					//task.log.ok("-------- see separate log <---");
+				// track esp. missing inputs
+				//task.log.ok("-------- see separate log --->");
+				productServer.log.warn(String.format("Yes, Executing... %s", task));
+				//log.warn(String.format("Executing... %s", task));
+				task.log.ok("Executing...");
+				task.execute();
+				//task.log.ok("-------- see separate log <---");
 
 
-					if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
-						task.log.warn(String.format("Failed task: %s", task.toString()));
-						throw task.log.indexedException;
-					}
-					else {
-						task.log.ok(String.format("Completed task: %s", task.toString()));
-					}
-
-					if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
-
-						if (task.actions.isSet(Actions.STREAM)) {
-							sendToStream(task, response);
-							return;
-						}
-
-						if (task.actions.isSet(Actions.REDIRECT)) {
-							String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
-							response.sendRedirect(url);
-							return;
-						}
-						// if not STATUS
-						/*
-						 * The page isn’t redirecting properly
-						 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
-						 * This problem can sometimes be caused by disabling or refusing to accept cookies.
-						 */
-					}
-					else {
-
-						if (!task.actions.isSet(ProductServer.Actions.CHECK)) {
-							sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
-									os.toString("UTF8"), request, response);
-							return;
-						}
-					}
-
-					response.setStatus(HttpServletResponse.SC_OK); // tes
+				if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
+					//task.log.log();
+					task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedException.index, task.toString()));
+					throw task.log.indexedException;
 				}
-				catch (IndexedException e) {
-
-					task.actions.add(Actions.CHECK);
-					response.setStatus(e.index);
-					switch (e.index){
-						case HttpServletResponse.SC_PRECONDITION_FAILED:
-							html.appendElement(SimpleHtml.H1, "Input problem(s)");
-							html.appendElement(SimpleHtml.P, "See input list further below");
-							break;
-						default:
-							html.appendElement(SimpleHtml.H1, "Product generator error");
-					}
-
-					html.appendElement(SimpleHtml.PRE, e.getMessage()).setAttribute("class", "error");
-					task.actions.add(Actions.CHECK);
-					task.actions.add(Actions.INPUTLIST);
-
+				else {
+					task.log.ok(String.format("Completed task: %s", task.toString()));
 				}
 
-				html.appendElement(SimpleHtml.H1, "Product info: " + productInfo.PRODUCT_ID);
-				//html.createElement(SimpleHtml.P, "No ST REAM or REDIRECT were requested, so this page appears.");
+				if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
-				if (task.actions.isSet(Actions.CHECK)) {
-
-					Map<String,Object> map = new LinkedHashMap<>();
-
-					//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
-					if (task.relativeOutputDir != null) {
-
-						Path relativePath = productServer.cachePrefix.resolve(task.relativeOutputPath);
-						//task.relativeOutputDir.toString(), task.info.getFilename());
-						//elem = html.createAnchor(relativePath, relativePath.getFileName());
-						map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
-						//elem = html.createAnchor(relativePath.getParent(), null);
-						if (task.logFile.exists()){
-							Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
-							map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
-						}
-
-						map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
-					}
-					else {
-						map.put("Output file", "???");
+					if (task.actions.isSet(Actions.STREAM)) {
+						sendToStream(task, response);
+						return;
 					}
 
-					// NOTE: these assume ExternalGenerator?
-					Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
-					map.put("Generator dir", html.createAnchor(gen.getParent(),null));
-					map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
-					map.put("actions", actions);
-					map.put("directives", task.directives);
-
-					html.appendTable(map, "Product generator");
-
-
-					// INPUTS
-					if (!task.inputs.isEmpty()) {
-						Map<String, Element> linkMap = new HashMap<>();
-						for (Map.Entry<String, String> e : task.inputs.entrySet()) {
-							String inputFilename = e.getValue();
-							//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
-							String url = String.format("%s%s?actions=CHECK&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
-							linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
-							//Object inp = task.retrievedInputs.get(e.getKey());
-							//if ()
-							//linkMap.put("", html.createAnchor(task.retrievedInputs, "log"));
-						}
-						html.appendTable(linkMap, "Product inputs");
+					if (task.actions.isSet(Actions.REDIRECT)) {
+						String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
+						response.sendRedirect(url);
+						return;
 					}
+					// if not STATUS
+					/*
+					 * The page isn’t redirecting properly
+					 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
+					 * This problem can sometimes be caused by disabling or refusing to accept cookies.
+					 */
+				}
+				else {
 
-					html.appendTable(task.getParamEnv(), "Product generator environment");
+					if (!task.actions.isSet(ProductServer.Actions.CHECK)) {
+						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
+								os.toString("UTF8"), request, response);
+						return;
+					}
 				}
 
-				html.appendElement(SimpleHtml.H2, "Log");
-				if (task.logFile.exists()){
-					html.appendElement(SimpleHtml.H3, "Task log");
-					StringBuilder builder = new StringBuilder();
-					BufferedReader reader = new BufferedReader(new FileReader(task.logFile));
-					String line = null;
-					while ((line = reader.readLine()) != null){
-						// TODO: detect ERROR, WARNING, # etc and apply colours
-						// Requires separate lines, so something other than StringBuilder
-						// builder.append("<b>x</b>").append(line).append('\n');
-						builder.append(line).append('\n');
-					}
-					html.appendElement(SimpleHtml.PRE, builder.toString()).setAttribute("class", "code");
+				response.setStatus(HttpServletResponse.SC_OK); // tes
+			}
+			catch (IndexedException e) {
 
+				task.actions.add(Actions.CHECK);
+				response.setStatus(e.index);
+				switch (e.index){
+					case HttpServletResponse.SC_PRECONDITION_FAILED:
+						html.appendElement(SimpleHtml.H1, "Input problem(s)");
+						html.appendElement(SimpleHtml.P, "See input list further below");
+						break;
+					default:
+						html.appendElement(SimpleHtml.H1, "Product generator error");
 				}
-				html.appendElement(SimpleHtml.H3, "NutLet log");
-				// log.warn("Nyt jotain");
-				html.appendElement(SimpleHtml.PRE, os.toString("UTF-8")).setAttribute("class", "code");
-				// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
 
-				html.appendElement(SimpleHtml.H3, "ProductServer log");
-				//log.warn("Nyt jotain");
-				productServer.log.warn("Empty?");
-				html.appendElement(SimpleHtml.PRE, ""+productServer.log.buffer.length()).setAttribute("class", "code");
-				html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
-
-				html.appendElement(SimpleHtml.H3, "Corresponding command line");
-				String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --actions %s %s";
-				//  if (!task.directives.isEmpty())
-				//	cmdLine += String.format("--directives %s", task.directives.toString());
-				String name = productServer.getClass().getCanonicalName();
-				html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, actions, task.info)).setAttribute("class", "code");
-
-				html.appendTable(productInfo.getParamEnv(null), "Product parameters");
-
-				//log.warn("Nyt jotain");
-
-				// 2
-				addRequestStatus(html, request);
-				addServerStatus(html);
-				sendToStream(html.document, response);
+				html.appendElement(SimpleHtml.PRE, e.getMessage()).setAttribute("class", "error");
+				task.actions.add(Actions.CHECK);
+				task.actions.add(Actions.INPUTLIST);
 
 			}
-			catch (Exception e) { // TODO: consider like above, indexedException
-				//e.printStackTrace();
-				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product generation error",
-							e, request, response);
+
+			html.appendElement(SimpleHtml.H1, "Product info: " + task.info.PRODUCT_ID);
+			//html.createElement(SimpleHtml.P, "No ST REAM or REDIRECT were requested, so this page appears.");
+
+			if (task.actions.isSet(Actions.CHECK)) {
+
+				Map<String,Object> map = new LinkedHashMap<>();
+
+				//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
+				if (task.relativeOutputDir != null) {
+
+					Path relativePath = productServer.cachePrefix.resolve(task.relativeOutputPath);
+					//task.relativeOutputDir.toString(), task.info.getFilename());
+					//elem = html.createAnchor(relativePath, relativePath.getFileName());
+					map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
+					//elem = html.createAnchor(relativePath.getParent(), null);
+					if (task.logFile.exists()){
+						Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
+						map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
+					}
+
+					map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
+				}
+				else {
+					map.put("Output file", "???");
+				}
+
+				// NOTE: these assume ExternalGenerator?
+				Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
+				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
+				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
+				map.put("actions", actions);
+				map.put("directives", task.directives);
+
+				html.appendTable(map, "Product generator");
+
+
+				// INPUTS
+				if (!task.inputs.isEmpty()) {
+					Map<String, Element> linkMap = new HashMap<>();
+					for (Map.Entry<String, String> e : task.inputs.entrySet()) {
+						String inputFilename = e.getValue();
+						//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
+						String url = String.format("%s%s?actions=CHECK&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
+						linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
+						//Object inp = task.retrievedInputs.get(e.getKey());
+						//if ()
+						//linkMap.put("", html.createAnchor(task.retrievedInputs, "log"));
+					}
+					html.appendTable(linkMap, "Product inputs");
+				}
+
+				html.appendTable(task.getParamEnv(), "Product generator environment");
 			}
-			// 1
+
+			html.appendElement(SimpleHtml.H2, "Log");
+			if (task.logFile.exists()){
+				html.appendElement(SimpleHtml.H3, "Task log");
+				StringBuilder builder = new StringBuilder();
+				BufferedReader reader = new BufferedReader(new FileReader(task.logFile));
+				String line = null;
+				while ((line = reader.readLine()) != null){
+					// TODO: detect ERROR, WARNING, # etc and apply colours
+					// Requires separate lines, so something other than StringBuilder
+					// builder.append("<b>x</b>").append(line).append('\n');
+					builder.append(line).append('\n');
+				}
+				html.appendElement(SimpleHtml.PRE, builder.toString()).setAttribute("class", "code");
+
+			}
+			html.appendElement(SimpleHtml.H3, "NutLet log");
+			// log.warn("Nyt jotain");
+			html.appendElement(SimpleHtml.PRE, os.toString("UTF-8")).setAttribute("class", "code");
+			// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
+
+			html.appendElement(SimpleHtml.H3, "ProductServer log");
+			//log.warn("Nyt jotain");
+			productServer.log.warn("Empty?");
+			html.appendElement(SimpleHtml.PRE, ""+productServer.log.buffer.length()).setAttribute("class", "code");
+			html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
+
+			html.appendElement(SimpleHtml.H3, "Corresponding command line");
+			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --actions %s %s";
+			//  if (!task.directives.isEmpty())
+			//	cmdLine += String.format("--directives %s", task.directives.toString());
+			String name = productServer.getClass().getCanonicalName();
+			html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, actions, task.info)).setAttribute("class", "code");
+
+			html.appendTable(task.info.getParamEnv(null), "Product parameters");
+
+			//log.warn("Nyt jotain");
+
+			// 2
+			addRequestStatus(html, request);
+			addServerStatus(html);
+			sendToStream(html.document, response);
+
 		}
 		catch (ParseException e) {
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,"Product parse failure",
-							e,	request, response);
+					e,	request, response);
 		}
-		catch (Exception e) {
-			sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unknown error",
-					e, request, response);
+		catch (Exception e) { // TODO: consider like above, indexedException
+			//e.printStackTrace();
+			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product generation error",
+						e, request, response);
 		}
-		// 2
+		// 1
 	}
 
 	/** Reads and returns a html page template (template/main.html)
@@ -460,12 +436,16 @@ public class Nutlet extends HttpServlet {
 		return html;
 	}
 
-	/** Given HTML page object, reads a file and copies its BODY element to the page.
-	 *
-	 * @param html
-	 * @param filename
-	 */
-	protected void includeHtml(SimpleHtml html, String filename){
+	protected SimpleHtml includeHtml(String filename){
+		return includeHtml(filename, getHtmlPage());
+	}
+
+		/** Given HTML page object, reads a file and copies its BODY element to the page.
+         *
+         * @param html
+         * @param filename
+         */
+	protected SimpleHtml includeHtml(String filename, SimpleHtml html){
 		try {
 			NodeList list = SimpleHtml.readBody(Paths.get(httpRoot, "template", filename).toString());
 			for (int i=0; i< list.getLength(); ++i) {
@@ -479,6 +459,7 @@ public class Nutlet extends HttpServlet {
 			html.appendElement(SimpleHtml.H2, "Failed reading template: " + filename);
 			html.appendElement(SimpleHtml.PRE, e.toString());
 		}
+		return html;
 	}
 
 

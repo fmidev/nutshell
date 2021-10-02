@@ -5,10 +5,10 @@ import sun.misc.Signal;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -63,6 +63,14 @@ public class ProductServer { //extends Cache {
 	*/
 
 	public final Map<String,Object> setup = new HashMap<>();
+
+	// TODO: add to config, set in constructor
+	//public final Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+	public Set<PosixFilePermission> dirPerms = PosixFilePermissions.fromString("rwxrwxr-x");
+	public FileAttribute<Set<PosixFilePermission>> dirPermAttrs = PosixFilePermissions.asFileAttribute(dirPerms);
+
+	public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
+	public FileAttribute<Set<PosixFilePermission>> filePermAttrs = PosixFilePermissions.asFileAttribute(filePerms);
 
 	/// System side settings.
 	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
@@ -120,6 +128,14 @@ public class ProductServer { //extends Cache {
 
 		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
+
+		// TODO: from conf
+		/*
+		this.filePerms = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
+		this.dirPerms = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
+		 */
+		setup.put("filePerms", filePerms);
+		setup.put("dirPerms", dirPerms);
 		// this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
@@ -268,7 +284,8 @@ public class ProductServer { //extends Cache {
 		final HttpLog log;
 		final ProductInfo info;
 
-		///
+		final public String filename;
+
 		final public Actions actions = new Actions();
 
 		public Path timeStampDir;
@@ -302,11 +319,12 @@ public class ProductServer { //extends Cache {
 		 */
 		public Task(String productStr, int actions, HttpLog parentLog) throws ParseException {
 
-			this.info = new ProductInfo(productStr);
 			this.creationTime = System.currentTimeMillis();
+
+			this.info = new ProductInfo(productStr);
+			this.filename = this.info.getFilename();
 			this.actions.set(actions);
 
-			final String filename = info.getFilename();
 
 			// Relative
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
@@ -331,15 +349,28 @@ public class ProductServer { //extends Cache {
 			}
 			else {
 				this.log = new HttpLog(this.info.PRODUCT_ID);
-				this.logFile = cacheRoot.resolve(relativeLogPath).toFile();
+				Path logPath = cacheRoot.resolve(relativeLogPath);
+				this.logFile = logPath.toFile();
 				try {
-					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
-					final boolean exists = logFile.createNewFile();
 
-					System.err.println(String.format("LOG FILE: exists=%b %s", exists, logFile.getAbsolutePath()));
-					//FileOutputStream fw = new FileOutputStream(this.logFile);
-					//this.log.printStream = new PrintStream(fw);
-					this.log.printStream = System.err;
+					ensureWritableFile(cacheRoot, this.relativeLogPath);
+					/*
+					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
+					//final boolean exists = logFile.createNewFile();
+					if (!logFile.exists()) {
+						System.err.println(String.format("Creating LOG FILE: %s", logFile.getAbsolutePath()));
+						Files.createFile(logPath, filePerms);
+					}
+					else {
+						System.err.println(String.format("Exists already: LOG FILE: %s", logFile.getAbsolutePath()));
+					}
+					*/
+
+
+
+					FileOutputStream fw = new FileOutputStream(this.logFile);
+					this.log.printStream = new PrintStream(fw);
+					//this.log.printStream = System.err;
 					//
 					this.log.setVerbosity(Log.DEBUG);
 				} catch (IOException e) {
@@ -349,7 +380,7 @@ public class ProductServer { //extends Cache {
 				// Close upon destruction of this Task?
 			}
 			//this.log.warn("Where am I?");
-			this.log.debug(String.format("started %s [%d] [%s] %s ", this.info.getFilename(), this.getId(), this.actions, this.directives)); //  this.toString()
+			this.log.debug(String.format("started %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
 			//this.log.debug(this.toString());
 			this.result = null;
 	
@@ -447,6 +478,54 @@ public class ProductServer { //extends Cache {
 			}
 		}
 
+		protected void ensureWritableDir(Path root, Path relativePath) throws IOException {
+
+			if (relativePath.getNameCount() == 0)
+				return;
+
+			Path path = root.resolve(relativePath);
+			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
+
+			if (!Files.exists(path)) {
+				// Step 1: ensure parent dir (recursively)
+				ensureWritableDir(root, relativePath.getParent());
+				this.log.warn(String.format("Creating dir: %s/./%s",  root, relativePath));
+				Files.createDirectory(path, dirPermAttrs);
+				//Files.createDirectories(path, dirPermAttrs);
+			}
+			else {
+				//this.log.warn(String.format("Exists dir: %s/./%s",  root, relativePath));
+			}
+
+			if (!Files.isWritable(path)) {
+				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
+				Files.setPosixFilePermissions(path, dirPerms);
+			}
+			else {
+				//this.log.warn(String.format("Is already writable: %s/./%s",  root, relativePath));
+			}
+
+		}
+
+		protected void ensureWritableFile(Path root, Path relativePath) throws IOException {
+
+			Path path = root.resolve(relativePath);
+
+			if (!Files.exists(path)) {
+				ensureWritableDir(root, relativePath.getParent());
+				this.log.warn(String.format("Creating file: %s",  path));
+				Files.createFile(path, filePermAttrs);
+			}
+
+			// TODO: Files.isRegularFile()
+
+			if (!Files.isWritable(path)) {
+				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
+				Files.setPosixFilePermissions(path, filePerms);
+			}
+
+		}
+
 		/** Execute this task: delete, load, generate and/or send a product.
 		 *
 		 * @see #run()
@@ -482,16 +561,8 @@ public class ProductServer { //extends Cache {
 			//  WRONG, ... MAKE will always require FILE
 
 			if (this.actions.isSet(Actions.MEMORY)) {
-				// Not implemented yet!
-				/*
-				if (cache,get(this.filename()))!= null{
-					if (!this.hasAction(this.GENERATE)){
-						return it... ?
-					}
-				}
-				*/
+				// Not implemented yet
 				// this.result = new BufferedImage();
-				// return ?  no, because also file might be needed
 			}
 
 			// These are file paths, not committing to provide to actual physical files
@@ -508,29 +579,41 @@ public class ProductServer { //extends Cache {
 						this.delete(this.outputPath);
 					}
 					catch (IOException e) {
-						log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
+						this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
 					}
 				}
 
 			}
 
-			// Mark this task being processed (empty file)
-			//if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
 			if (this.actions.isSet(Actions.FILE) && (fileFinal.length()==0)){
-
 				this.actions.add(Actions.GENERATE);
+			}
+
+				// Mark this task being processed (empty file)
+			//if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
+			if (this.actions.isSet(Actions.GENERATE)){
+
+				//if (this.outputPath.toFile().canWrite())
 
 				try {
-					this.log.debug(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDir));
+					ensureWritableDir(cacheRoot, relativeOutputDir);
+					ensureWritableDir(cacheRoot, relativeOutputDirTmp);
+					ensureWritableFile(cacheRoot, relativeOutputPath);
+
+					/*
+					this.log.warn(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDir));
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
+					// Optimize? Same dir up to tmp suffix,
 					this.log.debug(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
 					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDirTmp);
 					this.log.debug(String.format("Creating file: %s", this.relativeOutputPath));
-					Files.createFile(this.outputPath);
+					Files.createFile(this.outputPath, filePermAttrs);
+					*
+					 */
 					//fileFinal.createNewFile();
 				}
 				catch (Exception e) {
-					log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating file: %s", e.getMessage()));
+					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
 					//return;
 				}
 			}
