@@ -7,7 +7,7 @@
 
 export NUTSHELL_DIR
 export PYTHONPATH=$PYTHONPATH:$NUTSHELL_DIR
-export HTML_ROOT=$HTML_ROOT
+export HTTP_ROOT=$HTTP_ROOT
 
 NUTSHELL=${NUTSHELL:-'$NUTSHELL_DEFAULT'}
 
@@ -18,7 +18,7 @@ case $NUTSHELL in
 	;;
     java)
 	NUTSHELL_DIR=${NUTSHELL_DIR:-$HTML_ROOT}
-	NUTSHELL="java -cp $HTML_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
+	NUTSHELL="java -cp $HTTP_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
 	;;
     *)
 	#echo "NUTSHELL must be 'java' or 'python'"

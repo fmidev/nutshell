@@ -98,15 +98,12 @@ public class Nutlet extends HttpServlet {
 
 		String productStr = request.getParameter("product");
 
-		/// Respond with an HTML page, if query contains no product request Try to load (include)
+		/// Respond with an HTML page, if query contains no product request
 		if ((productStr == null) || productStr.isEmpty()){
 
 			/**  TODO: rename main.html to sth like layout.html or template.html
 			 *   Note: main.html is also utilied as index.html -> template/main.html (ie. linked)
 			 */
-			// Retrieve the empty HTML template
-			//SimpleHtml html = getHtmlPage();
-
 			String pageName = null; //"menu.html";
 
 			Map<String, String[]> parameterMap = request.getParameterMap();
@@ -214,8 +211,8 @@ public class Nutlet extends HttpServlet {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			final String filename = productStr;
 
-			// IMPORTANT: ordering may cause  filename != productStr
-			// TODO: -> link equivalent files?
+			// problem: parameter ordering may cause  filename != productStr
+			// TODO: -> _link_ equivalent files?
 
 			//Log log = new Log(String.format("%s-%d", getClass().getSimpleName(), ++productServer.counter));
 			//log.printStream = new PrintStream(os); // printStream;
@@ -315,7 +312,7 @@ public class Nutlet extends HttpServlet {
 					//elem = html.createAnchor(relativePath, relativePath.getFileName());
 					map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
 					//elem = html.createAnchor(relativePath.getParent(), null);
-					if (task.logFile.exists()){
+					if ((task.logFile!=null) && task.logFile.exists()){
 						Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
 						map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
 					}
@@ -355,7 +352,7 @@ public class Nutlet extends HttpServlet {
 			}
 
 			html.appendElement(SimpleHtml.H2, "Log");
-			if (task.logFile.exists()){
+			if ((task.logFile!=null) && task.logFile.exists()){
 				html.appendElement(SimpleHtml.H3, "Task log");
 				StringBuilder builder = new StringBuilder();
 				BufferedReader reader = new BufferedReader(new FileReader(task.logFile));

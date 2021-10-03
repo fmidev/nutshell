@@ -309,6 +309,27 @@ public class ProductServer { //extends Cache {
 
 		public File logFile = null;
 
+		public void setLogFile(){
+
+			//Path logPath = cacheRoot.resolve(relativeLogPath);
+			try {
+				Path logPath = ensureWritableFile(cacheRoot, this.relativeLogPath);
+				this.logFile = logPath.toFile();
+				this.log.debug(String.format("Continuing log in file: %s", this.logFile));
+				FileOutputStream fw = new FileOutputStream(this.logFile);
+				this.log.printStream = new PrintStream(fw);
+				//this.log.printStream = System.err;
+				this.log.setVerbosity(Log.DEBUG);
+				this.log.debug(String.format("Started log file: %s", this.logFile));
+			}
+			catch (IOException e) {
+				e.printStackTrace(); //this.log.printStream);
+				this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						String.format("Failed in creating log file: %s/./%s", cacheRoot, this.relativeLogPath));
+			}
+
+		};
+
 
 		/** Product generation task defining a product instance and alternative operations for retreaving it.
 		 *
@@ -348,43 +369,13 @@ public class ProductServer { //extends Cache {
 				this.logFile = null;
 			}
 			else {
-				this.log = new HttpLog(this.info.PRODUCT_ID);
-				Path logPath = cacheRoot.resolve(relativeLogPath);
-				this.logFile = logPath.toFile();
-				try {
-
-					ensureWritableFile(cacheRoot, this.relativeLogPath);
-					/*
-					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
-					//final boolean exists = logFile.createNewFile();
-					if (!logFile.exists()) {
-						System.err.println(String.format("Creating LOG FILE: %s", logFile.getAbsolutePath()));
-						Files.createFile(logPath, filePerms);
-					}
-					else {
-						System.err.println(String.format("Exists already: LOG FILE: %s", logFile.getAbsolutePath()));
-					}
-					*/
-
-
-
-					FileOutputStream fw = new FileOutputStream(this.logFile);
-					this.log.printStream = new PrintStream(fw);
-					//this.log.printStream = System.err;
-					//
-					this.log.setVerbosity(Log.DEBUG);
-				} catch (IOException e) {
-					e.printStackTrace(this.log.printStream);
-					this.log.error("Failed in creating log file: " + this.logFile);
-				}
-				// Close upon destruction of this Task?
+				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
+				setLogFile();
 			}
-			//this.log.warn("Where am I?");
+			this.log.warn("Where am I?");
 			this.log.debug(String.format("started %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
-			//this.log.debug(this.toString());
 			this.result = null;
-	
-		}
+	}
 
 
 
@@ -434,6 +425,54 @@ public class ProductServer { //extends Cache {
 			//return file.delete();
 		}
 
+		protected Path ensureWritableDir(Path root, Path relativePath) throws IOException {
+
+			if (relativePath.getNameCount() == 0)
+				return root;
+
+			Path path = root.resolve(relativePath);
+			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
+
+			if (!Files.exists(path)) {
+				ensureWritableDir(root, relativePath.getParent());
+				this.log.warn(String.format("Creating dir: %s/./%s",  root, relativePath));
+				Files.createDirectory(path, dirPermAttrs);
+			}
+			else {
+				//this.log.warn(String.format("Exists dir: %s/./%s",  root, relativePath));
+			}
+
+			if (!Files.isWritable(path)) {
+				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
+				Files.setPosixFilePermissions(path, dirPerms);
+			}
+			else {
+				//this.log.warn(String.format("Is already writable: %s/./%s",  root, relativePath));
+			}
+
+			return path;
+		}
+
+		protected Path  ensureWritableFile(Path root, Path relativePath) throws IOException {
+
+			Path path = root.resolve(relativePath);
+
+			if (!Files.exists(path)) {
+				ensureWritableDir(root, relativePath.getParent());
+				this.log.warn(String.format("Creating file: %s",  path));
+				Files.createFile(path, filePermAttrs);
+			}
+
+			// TODO: Files.isRegularFile()
+
+			//if (!Files.isWritable(path)) {
+				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
+				Files.setPosixFilePermissions(path, filePerms);
+			//}
+
+			return path;
+
+		}
 
 		/** Runs a thread generating and/or otherways handling a product
 		 *
@@ -443,7 +482,6 @@ public class ProductServer { //extends Cache {
 		public void run(){
 			try {
 				Signal.handle(new Signal("INT"), this::handleInterrupt);
-				//handle(this);
 				execute();
 			}
 			catch (InterruptedException e) {
@@ -453,8 +491,8 @@ public class ProductServer { //extends Cache {
 			}
 			catch (IndexedException e) {
 				this.log.warn("NutShell indexed exception --->");
-				//e.printStackTrace(log.printStream);
-				this.log.error(e.getMessage());
+				//this.log.error(e.getMessage());
+				this.log.log(e);
 				this.log.warn("NutShell indexed exception <---");
 			}
 		}
@@ -478,53 +516,6 @@ public class ProductServer { //extends Cache {
 			}
 		}
 
-		protected void ensureWritableDir(Path root, Path relativePath) throws IOException {
-
-			if (relativePath.getNameCount() == 0)
-				return;
-
-			Path path = root.resolve(relativePath);
-			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
-
-			if (!Files.exists(path)) {
-				// Step 1: ensure parent dir (recursively)
-				ensureWritableDir(root, relativePath.getParent());
-				this.log.warn(String.format("Creating dir: %s/./%s",  root, relativePath));
-				Files.createDirectory(path, dirPermAttrs);
-				//Files.createDirectories(path, dirPermAttrs);
-			}
-			else {
-				//this.log.warn(String.format("Exists dir: %s/./%s",  root, relativePath));
-			}
-
-			if (!Files.isWritable(path)) {
-				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
-				Files.setPosixFilePermissions(path, dirPerms);
-			}
-			else {
-				//this.log.warn(String.format("Is already writable: %s/./%s",  root, relativePath));
-			}
-
-		}
-
-		protected void ensureWritableFile(Path root, Path relativePath) throws IOException {
-
-			Path path = root.resolve(relativePath);
-
-			if (!Files.exists(path)) {
-				ensureWritableDir(root, relativePath.getParent());
-				this.log.warn(String.format("Creating file: %s",  path));
-				Files.createFile(path, filePermAttrs);
-			}
-
-			// TODO: Files.isRegularFile()
-
-			if (!Files.isWritable(path)) {
-				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
-				Files.setPosixFilePermissions(path, filePerms);
-			}
-
-		}
 
 		/** Execute this task: delete, load, generate and/or send a product.
 		 *
@@ -535,11 +526,10 @@ public class ProductServer { //extends Cache {
 		 */
 		public void execute() throws InterruptedException, IndexedException {
 
-			this.log.debug("Determining generator for : " + this.info.PRODUCT_ID);
-			//this.setStatus(HttpServletResponse.SC_OK, "Determining generator for : " + this.info.PRODUCT_ID);
+			this.log.log(HttpServletResponse.SC_OK, "Determining generator for : " + this.info.PRODUCT_ID);
 
 			Generator generator = getGenerator(this.info.PRODUCT_ID);
-			this.log.note(String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+			this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
 
 			if (! this.actions.copies.isEmpty())
 				this.actions.add(Actions.FILE);
@@ -570,7 +560,7 @@ public class ProductServer { //extends Cache {
 
 			if (this.actions.involves(Actions.DELETE | Actions.FILE)) {
 				// Wait
-				if (queryFile(fileFinal,  90, this.log) && !this.actions.isSet(Actions.DELETE)){
+				if (queryFile(fileFinal,90, this.log) && !this.actions.isSet(Actions.DELETE)){
 					// Order? Does it delete immediately?
 					this.result = this.outputPath;
 				}
@@ -589,33 +579,22 @@ public class ProductServer { //extends Cache {
 				this.actions.add(Actions.GENERATE);
 			}
 
-				// Mark this task being processed (empty file)
-			//if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
+			// Mark this task being processed (empty file)
+			// if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
 			if (this.actions.isSet(Actions.GENERATE)){
 
-				//if (this.outputPath.toFile().canWrite())
-
 				try {
-					ensureWritableDir(cacheRoot, relativeOutputDir);
 					ensureWritableDir(cacheRoot, relativeOutputDirTmp);
+					ensureWritableDir(cacheRoot, relativeOutputDir);
 					ensureWritableFile(cacheRoot, relativeOutputPath);
+					Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 
-					/*
-					this.log.warn(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDir));
-					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDir);
-					// Optimize? Same dir up to tmp suffix,
-					this.log.debug(String.format("Creating dir: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
-					ShellUtils.makeWritableDir(cacheRoot, this.relativeOutputDirTmp);
-					this.log.debug(String.format("Creating file: %s", this.relativeOutputPath));
-					Files.createFile(this.outputPath, filePermAttrs);
-					*
-					 */
-					//fileFinal.createNewFile();
 				}
 				catch (Exception e) {
 					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
-					//return;
+					return;
 				}
+
 			}
 			else {
 				this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
@@ -639,6 +618,7 @@ public class ProductServer { //extends Cache {
 					this.log.warn("Removing GENERATE from actions");
 					this.actions.remove(Actions.GENERATE);
 				}
+
 			}
 
 
@@ -650,7 +630,7 @@ public class ProductServer { //extends Cache {
 
 				Map<String,Task> tasks = executeMany(this.inputs, inputActions, null, this.log);
 
-				// Collect
+				// Collect results
 				for (Entry<String,Task> entry : tasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
@@ -659,7 +639,7 @@ public class ProductServer { //extends Cache {
 						this.log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
 						if (inputTask.log.indexedException.index > 300){
-							this.log.warn("errors in input generation: " + inputTask.log.indexedException.getMessage());
+							this.log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
 						}
 					}
 					else {
@@ -671,6 +651,11 @@ public class ProductServer { //extends Cache {
 
 				/// MAIN
 				this.log.note("Running Generator: " + this.info.PRODUCT_ID);
+				if (this.logFile == null){
+					this.setLogFile();
+				}
+				this.log.warn(String.format("Directing log to file: ", this.logFile));
+
 				File fileTmp   = this.outputPathTmp.toFile();
 
 				try {
@@ -678,7 +663,7 @@ public class ProductServer { //extends Cache {
 				}
 				catch (IndexedException e) {
 
-					log.log(e);
+					this.log.log(e);
 
 					try {
 						this.delete(this.outputPathTmp);
@@ -731,13 +716,14 @@ public class ProductServer { //extends Cache {
 				if (fileFinal.length() > 0) {
 
 					this.result = this.outputPath;
-					this.log.ok(String.format("Generated : %s (%d bytes)", this.result, fileFinal.length() ));
+					this.log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
 
 					if (this.actions.involves(Actions.LATEST|Actions.SHORTCUT)){
 
 						try {
 
-							Path dir = ShellUtils.makeWritableDir(cacheRoot,productDir);
+							Path dir = ShellUtils.makeWritableDir(cacheRoot, productDir);
+							ensureWritableDir(cacheRoot, productDir);
 
 							if (this.actions.isSet(Actions.LATEST)){
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")));
@@ -759,8 +745,8 @@ public class ProductServer { //extends Cache {
 						try {
 							this.copy(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
-							this.log.error(String.format("Copying failed: %s", path));
-							log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Copying failed: %s", path));
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 							//this.log.error(String.format("Copying failed: %s", path));
 						}
 					}
@@ -769,9 +755,19 @@ public class ProductServer { //extends Cache {
 						try {
 							this.link(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
-							this.log.error(String.format("Linking failed: %s", path));
-							log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Linking failed: %s", path));
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 						}
+					}
+
+					try {
+						if (this.outputDirTmp.toFile().exists()) {
+							this.log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
+							Files.delete(this.outputDirTmp);
+						}
+					} catch (IOException e) {
+						this.log.warn(e.getMessage());
+						this.log.log(HttpServletResponse.SC_SEE_OTHER, String.format("Failed in removing tmp dir %s", this.outputDirTmp));
 					}
 
 					return; // true;
@@ -779,13 +775,13 @@ public class ProductServer { //extends Cache {
 				else {
 					// TODO: save file (of JavaGenerator)
 					// this.log.error(String.format("Failed in generating: %s ", this.outputPath));
-					log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
+					this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
 					try {
 						this.delete(this.outputPath);
 					} catch (IOException e) {
 						//this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
-						log.log(Log.ERROR, String.format("Failed in deleting: %s ", this.outputPath));
-						log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in deleting: %s ", this.outputPath));
+						this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 					}
 					return;
 				}
@@ -823,14 +819,13 @@ public class ProductServer { //extends Cache {
 					case 6: // future option
 						env.put("MONTH", this.info.TIMESTAMP.substring(4, 6));
 						env.put("YEAR", this.info.TIMESTAMP.substring(0, 4));
+						break;
+					default:
+						this.log.log(HttpServletResponse.SC_NOT_MODIFIED, String.format("Odd timestamp '%s' length (%d)",  this.info.TIMESTAMP, this.info.TIMESTAMP.length()));
 				}
 			}
 
-
-
 			// Consider keeping Objects, and calling .toString() only upon ExternalGenerator?
-			// env.put("PATH", String.format("%s:%s", System.getenv("PATH"), cmdPath));
-			// env.put("PATH2", String.format("%s:%s", System.getenv("PATH"), cmdPath));
 			env.put("OUTDIR",  this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
 
@@ -844,21 +839,13 @@ public class ProductServer { //extends Cache {
 			return env;
 		}
 
-		/*
-		boolean fileIsComplete(){
-			File file = outputPath.toFile();
-			return (file.exists() && (file.length()>0));
-		}
-		 */
 
 		@Override
 		public String toString() {
-			if (directives.isEmpty())
-				return String.format("%s", this.outputPath.getFileName());
+			if (this.directives.isEmpty())
+				return String.format("%s", this.filename);
 			else
-				return String.format("%s?%s", this.outputPath.getFileName(), directives.toString());
-			//return String.format("%s?%s", this.outputPath.getFileName(), actions.toString());
-			//return MapUtils.getMap(this).toString();
+				return String.format("%s?%s", this.filename, this.directives.toString());
 		}
 
 		final long creationTime;
@@ -942,12 +929,13 @@ public class ProductServer { //extends Cache {
 		}
 
 
-		for (Entry<String,String> input : taskRequests.entrySet()){
-			String key   = input.getKey();
-			String value = input.getValue();
+		for (Entry<String,String> entry : taskRequests.entrySet()){
+			String key   = entry.getKey();
+			String value = entry.getValue();
 			try {
 
-				HttpLog subLog = (taskRequests.size()==1) ? log.child(key) : null;
+				//HttpLog subLog = (count==1) ? log.child(key) : null;
+				HttpLog subLog = log.child(key);
 
 				Task task = new Task(value, actions.value, subLog);
 
@@ -981,6 +969,7 @@ public class ProductServer { //extends Cache {
 		}
 
 		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");
+		//wait();
 
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
@@ -993,6 +982,7 @@ public class ProductServer { //extends Cache {
 				log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
 				log.warn(String.format("Pending file? : ", task.outputPathTmp));
 			}
+			log.log(task.log.indexedException);
 		}
 
 		return tasks;
@@ -1003,7 +993,7 @@ public class ProductServer { //extends Cache {
 	 * @param productID
 	 * @return
 	 */
-	public Generator getGenerator(String productID){
+	public Generator getGenerator(String productID) throws IndexedException {
 		Path dir = productRoot.resolve(getProductDir(productID));
 		Generator generator = new ExternalGenerator(productID, dir.toString());
 		return generator;
@@ -1165,7 +1155,16 @@ public class ProductServer { //extends Cache {
 								for (Field field : Log.class.getFields()) {
 									String name = field.getName();
 									if (name.equals(name.toUpperCase())) {
-										log.note(name + "=" + field.getInt(null));
+										//Integer value = field.getInt(null);
+										//if (value != null)
+										//	log.note(name + "=" + field.getInt(null));
+										try {
+											log.note(name + "=" + field.get(null));
+										}
+										catch (Exception e1){ // VT100 boolean
+											//log.debug(field.getType().toString());
+											//log.debug("(" + field.toString() + ")");
+										}
 									}
 								}
 								log.error("No such verbosity level: " + arg);
@@ -1224,6 +1223,12 @@ public class ProductServer { //extends Cache {
 							else {
 								// Set actions from invidual args: --make --delete --generate
 								opt = opt.toUpperCase();
+
+								if (HttpLog.statusCodes.containsValue(opt)){
+									log.error(String.format("Not implemented, use --log_level %s", opt));
+									continue;
+								}
+
 								//Field field =
 								log.info("Adding action:" + opt);
 								Actions.class.getField(opt); // ensure field exists
@@ -1256,7 +1261,7 @@ public class ProductServer { //extends Cache {
 			}
 		}
 		catch (Exception e) {
-			log.error(String.format("Unhandled exception: %s", e.getMessage()));
+			log.error(String.format("Unhandled exception: %s", e));
 			e.printStackTrace(log.printStream);
 			System.exit(1);
 		}
@@ -1285,10 +1290,11 @@ public class ProductServer { //extends Cache {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
-				log.warn("Some problem(s) occurred:");
-				log.note(String.format("exception: %s", task.log.indexedException.getMessage()));
+				log.warn("Problem(s): ");
+				//log.note(String.format("exception: %s", task.log.indexedException.getMessage()));
+				log.log(task.log.indexedException);
 				if (result < 20)
-				++result;
+					++result;
 			}
 			else {
 				log.note(String.format("status: %s", task.log.indexedException.getMessage()));
@@ -1296,7 +1302,8 @@ public class ProductServer { //extends Cache {
 			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.logFile != null)
 				log.info("Log: "  + task.logFile.getAbsolutePath());
-			log.note("File: " + task.outputPath.toString());
+			if (task.outputPath.toFile().exists())
+				log.ok("File: " + task.outputPath.toString());
 		}
 
 		System.exit(result);

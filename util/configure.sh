@@ -65,6 +65,7 @@ function ask_variable(){
 function check_dir_syntax(){
     local key=$1
     eval value=\${$key}
+    value=${value/\~/$HOME}
     value_orig=$value
     if [ ${value:0:1} != '/' ]; then
 	value="/$value"

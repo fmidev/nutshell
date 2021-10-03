@@ -29,10 +29,12 @@ public class ExternalGenerator implements ProductServer.Generator {
 	final protected File generatorScript;
 	final protected File inputScript;
 
-	public ExternalGenerator(String id, String dir){
+	public ExternalGenerator(String id, String dir) throws IndexedException {
 		this.id = id;
 		this.dir = Paths.get(dir); //new File(dir);
 		this.generatorScript = this.dir.resolve(scriptName).toFile();
+		if (!this.generatorScript.exists())
+			throw new IndexedException(HttpServletResponse.SC_NOT_IMPLEMENTED, String.format("Script %s not found", this.generatorScript));
 		this.inputScript     = this.dir.resolve(inputDeclarationScript).toFile();
 	}
 
@@ -244,7 +246,15 @@ public class ExternalGenerator implements ProductServer.Generator {
 		}
 
 		String dir = args[0];
-		ExternalGenerator generator = new ExternalGenerator("unnamed.generator", dir);
+
+		ExternalGenerator generator = null;
+
+		try {
+			generator = new ExternalGenerator("unnamed.generator", dir);
+		} catch (IndexedException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 
 		System.out.println(generator.toString());
 

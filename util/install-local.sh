@@ -21,7 +21,7 @@ function check_variable(){
 }
 
 export NUTSHELL_DIR # Python
-export HTML_ROOT 
+export HTTP_ROOT 
 export CACHE_ROOT 
 
 
@@ -80,7 +80,7 @@ mkdir -v --parents $CACHE_ROOT/
 chmod -v    a+rwsx $CACHE_ROOT/
 
 #NUTSHELL_SH=$BIN_DIR/nutshell.sh
-NUTSHELL_SH=$BIN_DIR/nutshell
+NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell
 
 #cat > $NUTSHELL_SH <<EOF
 ##!/bin/bash

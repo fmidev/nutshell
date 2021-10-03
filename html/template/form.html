@@ -5,7 +5,7 @@
   </head>
   <body>
     <form id="form" method="GET" target="product" action="/nutshell/NutShell">
-      <table astyle="border-radius: 5x; background-color: lightblue">
+      <table>
         <tr>
           <th class="LEAD" colspan="2">Request</th>
         </tr>
@@ -15,11 +15,11 @@
             <!-- NOTE: originally consisted of "request" widgets only /-->
             <fieldset class="inline">
               <legend>Main action</legend>
-              <label><input type="radio" name="action" value="DELETE" title="Only delete"/>Delete</label>
+              <label><input type="radio" name="actions" value="DELETE" title="Only delete"/>Delete</label>
               <br/>
-              <label><input type="radio" name="action" value="MAKE" title="Generate only if not existing" selected="true"/>Make</label>
+              <label><input type="radio" name="actions" value="MAKE" title="Generate only if not existing" selected="true"/>Make</label>
               <br/>
-              <label><input type="radio" name="action" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label>
+              <label><input type="radio" name="actions" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label>
               <br/>
             </fieldset>
             <fieldset class="inline">
@@ -38,26 +38,6 @@
 	    </fieldset>
           </td>
         </tr>
-        <!-- tr>
-          <td class="LEAD">Product</td>
-          <td>
-            <input id="product" name="product" list="prods" type="text" size="80" value="201012170840_test.ppmforge.png"/>
-            <datalist id="prods">
-              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png">Radar Composite</option>
-              <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
-              <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>
-              <option value="maps.wms_PROJ=4326_BBOX=20,57,25,62_SIZE=512,512_CONF=geoserver_LAYERS=world-map-combo-en.png">Map</option>
-              <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
-              <option value="demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png">Geoserver</option>
-              <option value="2020050800_demo.cloudy_SIZE=800,600.jpg">Cloudy</option>
-              <option value=""/>
-              <option value=""/>
-              <option value=""/>
-              <option value=""/>
-              <option value=""/>
-            </datalist>
-          </td>
-        </tr -->
         <tr>
           <td class="LEAD">Product</td>
           <td>
