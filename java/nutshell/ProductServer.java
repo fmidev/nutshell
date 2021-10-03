@@ -372,7 +372,7 @@ public class ProductServer { //extends Cache {
 				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
 				setLogFile();
 			}
-			this.log.warn("Where am I?");
+			//this.log.warn("Where am I?");
 			this.log.debug(String.format("started %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
 			this.result = null;
 	}
@@ -435,7 +435,7 @@ public class ProductServer { //extends Cache {
 
 			if (!Files.exists(path)) {
 				ensureWritableDir(root, relativePath.getParent());
-				this.log.warn(String.format("Creating dir: %s/./%s",  root, relativePath));
+				this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
 				Files.createDirectory(path, dirPermAttrs);
 			}
 			else {
@@ -443,7 +443,7 @@ public class ProductServer { //extends Cache {
 			}
 
 			if (!Files.isWritable(path)) {
-				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
+				this.log.debug(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
 				Files.setPosixFilePermissions(path, dirPerms);
 			}
 			else {
@@ -459,15 +459,15 @@ public class ProductServer { //extends Cache {
 
 			if (!Files.exists(path)) {
 				ensureWritableDir(root, relativePath.getParent());
-				this.log.warn(String.format("Creating file: %s",  path));
+				this.log.debug(String.format("Creating file: %s",  path));
 				Files.createFile(path, filePermAttrs);
 			}
 
 			// TODO: Files.isRegularFile()
 
 			//if (!Files.isWritable(path)) {
-				this.log.warn(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
-				Files.setPosixFilePermissions(path, filePerms);
+			this.log.debug(String.format("Changing permissions for existing file: %s/./%s",  root, relativePath));
+			Files.setPosixFilePermissions(path, filePerms);
 			//}
 
 			return path;
@@ -587,7 +587,7 @@ public class ProductServer { //extends Cache {
 					ensureWritableDir(cacheRoot, relativeOutputDirTmp);
 					ensureWritableDir(cacheRoot, relativeOutputDir);
 					ensureWritableFile(cacheRoot, relativeOutputPath);
-					Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
+					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 
 				}
 				catch (Exception e) {
@@ -603,7 +603,7 @@ public class ProductServer { //extends Cache {
 			// Generate or at least list inputs
 			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST)) { //
 
-				this.log.note(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
+				this.log.debug(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
 
 				this.inputs.clear(); // needed?
 
@@ -618,6 +618,9 @@ public class ProductServer { //extends Cache {
 					this.log.warn("Removing GENERATE from actions");
 					this.actions.remove(Actions.GENERATE);
 				}
+
+				if (!this.inputs.isEmpty())
+					this.log.info(String.format("Collected (%d) input requests for: %s", this.inputs.size(), this.info.PRODUCT_ID));
 
 			}
 
@@ -952,7 +955,7 @@ public class ProductServer { //extends Cache {
 				//if (log)
 				task.log.verbosity = log.verbosity;
 				tasks.put(key, task);
-				log.note(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
 				if (task.logFile != null)
 					log.info(String.format("See separate log: %s",  task.logFile));
 				task.start();
@@ -968,7 +971,7 @@ public class ProductServer { //extends Cache {
 			}
 		}
 
-		log.note("Waiting for (" + tasks.size() + ") tasks to complete... ");
+		log.note("Started (" + tasks.size() + ") tasks... ");
 		//wait();
 
 		for (Entry<String,Task> entry : tasks.entrySet()){
@@ -976,7 +979,7 @@ public class ProductServer { //extends Cache {
 			Task task = entry.getValue();
 			try {
 				task.join();
-				log.note(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				log.debug(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
 			}
 			catch (InterruptedException e) {
 				log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
@@ -1011,15 +1014,17 @@ public class ProductServer { //extends Cache {
 
 		int remainingSec = this.timeOut;
 
-		if (file.length() > 0) {
-			log.note("File found");
+		final long fileLength = file.length();
+
+		if (fileLength > 0) {
+			//log.note("File found");
+			log.log(HttpServletResponse.SC_OK, String.format("File found: %s ( bytes)", file.getName(), fileLength));
 			return true;
 		}
 		else { // empty file
 			long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
 			if (ageSec > maxEmptySec){
 				log.note("Outdated empty file, age=" + (ageSec/60) + " min, (max " + maxEmptySec + "s)");
-				return false;
 			}
 			else {
 				log.warn("Empty fresh file exists, waiting for it to complete...");
@@ -1036,8 +1041,8 @@ public class ProductServer { //extends Cache {
 						break;
 				}
 				log.note("File did not appear (grow), even after waiting");
-				return false;
 			}
+			return false;
 		}
 	}
 
@@ -1284,7 +1289,7 @@ public class ProductServer { //extends Cache {
 
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions, directives, log);
 
-		log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
+		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
@@ -1297,13 +1302,13 @@ public class ProductServer { //extends Cache {
 					++result;
 			}
 			else {
-				log.note(String.format("status: %s", task.log.indexedException.getMessage()));
+				log.info(String.format("Status:\t%s", task.log.indexedException.getMessage()));
 			}
 			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.logFile != null)
-				log.info("Log: "  + task.logFile.getAbsolutePath());
+				log.info("Log:\t"  + task.logFile.getAbsolutePath());
 			if (task.outputPath.toFile().exists())
-				log.ok("File: " + task.outputPath.toString());
+				log.note("File:\t" + task.outputPath.toString());
 		}
 
 		System.exit(result);
