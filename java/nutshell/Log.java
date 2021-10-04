@@ -1,11 +1,10 @@
 package nutshell;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.Response;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -139,6 +138,8 @@ public class Log {
 	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
 	public boolean VT100 = false;
 
+	public File logFile = null;
+
 	//final static Map<String, Integer> ssCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 	final static Map<Integer, String> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 
@@ -236,8 +237,44 @@ public class Log {
 		this.status = status;
 		//append(status,"");
 	}
-	
-	
+
+	public void setLogFile(Path path){
+
+		if (this.logFile != null){
+			// TODO: close!
+		}
+
+		if (path == null){
+			this.printStream = System.err;
+			this.logFile = null;
+			return;
+		}
+
+		//Path logPath = cacheRoot.resolve(relativeLogPath);
+		try {
+			//Path logPath = ensureWritableFile(cacheRoot, this.relativeLogPath);
+			this.logFile = path.toFile();
+			this.debug(String.format("Continuing log in file: %s", this.logFile));
+			FileOutputStream fw = new FileOutputStream(this.logFile);
+			this.printStream = new PrintStream(fw);
+			//this.log.printStream = System.err;
+			this.setVerbosity(Log.DEBUG);
+			this.debug(String.format("Started log file: %s", this.logFile));
+		}
+		catch (IOException e) {
+			e.printStackTrace(); //this.log.printStream);
+			this.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+					String.format("Failed in creating log file: %s", path));
+		}
+		/*
+		catch (IndexedException e) {
+			//e.printStackTrace(); //this.log.printStream);
+			this.log(e);
+		}
+		 */
+
+	};
+
 	/// TODO: FATAL = 20
 
 	long startTime;

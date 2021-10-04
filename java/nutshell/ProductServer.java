@@ -52,8 +52,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ProductServer { //extends Cache {
 
-	/// consider "log"
-	//final public Log serverLog;
 	final public HttpLog log = new HttpLog(getClass().getSimpleName());
 
 	/*
@@ -259,18 +257,29 @@ public class ProductServer { //extends Cache {
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 512;
 
+		/** Add specific request to copy the result.
+		 *
+		 *  Several requests can be added.
+		 *
+		 * @param filename
+		 */
 		public void addCopy(String filename){
-			copies.add(Paths.get(filename)); // filename
+			copies.add(Paths.get(filename));
 		}
 
+		/** Add specific request to copy the result.
+		 *
+		 *  Several requests can be added.
+		 *
+		 * @param filename
+		 */
 		public void addLink(String filename){
-			links.add(Paths.get(filename)); // filename
+			links.add(Paths.get(filename));
 		}
 
 		protected List<Path> copies = new ArrayList<>();
 		protected List<Path> links  = new ArrayList<>();
-		// protected List<String> copies = new ArrayList<>();
-		// protected List<String> links  = new ArrayList<>();
+
 	}
 
 
@@ -307,28 +316,8 @@ public class ProductServer { //extends Cache {
 		public final Map<String,String> inputs = new HashMap<>();
 		public final Map<String,Object> retrievedInputs = new HashMap<>();
 
-		public File logFile = null;
 
-		public void setLogFile(){
 
-			//Path logPath = cacheRoot.resolve(relativeLogPath);
-			try {
-				Path logPath = ensureWritableFile(cacheRoot, this.relativeLogPath);
-				this.logFile = logPath.toFile();
-				this.log.debug(String.format("Continuing log in file: %s", this.logFile));
-				FileOutputStream fw = new FileOutputStream(this.logFile);
-				this.log.printStream = new PrintStream(fw);
-				//this.log.printStream = System.err;
-				this.log.setVerbosity(Log.DEBUG);
-				this.log.debug(String.format("Started log file: %s", this.logFile));
-			}
-			catch (IOException e) {
-				e.printStackTrace(); //this.log.printStream);
-				this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						String.format("Failed in creating log file: %s/./%s", cacheRoot, this.relativeLogPath));
-			}
-
-		};
 
 
 		/** Product generation task defining a product instance and alternative operations for retreaving it.
@@ -366,11 +355,11 @@ public class ProductServer { //extends Cache {
 
 			if (parentLog != null){
 				this.log = parentLog.child("["+this.info.PRODUCT_ID+"]");
-				this.logFile = null;
+				this.log.setLogFile(null);
 			}
 			else {
 				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
-				setLogFile();
+				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
 			}
 			//this.log.warn("Where am I?");
 			this.log.debug(String.format("started %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
@@ -425,54 +414,6 @@ public class ProductServer { //extends Cache {
 			//return file.delete();
 		}
 
-		protected Path ensureWritableDir(Path root, Path relativePath) throws IOException {
-
-			if (relativePath.getNameCount() == 0)
-				return root;
-
-			Path path = root.resolve(relativePath);
-			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
-
-			if (!Files.exists(path)) {
-				ensureWritableDir(root, relativePath.getParent());
-				this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
-				Files.createDirectory(path, dirPermAttrs);
-			}
-			else {
-				//this.log.warn(String.format("Exists dir: %s/./%s",  root, relativePath));
-			}
-
-			if (!Files.isWritable(path)) {
-				this.log.debug(String.format("Changing permissions for existing dir: %s/./%s",  root, relativePath));
-				Files.setPosixFilePermissions(path, dirPerms);
-			}
-			else {
-				//this.log.warn(String.format("Is already writable: %s/./%s",  root, relativePath));
-			}
-
-			return path;
-		}
-
-		protected Path  ensureWritableFile(Path root, Path relativePath) throws IOException {
-
-			Path path = root.resolve(relativePath);
-
-			if (!Files.exists(path)) {
-				ensureWritableDir(root, relativePath.getParent());
-				this.log.debug(String.format("Creating file: %s",  path));
-				Files.createFile(path, filePermAttrs);
-			}
-
-			// TODO: Files.isRegularFile()
-
-			//if (!Files.isWritable(path)) {
-			this.log.debug(String.format("Changing permissions for existing file: %s/./%s",  root, relativePath));
-			Files.setPosixFilePermissions(path, filePerms);
-			//}
-
-			return path;
-
-		}
 
 		/** Runs a thread generating and/or otherways handling a product
 		 *
@@ -584,11 +525,17 @@ public class ProductServer { //extends Cache {
 			if (this.actions.isSet(Actions.GENERATE)){
 
 				try {
-					ensureWritableDir(cacheRoot, relativeOutputDirTmp);
-					ensureWritableDir(cacheRoot, relativeOutputDir);
-					ensureWritableFile(cacheRoot, relativeOutputPath);
+					FileUtils.ensureDir(cacheRoot, relativeOutputDirTmp, dirPerms);
+					FileUtils.ensureDir(cacheRoot, relativeOutputDir,    dirPerms);
+					FileUtils.ensureFile(cacheRoot, relativeOutputPath, filePerms, dirPerms); // this could be enough?
 					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 
+				}
+				catch (IndexedException e) {
+					this.log.log(e);
+					if (e.index >= HttpServletResponse.SC_INTERNAL_SERVER_ERROR){
+						return;
+					}
 				}
 				catch (Exception e) {
 					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
@@ -654,10 +601,10 @@ public class ProductServer { //extends Cache {
 
 				/// MAIN
 				this.log.note("Running Generator: " + this.info.PRODUCT_ID);
-				if (this.logFile == null){
-					this.setLogFile();
+				if (this.log.logFile == null){
+					this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
 				}
-				this.log.warn(String.format("Directing log to file: ", this.logFile));
+				this.log.warn(String.format("Directing log to file: ", this.log.logFile));
 
 				File fileTmp   = this.outputPathTmp.toFile();
 
@@ -725,8 +672,9 @@ public class ProductServer { //extends Cache {
 
 						try {
 
-							Path dir = ShellUtils.makeWritableDir(cacheRoot, productDir);
-							ensureWritableDir(cacheRoot, productDir);
+							Path dir = FileUtils.ensureDir(cacheRoot, productDir, dirPerms);
+							// Path dir = ShellUtils.makeWritableDir(cacheRoot, productDir);
+							// ensureWritableDir(cacheRoot, productDir);
 
 							if (this.actions.isSet(Actions.LATEST)){
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")));
@@ -956,8 +904,8 @@ public class ProductServer { //extends Cache {
 				task.log.verbosity = log.verbosity;
 				tasks.put(key, task);
 				log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
-				if (task.logFile != null)
-					log.info(String.format("See separate log: %s",  task.logFile));
+				if (task.log.logFile != null)
+					log.info(String.format("See separate log: %s",  task.log.logFile));
 				task.start();
 			}
 			catch (ParseException e) {
@@ -1295,7 +1243,7 @@ public class ProductServer { //extends Cache {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
-				log.warn("Problem(s): ");
+				//log.warn("Problem(s): ");
 				//log.note(String.format("exception: %s", task.log.indexedException.getMessage()));
 				log.log(task.log.indexedException);
 				if (result < 20)
@@ -1305,10 +1253,10 @@ public class ProductServer { //extends Cache {
 				log.info(String.format("Status:\t%s", task.log.indexedException.getMessage()));
 			}
 			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
-			if (task.logFile != null)
-				log.info("Log:\t"  + task.logFile.getAbsolutePath());
+			if (task.log.logFile != null)
+				log.info("Log:\t"  + task.log.logFile.getAbsolutePath());
 			if (task.outputPath.toFile().exists())
-				log.note("File:\t" + task.outputPath.toString());
+				log.note(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
 		}
 
 		System.exit(result);
