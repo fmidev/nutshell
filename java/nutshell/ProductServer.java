@@ -65,10 +65,10 @@ public class ProductServer { //extends Cache {
 	// TODO: add to config, set in constructor
 	//public final Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
 	public Set<PosixFilePermission> dirPerms = PosixFilePermissions.fromString("rwxrwxr-x");
-	public FileAttribute<Set<PosixFilePermission>> dirPermAttrs = PosixFilePermissions.asFileAttribute(dirPerms);
+	//public FileAttribute<Set<PosixFilePermission>> dirPermAttrs = PosixFilePermissions.asFileAttribute(dirPerms);
 
 	public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
-	public FileAttribute<Set<PosixFilePermission>> filePermAttrs = PosixFilePermissions.asFileAttribute(filePerms);
+	//public FileAttribute<Set<PosixFilePermission>> filePermAttrs = PosixFilePermissions.asFileAttribute(filePerms);
 
 	/// System side settings.
 	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
@@ -127,13 +127,10 @@ public class ProductServer { //extends Cache {
 		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
 
-		// TODO: from conf
-		/*
-		this.filePerms = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
-		this.dirPerms = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
-		 */
-		setup.put("filePerms", filePerms);
+		this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
+		this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rwxrwxr--").toString());
 		setup.put("dirPerms", dirPerms);
+		setup.put("filePerms", filePerms);
 		// this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();

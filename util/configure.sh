@@ -160,6 +160,10 @@ else
     echo "# Failed: write-protected"
 fi
 
+
+ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache sub-directories"
+ask_variable FILE_PERMS "rwxrwxr--" "Permissions for cached files"
+
 ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator directories"
 check_dir_syntax PRODUCT_ROOT
 mkdir -v --parents $PRODUCT_ROOT
