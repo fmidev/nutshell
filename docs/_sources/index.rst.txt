@@ -24,11 +24,11 @@ tracked to -- and also identified with -- a unique
 subdirectory, which also contains a *generator script* with a fixed
 name (``generate.sh``).
 
-Typically, Unix/Linux commands have a form like: ::
+Typically, command line invocations of programs have a form like: ::
 
   command -i <input-file>  -p <parameter> -o <output-file>
 
-Essentially, generator script is a wrapper for such commands.
+Essentially, a generator script is a wrapper for such commands.
   
 Upon *product request*, NutShell finds and executes a respective product generator script,
 communicating parameters -- file paths and product parameters among others -- as environment variables

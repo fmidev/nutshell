@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Welcome to NutShell’s documentation! &#8212; NutShell 0.3 documentation</title>
+    <title>Welcome to NutShell’s documentation! &#8212; NutShell 1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,7 +25,7 @@
             <img class="logo" src="_static/nutshell-logo-small.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="#">NutShell 0.3 documentation</a></div>
+          href="#">NutShell 1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="nutshell-overview.html" title="Overview"
              accesskey="N">next</a> |
@@ -60,11 +60,11 @@ path component <code class="docutils literal notranslate"><span class="pre">my/g
 tracked to – and also identified with – a unique
 subdirectory, which also contains a <em>generator script</em> with a fixed
 name (<code class="docutils literal notranslate"><span class="pre">generate.sh</span></code>).</p>
-<p>Typically, Unix/Linux commands have a form like:</p>
+<p>Typically, command line invocations of programs have a form like:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">command</span> <span class="o">-</span><span class="n">i</span> <span class="o">&lt;</span><span class="nb">input</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>  <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">parameter</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">o</span> <span class="o">&lt;</span><span class="n">output</span><span class="o">-</span><span class="n">file</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>Essentially, generator script is a wrapper for such commands.</p>
+<p>Essentially, a generator script is a wrapper for such commands.</p>
 <p>Upon <em>product request</em>, NutShell finds and executes a respective product generator script,
 communicating parameters – file paths and product parameters among others – as environment variables
 to the script. This is the “amount of interface” a script is required to handle.
