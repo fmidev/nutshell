@@ -199,7 +199,6 @@ public class ProductServer { //extends Cache {
 	public static class Actions extends Flags implements ResultType, OutputType {
 
 		public Actions(){
-
 		}
 
 		public Actions(int a){
@@ -287,6 +286,7 @@ public class ProductServer { //extends Cache {
 
 		protected List<Path> copies = new ArrayList<>();
 		protected List<Path> links  = new ArrayList<>();
+		protected Path move = null;
 
 	}
 
@@ -487,9 +487,12 @@ public class ProductServer { //extends Cache {
 			if (! this.actions.links.isEmpty())
 				this.actions.add(Actions.FILE);
 
+			if (this.actions.move != null)
+				this.actions.add(Actions.FILE);
+
 			if (this.actions.involves(Actions.EXIST)){
 				if (!this.actions.involves(Actions.MEMORY | Actions.FILE)) {
-					this.log.log(HttpServletResponse.SC_OK, "Adding FILE");
+					this.log.log(HttpServletResponse.SC_OK, "Adding action FILE");
 					this.actions.add(Actions.FILE);
 				}
 			}
@@ -737,6 +740,15 @@ public class ProductServer { //extends Cache {
 						}
 					}
 
+					if (this.actions.move != null) {
+						try {
+							this.move(this.outputPath, this.actions.move);
+						} catch (IOException e) {
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Moving failed: %s", this.actions.move));
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+						}
+					}
+
 					try {
 						if (this.outputDirTmp.toFile().exists()) {
 							this.log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
@@ -925,6 +937,9 @@ public class ProductServer { //extends Cache {
 				if (actions.links != null)
 					task.actions.links.addAll(actions.links);
 
+				//if (actions.move != null)
+				task.actions.move = actions.move; // Thread-safe?
+
 
 				//if (log)
 				task.log.verbosity = log.verbosity;
@@ -992,7 +1007,7 @@ public class ProductServer { //extends Cache {
 
 		if (fileLength > 0) {
 			//log.note("File found");
-			log.log(HttpServletResponse.SC_OK, String.format("File found: %s ( bytes)", file.getName(), fileLength));
+			log.log(HttpServletResponse.SC_OK, String.format("File found: %s (%d bytes)", file.getName(), fileLength));
 			return true;
 		}
 		else { // empty file
@@ -1041,8 +1056,9 @@ public class ProductServer { //extends Cache {
 		System.err.println("    --conf <file> : read configuration file");
 		System.err.println("    --actions <string> : main operation: " + String.join(",", Flags.getKeys(Actions.class)));
 		System.err.println("      (all the actions can be also supplied invidually: --make --delete --generate ... )");
-		System.err.println("    --copy <target>: copy file to target");
-		System.err.println("    --link <target>: link file to target");
+		System.err.println("    --copy <target>: copy file to target (repeatable)");
+		System.err.println("    --link <target>: link file to target (repeatable)");
+		System.err.println("    --move <target>: move file to target");
 		System.err.println("    --directives <key>=<value>|<key>=<value>|... : instructions (pipe-separated) for product generator");
 		System.err.println();
 		System.err.println("Examples: ");
@@ -1179,6 +1195,9 @@ public class ProductServer { //extends Cache {
 					}
 					else if (opt.equals("link")) {
 						actions.addLink(args[++i]);
+					}
+					else if (opt.equals("move")) {
+						actions.move = Paths.get(args[++i]);
 					}
 					else if (opt.equals("directives")) {
 						for (String d : args[++i].split("\\|")) { // Note: regexp

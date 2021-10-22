@@ -22,7 +22,7 @@ HTTP requests to :any:`nutshell.ProductServer`.
 
 """
 
-__version__ = '0.3'
+__version__ = '1.0'
 __author__ = 'Markus.Peura@fmi.fi'
 
 import os
