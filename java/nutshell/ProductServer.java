@@ -261,6 +261,8 @@ public class ProductServer { //extends Cache {
 			return (value == 0);
 		}
 
+
+
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 512;
 
@@ -274,6 +276,12 @@ public class ProductServer { //extends Cache {
 			copies.add(Paths.get(filename));
 		}
 
+		public void addCopies(List<Path> copies){
+			if (copies != null)
+				this.copies.addAll(copies);
+		}
+
+
 		/** Add specific request to copy the result.
 		 *
 		 *  Several requests can be added.
@@ -283,6 +291,21 @@ public class ProductServer { //extends Cache {
 		public void addLink(String filename){
 			links.add(Paths.get(filename));
 		}
+
+		public void addLinks(List<Path> links){
+			if (links != null)
+				this.links.addAll(links);
+		}
+
+		public void addMove(String path){
+			if (path != null)
+				move = Paths.get(path);
+		}
+
+		public void addMove(Path path){
+			move = path;
+		}
+
 
 		protected List<Path> copies = new ArrayList<>();
 		protected List<Path> links  = new ArrayList<>();
@@ -381,6 +404,10 @@ public class ProductServer { //extends Cache {
 		 * @param map
 		 */
 		public void setDirectives(Map<String,String[]> map){
+
+			if (map == null)
+				return;
+
 			for (Map.Entry<String,String[]> entry : map.entrySet() ){ //parameters.entrySet()) {
 				String key = entry.getKey().toString();
 				if (key.equals(key.toUpperCase())){
@@ -480,6 +507,7 @@ public class ProductServer { //extends Cache {
 			Generator generator = getGenerator(this.info.PRODUCT_ID);
 			this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
 			//this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+
 
 			if (! this.actions.copies.isEmpty())
 				this.actions.add(Actions.FILE);
@@ -927,19 +955,10 @@ public class ProductServer { //extends Cache {
 				HttpLog subLog = log.child(key);
 
 				Task task = new Task(value, actions.value, subLog);
-
-				if (directives != null)
-					task.directives.putAll(directives);
-
-				if (actions.copies != null)
-					task.actions.copies.addAll(actions.copies);
-
-				if (actions.links != null)
-					task.actions.links.addAll(actions.links);
-
-				//if (actions.move != null)
-				task.actions.move = actions.move; // Thread-safe?
-
+				task.setDirectives(directives);
+				task.actions.addCopies(actions.copies);
+				task.actions.addLinks(actions.links);
+				task.actions.addMove(actions.move); // Thread-safe?
 
 				//if (log)
 				task.log.verbosity = log.verbosity;
@@ -1197,7 +1216,7 @@ public class ProductServer { //extends Cache {
 						actions.addLink(args[++i]);
 					}
 					else if (opt.equals("move")) {
-						actions.move = Paths.get(args[++i]);
+						actions.addMove(args[++i]);
 					}
 					else if (opt.equals("directives")) {
 						for (String d : args[++i].split("\\|")) { // Note: regexp
