@@ -168,6 +168,9 @@ public class ProductServer { //extends Cache {
 
 	}
 
+	/** Specifies, what will be done after product has been generated (or checked)
+	 *
+	 */
 	public interface OutputType {
 
 		/**
@@ -177,11 +180,19 @@ public class ProductServer { //extends Cache {
 		static final int CHECK  = 1; // "OUTPUT=INFO"
 		// Rename STATUS or INFO or REPORT
 
+		/**
+		 *  Checks existence of product generator, memory cache and output directory.
+		 *
+		 */
+		static final int EXIST  = 2048; // "OUTPUT=INFO"
+
+
 		/** Output in a stream (typically as a response to an HTTP request, but also as pipe)
 		 *
 		 * @see Nutlet#doGet
 		 */
 		public static final int STREAM = 256;  // "OUTPUT=STREAM"
+
 
 	}
 
@@ -202,13 +213,6 @@ public class ProductServer { //extends Cache {
 		 */
 		public static final int GENERATE = 4;  // "ACTION=GENERATE_FILE"
 
-
-		/**
-		 *  Delete the product file on disk (future option: also in memory cache).
-		 */
-		public static final int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
-
-
 		/**
 		 *  HTTP only: client will be redirected to URL of generated product
 		 *  Strictly speaking - needs no file, but a result (file or object).
@@ -216,6 +220,13 @@ public class ProductServer { //extends Cache {
 		 * @see Nutlet#doGet
 		 */
 		public static final int REDIRECT = FILE|16;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
+
+
+		/**
+		 *  Delete the product file on disk (future option: also in memory cache).
+		 */
+		public static final int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
+
 
 		/** Generate product only if it does not exist.
 		 *
@@ -467,13 +478,22 @@ public class ProductServer { //extends Cache {
 			this.log.log(HttpServletResponse.SC_OK, "Determining generator for : " + this.info.PRODUCT_ID);
 
 			Generator generator = getGenerator(this.info.PRODUCT_ID);
-			this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+			this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+			//this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
 
 			if (! this.actions.copies.isEmpty())
 				this.actions.add(Actions.FILE);
 
 			if (! this.actions.links.isEmpty())
 				this.actions.add(Actions.FILE);
+
+			if (this.actions.involves(Actions.EXIST)){
+				if (!this.actions.involves(Actions.MEMORY | Actions.FILE)) {
+					this.log.log(HttpServletResponse.SC_OK, "Adding FILE");
+					this.actions.add(Actions.FILE);
+				}
+			}
+
 
 
 			// Implicit action request
@@ -496,11 +516,15 @@ public class ProductServer { //extends Cache {
 			// These are file paths, not committing to provide to actual physical files
 			File fileFinal = this.outputPath.toFile();
 
-			if (this.actions.involves(Actions.DELETE | Actions.FILE)) {
+			if (this.actions.involves(Actions.DELETE | Actions.FILE | Actions.EXIST)) {
 				// Wait
 				if (queryFile(fileFinal,90, this.log) && !this.actions.isSet(Actions.DELETE)){
 					// Order? Does it delete immediately?
 					this.result = this.outputPath;
+					if (this.actions.isSet(Actions.FILE) && this.actions.isSet(Actions.EXIST)){
+						this.log.log(HttpServletResponse.SC_OK, String.format("Completed! File exists: %s", this.outputPath));
+						return;
+					}
 				}
 				else {
 					try {
@@ -508,6 +532,11 @@ public class ProductServer { //extends Cache {
 					}
 					catch (IOException e) {
 						this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
+					}
+
+					if (this.actions.isSet(Actions.FILE) && this.actions.isSet(Actions.EXIST)){
+						this.log.log(HttpServletResponse.SC_NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
+						return;
 					}
 				}
 

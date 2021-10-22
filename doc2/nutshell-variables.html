@@ -1,0 +1,211 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NutShell Variables &#8212; NutShell 0.3 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Demo" href="nutshell-demo.html" />
+    <link rel="prev" title="Product generators" href="nutshell-generators.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+          <p class="logo"><a href="index.html">
+            <img class="logo" src="_static/nutshell-logo-small.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="index.html">NutShell 0.3 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="nutshell-generators.html" title="Product generators"
+             accesskey="P">previous</a> |
+          <a href="nutshell-demo.html" title="Demo"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nutshell-variables">
+<span id="id1"></span><h1>NutShell Variables<a class="headerlink" href="#nutshell-variables" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="system-variables">
+<span id="id2"></span><h2>System variables<a class="headerlink" href="#system-variables" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="39%" />
+<col width="39%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Variable</th>
+<th class="head">Description</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">PRODUCT</span></code></td>
+<td>Product id, eg.</td>
+<td>“my.test.product”</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">TIMESTAMP</span></code></td>
+<td>Numeric time or “LATEST”&lt;br&gt;
+or “LATEST” or “TIMESTAMP”</td>
+<td>“201708121600”</td>
+</tr>
+<tr class="row-even"><td>-- <code class="docutils literal notranslate"><span class="pre">YEAR</span></code></td>
+<td>Year (4 digits)</td>
+<td>“2017”</td>
+</tr>
+<tr class="row-odd"><td>– <code class="docutils literal notranslate"><span class="pre">MONTH</span></code></td>
+<td>Month (2 digits)</td>
+<td>“08”</td>
+</tr>
+<tr class="row-even"><td>– <code class="docutils literal notranslate"><span class="pre">DAY</span></code></td>
+<td>Day (2 digits)</td>
+<td>“12”</td>
+</tr>
+<tr class="row-odd"><td>– <code class="docutils literal notranslate"><span class="pre">HOUR</span></code></td>
+<td>Hour (2 digits)</td>
+<td>“16”</td>
+</tr>
+<tr class="row-even"><td>– <code class="docutils literal notranslate"><span class="pre">MINUTE</span></code></td>
+<td>Minute (2 digits)</td>
+<td>“00”</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">PARAMETERS</span></code></td>
+<td>Product specific variables</td>
+<td>{“SIZE”: “300”, “NAME”: “X”}</td>
+</tr>
+<tr class="row-even"><td>– <code class="docutils literal notranslate"><span class="pre">&lt;KEY&gt;</span></code></td>
+<td>Name of a variable</td>
+<td>“300”</td>
+</tr>
+<tr class="row-odd"><td>– <code class="docutils literal notranslate"><span class="pre">&lt;KEY&gt;</span></code></td>
+<td>Name of a variable</td>
+<td>“X”</td>
+</tr>
+<tr class="row-even"><td>–  …</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXTENSION</span></code></td>
+<td>File format,
+including compression</td>
+<td>“txt.gz”</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">FORMAT</span></code></td>
+<td>File format</td>
+<td>“txt”</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">COMPRESSION</span></code></td>
+<td>File compression</td>
+<td>“gz”</td>
+</tr>
+</tbody>
+</table>
+<p>In code, nutshell.product.Info provides parsing of above parameters.</p>
+<p>Part of the variables come from <a class="reference internal" href="nutshell-config.html#configuration"><span class="std std-ref">Configuration</span></a> files read by
+nutshell.nutshell.ProductServer .</p>
+</div>
+<div class="section" id="variable-parsing-scheme">
+<h2>Variable parsing scheme<a class="headerlink" href="#variable-parsing-scheme" title="Permalink to this headline">¶</a></h2>
+<p>Parsing can be tested interactively:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nutshell.product</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="s2">&quot;201708121600_my.test.product_SIZE=300.pgm.gz&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/nutshell-variables-dot.png" src="_images/nutshell-variables-dot.png" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-commands.html">Commands and status codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-generators.html">Product generators</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NutShell Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#system-variables">System variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variable-parsing-scheme">Variable parsing scheme</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="nutshell-generators.html" title="Product generators"
+              >previous</a> |
+            <a href="nutshell-demo.html" title="Demo"
+              >next</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/nutshell-variables.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Markus Peura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

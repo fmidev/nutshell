@@ -1,0 +1,860 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nutshell.nutshell &#8212; NutShell 0.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="shortcut icon" href="../../_static/nutshell-logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+          <p class="logo"><a href="../../index.html">
+            <img class="logo" src="../../_static/nutshell-logo-small.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="../../index.html">NutShell 0.3 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for nutshell.nutshell</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/bin/python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">Main module -- nutshell.nutshell</span>
+<span class="sd">==================================</span>
+
+<span class="sd">This module contains ProductServer class, which receives product</span>
+<span class="sd">requests and forwards them to product generators. A ProductServer</span>
+<span class="sd">instance also manages disk resources defined in </span>
+<span class="sd">:ref:`configuration`.</span>
+
+<span class="sd">The module uses :any:`nutshell.product`  for defining products (:any:`nutshell.product.Info`) </span>
+<span class="sd">and :any:`nutshell.request` for generating them using :any:`nutshell.request.Generator` . </span>
+
+<span class="sd">HTTP server provided by :any:`nutshell.httpd` essentially forwards</span>
+<span class="sd">HTTP requests to :any:`nutshell.ProductServer`.</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.3&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">subprocess</span> <span class="c1"># for shell escape</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">shutil</span> <span class="c1"># for copy cmd  only...</span>
+<span class="kn">from</span> <span class="nn">http</span> <span class="k">import</span> <span class="n">HTTPStatus</span>
+<span class="c1">#import http.server</span>
+<span class="c1">#HTTPresponses = http.server.SimpleHTTPRequestHandler.responses</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="se">\t</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="c1">#logging.basicConfig(format=&#39;%(levelname)s:%(message)s&#39;, level=logging.DEBUG)</span>
+<span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(message)s&#39;, datefmt=&#39;%m/%d/%Y %I:%M:%S %p&#39;)</span>
+<span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(levelname)s %(name)s : %(message)s&#39;, datefmt=&#39;%Y%m%d%H:%M:%S&#39;)</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nutils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">product</span> 
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">request</span>
+
+
+
+<div class="viewcode-block" id="ProductServer"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer">[docs]</a><span class="k">class</span> <span class="nc">ProductServer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Service designed for generating image and data products served as files </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">PRODUCT_ROOT</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+    <span class="n">CACHE_ROOT</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+    <span class="n">TIME_DIR_SYNTAX</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{YEAR}</span><span class="s1">/</span><span class="si">{MONTH}</span><span class="s1">/</span><span class="si">{DAY}</span><span class="s1">&#39;</span>
+    <span class="n">SHELL_GENERATOR_SCRIPT</span> <span class="o">=</span> <span class="s1">&#39;generate.sh&#39;</span>
+    <span class="n">SHELL_INPUT_SCRIPT</span> <span class="o">=</span> <span class="s1">&#39;input.sh&#39;</span>
+
+    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="mi">90</span>
+
+    <span class="c1"># HTTP Server Options (forward defs HTTP server, so perhaps later moved to NutServer )</span>
+    <span class="n">HTTP_PORT</span> <span class="o">=</span> <span class="mi">8088</span>
+    <span class="n">HTTP_NAME</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">HTTP_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;nutshell/&#39;</span> <span class="c1"># TODO</span>
+    <span class="n">HTTP_ROOT</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span> 
+    <span class="c1">#HTML_TEMPLATE = &#39;template.html&#39; </span>
+    <span class="n">HTML_TEMPLATE</span> <span class="o">=</span> <span class="s1">&#39;index.html&#39;</span> 
+
+    <span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+
+    <span class="c1">#verbosity = 5</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#error_code_regexp = re.compile(&quot;^\s*([0-9]+)\\.(zip|gz)$&quot;)</span>
+
+    
+<div class="viewcode-block" id="ProductServer.init_path"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.init_path">[docs]</a>    <span class="k">def</span> <span class="nf">init_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Expand relative path to absolute, optionally check that exists. &quot;&quot;&quot;</span> 
+        <span class="c1">#if (hasattr(self, dirname)):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">))</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{0}</span><span class="s1"> =&gt;  </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verify</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="c1"># TODO -&gt; Path obj</span></div>
+<span class="c1">#        #else:</span>
+        <span class="c1">#     raise KeyError   </span>
+            
+        
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conffile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;NutShell2&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">conffile</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_conf</span><span class="p">(</span><span class="n">conffile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="c1"># discarded</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="c1"># self._init_dir(&#39;PRODUCT_ROOT&#39;)</span>
+        <span class="c1"># self._init_dir(&#39;CACHE_ROOT&#39;)</span>
+        <span class="c1"># self._init_dir(&#39;HTTP_ROOT&#39;) # not here!</span>
+        <span class="c1"># self._init_dir(&#39;HTTP_ROOT&#39;+&#39;/&#39;+&#39;HTML_TEMPLATE&#39;) # not here!</span>
+        
+    <span class="c1">#def read_conf(self, conffile = &#39;nutshell.cnf&#39;, strict=True):</span>
+<div class="viewcode-block" id="ProductServer.read_conf"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.read_conf">[docs]</a>    <span class="k">def</span> <span class="nf">read_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conffile</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read given conf file, if it exists. Raise error, if strict.</span>
+<span class="sd">        The entries are copied to respective member of self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">strict</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">conffile</span><span class="p">:</span>
+            <span class="n">conffile</span> <span class="o">=</span> <span class="s1">&#39;nutshell.cnf&#39;</span>
+            <span class="n">strict</span>   <span class="o">=</span> <span class="kc">False</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">conffile</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reading conf file </span><span class="si">{0}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conffile</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf</span><span class="p">(</span><span class="n">conffile</span><span class="p">)</span>
+            <span class="c1"># print(result)</span>
+            <span class="n">nutils</span><span class="o">.</span><span class="n">set_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Conf file not found: &quot;</span> <span class="o">+</span> <span class="n">conffile</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Conf file not found: &quot;</span><span class="p">,</span> <span class="n">conffile</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Local conf file not found (ok): &quot;</span> <span class="o">+</span> <span class="n">conffile</span><span class="p">)</span>
+            <span class="c1">#print (&quot;Conf file not found: &quot;, conffile)  </span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="c1"># Rename... Missleading name.</span>
+    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+        <span class="k">return</span> <span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProductServer.get_cache_root"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_cache_root">[docs]</a>    <span class="k">def</span> <span class="nf">get_cache_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the abolute path (Path) to CACHE_ROOT directory. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CACHE_ROOT</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="ProductServer.get_product_dir"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_product_dir">[docs]</a>    <span class="k">def</span> <span class="nf">get_product_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the directory containing product generator script </span>
+<span class="sd">            (generate.sh) and possible configurations etc&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">get_time_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="c1"># product_info.TIMESTAMP</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">==</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">timevars</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">parse_timestamp2</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                <span class="c1"># print timevars</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIME_DIR_SYNTAX</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">timevars</span><span class="p">)</span> <span class="c1"># + os.sep</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    
+    
+    <span class="k">def</span> <span class="nf">get_generator_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PRODUCT_ROOT</span><span class="p">,</span> <span class="o">*</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
+        <span class="c1">#return self.PRODUCT_ROOT+os.sep+product_info.PRODUCT_ID.replace(&#39;.&#39;, os.sep)</span>
+
+   
+
+    <span class="c1"># Generalize?</span>
+<div class="viewcode-block" id="ProductServer.ensure_output_dir"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.ensure_output_dir">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a writable directory, if non-existent</span>
+
+<span class="sd">        Currently, uses mask 777</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Note: https://docs.python.org/3/library/os.html</span>
+        <span class="c1"># version 3.7: The mode argument no longer affects the file permission bits of newly-created intermediate-level directories</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1">#os.makedirs(str(outdir), 0o775, True)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="mo">0o777</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outdir</span></div>
+
+<span class="c1">#        </span>
+                   
+<div class="viewcode-block" id="ProductServer.get_input_list"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_input_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Used for reading dynamic input configuration generated by input.sh.</span>
+<span class="sd">        directives determine how the product is generated. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: directives</span>
+
+        <span class="n">input_query</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">InputQuery</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">)</span> <span class="c1"># TODO: directives</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No input script: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>         
+            <span class="k">return</span> <span class="n">input_query</span>   
+        
+        <span class="c1"># TODO generalize (how)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">env</span><span class="p">)</span>
+        
+        <span class="n">input_query</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">log_basename</span> <span class="o">=</span> <span class="n">input_query</span><span class="p">)</span> <span class="c1"># ??</span>
+     
+        <span class="k">if</span> <span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> 
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;empty stdout of input declaration script </span><span class="si">{0}</span><span class="s2">:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">input_query</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;executing failed with error code=</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">input_query</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">input_query</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="c1">#    else:</span>
+        <span class="c1">#        log.critical(&quot;input script reported no error info&quot;)</span>
+                       
+        <span class="k">return</span> <span class="n">input_query</span></div>
+    
+    <span class="k">def</span> <span class="nf">retrieve_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_generator</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">product_generator</span><span class="o">.</span><span class="n">inputs</span><span class="p">):</span>
+            <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrieving inputs for: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">product_generator</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">product_generator</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+                <span class="c1">#product_generator.log.info(&#39;INPUTFILE: &#39; + i)</span>
+                <span class="nb">input</span> <span class="o">=</span> <span class="n">product_generator</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># &lt;filename&gt;.h5</span>
+                <span class="c1">#product_generator.error(i, input)</span>
+                <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Make input: </span><span class="si">{0}</span><span class="s1"> (</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">input</span><span class="p">))</span>
+                <span class="n">input_prod_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="nb">input</span><span class="p">)</span>
+                <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Make input: </span><span class="si">{0}</span><span class="s1"> (</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">input_prod_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span><span class="p">))</span>
+                <span class="c1">#r = self.make_request(input_prod_info, [&#39;MAKE&#39;], [], product_generator.log.getChild(&quot;input[{0}]&quot;.format(i)))</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">input_prod_info</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s2">&quot;input[</span><span class="si">{0}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+                <span class="c1"># r = self.make_request(input_prod_info, log = product_generator.log)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+                    <span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="c1"># sensitive</span>
+                    <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Success: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;SKIPPED: &#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">inputs</span><span class="p">):</span>
+                <span class="n">product_generator</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;All input queries returned empty&#39;</span><span class="p">)</span> 
+        <span class="n">product_generator</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">product_generator</span><span class="o">.</span><span class="n">env</span><span class="p">[</span><span class="s1">&#39;INPUTKEYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">product_generator</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">product_generator</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">product_generator</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProductServer.query_file"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.query_file">[docs]</a>    <span class="k">def</span> <span class="nf">query_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main function.</span>
+
+<span class="sd">        :param pr[nutshell.product.Info]: description of the product (string or nutshell.product.Info)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>  
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File exists: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+            <span class="n">stat</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span>
+            <span class="n">age_mins</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> <span class="c1"># Non-empty</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">product_obj</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;File found (age </span><span class="si">{1}</span><span class="s1">mins, size </span><span class="si">{2}</span><span class="s1">): </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">age_mins</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">st_size</span><span class="p">))</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">age_mins</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">):</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Empty file found, but over 10 mins old...&quot;</span><span class="p">)</span>
+                <span class="c1"># set status? WAIT?</span>
+            <span class="k">else</span><span class="p">:</span>    
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;BUSY (empty file, under generation?)&#39;</span><span class="p">)</span> <span class="c1"># TODO raise (prevent deletion)</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">product_obj</span>  <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># BUSY</span>
+                <span class="n">total_time</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">i</span>
+                    <span class="n">total_time</span> <span class="o">+=</span> <span class="n">i</span>                        
+                    <span class="n">stat</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> 
+                        <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">)</span>
+                        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;OK, finally received: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+                        <span class="k">return</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sleep </span><span class="si">{0}</span><span class="s2"> seconds...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">total_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">):</span>
+                        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;timeout (</span><span class="si">{0}</span><span class="s2">s) exceeded&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">))</span>
+                        <span class="k">break</span>
+                
+                <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">REQUEST_TIMEOUT</span><span class="p">)</span>
+                <span class="c1"># pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503</span>
+                <span class="c1"># return </span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File not found: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">product_info</span><span class="o">.</span><span class="n">TIMESTAMP</span> <span class="o">==</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">):</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;LATEST-file not found (cannot generate it)&quot;</span><span class="p">)</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">)</span> </div>
+                <span class="c1"># return </span>
+        
+<div class="viewcode-block" id="ProductServer.make_prod"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.make_prod">[docs]</a>    <span class="k">def</span> <span class="nf">make_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pr</span><span class="p">,</span> <span class="n">directives</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">TEST</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main function.</span>
+
+<span class="sd">        :param pr[nutshell.product.Info]: description of the product</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_file</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if file exits or is under generation.</span>
+
+<span class="sd">        A file is interpreted as being under generation if a corresponding,</span>
+<span class="sd">        &quot;relatively new&quot; empty file exists.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># only TEST at this point</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Generator script ok: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Generator script not found: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">script</span><span class="p">))</span>
+            <span class="c1"># Consider case of copied valid product (without local generator)            </span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">TEST</span><span class="p">):</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">NOT_IMPLEMENTED</span><span class="p">)</span> <span class="c1"># Not Implemented</span>
+                <span class="k">return</span>
+
+        <span class="c1"># TODO: if not stream?</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Ensuring cache dir for: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+            
+        <span class="c1"># Runs input.sh</span>
+        <span class="c1">#if (MAKE or INPUTS or CHECK):  </span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Querying input list (dependencies)&#39;</span><span class="p">)</span>
+        <span class="n">input_info</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get_input_list</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Input script problem, return code: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">TEST</span><span class="p">):</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">PRECONDITION_FAILED</span><span class="p">)</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
+                <span class="k">return</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">TEST</span><span class="p">):</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_inputs</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span>
+
+        <span class="c1"># MAIN</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating:  </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Environment: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">env</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">run2</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Hey, HEY! Keyboard interrupt on main level&#39;</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">REQUEST_TIMEOUT</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
+            <span class="k">raise</span>
+                
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error (</span><span class="si">{0}</span><span class="s2">): &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">error_info</span><span class="p">))</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">pr</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator did not create desired file&quot;</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">pr</span>
+ 
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;generator failed (empty file intact)&quot;</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">remove_files</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">pr</span>
+        
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finally, move main product from tmp&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>    
+            <span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">globber</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span> <span class="c1"># note: dot omitten on purpose</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Move remaiming (auxiliary) files from tmp: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">globber</span><span class="p">))</span>
+        <span class="c1">#pr.log.warning(pr.path_tmp.parent)</span>
+        <span class="c1">#pr.log.warning(pr.path_tmp.parent.glob(globber))</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">globber</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Moving </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="c1">#pr.log.debug(&quot;move {0}&quot;.format(p))</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Removing tmp dir: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_tmp</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;RmDir failed: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            
+        <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">)</span></div>
+
+
+        
+
+<div class="viewcode-block" id="ProductServer.make_request"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="n">directives</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main function.</span>
+
+<span class="sd">        :param product_info: description of the product (string or nutshell.product.Info)</span>
+<span class="sd">        :param actions: what should be done about the product </span>
+<span class="sd">            (``MAKE``, ``DELETE``, ``CHECK`` , ``RETURN``), see :ref:`commands` .</span>
+<span class="sd">        :param directives: how the product is generated etc </span>
+<span class="sd">        :param log: optional logging.logger </span>
+
+<span class="sd">        :returns: Instance of product.Generator that contains the path of </span>
+<span class="sd">            the file (if succefully generated) and information about the process.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1">#actions = set(actions) </span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">directives</span> <span class="o">=</span> <span class="n">directives</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">directives</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
+            
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span> <span class="c1">#, actions, directives, log)</span>
+
+        <span class="c1"># Future option</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;GENERATE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">):</span>
+            <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#actions.add(&#39;DELETE&#39;)</span>
+            <span class="c1">#actions.add(&#39;MAKE&#39;)</span>
+            
+        <span class="c1"># Boolean:</span>
+        <span class="n">LATEST</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>
+        <span class="n">SHORTCUT</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SHORTCUT&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>
+
+        <span class="n">LINK</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LINK&#39;</span><span class="p">)</span> <span class="c1">#   in actions)  </span>
+        <span class="n">COPY</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;COPY&#39;</span><span class="p">)</span>  <span class="c1"># in actions) # directives)</span>
+        <span class="n">MOVE</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MOVE&#39;</span><span class="p">)</span> <span class="c1"># in actions) # directives)</span>
+         
+        <span class="k">if</span> <span class="p">(</span><span class="n">SHORTCUT</span> <span class="ow">or</span> <span class="n">LATEST</span> <span class="ow">or</span> <span class="n">LINK</span> <span class="ow">or</span> <span class="n">COPY</span> <span class="ow">or</span> <span class="n">MOVE</span><span class="p">):</span>
+            <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#actions[&#39;CHECK&#39;] = True</span>
+        
+        <span class="n">MAKE</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span>   <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
+        <span class="n">INPUTS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
+        <span class="n">DELETE</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;DELETE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
+        <span class="n">TEST</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CHECK&#39;</span>  <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span> 
+                
+        <span class="c1"># LOG =    (&#39;LOG&#39;    in pr.directives)        </span>
+        <span class="c1"># DEBUG =  (&#39;DEBUG&#39;  in pr.directives)        </span>
+
+        <span class="c1"># MAIN</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">DELETE</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()):</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+        <span class="c1"># MAIN</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">MAKE</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Making... </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_prod</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="n">directives</span><span class="p">,</span> <span class="n">TEST</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="p">(</span><span class="n">INPUTS</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Inputs... </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">input_info</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">get_input_list</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">input_info</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NOT Making... </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> 
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">):</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Make status: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">status</span><span class="p">))</span> 
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">status</span><span class="p">)</span> 
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Make failed: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span> 
+            <span class="k">return</span> <span class="n">pr</span>              
+            
+          
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">SHORTCUT</span><span class="p">:</span> <span class="c1">#and pr.product_info.TIMESTAMP:</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SHORTCUT: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                <span class="n">nutils</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_static</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+     
+            <span class="k">if</span> <span class="n">LATEST</span><span class="p">:</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LATEST: </span><span class="si">{0}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_latest</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_latest</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                <span class="n">nutils</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path_latest</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">INTERNAL_SERVER_ERROR</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Routine linking file failed: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>               
+
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">LINK</span><span class="p">:</span>
+                <span class="c1">#COPY = directives[&#39;COPY&#39;]</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Linking: </span><span class="si">{1}</span><span class="s1"> &lt;=  </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">LINK</span><span class="p">)</span> <span class="p">)</span>    
+                <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">LINK</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()):</span> <span class="c1"># shutil does not need this...</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                    <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                    
+                <span class="c1">#shutil.copy(str(pr.path), str(COPY))</span>
+                <span class="n">nutils</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>  
+
+            <span class="k">if</span> <span class="n">COPY</span><span class="p">:</span>
+                <span class="c1">#COPY = directives[&#39;COPY&#39;]</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Copying: </span><span class="si">{1}</span><span class="s1"> &lt;=  </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">COPY</span><span class="p">)</span> <span class="p">)</span>    
+                <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">COPY</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()):</span> <span class="c1"># shutil does not need this here either...</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                    <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">COPY</span><span class="p">))</span>
+   
+            <span class="k">if</span> <span class="n">MOVE</span><span class="p">:</span>
+                <span class="c1">#MOVE = directives[&#39;MOVE&#39;]</span>
+                <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Moving: </span><span class="si">{1}</span><span class="s1"> &lt;=  </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">MOVE</span><span class="p">)</span> <span class="p">)</span>    
+                <span class="c1"># product_request.path.rename(options.MOVE) does not accept plain dirname</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">MOVE</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()):</span> <span class="c1"># ...but shutil needs this</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_output_dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+                    <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">MOVE</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">INTERNAL_SERVER_ERROR</span><span class="p">)</span>
+            <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Copying/moving/linking file failed: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>               
+
+        <span class="n">pr</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Success: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+              
+        <span class="k">return</span> <span class="n">pr</span></div>
+    
+
+
+   
+<div class="viewcode-block" id="ProductServer.get_arg_parser"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.get_arg_parser">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_arg_parser</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parser</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Populates parser with options of this class&quot;&quot;&quot;</span>
+
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="c1"># parser = argparse.ArgumentParser()</span>
+
+        <span class="n">supported_actions</span> <span class="o">=</span> <span class="s1">&#39;DELETE,MAKE,GENERATE,INPUTS,SHORTCUT,LATEST,LINK,MOVE,COPY&#39;</span>
+        
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;--conf&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;CONF&quot;</span><span class="p">,</span>
+                            <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># &quot;nutshell.cnf&quot;, #ProductServer.CONF_FILE?</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Read config file&quot;</span><span class="p">,</span> 
+                            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;file&gt;&quot;</span><span class="p">)</span>
+     
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--actions&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;ACTIONS&quot;</span><span class="p">,</span>
+                            <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Comma-separated string of actions: </span><span class="si">{supported_actions}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--request&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;ACTIONS&quot;</span><span class="p">,</span>
+                            <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;(Deprecating) Use --actions&quot;</span><span class="p">)</span>
+    
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--delete&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span>
+                            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                            <span class="c1">#default=False,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Delete product file, same as --actions DELETE&quot;</span><span class="p">)</span>
+
+        
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;--inputList&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;INPUTS&quot;</span><span class="p">,</span>
+                            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;list input for a product, same as --actions INPUTS&quot;</span><span class="p">)</span>
+    
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;--make&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;MAKE&quot;</span><span class="p">,</span>
+                            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                            <span class="c1">#default=False,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Make product, same as --actions MAKE&quot;</span><span class="p">)</span>
+    
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-g&quot;</span><span class="p">,</span> <span class="s2">&quot;--generate&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;GENERATE&quot;</span><span class="p">,</span>
+                            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Generate product, same as --actions DELETE,MAKE&quot;</span><span class="p">)</span>
+    
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;--timeout&quot;</span><span class="p">,</span>
+                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;TIMEOUT&quot;</span><span class="p">,</span>
+                            <span class="n">default</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+                            <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Time limit for generating or waiting for a product&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">parser</span>    </div></div>
+
+
+        
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">NUTSHELL_DIR</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;NUTSHELL_DIR&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">):</span>
+        <span class="n">NUTSHELL_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;NUTSHELL_DIR&quot;</span><span class="p">]</span>      
+            
+    <span class="n">product_server</span> <span class="o">=</span> <span class="n">ProductServer</span><span class="p">()</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;NutShell&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="c1">#logger.debug(&quot;parsing arguments&quot;)</span>
+
+    <span class="c1"># ProductInfo.get_arg_parser(parser)</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ProductServer</span><span class="o">.</span><span class="n">get_arg_parser</span><span class="p">()</span>
+
+    <span class="c1">#supported_actions = &#39;DELETE,MAKE,GENERATE,INPUTS,SHORTCUT,LATEST,LINK,MOVE,COPY&#39;</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;PRODUCTS&quot;</span><span class="p">,</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Products to be requested&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-S&quot;</span><span class="p">,</span> <span class="s2">&quot;--shortcut&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;SHORTCUT&quot;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add link from static to timestamped dir, equals -r SHORTCUT&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-Z&quot;</span><span class="p">,</span> <span class="s2">&quot;--latest&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;LATEST&quot;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add link with timestamp replaced with &#39;LATEST&#39;, same as -r LATEST&quot;</span><span class="p">)</span>
+    
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-M&quot;</span><span class="p">,</span> <span class="s2">&quot;--move&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;path&gt;&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;MOVE&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Move resulting file, equals -r MOVE=&lt;path&gt;&quot;</span><span class="p">)</span>
+    
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-L&quot;</span><span class="p">,</span> <span class="s2">&quot;--link&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;path&gt;&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;LINK&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Link resulting file, equals -r LINK=&lt;path&gt;&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-C&quot;</span><span class="p">,</span> <span class="s2">&quot;--copy&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;path&gt;&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;COPY&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Copy resulting file, equals -r COPY=&lt;path&gt;&quot;</span><span class="p">)</span>
+
+
+    <span class="c1"># Raise? Could be http default directives?</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-D&quot;</span><span class="p">,</span> <span class="s2">&quot;--directives&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;DIRECTIVES&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;pipe-separated app instructions: DOUBLE|SCHEME=TILE|...&quot;</span><span class="p">)</span>
+    
+    
+    <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">options</span><span class="p">):</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">):</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span>
+        
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">))</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>   
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;NUTSHELL_DIR=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">NUTSHELL_DIR</span><span class="p">))</span>   
+    
+    <span class="n">product_server</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
+    <span class="n">product_server</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span> <span class="c1"># NEW</span>
+    <span class="n">product_info</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">Info</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">):</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">PRODUCTS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCT</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">PRODUCTS</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Product(s) not defined&#39;</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Products: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">PRODUCTS</span><span class="p">))</span>
+    
+        
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">CONF</span><span class="p">):</span>
+        <span class="n">product_server</span><span class="o">.</span><span class="n">read_conf</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">CONF</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">product_server</span><span class="o">.</span><span class="n">read_conf</span><span class="p">():</span> <span class="c1"># &quot;nutshell.cnf&quot;, False):  # Local, lenient</span>
+            <span class="k">if</span> <span class="n">NUTSHELL_DIR</span><span class="p">:</span>
+                <span class="c1">#logger.info(&#39;Reading &#39; + NUTSHELL_DIR + &quot;/nutshell.cnf&quot;)</span>
+                <span class="n">product_server</span><span class="o">.</span><span class="n">read_conf</span><span class="p">(</span><span class="n">NUTSHELL_DIR</span> <span class="o">+</span> <span class="s2">&quot;/nutshell.cnf&quot;</span><span class="p">)</span> <span class="c1">#, False)</span>
+                
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_status</span><span class="p">())</span>
+     
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># []</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">ACTIONS</span><span class="p">):</span>
+        <span class="c1"># actions.extend(options.ACTIONS.split(&#39;,&#39;))</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">ACTIONS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="c1"># No values using &#39;,&#39;?</span>
+    
+    <span class="c1"># , &#39;TEST&#39;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="s1">&#39;MAKE&#39;</span><span class="p">,</span> <span class="s1">&#39;GENERATE&#39;</span><span class="p">,</span> <span class="s1">&#39;INPUTS&#39;</span><span class="p">,</span> <span class="s1">&#39;SHORTCUT&#39;</span><span class="p">,</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">,</span> <span class="s1">&#39;LINK&#39;</span><span class="p">,</span> <span class="s1">&#39;MOVE&#39;</span><span class="p">,</span> <span class="s1">&#39;COPY&#39;</span><span class="p">]:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="p">):</span> <span class="c1"># Boolean ok, no numeric args expected, especially not zero</span>
+            <span class="n">actions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requests:   </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">actions</span><span class="p">))</span>
+
+    <span class="n">directives</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="p">):</span>
+        <span class="c1"># directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
+        <span class="c1"># directives = nutils.read_conf_text(options.DIRECTIVES.split(&#39;,&#39;)) # whattabout comma in arg?</span>
+        <span class="n">directives</span> <span class="o">=</span>  <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">))</span> 
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Directives: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directives</span><span class="p">))</span>
+
+    
+    <span class="n">fail</span><span class="o">=</span><span class="kc">False</span>
+    
+    <span class="k">for</span> <span class="n">PRODUCT</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">PRODUCTS</span><span class="p">:</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;PRODUCT=</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PRODUCT</span><span class="p">))</span>
+             
+        <span class="n">product_info</span><span class="o">.</span><span class="n">set_product</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">PRODUCT</span><span class="p">)</span>
+         
+        <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="ow">and</span> <span class="n">product_info</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
+            
+            <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">)</span> <span class="c1">#, logger.getChild(&quot;make_request&quot;)</span>
+    
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">):</span> <span class="c1"># or (options.VERBOSE &gt; 6):</span>
+                <span class="c1">#nutils.print_dict(product_request.inputs)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Inputs:&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+        
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>    
+            <span class="k">if</span> <span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">):</span>
+                <span class="n">fail</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Could not parse product&#39;</span><span class="p">)</span>
+            <span class="n">fail</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#exit(1)</span>
+            
+    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-usage.html">Using NutShell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-commands.html">Commands and status codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-generators.html">Product generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-demo.html">Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nutshell-code.html">NutShell Code</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Markus Peura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

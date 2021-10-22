@@ -24,7 +24,9 @@ import java.util.Map;
  *
  */
 public class SimpleHtml extends SimpleXML{
-	
+
+	/** Html starying tag.
+	 */
 	public static final String HTML  = "html";
 	public static final String HEAD  = "head";
 	public static final String TITLE = "title";
@@ -44,6 +46,9 @@ public class SimpleHtml extends SimpleXML{
 	public static final String PRE   = "pre";
 	public static final String CODE  = "code";
 	public static final String TT    = "tt";
+
+	/** Html anchor (link) tag.
+	 */
 	public static final String A     = "a";
 	public static final String STYLE = "style";
 	public static final String SPAN = "span";
@@ -60,7 +65,7 @@ public class SimpleHtml extends SimpleXML{
 	// protected Element lastElement = null;
 
 
-	/** Constructor creating an empty page.
+	/** Constructor that creates an empty document with title @title.
 	 *
 	 * @param title - Title appearing in browser header and/or tab.
 	 */
@@ -91,6 +96,11 @@ public class SimpleHtml extends SimpleXML{
 		this.main = this.body;
 	}
 
+
+	/** Constructor of a document containing the body retrieved from HTML file @path.
+	 *
+	 * @param path - file to be read
+	 */
 	public SimpleHtml(Path path)  throws ParserConfigurationException, IOException, SAXException {
 		super(path);
 

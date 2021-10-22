@@ -1,0 +1,332 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Commands and status codes &#8212; NutShell 0.3 documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuration" href="nutshell-config.html" />
+    <link rel="prev" title="Using NutShell" href="nutshell-usage.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+          <p class="logo"><a href="index.html">
+            <img class="logo" src="_static/nutshell-logo-small.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="index.html">NutShell 0.3 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="nutshell-usage.html" title="Using NutShell"
+             accesskey="P">previous</a> |
+          <a href="nutshell-config.html" title="Configuration"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="commands-and-status-codes">
+<span id="commands"></span><h1>Commands and status codes<a class="headerlink" href="#commands-and-status-codes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="requests">
+<span id="request"></span><h2>Requests<a class="headerlink" href="#requests" title="Permalink to this headline">¶</a></h2>
+<p>Also know as <em>actions</em></p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="17%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Action</th>
+<th class="head">Cmd line option</th>
+<th class="head">&#160;</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MAKE</span></code></td>
+<td>–make, -m</td>
+<td>Generate file, if it does not exist (default request)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">DELETE</span></code></td>
+<td>–delete, -d</td>
+<td>Delete the product file in cache dir</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">GENERATE</span></code></td>
+<td>–generate, -g</td>
+<td>Remake file, even if it exists. Same as <code class="docutils literal notranslate"><span class="pre">--delete</span> <span class="pre">--make</span></code></td>
+</tr>
+<tr class="row-odd"><td>–</td>
+<td>–copy, -C <cite>file</cite></td>
+<td>Copy file</td>
+</tr>
+<tr class="row-even"><td>–</td>
+<td>–move, -m <cite>file</cite></td>
+<td>Move file</td>
+</tr>
+<tr class="row-odd"><td>–</td>
+<td>–link, -l <cite>file</cite></td>
+<td>Link file</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SHORTCUT</span></code></td>
+<td>–shortcut</td>
+<td>Link file to short directory</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">LATEST</span></code></td>
+<td>–latest, -L</td>
+<td>Link file to short directory, <code class="docutils literal notranslate"><span class="pre">$TIMESTAMP</span></code> replaced with <code class="docutils literal notranslate"><span class="pre">'LATEST'</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">INPUTS</span></code></td>
+<td>–inputs, -I</td>
+<td>Check inputs</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="directives">
+<span id="id1"></span><h2>Directives<a class="headerlink" href="#directives" title="Permalink to this headline">¶</a></h2>
+<p>NutShell supports <em>directives</em>, additional instructions that
+define <em>how</em> a product is computed or what kind of <em>additional
+outputs</em> like logs should be generated.</p>
+<p>A directive <em>should not change the contents of the end product</em>.
+If it does, it should be applied as a <em>product parameter</em> instead,
+which appear in filenames as well.
+Products generated with same parameters but different directives
+yield an equivalent end result (file).</p>
+<p>As with product parameters, directives will be communicated to
+generator scripts as environment variables.</p>
+<p>User may define arbitrarily many directives, for example for
+selecting an input source from a list of equivalent data centers
+(mirrors). User should avoid predefined NutShell directives
+defined below.</p>
+<div class="section" id="built-in-directives">
+<h3>Built-in directives<a class="headerlink" href="#built-in-directives" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">LOG</span></code></td>
+<td>Save log</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">STATUS</span></code></td>
+<td>Also after successful <code class="docutils literal notranslate"><span class="pre">MAKE</span></code> return the status page (HTML)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NICE</span></code></td>
+<td>Generate a product with lower CPU priority</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="status-codes">
+<h2>Status codes<a class="headerlink" href="#status-codes" title="Permalink to this headline">¶</a></h2>
+<p>NutShell recycles some standard HTTP status codes <a class="footnote-reference" href="#id4" id="id2">[1]</a> <a class="footnote-reference" href="#id5" id="id3">[2]</a> for
+communicating success or failure on operations.
+Many of those codes can be also used by the generator scripts
+in describing errors or other exceptional conditions back
+to the hosting system, NutShell.</p>
+<div class="section" id="appicable-http-codes">
+<span id="http-codes"></span><h3>Appicable HTTP codes<a class="headerlink" href="#appicable-http-codes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="5%" />
+<col width="33%" />
+<col width="13%" />
+<col width="49%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Standard Enum Name</th>
+<th class="head">NutShell</th>
+<th class="head">Comment</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>102</td>
+<td>PROCESSING</td>
+<td>x</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>200</td>
+<td>OK</td>
+<td>x</td>
+<td>Request completed successfully</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>x</td>
+<td>File not found (Generator may exist)</td>
+</tr>
+<tr class="row-odd"><td>405</td>
+<td>Method Not Allowed</td>
+<td>x</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>408</td>
+<td>Request Timeout</td>
+<td>x</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>409</td>
+<td>Conflict</td>
+<td>&#160;</td>
+<td>Contradicting parameters</td>
+</tr>
+<tr class="row-even"><td>412</td>
+<td>Precondition Failed</td>
+<td>&#160;</td>
+<td>Required input missing</td>
+</tr>
+<tr class="row-odd"><td>413</td>
+<td>Payload Too Large</td>
+<td>&#160;</td>
+<td>Parameters imply expensive computation</td>
+</tr>
+<tr class="row-even"><td>415</td>
+<td>Unsupported Media Type</td>
+<td>&#160;</td>
+<td>Unsupported file format</td>
+</tr>
+<tr class="row-odd"><td>416</td>
+<td>Range Not Satisfiable</td>
+<td>&#160;</td>
+<td>Parameter underflow or overflow</td>
+</tr>
+<tr class="row-even"><td>425</td>
+<td>Too Early</td>
+<td>&#160;</td>
+<td>Input data not arrived</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>&#160;</td>
+<td>Generator script failed</td>
+</tr>
+<tr class="row-even"><td>501</td>
+<td>Not Implemented</td>
+<td>x</td>
+<td>Product generator not found</td>
+</tr>
+<tr class="row-odd"><td>503</td>
+<td>Service Unavailable</td>
+<td>x</td>
+<td>Busy, come back later</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td><a class="reference external" href="https://docs.python.org/3/library/http.html">https://docs.python.org/3/library/http.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td><a class="reference external" href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Commands and status codes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requests">Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#directives">Directives</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#built-in-directives">Built-in directives</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#status-codes">Status codes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#appicable-http-codes">Appicable HTTP codes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-generators.html">Product generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="nutshell-usage.html" title="Using NutShell"
+              >previous</a> |
+            <a href="nutshell-config.html" title="Configuration"
+              >next</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/nutshell-commands.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Markus Peura.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
