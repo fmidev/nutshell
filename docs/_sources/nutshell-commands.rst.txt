@@ -17,8 +17,10 @@ Requests
 Also know as *actions*
 
 ============ ================= ============
- Action      Cmd line option
+ Request     Cmd line arg
 ============ ================= ============
+``TEST``     --test            Check existence and permissions of directories and scripts
+``EXIST``    --exist           Check existence and permissions of directories and scripts
 ``MAKE``     --make, -m        Generate file, if it does not exist (default request)
 ``DELETE``   --delete, -d      Delete the product file in cache dir
 ``GENERATE`` --generate, -g    Remake file, even if it exists. Same as ``--delete --make``
@@ -29,6 +31,18 @@ Also know as *actions*
 ``LATEST``   --latest, -L      Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
 ``INPUTS``   --inputs, -I      Check inputs
 ============ ================= ============
+
+Some requests specify the product type, for example for ``make`` or ``exist` commands:` 
+
+============== ================= ============
+ Instance type   
+============== ================= ============
+``FILE``       --file            Target object is a file 
+``MEMORY``     --memory          Target object resides in memory
+============== ================= ============
+
+
+Short forms of command line actions are available in the Python version only.
 
 
 .. _directives:

@@ -60,12 +60,20 @@
 <col width="71%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Action</th>
-<th class="head">Cmd line option</th>
+<tr class="row-odd"><th class="head">Request</th>
+<th class="head">Cmd line arg</th>
 <th class="head">&#160;</th>
 </tr>
 </thead>
 <tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">TEST</span></code></td>
+<td>–test</td>
+<td>Check existence and permissions of directories and scripts</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXIST</span></code></td>
+<td>–exist</td>
+<td>Check existence and permissions of directories and scripts</td>
+</tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MAKE</span></code></td>
 <td>–make, -m</td>
 <td>Generate file, if it does not exist (default request)</td>
@@ -104,9 +112,34 @@
 </tr>
 </tbody>
 </table>
+<p>Some requests specify the product type, for example for <code class="docutils literal notranslate"><span class="pre">make</span></code> or <a href="#id1"><span class="problematic" id="id2">``</span></a>exist` commands:`</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="27%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Instance type</th>
+<th class="head">&#160;</th>
+<th class="head">&#160;</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">FILE</span></code></td>
+<td>–file</td>
+<td>Target object is a file</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">MEMORY</span></code></td>
+<td>–memory</td>
+<td>Target object resides in memory</td>
+</tr>
+</tbody>
+</table>
+<p>Short forms of command line actions are available in the Python version only.</p>
 </div>
 <div class="section" id="directives">
-<span id="id1"></span><h2>Directives<a class="headerlink" href="#directives" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>Directives<a class="headerlink" href="#directives" title="Permalink to this headline">¶</a></h2>
 <p>NutShell supports <em>directives</em>, additional instructions that
 define <em>how</em> a product is computed or what kind of <em>additional
 outputs</em> like logs should be generated.</p>
@@ -144,7 +177,7 @@ defined below.</p>
 </div>
 <div class="section" id="status-codes">
 <h2>Status codes<a class="headerlink" href="#status-codes" title="Permalink to this headline">¶</a></h2>
-<p>NutShell recycles some standard HTTP status codes <a class="footnote-reference" href="#id4" id="id2">[1]</a> <a class="footnote-reference" href="#id5" id="id3">[2]</a> for
+<p>NutShell recycles some standard HTTP status codes <a class="footnote-reference" href="#id6" id="id4">[1]</a> <a class="footnote-reference" href="#id7" id="id5">[2]</a> for
 communicating success or failure on operations.
 Many of those codes can be also used by the generator scripts
 in describing errors or other exceptional conditions back
@@ -238,16 +271,16 @@ to the hosting system, NutShell.</p>
 </tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
+<table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td><a class="reference external" href="https://docs.python.org/3/library/http.html">https://docs.python.org/3/library/http.html</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id4">[1]</a></td><td><a class="reference external" href="https://docs.python.org/3/library/http.html">https://docs.python.org/3/library/http.html</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
+<table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td><a class="reference external" href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id5">[2]</a></td><td><a class="reference external" href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html</a></td></tr>
 </tbody>
 </table>
 </div>
