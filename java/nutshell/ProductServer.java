@@ -771,6 +771,7 @@ public class ProductServer { //extends Cache {
 					if (this.actions.move != null) {
 						try {
 							this.move(this.outputPath, this.actions.move);
+							this.log.log(HttpServletResponse.SC_MOVED_PERMANENTLY, String.format("Moved: %s", this.actions.move));
 						} catch (IOException e) {
 							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Moving failed: %s", this.actions.move));
 							this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
