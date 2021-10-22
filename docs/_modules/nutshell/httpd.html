@@ -68,8 +68,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Markus.Peura@fmi.fi&#39;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span>   <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
-
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">urllib.request</span><span class="o">,</span> <span class="nn">urllib.parse</span><span class="o">,</span> <span class="nn">urllib.error</span>
 <span class="kn">import</span> <span class="nn">http.server</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
@@ -108,7 +107,7 @@
     <span class="k">def</span> <span class="nf">_get_html_template</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot;Read HTML template dir and return it for modifications.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
             <span class="n">html</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_TEMPLATE</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">html</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;html&#39;</span><span class="p">)</span>
@@ -132,7 +131,7 @@
         <span class="sd">&quot;&quot;&quot;Read HTML for modifications.&quot;&quot;&quot;</span>
         <span class="n">content</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
             <span class="n">html_include</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_body</span><span class="p">(</span><span class="n">html_include</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -140,7 +139,17 @@
             <span class="n">content</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="s1">&#39;color:red&#39;</span><span class="p">)</span>
             <span class="n">content</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Note: Included HTML file &quot;</span><span class="si">{0}</span><span class="s1">&quot; not found: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
         <span class="n">elem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-      
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_html_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HTML template dir and return it for modifications.&quot;&quot;&quot;</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">_get_html_template</span><span class="p">()</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_body</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+        <span class="n">main</span> <span class="o">=</span> <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="s1">&#39;span&#39;</span><span class="p">)</span>
+        <span class="n">NutHandler</span><span class="o">.</span><span class="n">_include_html</span><span class="p">(</span><span class="n">main</span><span class="p">,</span> <span class="s1">&#39;template/&#39;</span> <span class="o">+</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="c1"># TODO: footer remarks</span>
+        <span class="k">return</span> <span class="n">html</span>
+        
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_send_status_html</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -183,7 +192,10 @@
         <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span>
         <span class="c1">#  splitquery(&#39;/path?query&#39;) --&gt; &#39;/path&#39;, &#39;query&#39;.</span>
         <span class="c1">#  (path,query) = urllib.parse.splitquery(url)</span>
-        <span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">query</span><span class="p">)</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">splitquery</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="c1"># urllib.parse.urlparse() </span>
+        <span class="c1"># (path,query) = urllib.parse.splitquery(urllib.parse.unquote(url))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">query</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">data</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">query</span><span class="p">):</span>
@@ -249,6 +261,8 @@
         <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">querydata</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span> <span class="o">==</span> <span class="s1">&#39;/test&#39;</span><span class="p">):</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Testing (info)!&#39;</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Testing (warn)!&#39;</span><span class="p">)</span>
             <span class="n">NutHandler</span><span class="o">.</span><span class="n">_send_status_html</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="p">,</span> <span class="s2">&quot;Test&quot;</span><span class="p">,</span> <span class="n">basepath</span><span class="p">)</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            s.send_response(HTTPStatus.OK.value)</span>
@@ -258,22 +272,38 @@
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> 
 
+        <span class="n">nutshell_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
         <span class="c1"># Strip HTTP_PREFIX</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span><span class="p">)):</span>
-            <span class="n">basepath</span> <span class="o">=</span> <span class="n">basepath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span><span class="p">):]</span>
+            <span class="n">nutshell_path</span> <span class="o">=</span> <span class="n">basepath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span><span class="p">):]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="n">s</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
-            <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&lt;html&gt;&lt;body&gt;Error: path </span><span class="si">{0}</span><span class="s2"> does not start with </span><span class="si">{1}</span><span class="s2">&lt;/body&gt;&lt;/html&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">html</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">basepath</span><span class="p">,</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span><span class="p">)</span>
+            <span class="n">html</span> <span class="o">=</span> <span class="s1">&#39;&lt;html&gt;&lt;body&gt;Error: path </span><span class="si">{0}</span><span class="s1"> does not start with &lt;a href=&quot;</span><span class="si">{1}</span><span class="s1">&quot;&gt;</span><span class="si">{1}</span><span class="s1">&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">html</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nutshell_path</span><span class="p">,</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span><span class="p">)</span>
             <span class="n">s</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;test </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">basepath</span><span class="p">))</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;test </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nutshell_path</span><span class="p">))</span>
             <span class="k">return</span>  
             
+        <span class="k">if</span> <span class="p">(</span><span class="n">nutshell_path</span> <span class="o">==</span> <span class="s1">&#39;/NutShell&#39;</span><span class="p">):</span>
+            <span class="c1"># Imitate Tomcat Servlet (Nutlet)</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span> <span class="o">+</span> <span class="s2">&quot;/menu.html&quot;</span><span class="p">;</span> <span class="c1"># .format(system_path.name)</span>
+            <span class="n">NutHandler</span><span class="o">.</span><span class="n">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">return</span> 
+            <span class="c1">#NutHandler._include_html(main, &#39;template/form.html&#39;)</span>
+            <span class="c1">#NutHandler._send_status_html(s, HTTPStatus.OK, &quot;Test&quot;, nutshell_path)</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            s.send_response(HTTPStatus.OK.value)</span>
+<span class="sd">            s.end_headers()</span>
+<span class="sd">            s.wfile.write(&quot;&lt;html&gt;&lt;body&gt;Test&lt;/body&gt;&lt;/html&gt;\n&quot;.encode())</span>
+<span class="sd">            s.log.warning(&quot;test {0}&quot;.format(nutshell_path))</span>
+<span class="sd">            &quot;&quot;&quot;</span>
        
         <span class="c1"># Directory and file requests are directed to default HTTP handler</span>
         <span class="c1"># NOTE: use plus, otherways collapses to root</span>
-        <span class="n">system_path</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">directory</span> <span class="o">+</span> <span class="n">basepath</span><span class="p">)</span> 
+        <span class="c1">#system_path = nutshell.Path(s.directory + nutshell_path)</span>
+        <span class="n">system_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">directory</span> <span class="o">+</span> <span class="n">nutshell_path</span><span class="p">)</span> 
         <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;system_path: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="p">))</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
             <span class="c1"># TODO: if empty product, allow generation</span>
@@ -288,13 +318,13 @@
         <span class="c1"># - is a file, that has not been found (checked above)</span>
         <span class="c1"># - has a filename extension (system_path.suffix, like &quot;.png&quot;)</span>
         <span class="c1"># - has no special parameters (like &quot;?redirect=None&quot;)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/cache/&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">and</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">nutshell_path</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/cache/&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">and</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;PRODUCT? </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span><span class="p">))</span>
             <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PREFIX</span> <span class="o">+</span> <span class="s2">&quot;/nutshell/server/?request=MAKE&amp;product=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="n">NutHandler</span><span class="o">.</span><span class="n">_redirect</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
             <span class="k">return</span> 
                    
-        <span class="k">if</span> <span class="p">(</span><span class="n">basepath</span> <span class="o">==</span> <span class="s1">&#39;/stop&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;stop&#39;</span><span class="p">):</span>
             <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="n">s</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
             <span class="n">s</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&lt;html&gt;Stopped server&lt;/html&gt;&quot;</span><span class="p">)</span>
@@ -302,6 +332,18 @@
             <span class="n">s</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Goodbye, world!&#39;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">SystemExit</span>  <span class="c1">#KeyboardInterrupt</span>
 
+        <span class="c1">#s.log.warning(&#39;Suffix?&#39;)</span>
+        <span class="c1">#s.log.warning(system_path.suffix)</span>
+
+        <span class="c1"># TODO: fix - this does not recognize query param. /nutshell/NutShell?menu.html</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.html&#39;</span><span class="p">):</span>
+            <span class="c1">#s.log.warn(&#39;Goodbye, HTML&#39;)</span>
+            <span class="n">html</span> <span class="o">=</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">_get_html_file</span><span class="p">(</span><span class="n">system_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">HTTPStatus</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">html</span><span class="p">))</span>
+            <span class="k">return</span>
+        
         <span class="n">actions</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">directives</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">product_name</span> <span class="o">=</span> <span class="n">querydata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;product&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -421,8 +463,8 @@
         <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">product_server</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s2">&quot;Load: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getloadavg</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s2">&quot;Cwd: &quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">directory</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s2">&quot;System side path: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">system_path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s2">&quot;Cwd (s.directory): &quot;</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">directory</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s2">&quot;System side path (system_path): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">system_path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s2">&quot;HttpRequest: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
         <span class="n">elem</span> <span class="o">=</span>  <span class="n">nutxml</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;span&#39;</span><span class="p">)</span>
@@ -440,8 +482,8 @@
     <span class="sd">&quot;&quot;&quot;A convenience function for starting and stopping the HTTP server.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">NutHandler</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span> <span class="c1"># has no effect as such...</span>
-    <span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span> <span class="c1"># has no effect...</span>
+    <span class="n">NutHandler</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span> <span class="c1"># has no effect as such...</span>
+    <span class="n">http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span> <span class="c1"># has no effect...</span>
     
     <span class="c1">#http.server.SimpleHTTPRequestHandler.</span>
 
@@ -453,7 +495,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting server (port=</span><span class="si">{0}</span><span class="s1">, root=</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_PORT</span><span class="p">,</span> <span class="n">NutHandler</span><span class="o">.</span><span class="n">directory</span><span class="p">))</span>
     <span class="n">nutils</span><span class="o">.</span><span class="n">print_dict</span><span class="p">(</span><span class="n">nutils</span><span class="o">.</span><span class="n">get_entries</span><span class="p">(</span><span class="n">httpd</span><span class="p">))</span>
 
-    <span class="n">cache</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_ROOT</span><span class="p">,</span> <span class="s1">&#39;cache&#39;</span><span class="p">)</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span><span class="p">,</span> <span class="s1">&#39;cache&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: cache dir does not exist: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cache</span><span class="p">))</span>
     <span class="c1"># elif not writable:</span>
@@ -506,8 +548,8 @@
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Template file for html responses&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;file&gt;.html&quot;</span><span class="p">)</span>
     
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-R&quot;</span><span class="p">,</span> <span class="s2">&quot;--html_root&quot;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;HTML_ROOT&quot;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-R&quot;</span><span class="p">,</span> <span class="s2">&quot;--http_root&quot;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;HTTP_ROOT&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;HTML document root&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;dir&gt;&quot;</span><span class="p">)</span>
     
@@ -548,8 +590,8 @@
 
     <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;PRODUCT_ROOT&#39;</span><span class="p">)</span>
     <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;CACHE_ROOT&#39;</span><span class="p">)</span>
-    <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;HTML_ROOT&#39;</span><span class="p">)</span> <span class="c1"># not here!</span>
-    <span class="c1">#product_server.init_path(&#39;HTML_ROOT&#39;+&#39;/&#39;+&#39;HTML_TEMPLATE&#39;) # not here!</span>
+    <span class="n">product_server</span><span class="o">.</span><span class="n">init_path</span><span class="p">(</span><span class="s1">&#39;HTTP_ROOT&#39;</span><span class="p">)</span> <span class="c1"># not here!</span>
+    <span class="c1">#product_server.init_path(&#39;HTTP_ROOT&#39;+&#39;/&#39;+&#39;HTML_TEMPLATE&#39;) # not here!</span>
 
     <span class="c1">#if (options.VERBOSE &gt; 6):</span>
     <span class="c1">#    nutils.print_dict(product_server.get_status())</span>

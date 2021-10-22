@@ -9,7 +9,7 @@ Welcome to NutShell's documentation!
 ====================================
 
 
-NutShell is software for generating product files:
+NutShell is software for generating "file products":
 images, data files and text files.  NutShell suits to generation of
 real time products as well as to regenerating products on-demand from
 archived data.
