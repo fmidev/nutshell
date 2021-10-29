@@ -87,14 +87,48 @@ function warn_if_unfound(){
   fi
 }
 
-function clone_dir {
-    local src_dir=$1/
-    local dst_dir=$2/
-    if [ "$dst_dir" != "$src_dir" ]; then
-	echo "Copying files to $dst_dir"
-	cp -vauR  $src_dir $dst_dir
+#function clone_dir {
+#    local src_dir=$1/
+#    local dst_dir=$2/
+#    if [ "$dst_dir" != "$src_dir" ]; then
+#	echo "Copying files to $dst_dir"
+#	cp -vauR  $src_dir $dst_dir
+#    fi
+#}
+
+function prepare_dir {
+
+    local src_dir=$1
+    local dst_subdir=$2
+    local dst_dir=$HTTP_ROOT/$dst_subdir
+
+    if [ -d $src_dir ]; then
+	echo "# Directory exists: $src_dir"
+    else
+	mkdir -v --parents $src_dir
     fi
+    
+    if [[ $dst_dir -ef $src_dir ]]; then
+	echo "# Directory/link exists already: \$HTTP_ROOT/$dst_subdir"
+	return
+    fi
+    
+    if [ -d $dst_dir ]; then
+	echo "# ! Another directory exists: \$HTTP_ROOT/$dst_subdir"
+    fi
+
+    if [ -l $dst_dir ]; then
+	echo "# ! Another link exists: \$HTTP_ROOT/$dst_subdir"
+    fi
+
+    echo "Linking $src_dir to \$HTTP_ROOT/$dst_dir"
+    ln -sfv $src_dir $dst_dir
+    if [ $? != 0 ]; then	
+	echo "# Linking failed!"
+    fi
+    
 }
+
 
 #function exit_if_failed(){
 #  if [ ! -d "$1" ]; then
@@ -152,13 +186,13 @@ check_dir_syntax TOMCAT_CONF_DIR
 
 ask_variable CACHE_ROOT "$PKG_ROOT/cache" "Root of cache directory, often on separate resource:"
 check_dir_syntax CACHE_ROOT
-mkdir -v --parents --mode a+rwx $CACHE_ROOT
-echo "Linking CACHE_ROOT to HTTP_ROOT/cache"
-if [ $? == 0 ] && [ ! -w $HTTP_ROOT/ ]; then
-    ln -svi $CACHE_ROOT $HTTP_ROOT/
-else
-    echo "# Failed: write-protected"
-fi
+prepare_dir $CACHE_ROOT cache
+
+
+ask_variable STORAGE_ROOT "$PKG_ROOT/storage" "Root of a rolling archive, externally maintained:"
+check_dir_syntax STORAGE_ROOT
+prepare_dir $STORAGE_ROOT storage
+
 
 
 ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache sub-directories"
@@ -166,13 +200,8 @@ ask_variable FILE_PERMS "rwxrwxr--" "Permissions for cached files"
 
 ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator directories"
 check_dir_syntax PRODUCT_ROOT
-mkdir -v --parents $PRODUCT_ROOT
-echo "Linking PRODUCT_ROOT to HTTP_ROOT/cache"
-if [ $? == 0 ] && [ ! -w $HTTP_ROOT/ ]; then
-    ln -svi $PRODUCT_ROOT $HTTP_ROOT/
-else
-    echo "# Failed: write-protected"
-fi
+prepare_dir $PRODUCT_ROOT products
+
 
 ask_variable CMD_SCRIPT_DIR '/usr/local/bin' "Optional: directory for 'nutshell' wrapper script"
 check_dir_syntax PRODUCT_ROOT

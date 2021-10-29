@@ -269,7 +269,7 @@ public class Nutlet extends HttpServlet {
 				}
 				else {
 
-					if (!task.actions.isSet(ProductServer.Actions.CHECK)) {
+					if (!task.actions.isSet(ProductServer.Actions.TEST)) {
 						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 								os.toString("UTF8"), request, response);
 						return;
@@ -280,7 +280,7 @@ public class Nutlet extends HttpServlet {
 			}
 			catch (IndexedException e) {
 
-				task.actions.add(Actions.CHECK);
+				task.actions.add(Actions.TEST);
 				response.setStatus(e.index);
 				switch (e.index){
 					case HttpServletResponse.SC_PRECONDITION_FAILED:
@@ -292,15 +292,23 @@ public class Nutlet extends HttpServlet {
 				}
 
 				html.appendElement(SimpleHtml.PRE, e.getMessage()).setAttribute("class", "error");
-				task.actions.add(Actions.CHECK);
+				task.actions.add(Actions.TEST);
 				task.actions.add(Actions.INPUTLIST);
 
 			}
 
-			html.appendElement(SimpleHtml.H1, "Product info: " + task.info.PRODUCT_ID);
+			html.appendElement(SimpleHtml.H1, "Product: " + task.info.PRODUCT_ID);
 			//html.createElement(SimpleHtml.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
-			if (task.actions.isSet(Actions.CHECK)) {
+			// tODO: select this, or above Excpt handling
+			Element elem = html.appendElement(SimpleHtml.PRE, task.log.indexedException.getMessage());
+			if (task.log.indexedException.index > 400)
+				elem.setAttribute("style", "color:red");
+			else if (task.log.indexedException.index < 200)
+				elem.setAttribute("style", "color:green");
+
+
+			if (task.actions.isSet(Actions.TEST)) {
 
 				Map<String,Object> map = new LinkedHashMap<>();
 

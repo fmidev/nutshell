@@ -3,10 +3,7 @@ package nutshell;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /** Container for product parameters; esp. time, file format and free parameters.
@@ -15,17 +12,23 @@ import java.util.Set;
  */
 public class ProductParameters { // consider derived classes, like DynamicProductParameters
 
+    /** Data and time formatted as @timeStampFormat or "LATEST".
+     */
     public String TIMESTAMP;
 
+    static
     final public DateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm");
 
-    long time;
+    /** Time of the product in Unix seconds.
+     *
+     */
+    protected long time;
 
     /// Product-specific parameters
-    final Map<String,Object> PARAMETERS = new HashMap<String, Object>();
+    final TreeMap<String,Object> PARAMETERS = new TreeMap<String, Object>();
 
     /// Product-specific parameters that are also forwarded to (automated) input product request
-    final Map<String,Object> INPUT_PARAMETERS = new HashMap<String, Object>();
+    final TreeMap<String,Object> INPUT_PARAMETERS = new TreeMap<String, Object>();
 
     // unused
     public String postProcessingInfo;
@@ -40,14 +43,14 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     // final
     public String COMPRESSION;
 
-    // final public String PRODUCT_DIR;
-    // public String INPUTKEYS = "";
 
-    /// Returns lines of type:  KEY='VALUE';
+    /** Product paramaters as a map.
+     *
+     */
     public Map<String,Object> getParamEnv(Map<String,Object> map) {
 
         if (map == null)
-            map = new HashMap<String,Object>();
+            map = new TreeMap<String, Object>();
 
         /// STANDARD PARAMETERS (YEAR, MONTH,...)
         Field[] fields = getClass().getFields();
@@ -62,7 +65,7 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
             }
         }
 
-        /// PRODUCT_ID-SPECIFIC PARAMETERS
+        /// Product specific parameters
         // TODO: replace with param groups?
         map.putAll(PARAMETERS);
         map.putAll(INPUT_PARAMETERS);

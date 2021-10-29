@@ -73,3 +73,12 @@ legend {
     /* margin: 2px; */
     /* border: 1px solid black; */
 }
+
+.warn {
+    color: brown;
+    font-size: x-large;
+}
+
+.note {
+    color: green;
+}

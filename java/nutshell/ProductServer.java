@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.*;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.text.DateFormat;
@@ -74,6 +73,8 @@ public class ProductServer { //extends Cache {
 	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
 	public Path cacheRoot   = Paths.get(".");
 	public Path productRoot = Paths.get(".");
+	protected Path storageRoot = Paths.get(".");
+
 	static final public Path cachePrefix = Paths.get("cache");
 
 	/// System side setting.// TODO: conf
@@ -124,8 +125,9 @@ public class ProductServer { //extends Cache {
 
 		log.debug(setup.toString());
 
-		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
+		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
+		this.storageRoot   = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
 
 		this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
 		this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rwxrwxr--").toString());
@@ -155,48 +157,107 @@ public class ProductServer { //extends Cache {
 
 	public interface ResultType {
 
-		/**
-		 *  The product should be finally in memory cache
-		 *
+		/** The product is in memory cache
 		 */
-		static final int MEMORY = 2; // "RESULT=MEMORY"
+		static
+		final int MEMORY = 1; // "RESULT=MEMORY"
 
 		/** Product should be saved on disk. System side generator may save it anyway.
 		 *   – return immediately in success
 		 */
-		static final int FILE = 8; // "RESULT=FILE"
+		static
+		final int FILE = 2; // "RESULT=FILE"
+
+		/** Link file to short directory
+		 *
+		 */
+		static
+		public final int SHORTCUT = 4 | FILE; // "POSTOP=LINK_SHORTCUT"
+
+		/** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
+		 */
+		static
+		public final int LATEST = 8 | FILE;  // "POSTOP=LINK_LATEST"
+
 
 	}
 
-	/** Specifies, what will be done after product has been generated (or checked)
+	/** Specifies, what will be done after product has been generated (or checked).
+	 *
+	 *  If unset, a status report is returned, including path/link to the result.
 	 *
 	 */
 	public interface OutputType {
 
-		/**
-		 *  Checks existence of product generator, memory cache and output directory.
-		 *
-		 */
-		static final int CHECK  = 1; // "OUTPUT=INFO"
-		// Rename STATUS or INFO or REPORT
 
-		/**
-		 *  Checks existence of product generator, memory cache and output directory.
-		 *
-		 */
-		static final int EXIST  = 2048; // "OUTPUT=INFO"
-
-
-		/** Output in a stream (typically as a response to an HTTP request, but also as pipe)
+		/** HTTP only: client will be redirected to URL of generated product
+		 *  Strictly speaking - needs no file, but a result (file or object).
 		 *
 		 * @see Nutlet#doGet
 		 */
-		public static final int STREAM = 256;  // "OUTPUT=STREAM"
+		public static final int REDIRECT = 16 | ResultType.FILE;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
+
+		/** Output in a stream (Currently, HTTP only. Future option: standard output.)
+		 *
+		 * @see Nutlet#doGet
+		 */
+		public static final int STREAM = 32;  // "OUTPUT=STREAM"
+
+	}
+
+	public interface ActionType {
+
+		/** Only checks existence of product (used with @MEMORY or @FILE)
+		 *
+		 *  Returns immediately, if a non-empty product instance is found.
+		 *  If an empty product is found, waits for completion.
+		 */
+		static
+		final int EXISTS = 64; // "OUTPUT=INFO"
+
+		/** Delete the product file on disk (future option: also in memory cache).
+		 */
+		static
+		final int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
+
+		/** Retrieve input list.
+		 */
+		static
+		public final int INPUTLIST = 256; // a "hidden" flag? "OUTPUT=INFO"
+
+		/** The product is (re)generated. Used with {@link ResultType.#MEMORY} and {@link ResultType.FILE}
+		 *
+		 */
+		static
+		public final int GENERATE = 512; //  | INPUTLIST;
+
+		/** Conditional generate: create product only if it does not exist. Used with {@link #MEMORY} and {@link #FILE}
+		 *
+		 *  In program flow, MEMORY and FILE will be checked first, and only if they fail, GENERATION takes place.
+		 */
+		static
+		public final int MAKE = 1024 | EXISTS;
+		//public final int MAKE = EXIST | GENERATE;
+		// A "hidden" flag? actually unclear, should be either RESULT=FILE or RESULT=MEMORY (but not RESULT=null);
+		// Also, acts like "make both MEMORY and FILE objects".
+
+		/// Check if product is in cache memory or disk, but do not generate it if missing.
+		// public static final int QUERY = MEMORY|FILE;
+
+
+		/** Go through product request handler checking existence of product generator, memory cache and output directory.
+		 */
+		static
+		public final int TEST = 2048; // | INPUTLIST; // "OUTPUT=INFO"
+
+		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
+		//  public static final int BATCH = 4096;
 
 
 	}
 
-	public static class Actions extends Flags implements ResultType, OutputType {
+
+	public static class Actions extends Flags implements ActionType, ResultType, OutputType {
 
 		public Actions(){
 		}
@@ -205,66 +266,10 @@ public class ProductServer { //extends Cache {
 			this.value = a;
 		}
 
-		/**
-		 *   The object will be generated, resulting native output (FILE or MEMORY)..
-		 *
-		 *   If also {@link #DELETE} is requested, the file will be regenerated.
-		 */
-		public static final int GENERATE = 4;  // "ACTION=GENERATE_FILE"
-
-		/**
-		 *  HTTP only: client will be redirected to URL of generated product
-		 *  Strictly speaking - needs no file, but a result (file or object).
-		 *
-		 * @see Nutlet#doGet
-		 */
-		public static final int REDIRECT = FILE|16;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
-
-
-		/**
-		 *  Delete the product file on disk (future option: also in memory cache).
-		 */
-		public static final int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
-
-
-		/** Generate product only if it does not exist.
-		 *
-		 * In program flow, MEMORY and FILE will be checked first, and only if they fail, GENERATION takes place.
-		 */
-		public static final int MAKE = MEMORY | FILE;
-		// A "hidden" flag? actually unclear, should be either RESULT=FILE or RESULT=MEMORY (but not RESULT=null);
-		// Also, acts like "make both MEMORY and FILE objects".
-
-		/// Check if product is in cache memory or disk, but do not generate it if missing.
-		// public static final int QUERY = MEMORY|FILE;
-
-		/**
-		 *  Derive and dump input list (and quit)
-		 */
-		public static final int INPUTLIST = 64; // a "hidden" flag? "OUTPUT=INFO"
-
-
-		// Output options
-
-
-		/** Link file to short directory
-		 *
-		 */
-		public static final int SHORTCUT = 512 | FILE; // "POSTOP=LINK_SHORTCUT"
-
-		/** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
-		 *
-		 */
-		public static final int LATEST = 1024 | FILE;  // "POSTOP=LINK_LATEST"
-
 		public boolean isEmpty() {
 			return (value == 0);
 		}
 
-
-
-		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
-		//  public static final int BATCH = 512;
 
 		/** Add specific request to copy the result.
 		 *
@@ -306,7 +311,6 @@ public class ProductServer { //extends Cache {
 			move = path;
 		}
 
-
 		protected List<Path> copies = new ArrayList<>();
 		protected List<Path> links  = new ArrayList<>();
 		protected Path move = null;
@@ -347,11 +351,7 @@ public class ProductServer { //extends Cache {
 		public final Map<String,String> inputs = new HashMap<>();
 		public final Map<String,Object> retrievedInputs = new HashMap<>();
 
-
-
-
-
-		/** Product generation task defining a product instance and alternative operations for retreaving it.
+		/** Product generation task defining a product instance and operations on it.
 		 *
 		 * @param productStr
 		 * @param actions - definition how a product is retrieved and handled thereafter - @see #Actions
@@ -365,7 +365,6 @@ public class ProductServer { //extends Cache {
 			this.info = new ProductInfo(productStr);
 			this.filename = this.info.getFilename();
 			this.actions.set(actions);
-
 
 			// Relative
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
@@ -395,7 +394,7 @@ public class ProductServer { //extends Cache {
 			//this.log.warn("Where am I?");
 			this.log.debug(String.format("started %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
 			this.result = null;
-	}
+		}
 
 
 
@@ -422,6 +421,8 @@ public class ProductServer { //extends Cache {
 		public Path move(Path src, Path dst) throws IOException {
 			this.log.note(String.format("Move: from: %s ", src));
 			this.log.note(String.format("        to: %s ", dst));
+			if (dst.toFile().isDirectory())
+				dst = dst.resolve(src.getFileName());
 			return Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
 			//return src.renameTo(dst);
 		}
@@ -450,7 +451,7 @@ public class ProductServer { //extends Cache {
 		}
 
 
-		/** Runs a thread generating and/or otherways handling a product
+		/** Runs a thread generating and/or otherwise handling a product
 		 *
 		 * @see #execute()
 		 */
@@ -481,7 +482,7 @@ public class ProductServer { //extends Cache {
 		private void handleInterrupt(Signal signal){
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
 			// System.out.println("Interrupted by Ctrl+C: " + this.outputPath.getFileName());
-			if (actions.involves(Actions.FILE)) {
+			if (actions.involves(ResultType.FILE)) {
 				try {
 					delete(this.outputPath);
 					delete(this.outputPathTmp); // what about tmpdir?
@@ -502,39 +503,43 @@ public class ProductServer { //extends Cache {
 		 */
 		public void execute() throws InterruptedException, IndexedException {
 
-			this.log.log(HttpServletResponse.SC_OK, "Determining generator for : " + this.info.PRODUCT_ID);
+			Generator generator = null;
 
-			Generator generator = getGenerator(this.info.PRODUCT_ID);
-			this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
-			//this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+			this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Starting %s", this.info.PRODUCT_ID));
 
+			// Logical corrections
 
 			if (! this.actions.copies.isEmpty())
-				this.actions.add(Actions.FILE);
+				this.actions.add(Actions.MAKE | ResultType.FILE);
 
 			if (! this.actions.links.isEmpty())
-				this.actions.add(Actions.FILE);
+				this.actions.add(Actions.MAKE | ResultType.FILE);
 
 			if (this.actions.move != null)
-				this.actions.add(Actions.FILE);
+				this.actions.add(Actions.MAKE | ResultType.FILE);
 
-			if (this.actions.involves(Actions.EXIST)){
-				if (!this.actions.involves(Actions.MEMORY | Actions.FILE)) {
-					this.log.log(HttpServletResponse.SC_OK, "Adding action FILE");
-					this.actions.add(Actions.FILE);
+			// Rest default result type
+			// if (this.actions.involves(Actions.MAKE | Actions.DELETE)) { }
+			if (!this.actions.involves(ResultType.FILE | ResultType.MEMORY)) {
+				// This "type selection" could be also done with Generator?
+				this.log.log(HttpServletResponse.SC_OK, "Setting default result type: FILE");
+				this.actions.add(ResultType.FILE);
+			}
+
+
+			if (this.actions.involves(Actions.DELETE)){
+
+				if (this.actions.isSet(ResultType.FILE) ) {
+					try {
+						this.delete(this.outputPath);
+					} catch (IOException e) {
+						this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
+						//return;
+					}
 				}
+
 			}
 
-
-
-			// Implicit action request
-			// MAKE = lazy: do not generate if exists
-			if (this.actions.involves(Actions.MAKE | Actions.GENERATE)){ // == MAKE ?!
-				if (generator instanceof ExternalGenerator)
-					this.actions.add(Actions.FILE); // PREPARE dir & empty file
-				else
-					this.actions.add(Actions.MEMORY);
-			}
 
 			//  Note: Java Generators do not need disk, unless FILE
 			//  WRONG, ... MAKE will always require FILE
@@ -544,68 +549,63 @@ public class ProductServer { //extends Cache {
 				// this.result = new BufferedImage();
 			}
 
-			// These are file paths, not committing to provide to actual physical files
+			// This is a potential path, not committing to a physical file yet.
 			File fileFinal = this.outputPath.toFile();
 
-			if (this.actions.involves(Actions.DELETE | Actions.FILE | Actions.EXIST)) {
-				// Wait
-				if (queryFile(fileFinal,90, this.log) && !this.actions.isSet(Actions.DELETE)){
+			if (this.actions.involves(Actions.EXISTS | ResultType.FILE) && ! this.actions.isSet(Actions.DELETE)) {
+
+				// Don't wait (so the other process will "notice" ie fail)
+				if (queryFile(fileFinal, 90, this.log)) {
 					// Order? Does it delete immediately?
 					this.result = this.outputPath;
-					if (this.actions.isSet(Actions.FILE) && this.actions.isSet(Actions.EXIST)){
-						this.log.log(HttpServletResponse.SC_OK, String.format("Completed! File exists: %s", this.outputPath));
-						return;
+					this.log.log(HttpServletResponse.SC_OK, String.format("File exists: %s", this.outputPath));
+				}
+				else { // if (this.actions.isSet(Actions.EXIST)){
+					this.log.log(HttpServletResponse.SC_NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
+					//this.log.log(HttpServletResponse.SC_OK, String.format("File does not exist: %s", this.outputPath));
+					if (this.actions.isSet(Actions.MAKE)) {
+						this.actions.add(Actions.GENERATE);
 					}
+				}
+
+			}
+
+
+			// Retrieve Geneator, if needed
+			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST | Actions.TEST)){
+
+				this.log.log(HttpServletResponse.SC_OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
+				generator = getGenerator(this.info.PRODUCT_ID);
+				this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+
+				if (this.actions.involves(Actions.GENERATE )){
+					if (generator instanceof ExternalGenerator)
+						this.actions.add(ResultType.FILE); // PREPARE dir & empty file
+					else
+						this.actions.add(ResultType.MEMORY);
+				}
+
+			}
+
+			if (this.actions.isSet(Actions.DELETE)) {
+
+				if (fileFinal.exists()) {
+					this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting: %s ", this.outputPath));
 				}
 				else {
-					try {
-						this.delete(this.outputPath);
-					}
-					catch (IOException e) {
-						this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
-					}
-
-					if (this.actions.isSet(Actions.FILE) && this.actions.isSet(Actions.EXIST)){
-						this.log.log(HttpServletResponse.SC_NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
-						return;
-					}
+					this.log.log(HttpServletResponse.SC_NO_CONTENT, String.format("Deleted: %s ", this.outputPath));
 				}
 
-			}
-
-			if (this.actions.isSet(Actions.FILE) && (fileFinal.length()==0)){
-				this.actions.add(Actions.GENERATE);
-			}
-
-			// Mark this task being processed (empty file)
-			// if (this.actions.isSet(Actions.FILE) && !fileFinal.exists()){
-			if (this.actions.isSet(Actions.GENERATE)){
-
-				try {
-					FileUtils.ensureDir(cacheRoot, relativeOutputDirTmp, dirPerms);
-					FileUtils.ensureDir(cacheRoot, relativeOutputDir,    dirPerms);
-					FileUtils.ensureFile(cacheRoot, relativeOutputPath, filePerms, dirPerms); // this could be enough?
-					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
-
-				}
-				catch (IndexedException e) {
-					this.log.log(e);
-					if (e.index >= HttpServletResponse.SC_INTERNAL_SERVER_ERROR){
-						return;
-					}
-				}
-				catch (Exception e) {
-					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
-					return;
+				if (this.actions.involves(Actions.GENERATE|Actions.EXISTS)){
+					this.log.log(HttpServletResponse.SC_MULTIPLE_CHOICES, String.format("Mutually contradicting actions: %s ", this.actions));
 				}
 
+				return;
 			}
-			else {
-				this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
-			}
+
 
 			// Generate or at least list inputs
-			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST)) { //
+			if (this.actions.involves(Actions.INPUTLIST  | Actions.GENERATE)) { //
 
 				this.log.debug(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
 
@@ -630,12 +630,40 @@ public class ProductServer { //extends Cache {
 
 
 
-			if (this.actions.isSet(Actions.GENERATE)){
+			if (this.actions.isSet(Actions.GENERATE)) {
 
-				/// Assume Generator uses input similar to output (File or Object)
-				final int inputActions = this.actions.value & (Actions.MEMORY | Actions.FILE);
+				this.log.reset(); // Forget old sins
 
-				Map<String,Task> tasks = executeMany(this.inputs, inputActions, null, this.log);
+				this.log.info("Generate!");
+				// this.log.info("No generation request, returning.");
+				// return;
+
+				// Mark this task being processed (empty file)
+				// if (this.actions.isSet(ResultType.FILE) && !fileFinal.exists()){
+				try {
+					FileUtils.ensureDir(cacheRoot, relativeOutputDirTmp, dirPerms);
+					FileUtils.ensureDir(cacheRoot, relativeOutputDir,    dirPerms);
+					FileUtils.ensureFile(cacheRoot, relativeOutputPath, filePerms, dirPerms); // this could be enough?
+					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
+				}
+				catch (IndexedException e) {
+					// TODO: could still do linking/copying?
+					this.log.log(e);
+					if (e.index >= HttpServletResponse.SC_INTERNAL_SERVER_ERROR){
+						return;
+					}
+				}
+				catch (Exception e) {
+					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
+					return;
+				}
+
+				//	this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
+
+				// Assume Generator uses input similar to output (File or Object)
+				final int inputActions = this.actions.value & (ResultType.MEMORY | ResultType.FILE);
+
+				Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, this.log);
 
 				// Collect results
 				for (Entry<String,Task> entry : tasks.entrySet()){
@@ -712,15 +740,38 @@ public class ProductServer { //extends Cache {
 				}
 
 			}
-			else {
+
+			if (this.actions.isSet(Actions.INPUTLIST) && ! this.actions.involves(Actions.GENERATE)) {
 				this.log.note("Input list: requested");
 				this.result = this.inputs;
 			}
 
 
-			if (this.actions.isSet(Actions.FILE)){
+			if (this.actions.isSet(ResultType.FILE)){
+				// TODO: save file (of JavaGenerator)
+				// if (this.result instanceof Path)...
 
-				if (fileFinal.length() > 0) {
+				if (this.actions.isSet(ActionType.DELETE)){
+					if (fileFinal.exists())
+						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length() ));
+					else {
+						this.log.reset();
+						this.log.ok("Deleted.");
+					}
+				}
+				else if (fileFinal.length() == 0) {
+
+					this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
+					try {
+						this.delete(this.outputPath);
+					} catch (IOException e) {
+						//this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
+						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in deleting: %s ", this.outputPath));
+						this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+					}
+
+				}
+				else {
 
 					this.result = this.outputPath;
 					this.log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
@@ -730,8 +781,6 @@ public class ProductServer { //extends Cache {
 						try {
 
 							Path dir = FileUtils.ensureDir(cacheRoot, productDir, dirPerms);
-							// Path dir = ShellUtils.makeWritableDir(cacheRoot, productDir);
-							// ensureWritableDir(cacheRoot, productDir);
 
 							if (this.actions.isSet(Actions.LATEST)){
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")));
@@ -771,6 +820,7 @@ public class ProductServer { //extends Cache {
 					if (this.actions.move != null) {
 						try {
 							this.move(this.outputPath, this.actions.move);
+							this.result = this.actions.move;
 							this.log.log(HttpServletResponse.SC_MOVED_PERMANENTLY, String.format("Moved: %s", this.actions.move));
 						} catch (IOException e) {
 							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Moving failed: %s", this.actions.move));
@@ -788,28 +838,14 @@ public class ProductServer { //extends Cache {
 						this.log.log(HttpServletResponse.SC_SEE_OTHER, String.format("Failed in removing tmp dir %s", this.outputDirTmp));
 					}
 
-					return; // true;
-				}
-				else {
-					// TODO: save file (of JavaGenerator)
-					// this.log.error(String.format("Failed in generating: %s ", this.outputPath));
-					this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
-					try {
-						this.delete(this.outputPath);
-					} catch (IOException e) {
-						//this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
-						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in deleting: %s ", this.outputPath));
-						this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-					}
-					return;
 				}
 			}
 			else {
-				if (this.result != null)
+				if (this.result != null) // Object?
 					this.log.info("Result: " + this.result.toString());
 				this.log.note("Task completed: actions=" + this.actions);
 				// status page?
-				return; // true;
+
 			}
 
 			// return true; // SEMANTICS?
@@ -823,7 +859,8 @@ public class ProductServer { //extends Cache {
 		public Map<String,Object> getParamEnv() {
 
 			// BASE
-			Map<String,Object> env = this.info.getParamEnv(null);
+			Map<String,Object> env =  new TreeMap<String, Object>();
+			this.info.getParamEnv(env);
 
 			// EXTENDED
 			if (this.info.TIMESTAMP != null) {
@@ -837,6 +874,8 @@ public class ProductServer { //extends Cache {
 					case 6: // future option
 						env.put("MONTH", this.info.TIMESTAMP.substring(4, 6));
 						env.put("YEAR", this.info.TIMESTAMP.substring(0, 4));
+						break;
+					case 0:
 						break;
 					default:
 						this.log.log(HttpServletResponse.SC_NOT_MODIFIED, String.format("Odd timestamp '%s' length (%d)",  this.info.TIMESTAMP, this.info.TIMESTAMP.length()));
@@ -912,10 +951,21 @@ public class ProductServer { //extends Cache {
 	 * @return - the completed set of tasks, including failed ones.
 	 *
 	 */
+	/*
 	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, HttpLog log) {
 		return executeMany(taskRequests, new Actions(actions), directives, log);
 	}
 
+	 */
+
+	/** Run a set of tasks in parallel.
+	 *
+	 * @param taskRequests
+	 * @param actions
+	 * @param directives
+	 * @param log
+	 * @return
+	 */
 	public Map<String,Task> executeMany(Map<String,String> taskRequests, Actions actions, Map directives, HttpLog log){
 
 		Map<String,Task> tasks = new HashMap<>();
@@ -1021,6 +1071,11 @@ public class ProductServer { //extends Cache {
 	 */
 	public boolean queryFile(File file, int maxEmptySec, Log log) throws InterruptedException {
 
+		if (!file.exists()){
+			log.log(HttpServletResponse.SC_SEE_OTHER, String.format("File does not exist: %s", file));
+			return false;
+		}
+
 		int remainingSec = this.timeOut;
 
 		final long fileLength = file.length();
@@ -1033,24 +1088,38 @@ public class ProductServer { //extends Cache {
 		else { // empty file
 			long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
 			if (ageSec > maxEmptySec){
-				log.note("Outdated empty file, age=" + (ageSec/60) + " min, (max " + maxEmptySec + "s)");
+				log.log(HttpServletResponse.SC_SEE_OTHER, String.format("Time %d", java.lang.System.currentTimeMillis()));
+				log.log(HttpServletResponse.SC_SEE_OTHER, String.format("File %d", file.lastModified()));
+				log.log(HttpServletResponse.SC_NOT_MODIFIED, String.format("Outdated empty file, age=%d min, (max %d s)",(ageSec/60), maxEmptySec));
+				//return false;
 			}
 			else {
-				log.warn("Empty fresh file exists, waiting for it to complete...");
+				log.log(HttpServletResponse.SC_SEE_OTHER, "Empty fresh file exists, waiting for it to complete...");
 				for (int i = 1; i < 10; i++) {
 					int waitSec = i * i;
 					log.warn("Waiting for "+ waitSec + " s...");
 					TimeUnit.SECONDS.sleep(waitSec);
 					if (file.length() > 0){
-						log.note("File appeared");
+						log.log(HttpServletResponse.SC_CREATED,"File appeared");
 						return true;
 					}
 					remainingSec = remainingSec - waitSec;
 					if (remainingSec <= 0)
 						break;
 				}
-				log.note("File did not appear (grow), even after waiting");
+				log.log(HttpServletResponse.SC_NOT_MODIFIED,"File did not appear (grow), even after waiting");
+				//return false;
 			}
+
+			try {
+				log.note("Deleting file");
+				Files.delete(file.toPath());
+				//this.delete(this.outputPath);
+			}
+			catch (IOException e) {
+				this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
+			}
+
 			return false;
 		}
 	}
@@ -1088,26 +1157,6 @@ public class ProductServer { //extends Cache {
 
 	}
 
-	/*
-	protected void setField(Object obj, String key, String value, Log log){
-		key = key.toUpperCase();
-		try {
-			Field field = obj.getClass().getField(key);
-			actions.add(a);
-			log.note("Added action:"  + a);
-		} catch (NoSuchFieldException e) {
-			log.note("Use following action codes: ");
-			for (Field field: Actions.class.getFields()){
-				String name = field.getName();
-				if (name.equals(name.toUpperCase())){
-					log.note("  " + name + "=" + field.getInt(null));
-				}
-			}
-			log.error("No such action code: "  + a);
-			System.exit(2;
-		}
-	}
-	*/
 
 	/// Command-line interface for 
 	public static void main(String[] args) {
@@ -1209,6 +1258,19 @@ public class ProductServer { //extends Cache {
 
 					if (opt.equals("product")) {
 						products.put("product", args[++i]);
+					}
+					else if (opt.equals("parse")) {
+						//ProductInfo product = new ProductInfo(args[++i]);
+						Task product = server.new Task(args[++i], 0, log);
+						//products.put("product", args[++i]);
+						//System.out.println(product);
+						Map<String,Object> map = product.getParamEnv();
+						String[] array = MapUtils.toArray(map);
+						//System.out.println(MapUtils.toArray(map));
+						for (String s : array) {
+							System.out.println(s);
+						}
+						return;
 					}
 					else if (opt.equals("copy")) {
 						actions.addCopy(args[++i]);
@@ -1319,7 +1381,12 @@ public class ProductServer { //extends Cache {
 			}
 			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.log.logFile != null)
-				log.info("Log:\t"  + task.log.logFile.getAbsolutePath());
+				log.info(String.format("Log:\t %s", task.log.logFile.getAbsolutePath()));
+
+			if (task.result != null)
+				log.info(String.format("Result [%s]: %s", task.result.getClass().getCanonicalName(), task.result));
+			//log.info("Log:\t"  + task.log.logFile.getAbsolutePath());
+
 			if (task.outputPath.toFile().exists())
 				log.note(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
 		}
