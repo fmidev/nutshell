@@ -232,7 +232,8 @@ public class Nutlet extends HttpServlet {
 			try {
 				// track esp. missing inputs
 				//task.log.ok("-------- see separate log --->");
-				productServer.log.warn(String.format("Yes, Executing... %s", task));
+				productServer.log.warn(String.format("Executing... %s", task));
+				productServer.log.debug(String.format("See separate log: %s", task.log.logFile));
 				//log.warn(String.format("Executing... %s", task));
 				task.log.ok("Executing...");
 				task.execute();
@@ -248,25 +249,27 @@ public class Nutlet extends HttpServlet {
 					task.log.ok(String.format("Completed task: %s", task.toString()));
 				}
 
-				if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
+				//if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
+				final boolean statusOK = (task.log.getStatus() >= Log.NOTE);
+				//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
-					if (task.actions.isSet(Actions.STREAM)) {
-						sendToStream(task, response);
-						return;
-					}
-
-					if (task.actions.isSet(Actions.REDIRECT)) {
-						String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
-						response.sendRedirect(url);
-						return;
-					}
-					// if not STATUS
+				if (statusOK && task.actions.isSet(Actions.STREAM)) {
+					sendToStream(task, response);
+					return;
+				}
+				else if (statusOK && task.actions.isSet(Actions.REDIRECT)) {
+					String url = String.format("%s/cache/%s?redirect=NO", request.getContextPath(), task.relativeOutputPath);
+					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
+					response.sendRedirect(url);
+					return;
+				}
+				// if not STATUS
 					/*
 					 * The page isn’t redirecting properly
 					 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
 					 * This problem can sometimes be caused by disabling or refusing to accept cookies.
 					 */
-				}
+				//}
 				else {
 
 					if (!task.actions.isSet(ProductServer.Actions.TEST)) {
@@ -280,8 +283,12 @@ public class Nutlet extends HttpServlet {
 			}
 			catch (IndexedException e) {
 
-				task.actions.add(Actions.TEST);
 				response.setStatus(e.index);
+
+				task.actions.add(Actions.TEST);
+				task.actions.add(Actions.TEST);
+				task.actions.add(Actions.INPUTLIST);
+				/*
 				switch (e.index){
 					case HttpServletResponse.SC_PRECONDITION_FAILED:
 						html.appendElement(SimpleHtml.H1, "Input problem(s)");
@@ -292,20 +299,33 @@ public class Nutlet extends HttpServlet {
 				}
 
 				html.appendElement(SimpleHtml.PRE, e.getMessage()).setAttribute("class", "error");
-				task.actions.add(Actions.TEST);
-				task.actions.add(Actions.INPUTLIST);
+
+				 */
 
 			}
 
 			html.appendElement(SimpleHtml.H1, "Product: " + task.info.PRODUCT_ID);
 			//html.createElement(SimpleHtml.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
-			// tODO: select this, or above Excpt handling
-			Element elem = html.appendElement(SimpleHtml.PRE, task.log.indexedException.getMessage());
-			if (task.log.indexedException.index > 400)
-				elem.setAttribute("style", "color:red");
-			else if (task.log.indexedException.index < 200)
-				elem.setAttribute("style", "color:green");
+			Element elem = html.createElement(SimpleHtml.PRE, task.log.indexedException.getMessage());
+
+			switch (task.log.indexedException.index){
+				case HttpServletResponse.SC_PRECONDITION_FAILED:
+					html.appendElement(SimpleHtml.H2, "Input problem(s)");
+					html.appendElement(SimpleHtml.P, "See input list further below");
+					elem.setAttribute("class", "error");
+					break;
+				default:
+					// General, section-wise handling
+					if (task.log.indexedException.index > 400) {
+						html.appendElement(SimpleHtml.H2, "Product generator error");
+						elem.setAttribute("class", "error");
+					}
+					else if (task.log.indexedException.index < 200)
+						elem.setAttribute("class", "note");
+			}
+
+			html.appendElement(elem);
 
 
 			if (task.actions.isSet(Actions.TEST)) {
@@ -347,7 +367,7 @@ public class Nutlet extends HttpServlet {
 					for (Map.Entry<String, String> e : task.inputs.entrySet()) {
 						String inputFilename = e.getValue();
 						//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
-						String url = String.format("%s%s?actions=CHECK&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
+						String url = String.format("%s%s?actions=TEST&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
 						linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
 						//Object inp = task.retrievedInputs.get(e.getKey());
 						//if ()
@@ -380,9 +400,8 @@ public class Nutlet extends HttpServlet {
 			// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
 
 			html.appendElement(SimpleHtml.H3, "ProductServer log");
-			//log.warn("Nyt jotain");
-			productServer.log.warn("Empty?");
-			html.appendElement(SimpleHtml.PRE, ""+productServer.log.buffer.length()).setAttribute("class", "code");
+			//productServer.log.warn("Empty?");
+			html.appendElement(SimpleHtml.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
 			html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
 
 			html.appendElement(SimpleHtml.H3, "Corresponding command line");

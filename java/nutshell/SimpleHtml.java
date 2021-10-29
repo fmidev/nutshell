@@ -174,6 +174,11 @@ public class SimpleHtml extends SimpleXML{
 		return appendElement(this.main, tag);
 	}
 
+	public Element appendElement(Element elem){
+		this.main.appendChild(elem);
+		return elem;
+	}
+
 
 	public Element appendStyleLink(String link){
 		//<link href="/directory/css/style.css" rel="stylesheet">

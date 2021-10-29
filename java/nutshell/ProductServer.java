@@ -72,6 +72,7 @@ public class ProductServer { //extends Cache {
 	/// System side settings.
 	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
 	public Path cacheRoot   = Paths.get(".");
+	//public Path storageRoot   = Paths.get(".");
 	public Path productRoot = Paths.get(".");
 	protected Path storageRoot = Paths.get(".");
 
@@ -345,6 +346,7 @@ public class ProductServer { //extends Cache {
 		public Path outputDirTmp;
 		public Path outputPath;
 		public Path outputPathTmp;
+		public Path storagePath;
 
 		public final Map<String,String> directives = new HashMap<>();
 
@@ -382,6 +384,7 @@ public class ProductServer { //extends Cache {
 			this.outputPath    = outputDir.resolve(filename);
 			//this.outputPathTmp = outputDirTmp.resolve(getFilePrefix() + filename);
 			this.outputPathTmp = outputDirTmp.resolve(filename);
+			this.storagePath   = storageRoot.resolve(this.relativeOutputDir).resolve(filename);
 
 			if (parentLog != null){
 				this.log = parentLog.child("["+this.info.PRODUCT_ID+"]");
@@ -554,8 +557,27 @@ public class ProductServer { //extends Cache {
 
 			if (this.actions.involves(Actions.EXISTS | ResultType.FILE) && ! this.actions.isSet(Actions.DELETE)) {
 
+				if (storagePath.toFile().exists() && ! fileFinal.exists()){
+					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
+					try {
+						FileUtils.ensureDir(cacheRoot, relativeOutputDir, dirPerms);
+					}
+					catch (IOException e) {
+						this.log.warn(e.getMessage());
+						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in creating dir (with permissions): %s", this.outputDir));
+						//e.printStackTrace();
+					}
+					try {
+						this.link(this.storagePath, this.outputPath);
+					}
+					catch (IOException e) {
+						this.log.error(e.getMessage());
+						this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in linking: %s <- %s", this.outputPath, storagePath));
+						//e.printStackTrace();
+					}
+				}
 				// Don't wait (so the other process will "notice" ie fail)
-				if (queryFile(fileFinal, 90, this.log)) {
+				else if (queryFile(fileFinal, 90, this.log)) {
 					// Order? Does it delete immediately?
 					this.result = this.outputPath;
 					this.log.log(HttpServletResponse.SC_OK, String.format("File exists: %s", this.outputPath));
@@ -1044,7 +1066,7 @@ public class ProductServer { //extends Cache {
 				log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
 				log.warn(String.format("Pending file? : ", task.outputPathTmp));
 			}
-			log.log(task.log.indexedException);
+			log.log(String.format("Final status: %s", task.log.indexedException));
 		}
 
 		return tasks;
@@ -1061,7 +1083,7 @@ public class ProductServer { //extends Cache {
 		return generator;
 	};
 
-	/// Checks if a file exists, return if non-empty, else wait for an empty file to complete.
+	/// Checks if a file exists in cache or storage, return immediately if non-empty or nonexistent, else wait for an empty file to complete.
 	/**
 	 * @param file
 	 * @param maxEmptySec maximum age of empty file in seconds
