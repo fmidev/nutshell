@@ -160,14 +160,12 @@ public class ProductServer { //extends Cache {
 
 		/** The product is in memory cache
 		 */
-		static
-		final int MEMORY = 1; // "RESULT=MEMORY"
+		int MEMORY = 1; // "RESULT=MEMORY"
 
 		/** Product should be saved on disk. System side generator may save it anyway.
 		 *   – return immediately in success
 		 */
-		static
-		final int FILE = 2; // "RESULT=FILE"
+		int FILE = 2; // "RESULT=FILE"
 
 		/** Link file to short directory
 		 *
@@ -213,31 +211,26 @@ public class ProductServer { //extends Cache {
 		 *  Returns immediately, if a non-empty product instance is found.
 		 *  If an empty product is found, waits for completion.
 		 */
-		static
-		final int EXISTS = 64; // "OUTPUT=INFO"
+		int EXISTS = 64; // "OUTPUT=INFO"
 
 		/** Delete the product file on disk (future option: also in memory cache).
 		 */
-		static
-		final int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
+		int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
 
 		/** Retrieve input list.
 		 */
-		static
-		public final int INPUTLIST = 256; // a "hidden" flag? "OUTPUT=INFO"
+		int INPUTLIST = 256; // a "hidden" flag? "OUTPUT=INFO"
 
-		/** The product is (re)generated. Used with {@link ResultType.#MEMORY} and {@link ResultType.FILE}
+		/** The product is (re)generated. Used with MEMORY and FILE
 		 *
 		 */
-		static
-		public final int GENERATE = 512; //  | INPUTLIST;
+		int GENERATE = 512; //  | INPUTLIST;
 
-		/** Conditional generate: create product only if it does not exist. Used with {@link #MEMORY} and {@link #FILE}
+		/** Conditional generate: create product only if it does not exist. Used with MEMORY and FILE
 		 *
 		 *  In program flow, MEMORY and FILE will be checked first, and only if they fail, GENERATION takes place.
 		 */
-		static
-		public final int MAKE = 1024 | EXISTS;
+		int MAKE = 1024 | EXISTS;
 		//public final int MAKE = EXIST | GENERATE;
 		// A "hidden" flag? actually unclear, should be either RESULT=FILE or RESULT=MEMORY (but not RESULT=null);
 		// Also, acts like "make both MEMORY and FILE objects".
@@ -248,8 +241,7 @@ public class ProductServer { //extends Cache {
 
 		/** Go through product request handler checking existence of product generator, memory cache and output directory.
 		 */
-		static
-		public final int TEST = 2048; // | INPUTLIST; // "OUTPUT=INFO"
+		int TEST = 2048; // | INPUTLIST; // "OUTPUT=INFO"
 
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 4096;
@@ -1234,10 +1226,13 @@ public class ProductServer { //extends Cache {
 							log.setVerbosity(level);
 						} catch (NumberFormatException e) {
 							try {
-								Field field = Log.class.getField(arg);
-								log.verbosity = field.getInt(null);
+								log.setVerbosity(arg);
+								//Field field = Log.class.getField(arg);
+								//log.verbosity = field.getInt(null);
 							} catch (NoSuchFieldException e2) {
-								log.note("Use following keys or values (0...10)");
+								//log.note("Use following keys or values (0...10)");
+								log.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
+								/*
 								for (Field field : Log.class.getFields()) {
 									String name = field.getName();
 									if (name.equals(name.toUpperCase())) {
@@ -1248,11 +1243,11 @@ public class ProductServer { //extends Cache {
 											log.note(name + "=" + field.get(null));
 										}
 										catch (Exception e1){ // VT100 boolean
-											//log.debug(field.getType().toString());
-											//log.debug("(" + field.toString() + ")");
 										}
 									}
 								}
+
+								 */
 								log.error("No such verbosity level: " + arg);
 								return;
 							}

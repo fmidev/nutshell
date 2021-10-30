@@ -49,17 +49,13 @@ public class Log {
 		return log;
 	}
 
+	public Log fatal(String message){
+		return log(FATAL, message);
+	}
+
 	public Log error(String message){
 		return log(ERROR, message);
 	}
-
-	/*
-	public Log error(String message, int i){
-		append(ERROR, message);
-		System.exit(i);
-		return this;
-	}
-	 */
 
 	public Log warn(String message){
 		return log(WARNING, message);
@@ -108,6 +104,8 @@ public class Log {
 	
 	public PrintStream printStream = System.err;
 
+	public static final int FATAL = 1;
+
 	public static final int ERROR = 2;
 	public static final int WARNING = 3;
 
@@ -133,7 +131,7 @@ public class Log {
 	public static final int DEBUG = 10;
 
 	/// Verbose level. Messages equal or lower value than will be communicated.
-	public int verbosity = VERBOSE;
+	protected int verbosity = VERBOSE;
 
 	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
 	public boolean VT100 = false;
@@ -144,7 +142,6 @@ public class Log {
 	final static Map<Integer, String> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 
 	static {
-
 
 		//statusCodes = ClassUtils.getConstants(Log.class);
 		statusCodes = new HashMap<>();
@@ -181,8 +178,9 @@ public class Log {
 			// or warn? (with infinite loop risk)
 			log(String.format("Illegal LOG level: %d", status));  // Or: return false?
 		}
-
-		set(status);
+		else {
+			set(status);
+		}
 
 		return log(message);
 
@@ -287,14 +285,53 @@ public class Log {
 		this.verbosity = verbosity;
 	}
 
+	public void setVerbosity(String verbosity) throws NoSuchFieldException {
+		for (Map.Entry<Integer, String> entry: statusCodes.entrySet()){
+			if (entry.getValue().equals(verbosity)) {
+				this.verbosity = entry.getKey();
+				return; // true
+			}
+		}
+		throw new NoSuchFieldException(verbosity);
+		//return false;
+	}
+
 	public static void main(String[] args) {
 		
 		Log log = new Log();
-		log.verbosity = 0;
-		
+		log.printStream = null;
+
+		log.note("Starting");
+
+		if (args.length == 0){
+			log.debug("No arguments, invoking 'help'");
+			System.out.println("Prints log lines until end-of-line");
+			System.out.println("Usage: ");
+			System.out.println("  argument: <log_level>  #" + statusCodes.entrySet());
+			log.warn("Quitting");
+			return;
+		}
+
+		try {
+			log.setVerbosity(args[0]);
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 	
 		String line = null;
+		try {
+			while (!(line = in.readLine()).isEmpty()) {
+				log.log((int) (Math.random() * 5.0), line);
+			}
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		/*
 		while (true){
 			
 			try {
@@ -307,6 +344,9 @@ public class Log {
 			log.log((int)(Math.random()*5.0),line);
 			
 		}
+
+		 */
+		System.out.println(log.buffer.toString());
 		System.out.println(log);
 	}
 
