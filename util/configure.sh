@@ -173,7 +173,10 @@ ask_variable HTTP_PORT "8088" "Port for HTTP server, Python version (optional)"
 
 ask_variable HTTP_ROOT "/opt/nutshell" "Root directory for HTTP server (including ./WEB-INF/lib/Nutlet.jar):"
 check_dir_syntax HTTP_ROOT
-mkdir -v --parents $HTTP_ROOT
+if [ ! -d $HTTP_ROOT ]; then
+    mkdir -v --parents $HTTP_ROOT
+fi
+
 
 ask_variable HTTP_PREFIX "/nutshell" "URL prefix (with leading '/' but without trailing '/')"
 check_dir_syntax HTTP_PREFIX
@@ -207,7 +210,9 @@ prepare_dir $PRODUCT_ROOT products
 
 ask_variable CMD_SCRIPT_DIR '/usr/local/bin' "Optional: directory for 'nutshell' wrapper script"
 check_dir_syntax PRODUCT_ROOT
-mkdir -v --parents $PRODUCT_ROOT
+if [ ! -d $PRODUCT_ROOT ]; then
+    mkdir -v --parents $PRODUCT_ROOT
+fi
 
 
 
