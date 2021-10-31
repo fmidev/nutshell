@@ -209,10 +209,10 @@ prepare_dir $PRODUCT_ROOT products
 
 
 ask_variable CMD_SCRIPT_DIR '/usr/local/bin' "Optional: directory for 'nutshell' wrapper script"
-check_dir_syntax PRODUCT_ROOT
-if [ ! -d $PRODUCT_ROOT ]; then
-    mkdir -v --parents $PRODUCT_ROOT
-fi
+check_dir_syntax CMD_SCRIPT_DIR
+#if [ ! -d $PRODUCT_ROOT ]; then
+#    mkdir -v --parents $PRODUCT_ROOT
+#fi
 
 
 
