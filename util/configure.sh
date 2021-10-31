@@ -108,7 +108,7 @@ function prepare_dir {
 	mkdir -v --parents $src_dir
     fi
     
-    if [[ $dst_dir -ef $src_dir ]]; then
+    if [ $dst_dir -ef $src_dir ]; then
 	echo "# Directory/link exists already: \$HTTP_ROOT/$dst_subdir"
 	return
     fi
@@ -117,14 +117,16 @@ function prepare_dir {
 	echo "# ! Another directory exists: \$HTTP_ROOT/$dst_subdir"
     fi
 
-    if [ -l $dst_dir ]; then
+    if [ -L $dst_dir ]; then
 	echo "# ! Another link exists: \$HTTP_ROOT/$dst_subdir"
     fi
 
-    echo "Linking $src_dir to \$HTTP_ROOT/$dst_dir"
-    ln -sfv $src_dir $dst_dir
-    if [ $? != 0 ]; then	
-	echo "# Linking failed!"
+    echo "Linking $src_dir to \$HTTP_ROOT/$dst_subdir"
+    if ! [ $src_dir -ef $dst_dir ]; then
+	ln -sfv $src_dir $dst_dir
+	if [ $? != 0 ]; then	
+	    echo "# Linking failed!"
+	fi
     fi
     
 }
