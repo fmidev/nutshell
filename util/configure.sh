@@ -161,8 +161,9 @@ ls -d $NUTSHELL_DIR
 
 ask_variable NUTSHELL_CONF_DIR "$PKG_ROOT" "Directory for primary configuration file:"
 check_dir_syntax NUTSHELL_CONF_DIR
-mkdir -v --parent $NUTSHELL_CONF_DIR
-
+if [ ! -d $NUTSHELL_CONF_DIR ]; then
+    mkdir -v --parent $NUTSHELL_CONF_DIR
+fi
 
 if [ ${NUTSHELL_DEFAULT} == 'python' ]; then
     echo "The following HTTP settings are optional for Python version"
