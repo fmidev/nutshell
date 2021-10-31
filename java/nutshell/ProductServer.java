@@ -434,7 +434,9 @@ public class ProductServer { //extends Cache {
 			this.log.note(String.format("        to: %s ", dst));
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
-			return Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			//Files.setPosixFilePermissions(dst, filePerms);
+			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			return dst;
 			//return src.renameTo(dst);
 		}
 
@@ -443,7 +445,7 @@ public class ProductServer { //extends Cache {
 			this.log.note(String.format("        to: %s ", dst));
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
-			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
 		public Path link(Path src, Path dst) throws IOException {
@@ -461,7 +463,8 @@ public class ProductServer { //extends Cache {
 			//return file.delete();
 		}
 
-		public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
+		//public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
+		public Path ensureDir(Path root, Path relativePath) throws IOException {
 
 			if (relativePath==null)
 				return root;
@@ -475,13 +478,13 @@ public class ProductServer { //extends Cache {
 			if (!Files.exists(path)) {
 				// Consider(ed?):
 				// Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
-				ensureDir(root, relativePath.getParent(), perms);
+				ensureDir(root, relativePath.getParent());
 				//this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
-				if (perms == null) {
+				if (dirPerms == null) {
 					Files.createDirectory(path);
 				}
 				else {
-					Files.createDirectory(path, PosixFilePermissions.asFileAttribute(perms));
+					Files.createDirectory(path, PosixFilePermissions.asFileAttribute(dirPerms));
 
 				}
 				Files.setAttribute(path, "unix:gid", fileGroupID);
@@ -491,12 +494,13 @@ public class ProductServer { //extends Cache {
 			return path;
 		}
 
-		public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
+		//public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
+		public Path ensureFile(Path root, Path relativePath) throws IOException {
 
 			Path path = root.resolve(relativePath);
 
 			if (!Files.exists(path)) {
-				ensureDir(root, relativePath.getParent(), dirPerms);
+				ensureDir(root, relativePath.getParent());
 				if (filePerms == null) {
 					Files.createFile(path);
 					//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
@@ -504,10 +508,8 @@ public class ProductServer { //extends Cache {
 				else {
 					Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
 				}
-				// Files.set(path, fileGroupID);
-				//Files.getAttribute()
-				//Files.setAttribute(path, "unix:gid", fileGroupID);
 			}
+			Files.setAttribute(path, "unix:gid", fileGroupID);
 
 			return path;
 
@@ -620,7 +622,7 @@ public class ProductServer { //extends Cache {
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
 					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
 					try {
-						ensureDir(cacheRoot, relativeOutputDir, dirPerms);
+						ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					}
 					catch (IOException e) {
 						this.log.warn(e.getMessage());
@@ -723,21 +725,11 @@ public class ProductServer { //extends Cache {
 				// Mark this task being processed (empty file)
 				// if (this.actions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
-					ensureDir(cacheRoot, relativeOutputDirTmp, dirPerms);
-					ensureDir(cacheRoot, relativeOutputDir,    dirPerms);
-					ensureFile(cacheRoot, relativeOutputPath, dirPerms, filePerms); // this could be enough?
+					ensureDir(cacheRoot, relativeOutputDirTmp); //, dirPerms);
+					ensureDir(cacheRoot, relativeOutputDir); //,    dirPerms);
+					ensureFile(cacheRoot, relativeOutputPath); //, dirPerms, filePerms); // this could be enough?
 					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				}
-				/*
-				catch (IndexedException e) {
-					// TODO: could still do linking/copying?
-					this.log.log(e);
-					if (e.index >= HttpServletResponse.SC_INTERNAL_SERVER_ERROR){
-						return;
-					}
-				}
-
-				 */
 				catch (IOException e) {
 					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
 					return;
@@ -772,9 +764,17 @@ public class ProductServer { //extends Cache {
 				/// MAIN
 				this.log.note("Running Generator: " + this.info.PRODUCT_ID);
 				if (this.log.logFile == null){
-					this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
+					try {
+						Path p = ensureFile(cacheRoot, relativeLogPath);
+						this.log.setLogFile(p);
+						this.log.warn(String.format("Directing log to file: ", this.log.logFile));
+					} catch (IOException e) {
+						this.log.warn(e.getMessage());
+						this.log.error(String.format("Could not open log file: ", this.log.logFile));
+						//e.printStackTrace();
+					}
+
 				}
-				this.log.warn(String.format("Directing log to file: ", this.log.logFile));
 
 				File fileTmp   = this.outputPathTmp.toFile();
 
@@ -799,17 +799,30 @@ public class ProductServer { //extends Cache {
 
 
 				if (fileTmp.length() > 0){
-					// this.info.getFilename()
+
 					this.log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
-					// this.move(fileTmp, fileFinal);
+
+					// Let's take this slowly...
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
-						Files.setPosixFilePermissions(this.outputPathTmp, filePerms);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
+						//this.log.warn(String.format("filePerms: %s", filePerms));
 						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
 						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
+
+
+					try {
+						Files.setPosixFilePermissions(this.outputPath, filePerms);
+					} catch (IOException e) {
+						this.log.warn(e.toString());
+						this.log.warn(String.format("filePerms: %s", filePerms));
+						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
+						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+					}
+
+
 					// this.result = this.outputPath;
 				}
 				else {
@@ -866,7 +879,7 @@ public class ProductServer { //extends Cache {
 
 						try {
 
-							Path dir = ensureDir(cacheRoot, productDir, dirPerms);
+							Path dir = ensureDir(cacheRoot,productDir); //, dirPerms);
 
 							if (this.actions.isSet(Actions.LATEST)){
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")));

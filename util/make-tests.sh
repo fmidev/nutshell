@@ -218,7 +218,7 @@ check 0  -f ./$FILE
 
 
 
-echo
+
 echo_title "Cmd and Http interplay test"
 
 set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
@@ -226,5 +226,11 @@ set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 run_nutshell --generate $FILE
 run_http     --delete   $FILE 
 check 0 ! -f $OUTDIR/$FILE
+
+
+echo_title "Meteorological..."
+set_file 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
+run_nutshell --generate $FILE
+check 0 -f $OUTDIR/$FILE
 
 
