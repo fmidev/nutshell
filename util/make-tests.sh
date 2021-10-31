@@ -3,18 +3,54 @@
 # Test script for nutshell 
 
 LOG='nutshell.log'
-# INFO='nutshell.inf'
+
 
 echo "Reading conf file"
 export CACHE_ROOT 
 source nutshell.cnf
 
-echo $CACHE_ROOT
+
+HTTP_GET='wget --proxy=off --spider'
+NUTSHELL_URL='http://localhost:8080/nutshell/NutShell'
+
+#SCRIPT_NAME=$0
+VT100UTILS=${0%/*}'/vt100utils.sh'
+echo $VT100UTILS
+source $VT100UTILS
+
+shopt -s expand_aliases
+alias echo_title='vt100echo blue-bg'  # ,underline'
+alias echo_comment='vt100echo blue -'
+alias echo_note='vt100echo cyan'
+alias echo_cmd='vt100echo bright'
+alias echo_debug='vt100echo dark'
+alias echo_error='vt100echo red [ERROR] '
+alias echo_warn='vt100echo yellow [WARNING] '
+alias echo_ok='vt100echo green [OK] '
+
+echo_note CACHE_ROOT=$CACHE_ROOT
+
+
+function set_file(){
+    FILE=$1
+    echo_note "FILE=$FILE" 
+    #echo_debug "$FILE"
+    parse $FILE
+}
 
 
 function run_nutshell(){
-    echo "# nutshell" $*
+    echo_cmd "nutshell" $*
     nutshell $* &> $LOG
+}
+
+function run_http(){
+    #echo_warn params...
+    local params=`nutshell $* --http_params 2> /dev/null`
+    #echo_warn ...end
+    local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
+    echo_cmd $cmd
+    eval $cmd &>> $LOG
 }
 
 function parse(){
@@ -24,6 +60,13 @@ function parse(){
     source nutshell.inf
     OUTDIR=$CACHE_ROOT/$YEAR/$MONTH/$DAY/${PRODUCT_ID//.//}
     OUTDIR_SHORT=$CACHE_ROOT/${PRODUCT_ID//.//}
+    if [ $OUTDIR -ef $OUTDIR_SHORT ]; then
+	OUTDIR=$OUTDIR_SHORT
+	echo_note OUTDIR=$OUTDIR
+    else
+	echo_note OUTDIR=$OUTDIR
+	echo_note OUTDIR_SHORT=$OUTDIR_SHORT
+    fi
     LATEST_FILE=${OUTFILE/$TIMESTAMP/LATEST}
 }
 
@@ -34,108 +77,154 @@ function check(){
     local REQUIRE_STATUS=${1:-0}
 
     if [ $STATUS == 0 ] && [ $REQUIRE_STATUS != 0 ] ; then
-	cat $LOG
-	echo
- 	echo "[ERROR] Wrong exit code: $STATUS"
+	vt100cmd yellow cat $LOG
+ 	echo_error "return value: $STATUS"
 	exit 1
     else
-	echo "[OK] Exit code: $STATUS"
+	echo_ok "return value: $STATUS"
     fi
 
     
     shift
     
     if [ $# != 0 ]; then
-	echo "# test" $*
 	test $*
 	if [ $? != 0 ]; then
-	    cat $LOG
+	    echo_warn "test" $*
+	    vt100cmd yellow cat $LOG
 	    echo
-	    echo '[ERROR] Test failed' 
-	    exit 1
+	    echo_error 'Test failed' 
+	    exit 2
 	fi
-	echo "[OK]"
+	echo_cmd "test" $*
+	echo_ok 'Passed'
     fi
 
 
     echo
 }
 
-FILE=201012161615_test.ppmforge_DIMENSION=2.5.png
+
 
 
 echo
-echo "Basic tests"
+echo_title "Basic tests (cmd line only)"
 
+
+echo_comment "Help command"
 run_nutshell --help 
 check 0 
 
+echo_comment "Unknown command"
 run_nutshell --foo
 check 1 
 
-run_nutshell foo.pdf
-check 1 
 
-run_nutshell $FILE 
-check 0 
+echo_title "Testing Cmd and Http interfaces"
 
-run_nutshell --exists $FILE 
-check 0 
+for cmd in run_nutshell run_http; do
 
-run_nutshell --delete $FILE 
-parse $FILE
-check 0 ! -f $OUTDIR/$FILE
+    set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-run_nutshell --exists $FILE 
-check 1 
+    echo_comment "Undefined action"
+    run_nutshell --actions FOO
+    check 1 
+    
+    echo_comment "Parsing error"
+    run_nutshell foo.pdf
+    check 1 
 
-run_nutshell --make $FILE 
-parse $FILE
-check 0 -f $OUTDIR/$FILE
+    echo_comment "Default action (MAKE)"
+    $cmd $FILE
+    check 0 -f $OUTDIR/$FILE
+    # check 0 
 
+    echo_comment "Does product file exist?"
+    $cmd --exists $FILE 
+    check 0 
+
+    echo_comment "Delete product file"
+    $cmd --delete $FILE 
+    check 0 ! -f $OUTDIR/$FILE
+
+    echo_comment "Now, product file should not exist"
+    $cmd --exists $FILE 
+    check 1 
+
+    echo_comment "Action: MAKE product (generate, if nonexistent)"
+    $cmd --make $FILE 
+    check 0 -f $OUTDIR/$FILE
+
+    echo_comment "Action: GENERATE (unconditionally)"
+    $cmd --make $FILE 
+    check 0 -f $OUTDIR/$FILE
+
+    echo_comment "Action: add soft links: latest file and file in non-timestamped dir "
+    run_nutshell --latest --shortcut $FILE
+    check 0 -f $OUTDIR/$FILE
+    check 0 -L $OUTDIR_SHORT/$FILE
+    check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
+
+    #echo
+    echo_comment "Try to parameters in wrong order (generated file has them in order)"
+    set_file demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+    run_nutshell --generate $FILE
+    check 0 ! -f $OUTDIR/$FILE
+
+    echo 
+    echo_title "Product error message tests"
+    set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+    parse $FILE
+    
+    echo_comment "Check that test product works..."
+    run_nutshell --generate $FILE
+    check 0  -f $OUTDIR/$FILE
+    
+    echo_comment "Image too large"
+    set_file demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
+    run_nutshell --generate $FILE
+    check 1
+    
+    echo_comment "Illegal (negative) arguments"
+    set_file demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
+    run_nutshell --generate $FILE
+    check 1
+    
+    echo_comment "Unsupported feature"
+    set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
+    run_nutshell --generate $FILE
+    check 1
+    
+    echo_comment "Unsupported file format"
+    set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
+    run_nutshell --generate $FILE
+    check 1
+    
+    
+done
+
+set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+echo_title "Local actions test: copy, link and move"
 run_nutshell --move . --make $FILE 
-parse $FILE
 check 0 ! -f $OUTDIR/$FILE
 check 0   -f ./$FILE
 
 run_nutshell --copy . --make $FILE 
-parse $FILE
 check 0  -f $OUTDIR/$FILE
 check 0  -f ./$FILE
 
 
-run_nutshell --latest --shortcut $FILE
-check 0 -f $OUTDIR/$FILE
-check 0 -L $OUTDIR_SHORT/$FILE
-check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 
 
 echo
-echo "Order test"
-FILE=demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+echo_title "Cmd and Http interplay test"
+
+set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
 run_nutshell --generate $FILE
-parse $FILE
+run_http     --delete   $FILE 
 check 0 ! -f $OUTDIR/$FILE
 
-echo 
-echo "Product error message tests"
-FILE=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-run_nutshell --generate $FILE
-parse $FILE
-check 0  -f $OUTDIR/$FILE
 
-FILE=demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
-run_nutshell --generate $FILE
-check 1
-
-FILE=demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
-run_nutshell --generate $FILE
-check 1
-
-FILE=demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
-run_nutshell --generate $FILE
-check 1
-
-FILE=demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
-run_nutshell --generate $FILE
-check 1

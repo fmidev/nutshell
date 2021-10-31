@@ -197,6 +197,7 @@ prepare_dir $STORAGE_ROOT storage
 
 ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache sub-directories"
 ask_variable FILE_PERMS "rwxrwxr--" "Permissions for cached files"
+#ask_variable FILE_GROUP "132"    "Group id shared with http and command line"
 
 ask_variable PRODUCT_ROOT "$PKG_ROOT/products" "Root of product generator directories"
 check_dir_syntax PRODUCT_ROOT

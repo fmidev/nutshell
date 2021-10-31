@@ -6,8 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.*;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,12 +61,11 @@ public class ProductServer { //extends Cache {
 	public final Map<String,Object> setup = new HashMap<>();
 
 	// TODO: add to config, set in constructor
-	//public final Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
-	public Set<PosixFilePermission> dirPerms = PosixFilePermissions.fromString("rwxrwxr-x");
-	//public FileAttribute<Set<PosixFilePermission>> dirPermAttrs = PosixFilePermissions.asFileAttribute(dirPerms);
-
+	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
 	public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
-	//public FileAttribute<Set<PosixFilePermission>> filePermAttrs = PosixFilePermissions.asFileAttribute(filePerms);
+	public int fileGroupID = 100;
+	//public GroupPrincipal fileGroupID;
+			//Files.readAttributes(originalFile.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
 
 	/// System side settings.
 	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
@@ -97,7 +95,7 @@ public class ProductServer { //extends Cache {
 	/** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
 	 *
 	 */
-	public String cmdPath = "";
+	//public String cmdPath = "";
 
 	protected void readConfig(){
 		readConfig(confFile);
@@ -108,8 +106,6 @@ public class ProductServer { //extends Cache {
 	}
 
 	protected void readConfig(Path path){
-
-		//Map<String, Object> setup = new HashMap<>();
 
 		try {
 			if (path != null) {
@@ -134,6 +130,16 @@ public class ProductServer { //extends Cache {
 		this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rwxrwxr--").toString());
 		setup.put("dirPerms", dirPerms);
 		setup.put("filePerms", filePerms);
+
+		// this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
+		try {
+			// this.fileGroupID = Files.readAttributes(cacheRoot, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
+			fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
+		} catch (IOException e) {
+			log.error(String.format("Could not read group of cache dir: %s", cacheRoot));
+		}
+		setup.put("fileGroupID", fileGroupID);
+
 		// this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
@@ -143,7 +149,6 @@ public class ProductServer { //extends Cache {
 	public String toString() {
 		return MapUtils.getMap(this).toString();
 	}
-
 
 	Path getProductDir(String productID){
 		return Paths.get(productID.replace(".", File.separator));
@@ -170,13 +175,11 @@ public class ProductServer { //extends Cache {
 		/** Link file to short directory
 		 *
 		 */
-		static
-		public final int SHORTCUT = 4 | FILE; // "POSTOP=LINK_SHORTCUT"
+		int SHORTCUT = 4 | FILE; // "POSTOP=LINK_SHORTCUT"
 
 		/** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
 		 */
-		static
-		public final int LATEST = 8 | FILE;  // "POSTOP=LINK_LATEST"
+		int LATEST = 8 | FILE;  // "POSTOP=LINK_LATEST"
 
 
 	}
@@ -194,13 +197,13 @@ public class ProductServer { //extends Cache {
 		 *
 		 * @see Nutlet#doGet
 		 */
-		public static final int REDIRECT = 16 | ResultType.FILE;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
+		int REDIRECT = 16 | ResultType.FILE;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
 
 		/** Output in a stream (Currently, HTTP only. Future option: standard output.)
 		 *
 		 * @see Nutlet#doGet
 		 */
-		public static final int STREAM = 32;  // "OUTPUT=STREAM"
+		int STREAM = 32;  // "OUTPUT=STREAM"
 
 	}
 
@@ -238,14 +241,12 @@ public class ProductServer { //extends Cache {
 		/// Check if product is in cache memory or disk, but do not generate it if missing.
 		// public static final int QUERY = MEMORY|FILE;
 
-
 		/** Go through product request handler checking existence of product generator, memory cache and output directory.
 		 */
 		int TEST = 2048; // | INPUTLIST; // "OUTPUT=INFO"
 
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 4096;
-
 
 	}
 
@@ -268,19 +269,23 @@ public class ProductServer { //extends Cache {
 		 *
 		 *  Several requests can be added.
 		 *
-		 * @param filename
+		 * @param filename - target file
 		 */
 		public void addCopy(String filename){
 			copies.add(Paths.get(filename));
 		}
 
+		/** Add specific request to copy the result.
+		 *
+		 * @param copies - target files
+		 */
 		public void addCopies(List<Path> copies){
 			if (copies != null)
 				this.copies.addAll(copies);
 		}
 
 
-		/** Add specific request to copy the result.
+		/** Add specific request to list the result.
 		 *
 		 *  Several requests can be added.
 		 *
@@ -290,11 +295,23 @@ public class ProductServer { //extends Cache {
 			links.add(Paths.get(filename));
 		}
 
+		/** Add specific request to link the result.
+		 *
+		 *  Several requests can be added.
+		 *
+		 * @param links - filenames pointing to the original result
+		 */
 		public void addLinks(List<Path> links){
 			if (links != null)
 				this.links.addAll(links);
 		}
 
+		/** Add specific request to link the result.
+		 *
+		 *  Several requests can be added.
+		 *
+		 * @param path - target
+		 */
 		public void addMove(String path){
 			if (path != null)
 				move = Paths.get(path);
@@ -316,7 +333,7 @@ public class ProductServer { //extends Cache {
 	 *   Task does not know about the generator. Notice GENERATE and getParamEnv.
 	 *
 	 */
-	public class Task extends Thread { //implements Runnable {
+	public class Task extends Thread {
 		
 		final HttpLog log;
 		final ProductInfo info;
@@ -341,7 +358,6 @@ public class ProductServer { //extends Cache {
 		public Path storagePath;
 
 		public final Map<String,String> directives = new HashMap<>();
-
 		public final Map<String,String> inputs = new HashMap<>();
 		public final Map<String,Object> retrievedInputs = new HashMap<>();
 
@@ -443,6 +459,58 @@ public class ProductServer { //extends Cache {
 			this.log.note(String.format("Deleting: %s ", dst));
 			return Files.deleteIfExists(dst);
 			//return file.delete();
+		}
+
+		public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
+
+			if (relativePath==null)
+				return root;
+
+			if (relativePath.getNameCount() == 0)
+				return root;
+
+			Path path = root.resolve(relativePath);
+			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
+
+			if (!Files.exists(path)) {
+				// Consider(ed?):
+				// Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
+				ensureDir(root, relativePath.getParent(), perms);
+				//this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
+				if (perms == null) {
+					Files.createDirectory(path);
+				}
+				else {
+					Files.createDirectory(path, PosixFilePermissions.asFileAttribute(perms));
+
+				}
+				Files.setAttribute(path, "unix:gid", fileGroupID);
+				//Files.setOwner(path, fileGroupID);
+			}
+
+			return path;
+		}
+
+		public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
+
+			Path path = root.resolve(relativePath);
+
+			if (!Files.exists(path)) {
+				ensureDir(root, relativePath.getParent(), dirPerms);
+				if (filePerms == null) {
+					Files.createFile(path);
+					//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
+				}
+				else {
+					Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
+				}
+				// Files.set(path, fileGroupID);
+				//Files.getAttribute()
+				//Files.setAttribute(path, "unix:gid", fileGroupID);
+			}
+
+			return path;
+
 		}
 
 
@@ -552,7 +620,7 @@ public class ProductServer { //extends Cache {
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
 					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
 					try {
-						FileUtils.ensureDir(cacheRoot, relativeOutputDir, dirPerms);
+						ensureDir(cacheRoot, relativeOutputDir, dirPerms);
 					}
 					catch (IOException e) {
 						this.log.warn(e.getMessage());
@@ -655,11 +723,12 @@ public class ProductServer { //extends Cache {
 				// Mark this task being processed (empty file)
 				// if (this.actions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
-					FileUtils.ensureDir(cacheRoot, relativeOutputDirTmp, dirPerms);
-					FileUtils.ensureDir(cacheRoot, relativeOutputDir,    dirPerms);
-					FileUtils.ensureFile(cacheRoot, relativeOutputPath, filePerms, dirPerms); // this could be enough?
+					ensureDir(cacheRoot, relativeOutputDirTmp, dirPerms);
+					ensureDir(cacheRoot, relativeOutputDir,    dirPerms);
+					ensureFile(cacheRoot, relativeOutputPath, dirPerms, filePerms); // this could be enough?
 					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				}
+				/*
 				catch (IndexedException e) {
 					// TODO: could still do linking/copying?
 					this.log.log(e);
@@ -667,7 +736,9 @@ public class ProductServer { //extends Cache {
 						return;
 					}
 				}
-				catch (Exception e) {
+
+				 */
+				catch (IOException e) {
 					this.log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
 					return;
 				}
@@ -733,6 +804,7 @@ public class ProductServer { //extends Cache {
 					// this.move(fileTmp, fileFinal);
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
+						Files.setPosixFilePermissions(this.outputPathTmp, filePerms);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
 						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
@@ -794,7 +866,7 @@ public class ProductServer { //extends Cache {
 
 						try {
 
-							Path dir = FileUtils.ensureDir(cacheRoot, productDir, dirPerms);
+							Path dir = ensureDir(cacheRoot, productDir, dirPerms);
 
 							if (this.actions.isSet(Actions.LATEST)){
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")));
@@ -1276,18 +1348,31 @@ public class ProductServer { //extends Cache {
 					if (opt.equals("product")) {
 						products.put("product", args[++i]);
 					}
-					else if (opt.equals("parse")) {
-						//ProductInfo product = new ProductInfo(args[++i]);
+					else if (opt.equals("parse")) { // Debugging
 						Task product = server.new Task(args[++i], 0, log);
-						//products.put("product", args[++i]);
-						//System.out.println(product);
 						Map<String,Object> map = product.getParamEnv();
 						String[] array = MapUtils.toArray(map);
-						//System.out.println(MapUtils.toArray(map));
 						for (String s : array) {
 							System.out.println(s);
 						}
 						return;
+					}
+					else if (opt.equals("http_params")) { // HTTP Get Params
+						String[] p = products.values().toArray(new String[0]);
+						if (p.length == 0){
+							System.err.println("Product not defined yet?");
+							System.exit(1);
+						}
+						else {
+							if (p.length > 1){
+								System.err.println("Several products defined, using last");
+							}
+							if (actions.isEmpty())
+								actions.add(Actions.MAKE);
+							Task product = server.new Task(p[p.length-1], 0, log);
+							System.out.println(String.format("actions=%s&product=%s", actions, product));
+							System.exit(0);
+						}
 					}
 					else if (opt.equals("copy")) {
 						actions.addCopy(args[++i]);
