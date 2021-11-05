@@ -400,6 +400,11 @@ public class ProductServer { //extends Cache {
 			}
 			else {
 				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
+				try {
+					this.ensureFile(cacheRoot, this.relativeLogPath);
+				} catch (IOException e) {
+					System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
+				}
 				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
 			}
 			//this.log.warn("Where am I?");
@@ -1112,10 +1117,14 @@ public class ProductServer { //extends Cache {
 
 				//if (log)
 				task.log.verbosity = log.verbosity;
-				tasks.put(key, task);
 				log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
-				if (task.log.logFile != null)
+				if (task.log.logFile != null){
+
 					log.info(String.format("See separate log: %s",  task.log.logFile));
+
+				}
+
+				tasks.put(key, task);
 				task.start();
 			}
 			catch (ParseException e) {
