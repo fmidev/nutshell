@@ -2,8 +2,8 @@
 
 # Test script for nutshell 
 
-LOG='nutshell.log'
-
+LOG='tests/nutshell.log'
+mkdir --parents tests
 
 echo "Reading conf file"
 export CACHE_ROOT 
@@ -30,6 +30,7 @@ alias echo_ok='vt100echo green [OK] '
 
 echo_note CACHE_ROOT=$CACHE_ROOT
 
+counter=0
 
 function set_file(){
     FILE=$1
@@ -40,17 +41,28 @@ function set_file(){
 
 
 function run_nutshell(){
+
+    counter=$(( counter + 1 ))
+    LOG=`printf 'tests/nutshell-%02d-cmd.log' $counter `
+
     echo_cmd "nutshell" $*
     nutshell $* &> $LOG
+    #fgrep 'Final status:' $LOG > $LOG.$counter
+    
 }
 
 function run_http(){
+    
+    counter=$(( counter + 1 ))
+    LOG=`printf 'tests/nutshell-%02d-http.log' $counter `
+
     #echo_warn params...
     local params=`nutshell $* --http_params 2> /dev/null`
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd
     eval $cmd &>> $LOG
+    # cp $LOG $LOG.$counter
 }
 
 function parse(){
@@ -124,6 +136,8 @@ echo_title "Testing Cmd and Http interfaces"
 
 for cmd in run_nutshell run_http; do
 
+    echo $counter
+    
     set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
     echo_comment "Undefined action"
