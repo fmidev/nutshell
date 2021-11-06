@@ -144,7 +144,8 @@ for cmd in run_nutshell run_http; do
 
     echo $counter
     
-    set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
+    set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+    # set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
     echo_comment "Undefined action"
     run_nutshell --actions FOO
