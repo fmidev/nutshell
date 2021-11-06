@@ -679,6 +679,9 @@ public class ProductServer { //extends Cache {
 				catch (IndexedException e){
 					this.log.log(HttpServletResponse.SC_CONFLICT, "Generator does not exist");
 					this.log.log(e);
+					this.actions.remove(Actions.GENERATE);
+					this.actions.remove(Actions.INPUTLIST);
+					this.actions.remove(Actions.TEST);
 				}
 
 			}
@@ -711,9 +714,10 @@ public class ProductServer { //extends Cache {
 					this.inputs.putAll(generator.getInputList(this));
 					this.log.debug(this.inputs.toString());
 					//System.err.println("## " + this.inputs);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					log.log(HttpServletResponse.SC_CONFLICT, "Input list retrieval failed");
-					this.log.error(e.getMessage());
+					log.log(e);
 
 					this.log.warn("Removing GENERATE from actions");
 					this.actions.remove(Actions.GENERATE);
