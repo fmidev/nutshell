@@ -35,6 +35,9 @@ public class ExternalGenerator implements ProductServer.Generator {
 		this.generatorScript = this.dir.resolve(scriptName).toFile();
 		if (!this.generatorScript.exists())
 			throw new IndexedException(HttpServletResponse.SC_NOT_IMPLEMENTED, String.format("Script %s not found", this.generatorScript));
+		if (!this.generatorScript.canRead())
+			throw new IndexedException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("Script %s unreadable", this.generatorScript));
+
 		this.inputScript     = this.dir.resolve(inputDeclarationScript).toFile();
 	}
 

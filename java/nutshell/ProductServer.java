@@ -664,14 +664,21 @@ public class ProductServer { //extends Cache {
 			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST | Actions.TEST)){
 
 				this.log.log(HttpServletResponse.SC_OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
-				generator = getGenerator(this.info.PRODUCT_ID);
-				this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+				try {
+					generator = getGenerator(this.info.PRODUCT_ID);
+					this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
 
-				if (this.actions.involves(Actions.GENERATE )){
-					if (generator instanceof ExternalGenerator)
-						this.actions.add(ResultType.FILE); // PREPARE dir & empty file
-					else
-						this.actions.add(ResultType.MEMORY);
+					if (this.actions.involves(Actions.GENERATE )){
+						if (generator instanceof ExternalGenerator)
+							this.actions.add(ResultType.FILE); // PREPARE dir & empty file
+						else
+							this.actions.add(ResultType.MEMORY);
+					}
+
+				}
+				catch (IndexedException e){
+					this.log.log(HttpServletResponse.SC_CONFLICT, "Generator does not exist");
+					this.log.log(e);
 				}
 
 			}
