@@ -90,7 +90,7 @@ if [ -f $WEB_XML ]; then
     popd &> /dev/null
     mv -v $WEB_XML.new $WEB_XML
 fi
-#
+
 echo
 
 echo "# Updating HTTP structure $HTTP_ROOT"
