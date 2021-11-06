@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import static java.nio.file.Files.*;
+
 //import javax.servlet.http.HttpServletResponse;
 
 
@@ -134,7 +136,7 @@ public class ProductServer { //extends Cache {
 		// this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
 		try {
 			// this.fileGroupID = Files.readAttributes(cacheRoot, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
-			fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
+			fileGroupID = Integer.parseInt(getAttribute(cacheRoot, "unix:gid").toString());
 		} catch (IOException e) {
 			log.error(String.format("Could not read group of cache dir: %s", cacheRoot));
 		}
@@ -458,13 +460,13 @@ public class ProductServer { //extends Cache {
 			this.log.note(String.format("        to: %s ", dst));
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
-			return Files.createSymbolicLink(dst, src);
+			return createSymbolicLink(dst, src);
 			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
 		public boolean delete(Path dst) throws IOException {
 			this.log.note(String.format("Deleting: %s ", dst));
-			return Files.deleteIfExists(dst);
+			return deleteIfExists(dst);
 			//return file.delete();
 		}
 
@@ -480,19 +482,19 @@ public class ProductServer { //extends Cache {
 			Path path = root.resolve(relativePath);
 			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
 
-			if (!Files.exists(path)) {
+			if (!exists(path)) {
 				// Consider(ed?):
 				// Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
 				ensureDir(root, relativePath.getParent());
 				//this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
 				if (dirPerms == null) {
-					Files.createDirectory(path);
+					createDirectory(path);
 				}
 				else {
-					Files.createDirectory(path, PosixFilePermissions.asFileAttribute(dirPerms));
+					createDirectory(path, PosixFilePermissions.asFileAttribute(dirPerms));
 
 				}
-				Files.setAttribute(path, "unix:gid", fileGroupID);
+				setAttribute(path, "unix:gid", fileGroupID);
 				//Files.setOwner(path, fileGroupID);
 			}
 
@@ -504,17 +506,17 @@ public class ProductServer { //extends Cache {
 
 			Path path = root.resolve(relativePath);
 
-			if (!Files.exists(path)) {
+			if (!exists(path)) {
 				ensureDir(root, relativePath.getParent());
 				if (filePerms == null) {
-					Files.createFile(path);
+					createFile(path);
 					//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
 				}
 				else {
-					Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
+					createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
 				}
 			}
-			Files.setAttribute(path, "unix:gid", fileGroupID);
+			setAttribute(path, "unix:gid", fileGroupID);
 
 			return path;
 
@@ -830,7 +832,7 @@ public class ProductServer { //extends Cache {
 
 
 					try {
-						Files.setPosixFilePermissions(this.outputPath, filePerms);
+						setPosixFilePermissions(this.outputPath, filePerms);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
 						this.log.warn(String.format("filePerms: %s", filePerms));
@@ -1232,7 +1234,7 @@ public class ProductServer { //extends Cache {
 
 			try {
 				log.note("Deleting file");
-				Files.delete(file.toPath());
+				delete(file.toPath());
 				//this.delete(this.outputPath);
 			}
 			catch (IOException e) {
@@ -1251,6 +1253,31 @@ public class ProductServer { //extends Cache {
 
 	/// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
 	public int timeOut = 30;
+
+	public void clearCache(boolean check) {
+
+		if (!this.cacheRoot.endsWith("cache")){
+			log.error("Cache root does not end with 'cache' : " + this.cacheRoot);
+			return;
+		}
+		//Files.walk(this.cacheRoot).filter(Files::isRegularFile).forEach(System.out::println);
+			//Files.walk(this.cacheRoot).filter(Files::isRegularFile).forEach(Files::delete);
+		try {
+			Files.walk(this.cacheRoot).filter(Files::isRegularFile).forEach(path -> {
+						try {
+							log.debug("Deleting: " + path);
+							//Files.delete(path);
+						} catch (Exception e) {
+							log.warn("Failed in deleting: " + path);
+						}
+					}
+				);
+		} catch (IOException e) {
+			log.error("Failed in deleting: " + this.cacheRoot);
+		}
+		//Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
+
+	}
 
 	public static void help(){
 
@@ -1368,6 +1395,12 @@ public class ProductServer { //extends Cache {
 						}
 						confFile = args[++i];
 						server.readConfig(confFile);
+						continue; // Note
+					}
+
+					if (opt.equals("clearCache")) {
+						log.warn("Clearing cache");
+						server.clearCache(false);
 						continue; // Note
 					}
 
