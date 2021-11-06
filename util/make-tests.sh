@@ -9,9 +9,15 @@ echo "Reading conf file"
 export CACHE_ROOT 
 source nutshell.cnf
 
+# Todo: in conf file URL_BASE?
+
 
 HTTP_GET='wget --proxy=off --spider'
-NUTSHELL_URL='http://localhost:8080/nutshell/NutShell'
+NUTSHELL_SERVER=${NUTSHELL_SERVER='http://localhost:8080'}
+echo "NUTSHELL_SERVER=${NUTSHELL_SERVER}"
+
+# NUTSHELL_URL='http://localhost:8080/nutshell/NutShell'
+NUTSHELL_URL="${NUTSHELL_SERVER}${HTTP_PREFIX}/NutShell"
 
 #SCRIPT_NAME=$0
 VT100UTILS=${0%/*}'/vt100utils.sh'
