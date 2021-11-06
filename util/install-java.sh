@@ -79,7 +79,8 @@ export DATE=`date +'%Y-%m-%d %H:%M'`
 WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
 cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 if [ -f $WEB_XML ]; then
-    cp -va $WEB_XML{,.old}
+    #cp -va $WEB_XML{,.old}
+    cp -v $WEB_XML{,.old}
     pushd $HTTP_ROOT/WEB-INF/ &> /dev/null
     diff web.xml.old web.xml.new
     if [ $? != 0 ]; then
