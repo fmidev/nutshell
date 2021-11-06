@@ -79,7 +79,6 @@ export DATE=`date +'%Y-%m-%d %H:%M'`
 WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
 cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 if [ -f $WEB_XML ]; then
-
     #cp -va $WEB_XML{,.old}
     cp -v $WEB_XML{,.old}
     pushd $HTTP_ROOT/WEB-INF/ &> /dev/null
@@ -90,9 +89,8 @@ if [ -f $WEB_XML ]; then
     #mv -v web.xml.new web.xml
     popd &> /dev/null
     mv -v $WEB_XML.new $WEB_XML
-
 fi
-#
+
 echo
 
 echo "# Updating HTTP structure $HTTP_ROOT"
