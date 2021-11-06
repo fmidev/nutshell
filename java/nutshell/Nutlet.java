@@ -122,6 +122,12 @@ public class Nutlet extends HttpServlet {
 								"NutShell server is running since " + setup.get("startTime"), request, response);
 						return;
 					}
+					else if (queryString.equals("clearCache")){
+						productServer.clearCache(false);
+						sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
+								"Statistics... ", request, response);
+						return;
+					}
 					else {
 						sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
 								String.format("Query: %s", queryString), request, response);
@@ -133,6 +139,7 @@ public class Nutlet extends HttpServlet {
 			if ((pageName == null) || pageName.isEmpty()){
 				pageName = "menu.html";
 			}
+
 
 
 			SimpleHtml html = includeHtml(pageName); // fail?

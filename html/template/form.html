@@ -72,12 +72,16 @@
             <label>
               <input type="text" name="directives" value="" size="40"/>
             </label>
-            <!-- label><input type="checkbox" name="directives" value="STATUS"/>Status</label -->
             <label><input type="checkbox" name="directives" value="DEBUG=true"/>Debug</label>
           </td>
         </tr>
+        <tr>
+          <th class="LEAD" colspan="1">Clear cache</th>
+          <td>
+            <label><button type="button" onclick="if (confirm('Clear cache?')) window.open('NutShell?clearCache','_cache')"/>Clear cache</label>
+          </td>
+        </tr>
       </table>
-      <!--a href="/stop">STOP</a-->
     </form>
   </body>
 </html>

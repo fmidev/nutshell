@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.*;
 
 //import javax.servlet.http.HttpServletResponse;
@@ -1254,30 +1255,75 @@ public class ProductServer { //extends Cache {
 	/// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
 	public int timeOut = 30;
 
-	public void clearCache(boolean check) {
+	public class DeleteFiles extends SimpleFileVisitor<Path> {
+
+		// Print information about
+		// each type of file.
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
+			if (attr.isRegularFile() || attr.isSymbolicLink()) {
+				try {
+					Files.delete(file);
+				} catch (IOException e) {
+					log.warn(e.toString());
+				}
+			}
+			return CONTINUE;
+		}
+
+		// Print each directory visited.
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+			try {
+				Files.delete(dir);
+				log.debug(String.format("deleted dir: %s", dir));
+			} catch (IOException e) {
+				log.warn(e.toString());
+			}
+			return CONTINUE;
+		}
+
+		// If there is some error accessing
+		@Override
+		public FileVisitResult visitFileFailed(Path file, IOException e) {
+			log.warn(e.getMessage());
+			return CONTINUE;
+		}
+	}
+
+	public void clearCache(boolean confirm) throws IOException {
 
 		if (!this.cacheRoot.endsWith("cache")){
 			log.error("Cache root does not end with 'cache' : " + this.cacheRoot);
 			return;
 		}
-		//Files.walk(this.cacheRoot).filter(Files::isRegularFile).forEach(System.out::println);
-			//Files.walk(this.cacheRoot).filter(Files::isRegularFile).forEach(Files::delete);
-		try {
-			Files.walk(this.cacheRoot).filter(Files::isRegularFile).forEach(path -> {
-						try {
-							log.debug("Deleting: " + path);
-							//Files.delete(path);
-						} catch (Exception e) {
-							log.warn("Failed in deleting: " + path);
-						}
-					}
-				);
-		} catch (IOException e) {
-			log.error("Failed in deleting: " + this.cacheRoot);
+
+		Path p = this.cacheRoot.toRealPath();
+		if (!p.endsWith("cache")){
+			log.error("Cache root does not end with 'cache' : " + p);
+			return;
 		}
+
+		if (confirm){
+			System.err.println(String.format("Delete files in %s ? ", p ));
+			Scanner kbd = new Scanner (System.in);
+			String line = kbd.nextLine();
+			if (line.toLowerCase().charAt(0) != 'y'){
+				System.err.println("Cancelled");
+				return;
+			}
+		}
+
+		log.note("Clearing cache: " + p);
+		Files.walkFileTree(p, new DeleteFiles());
+
+		log.note("Clearing cache completed");
 		//Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
 
 	}
+
+
+
 
 	public static void help(){
 
@@ -1314,6 +1360,9 @@ public class ProductServer { //extends Cache {
 
 		final ProductServer server = new ProductServer();
 		server.log.printStream = System.err;  // System.out  Note: testing STREAM action needs clean stdout
+		//Path serverLogPath = server.cacheRoot.resolve("ProductServer.log");
+		//server.ensureFile(serverLogPath);
+		//server.log.setLogFile(serverLogPath);
 		server.log.setVerbosity(Log.DEBUG);
 		server.timeOut = 20;
 
@@ -1400,7 +1449,7 @@ public class ProductServer { //extends Cache {
 
 					if (opt.equals("clearCache")) {
 						log.warn("Clearing cache");
-						server.clearCache(false);
+						server.clearCache(true);
 						continue; // Note
 					}
 
