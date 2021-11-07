@@ -364,22 +364,21 @@ public class ProductServer { //extends Cache {
 		//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
 
 		if (!exists(path)) {
-			// Consider(ed?):
 			//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(dirPerms));
 			ensureDir(root, relativePath.getParent());
-			//this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
-				/*
-				if (dirPerms == null) {
-					createDirectory(path);
-				}
-				else {
-					createDirectory(path, PosixFilePermissions.asFileAttribute(dirPerms));
-				}
-				 */
+			log.debug("creating dir: " + path);
 			Files.createDirectory(path); //, PosixFilePermissions.asFileAttribute(dirPerms));
 			Files.setPosixFilePermissions(path, dirPerms);
-			setAttribute(path, "unix:gid", fileGroupID);
+
 			//Files.setOwner(path, fileGroupID);
+			try {
+				Files.setAttribute(path, "unix:gid", fileGroupID);
+			}
+			catch (IOException e){
+				log.warn(e.toString());
+				log.warn(String.format("could not se unix GID: ",  fileGroupID) );
+			}
+
 		}
 
 		return path;
@@ -392,21 +391,19 @@ public class ProductServer { //extends Cache {
 
 		if (!exists(path)) {
 			ensureDir(root, relativePath.getParent());
-				/*
-				if (filePerms == null) {
-					createFile(path);
-					//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
-				}
-				else {
-					createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
-				}
-				 */
+			log.debug("creating file: " + path);
 			Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
 			//Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
 			//Files.setPosixFilePermissions(path, filePerms);
 		}
 
-		setAttribute(path, "unix:gid", fileGroupID);
+		try {
+			Files.setAttribute(path, "unix:gid", fileGroupID);
+		}
+		catch (IOException e){
+			log.warn(e.toString());
+			log.warn(String.format("could not se unix GID: ",  fileGroupID) );
+		}
 
 		return path;
 
