@@ -123,6 +123,10 @@ class ProductInfo extends ProductParameters {
 		return getFilename();
 	}
 
+	boolean isDynamic() {
+		return (TIMESTAMP!=null) && !TIMESTAMP.isEmpty();
+	}
+
 	public String getFilename() {
 		return getFilename(TIMESTAMP);
 	}

@@ -246,7 +246,7 @@ public class ProductServer { //extends Cache {
 
 		/** Go through product request handler checking existence of product generator, memory cache and output directory.
 		 */
-		int TEST = 2048; // | INPUTLIST; // "OUTPUT=INFO"
+		int DEBUG = 2048; // | INPUTLIST; // "OUTPUT=INFO"
 
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 4096;
@@ -456,11 +456,33 @@ public class ProductServer { //extends Cache {
 			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
-		public Path link(Path src, Path dst) throws IOException {
+		public Path link(Path src, Path dst, boolean force) throws IOException {
 			this.log.note(String.format("Link: from: %s ", src));
 			this.log.note(String.format("        to: %s ", dst));
+
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
+
+			if (Files.exists(dst)){
+
+				if (Files.isSymbolicLink(dst)){
+					this.log.note(String.format("Link exists: %s ", dst));
+				}
+				else {
+					this.log.note(String.format("File (not Link) exists: %s ", dst));
+				}
+
+				if (Files.isSameFile(src, dst)){
+					this.log.note("File and link are equal");
+					if (!force){
+						return dst;
+					}
+				}
+
+				// Destination differs, or explicit deletion is requested
+				Files.delete(dst);
+			}
+
 			return createSymbolicLink(dst, src);
 			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
@@ -629,6 +651,7 @@ public class ProductServer { //extends Cache {
 
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
 					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
+
 					try {
 						ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					}
@@ -637,8 +660,9 @@ public class ProductServer { //extends Cache {
 						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in creating dir (with permissions): %s", this.outputDir));
 						//e.printStackTrace();
 					}
+
 					try {
-						this.link(this.storagePath, this.outputPath);
+						this.link(this.storagePath, this.outputPath, false);
 					}
 					catch (IOException e) {
 						this.log.error(e.getMessage());
@@ -664,7 +688,7 @@ public class ProductServer { //extends Cache {
 
 
 			// Retrieve Geneator, if needed
-			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST | Actions.TEST)){
+			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST | Actions.DEBUG)){
 
 				this.log.log(HttpServletResponse.SC_OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
 				try {
@@ -684,7 +708,7 @@ public class ProductServer { //extends Cache {
 					this.log.log(e);
 					this.actions.remove(Actions.GENERATE);
 					this.actions.remove(Actions.INPUTLIST);
-					this.actions.remove(Actions.TEST);
+					this.actions.remove(Actions.DEBUG);
 				}
 
 			}
@@ -894,26 +918,34 @@ public class ProductServer { //extends Cache {
 					this.result = this.outputPath;
 					this.log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
 
-					if (this.actions.involves(Actions.LATEST|Actions.SHORTCUT)){
-
-						try {
-
-							Path dir = ensureDir(cacheRoot,productDir); //, dirPerms);
-
-							if (this.actions.isSet(Actions.LATEST)){
-								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")));
+					// "Post processing"
+					if (this.actions.isSet(Actions.SHORTCUT)){
+						if (this.info.isDynamic()) {
+							try {
+								Path dir = ensureDir(cacheRoot,productDir); //, dirPerms);
+								this.link(this.outputPath, dir, true);
+							} catch (IOException e) {
+								log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 							}
-
-							if (this.actions.isSet(Actions.SHORTCUT)){
-								this.link(this.outputPath, dir);
-							}
-
 						}
-						catch (IOException e) {
-							log.log(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
-						}
-
+						else
+							log.debug("Static product (no TIMESTAMP), skipped shortcut");
 					}
+
+					if (this.actions.isSet(Actions.LATEST)){
+						if (this.info.isDynamic()) {
+							try {
+								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
+								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")), true);
+							} catch (IOException e) {
+								log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+							}
+						}
+						else
+							log.debug("Static product (no TIMESTAMP), skipped shortcut");
+					}
+
+
 
 
 					for (Path path: this.actions.copies) {
@@ -928,7 +960,7 @@ public class ProductServer { //extends Cache {
 
 					for (Path path: this.actions.links) {
 						try {
-							this.link(this.outputPath, path); // Paths.get(path)
+							this.link(this.outputPath, path, false); // Paths.get(path)
 						} catch (IOException e) {
 							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Linking failed: %s", path));
 							this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
@@ -1408,27 +1440,8 @@ public class ProductServer { //extends Cache {
 						} catch (NumberFormatException e) {
 							try {
 								log.setVerbosity(arg);
-								//Field field = Log.class.getField(arg);
-								//log.verbosity = field.getInt(null);
 							} catch (NoSuchFieldException e2) {
-								//log.note("Use following keys or values (0...10)");
 								log.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
-								/*
-								for (Field field : Log.class.getFields()) {
-									String name = field.getName();
-									if (name.equals(name.toUpperCase())) {
-										//Integer value = field.getInt(null);
-										//if (value != null)
-										//	log.note(name + "=" + field.getInt(null));
-										try {
-											log.note(name + "=" + field.get(null));
-										}
-										catch (Exception e1){ // VT100 boolean
-										}
-									}
-								}
-
-								 */
 								log.error("No such verbosity level: " + arg);
 								return;
 							}

@@ -227,6 +227,11 @@ public class Nutlet extends HttpServlet {
 			//Task task = productServer.new Task(filename, action.value,  log);
 			Task task = productServer.new Task(filename, actions.value,null);
 
+			if (task.actions.isSet(Actions.LATEST)){
+				task.log.note("Action 'LATEST' not allowed in HTTP interface, discarding it");
+				task.actions.remove(Actions.LATEST);
+			}
+
 			//String[] directives = request.getParameterValues("directives");
 			task.setDirectives(request.getParameterMap());
 			//task.log.setVerbosity(log.verbosity);
@@ -244,7 +249,6 @@ public class Nutlet extends HttpServlet {
 				task.log.ok("Executing...");
 				task.execute();
 				//task.log.ok("-------- see separate log <---");
-
 
 				if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
 					//task.log.log();
@@ -278,7 +282,7 @@ public class Nutlet extends HttpServlet {
 				//}
 				else {
 
-					if (!task.actions.isSet(ProductServer.Actions.TEST)) {
+					if (!task.actions.isSet(ProductServer.Actions.DEBUG)) {
 						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 								os.toString("UTF8"), request, response);
 						return;
@@ -291,8 +295,8 @@ public class Nutlet extends HttpServlet {
 
 				response.setStatus(e.index);
 
-				task.actions.add(Actions.TEST);
-				task.actions.add(Actions.TEST);
+				task.actions.add(Actions.DEBUG);
+				task.actions.add(Actions.DEBUG);
 				task.actions.add(Actions.INPUTLIST);
 				/*
 				switch (e.index){
@@ -334,7 +338,7 @@ public class Nutlet extends HttpServlet {
 			html.appendElement(elem);
 
 
-			if (task.actions.isSet(Actions.TEST)) {
+			if (task.actions.isSet(Actions.DEBUG)) {
 
 				Map<String,Object> map = new LinkedHashMap<>();
 

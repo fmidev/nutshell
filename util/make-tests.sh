@@ -46,12 +46,13 @@ function set_file(){
 }
 
 
-function run_nutshell(){
+function run_cmdline(){
 
     counter=$(( counter + 1 ))
     LOG=`printf 'tests/nutshell-%02d-cmd.log' $counter `
 
     echo_cmd "nutshell" $*
+    echo $cmd > $LOG.cmd
     nutshell $* &> $LOG
     #fgrep 'Final status:' $LOG > $LOG.$counter
     
@@ -67,6 +68,7 @@ function run_http(){
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd
+    echo $cmd > $LOG.cmd
     eval $cmd &>> $LOG
     # cp $LOG $LOG.$counter
 }
@@ -130,29 +132,33 @@ echo_title "Basic tests (cmd line only)"
 
 
 echo_comment "Help command"
-run_nutshell --help 
+run_cmdline --help 
 check 0 
 
 echo_comment "Unknown command"
-run_nutshell --foo
+run_cmdline --foo
 check 1 
+
 
 
 echo_title "Testing Cmd and Http interfaces"
 
-for cmd in run_nutshell run_http; do
+#for cmd in run_cmdline run_http; do
+LOOP=${LOOP:-'cmdline,http'}
+for i in ${LOOP//,/ } ; do    
 
+    cmd=run_$i
     echo $counter
     
-    set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+    set_file 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     # set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
     echo_comment "Undefined action"
-    run_nutshell --actions FOO
+    run_cmdline --actions FOO
     check 1 
     
     echo_comment "Parsing error"
-    run_nutshell foo.pdf
+    run_cmdline foo.pdf
     check 1 
 
     echo_comment "Default action (MAKE)"
@@ -180,17 +186,12 @@ for cmd in run_nutshell run_http; do
     $cmd --make $FILE 
     check 0 -f $OUTDIR/$FILE
 
-    echo_comment "Action: add soft links: latest file and file in non-timestamped dir "
-    run_nutshell --latest --shortcut $FILE
-    check 0 -f $OUTDIR/$FILE
-    check 0 -L $OUTDIR_SHORT/$FILE
-    check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 
     #echo
     echo_comment "Try to parameters in wrong order (generated file has them in order)"
     set_file demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
-    run_nutshell --generate $FILE
+    run_cmdline --generate $FILE
     check 0 ! -f $OUTDIR/$FILE
 
     echo 
@@ -199,27 +200,27 @@ for cmd in run_nutshell run_http; do
     parse $FILE
     
     echo_comment "Check that test product works..."
-    run_nutshell --generate $FILE
+    run_cmdline --generate $FILE
     check 0  -f $OUTDIR/$FILE
     
     echo_comment "Image too large"
     set_file demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
-    run_nutshell --generate $FILE
+    run_cmdline --generate $FILE
     check 1
     
     echo_comment "Illegal (negative) arguments"
     set_file demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
-    run_nutshell --generate $FILE
+    run_cmdline --generate $FILE
     check 1
     
     echo_comment "Unsupported feature"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
-    run_nutshell --generate $FILE
+    run_cmdline --generate $FILE
     check 1
     
     echo_comment "Unsupported file format"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
-    run_nutshell --generate $FILE
+    run_cmdline --generate $FILE
     check 1
     
     
@@ -227,14 +228,35 @@ done
 
 set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-echo_title "Local actions test: copy, link and move"
-run_nutshell --move . --make $FILE 
+echo_title "Local actions test (copy, link and move)"
+echo_comment "Move the resulting file to specified location"
+run_cmdline --move . --make $FILE 
 check 0 ! -f $OUTDIR/$FILE
 check 0   -f ./$FILE
 
-run_nutshell --copy . --make $FILE 
+echo_comment "Copy the resulting file to specified location"
+run_cmdline --copy . --make $FILE 
 check 0  -f $OUTDIR/$FILE
 check 0  -f ./$FILE
+#rm -v ./$FILE
+
+echo_comment "Link the resulting file to specified location"
+run_cmdline --link . --make $FILE 
+check 0  -f $OUTDIR/$FILE
+check 0  -f ./$FILE
+#rm -v ./$FILE
+
+echo_comment "Link the resulting file to SHORTCUT (non-timestamped) directory"
+run_cmdline --shortcut $FILE
+#check 0 -f $OUTDIR/$FILE
+check 0 -L $OUTDIR_SHORT/$FILE
+#check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
+
+echo_comment "Link the resulting file, as LATEST one"
+run_cmdline --latest $FILE
+#check 0 -f $OUTDIR/$FILE
+#check 0 -L $OUTDIR_SHORT/$FILE
+check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 
 
 
@@ -244,14 +266,14 @@ echo_title "Cmd and Http interplay test"
 
 set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
-run_nutshell --generate $FILE
+run_cmdline --generate $FILE
 run_http     --delete   $FILE 
 check 0 ! -f $OUTDIR/$FILE
 
 
 echo_title "Meteorological..."
 set_file 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
-run_nutshell --generate $FILE
+run_cmdline --generate $FILE
 check 0 -f $OUTDIR/$FILE
 
 
