@@ -170,11 +170,11 @@ for i in ${LOOP//,/ } ; do
     $cmd --exists $FILE 
     check 0 
 
-    echo_comment "Delete product file"
+    echo_comment "Action: DELETE product file"
     $cmd --delete $FILE 
     check 0 ! -f $OUTDIR/$FILE
 
-    echo_comment "Now, product file should not exist"
+    #echo_comment "Now, product file should not exist"
     $cmd --exists $FILE 
     check 1 
 
@@ -195,30 +195,29 @@ for i in ${LOOP//,/ } ; do
     check 0 ! -f $OUTDIR/$FILE
 
     echo 
-    echo_title "Product error message tests"
+    echo_comment "Product error message tests..."
     set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     parse $FILE
-    
-    echo_comment "Check that test product works..."
+    echo_comment "Check that test product works"
     run_cmdline --generate $FILE
     check 0  -f $OUTDIR/$FILE
     
-    echo_comment "Image too large"
+    echo_comment "Error test: image too large"
     set_file demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
     run_cmdline --generate $FILE
     check 1
     
-    echo_comment "Illegal (negative) arguments"
+    echo_comment "Error test: Illegal (negative) arguments"
     set_file demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
     run_cmdline --generate $FILE
     check 1
     
-    echo_comment "Unsupported feature"
+    echo_comment "Error test: Unsupported feature"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
     run_cmdline --generate $FILE
     check 1
     
-    echo_comment "Unsupported file format"
+    echo_comment "Error test: Unsupported file format"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
     run_cmdline --generate $FILE
     check 1

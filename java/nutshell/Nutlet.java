@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -61,7 +62,6 @@ public class Nutlet extends HttpServlet {
 		productServer.log.warn("What about me?");
 	}
 
-
 	String confDir = "";
 	String httpRoot = "";
 
@@ -94,6 +94,9 @@ public class Nutlet extends HttpServlet {
 	@Override	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
+
+		productServer.setLogFile("tomcat8");
+
 
 		String productStr = request.getParameter("product");
 
@@ -243,7 +246,7 @@ public class Nutlet extends HttpServlet {
 			try {
 				// track esp. missing inputs
 				//task.log.ok("-------- see separate log --->");
-				productServer.log.warn(String.format("Executing... %s", task));
+				productServer.log.info(String.format("Executing... %s", task));
 				productServer.log.debug(String.format("See separate log: %s", task.log.logFile));
 				//log.warn(String.format("Executing... %s", task));
 				task.log.ok("Executing...");
@@ -545,6 +548,10 @@ public class Nutlet extends HttpServlet {
 
 		html.appendElement(SimpleHtml.H1, "ProductServer setup");
 		html.appendTable(productServer.setup, null);
+
+		html.appendElement(SimpleHtml.H1, "Environment variables");
+		html.appendTable(System.getenv(), null);
+
 	}
 
 	protected void addRequestStatus(SimpleHtml html, HttpServletRequest request) {

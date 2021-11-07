@@ -53,13 +53,34 @@ import static java.nio.file.Files.*;
 
 public class ProductServer { //extends Cache {
 
-	final public HttpLog log = new HttpLog(getClass().getSimpleName());
+	final public HttpLog log; // = new HttpLog(getClass().getSimpleName());
+	final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-	/*
+
 	ProductServer(){
 		log = new HttpLog(getClass().getSimpleName());
+		//log.setLogFile(ensureFile(cacheRoot));
 	}
-	*/
+
+	/**
+	 *
+	 * @param label - Username of other identifier
+	 * @return
+	 */
+	public Path setLogFile(String label){
+		try {
+			Path p = Paths.get("nutshell","log", String.format("nutshell-%s-%s.log",
+					logFilenameTimeFormat.format(System.currentTimeMillis()), label));
+			p = ensureFile(cacheRoot, p);
+			log.setLogFile(p);
+			log.debug(setup.toString());
+			return p;
+		} catch (IOException e) {
+			log.setLogFile(null);
+			return null;
+		}
+	}
+
 
 	public final Map<String,Object> setup = new HashMap<>();
 
@@ -123,11 +144,11 @@ public class ProductServer { //extends Cache {
 			setup.put("confFileError", e.getLocalizedMessage());
 		}
 
-		log.debug(setup.toString());
+		//log.debug(setup.toString());
 
 		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
 		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
-		this.storageRoot   = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
+		this.storageRoot = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
 
 		this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
 		this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rwxrwxr--").toString());
@@ -330,6 +351,67 @@ public class ProductServer { //extends Cache {
 
 	}
 
+	//public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
+	public Path ensureDir(Path root, Path relativePath) throws IOException {
+
+		if (relativePath==null)
+			return root;
+
+		if (relativePath.getNameCount() == 0)
+			return root;
+
+		Path path = root.resolve(relativePath);
+		//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
+
+		if (!exists(path)) {
+			// Consider(ed?):
+			//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(dirPerms));
+			ensureDir(root, relativePath.getParent());
+			//this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
+				/*
+				if (dirPerms == null) {
+					createDirectory(path);
+				}
+				else {
+					createDirectory(path, PosixFilePermissions.asFileAttribute(dirPerms));
+				}
+				 */
+			Files.createDirectory(path); //, PosixFilePermissions.asFileAttribute(dirPerms));
+			Files.setPosixFilePermissions(path, dirPerms);
+			setAttribute(path, "unix:gid", fileGroupID);
+			//Files.setOwner(path, fileGroupID);
+		}
+
+		return path;
+	}
+
+	//public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
+	public Path ensureFile(Path root, Path relativePath) throws IOException {
+
+		Path path = root.resolve(relativePath);
+
+		if (!exists(path)) {
+			ensureDir(root, relativePath.getParent());
+				/*
+				if (filePerms == null) {
+					createFile(path);
+					//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
+				}
+				else {
+					createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
+				}
+				 */
+			Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
+			//Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
+			//Files.setPosixFilePermissions(path, filePerms);
+		}
+
+		setAttribute(path, "unix:gid", fileGroupID);
+
+		return path;
+
+	}
+
 
 	/**
 	 *   A "tray" containing both the product query info and the resulting object if successfully queried.
@@ -399,19 +481,22 @@ public class ProductServer { //extends Cache {
 
 			if (parentLog != null){
 				this.log = parentLog.child("["+this.info.PRODUCT_ID+"]");
-				this.log.setLogFile(null);
+				// this.log.setLogFile(null);
 			}
 			else {
 				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
-				try {
-					this.ensureFile(cacheRoot, this.relativeLogPath);
-				} catch (IOException e) {
-					System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
-				}
-				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
 			}
+
+			try {
+				ensureFile(cacheRoot, this.relativeLogPath);
+				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
+			} catch (IOException e) {
+				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
+				this.log.setLogFile(null);
+			}
+
 			//this.log.warn("Where am I?");
-			this.log.debug(String.format("started %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
+			this.log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
 			this.result = null;
 		}
 
@@ -493,57 +578,6 @@ public class ProductServer { //extends Cache {
 			//return file.delete();
 		}
 
-		//public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
-		public Path ensureDir(Path root, Path relativePath) throws IOException {
-
-			if (relativePath==null)
-				return root;
-
-			if (relativePath.getNameCount() == 0)
-				return root;
-
-			Path path = root.resolve(relativePath);
-			//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
-
-			if (!exists(path)) {
-				// Consider(ed?):
-				// Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
-				ensureDir(root, relativePath.getParent());
-				//this.log.debug(String.format("Creating dir: %s/./%s",  root, relativePath));
-				if (dirPerms == null) {
-					createDirectory(path);
-				}
-				else {
-					createDirectory(path, PosixFilePermissions.asFileAttribute(dirPerms));
-
-				}
-				setAttribute(path, "unix:gid", fileGroupID);
-				//Files.setOwner(path, fileGroupID);
-			}
-
-			return path;
-		}
-
-		//public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
-		public Path ensureFile(Path root, Path relativePath) throws IOException {
-
-			Path path = root.resolve(relativePath);
-
-			if (!exists(path)) {
-				ensureDir(root, relativePath.getParent());
-				if (filePerms == null) {
-					createFile(path);
-					//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(perms));
-				}
-				else {
-					createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
-				}
-			}
-			setAttribute(path, "unix:gid", fileGroupID);
-
-			return path;
-
-		}
 
 
 		/** Runs a thread generating and/or otherwise handling a product
@@ -561,12 +595,14 @@ public class ProductServer { //extends Cache {
 				this.log.warn("Interrupted");
 				e.printStackTrace(log.printStream);
 			}
+			/*
 			catch (IndexedException e) {
 				this.log.warn("NutShell indexed exception --->");
 				//this.log.error(e.getMessage());
 				this.log.log(e);
 				this.log.warn("NutShell indexed exception <---");
 			}
+			 */
 		}
 
 		/** Method called upon SIGINT signal handler set in {@link #run()}
@@ -596,7 +632,7 @@ public class ProductServer { //extends Cache {
 		 * @return
 		 * @throws InterruptedException  // Gene
 		 */
-		public void execute() throws InterruptedException, IndexedException {
+		public void execute() throws InterruptedException {
 
 			Generator generator = null;
 
@@ -806,6 +842,7 @@ public class ProductServer { //extends Cache {
 
 				/// MAIN
 				this.log.note("Running Generator: " + this.info.PRODUCT_ID);
+				/*
 				if (this.log.logFile == null){
 					try {
 						Path p = ensureFile(cacheRoot, relativeLogPath);
@@ -817,7 +854,7 @@ public class ProductServer { //extends Cache {
 						//e.printStackTrace();
 					}
 
-				}
+				}*/
 
 				File fileTmp   = this.outputPathTmp.toFile();
 
@@ -857,7 +894,7 @@ public class ProductServer { //extends Cache {
 
 
 					try {
-						setPosixFilePermissions(this.outputPath, filePerms);
+						Files.setPosixFilePermissions(this.outputPath, filePerms);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
 						this.log.warn(String.format("filePerms: %s", filePerms));
@@ -1391,6 +1428,7 @@ public class ProductServer { //extends Cache {
 		}
 
 		final ProductServer server = new ProductServer();
+		//server.setLogFile();
 		server.log.printStream = System.err;  // System.out  Note: testing STREAM action needs clean stdout
 		//Path serverLogPath = server.cacheRoot.resolve("ProductServer.log");
 		//server.ensureFile(serverLogPath);
@@ -1457,6 +1495,8 @@ public class ProductServer { //extends Cache {
 						}
 						confFile = args[++i];
 						server.readConfig(confFile);
+						Path p = server.setLogFile(System.getenv("USER"));
+						log.note(String.format("Server log %s", p));
 						continue; // Note
 					}
 
@@ -1468,8 +1508,9 @@ public class ProductServer { //extends Cache {
 
 					// Now, read conf file if not read this far.
 					if (confFile == null){
-						confFile = "nutshell.cnf";
-						server.readConfig(confFile);
+						server.readConfig(confFile = "nutshell.cnf");
+						Path p = server.setLogFile(System.getenv("USER"));
+						log.note(String.format("Server log: %s", p));
 					}
 
 
