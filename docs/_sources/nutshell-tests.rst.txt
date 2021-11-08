@@ -24,7 +24,7 @@ The following commands are for command line only.
 Help command
 ------------
 
-  ::
+.. code-block::
 
   nutshell --help
 
@@ -33,7 +33,7 @@ Help command
 Unknown command
 ---------------
 
-  ::
+.. code-block::
 
   nutshell --foo
 
@@ -42,7 +42,7 @@ Unknown command
 Undefined action
 ----------------
 
-  ::
+.. code-block::
 
   nutshell --actions FOO
 
@@ -51,7 +51,7 @@ Undefined action
 Parsing error
 -------------
 
-  ::
+.. code-block::
 
   nutshell foo.pdf
 
@@ -158,7 +158,7 @@ Local actions: copy, link and move
 Move the resulting file to specified location
 ---------------------------------------------
 
-  ::
+.. code-block::
 
   nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -168,7 +168,7 @@ Move the resulting file to specified location
 Copy the resulting file to specified location
 ---------------------------------------------
 
-  ::
+.. code-block::
 
   nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -178,7 +178,7 @@ Copy the resulting file to specified location
 Link the resulting file to specified location
 ---------------------------------------------
 
-  ::
+.. code-block::
 
   nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -188,7 +188,7 @@ Link the resulting file to specified location
 Link the resulting file to SHORTCUT (non-timestamped) directory
 ---------------------------------------------------------------
 
-  ::
+.. code-block::
 
   nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -197,7 +197,7 @@ Link the resulting file to SHORTCUT (non-timestamped) directory
 Link the resulting file, as LATEST one
 --------------------------------------
 
-  ::
+.. code-block::
 
   nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -210,7 +210,7 @@ Cmd and Http interplay test
 Generate on command line, delete through HTTP
 ---------------------------------------------
 
-  ::
+.. code-block::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -223,7 +223,7 @@ Generate through HTTP, delete on command line
 
 `$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
-  ::
+.. code-block::
 
   nutshell --delete demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -232,7 +232,7 @@ Generate through HTTP, delete on command line
 Meteorological...
 =================
 
-  ::
+.. code-block::
 
   nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
 

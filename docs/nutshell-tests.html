@@ -54,26 +54,18 @@ and http queries.</p>
 <p>The following commands are for command line only.</p>
 <div class="section" id="help-command">
 <h3>Help command<a class="headerlink" href="#help-command" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –help</div></blockquote>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="unknown-command">
 <h3>Unknown command<a class="headerlink" href="#unknown-command" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –foo</div></blockquote>
 <p><em>Return value: 2</em></p>
 </div>
 <div class="section" id="undefined-action">
 <h3>Undefined action<a class="headerlink" href="#undefined-action" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –actions FOO</div></blockquote>
 <p><em>Return value: 2</em></p>
 </div>
 <div class="section" id="parsing-error">
 <h3>Parsing error<a class="headerlink" href="#parsing-error" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell foo.pdf</div></blockquote>
 <p><em>Return value: 1</em></p>
 </div>
 </div>
@@ -148,35 +140,25 @@ and http queries.</p>
 <h2>Local actions: copy, link and move<a class="headerlink" href="#local-actions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="move-the-resulting-file-to-specified-location">
 <h3>Move the resulting file to specified location<a class="headerlink" href="#move-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –move . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
 <p><em>Return value: 0</em>
 <em>Return value: 0</em></p>
 </div>
 <div class="section" id="copy-the-resulting-file-to-specified-location">
 <h3>Copy the resulting file to specified location<a class="headerlink" href="#copy-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –copy . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
 <p><em>Return value: 0</em>
 <em>Return value: 0</em></p>
 </div>
 <div class="section" id="link-the-resulting-file-to-specified-location">
 <h3>Link the resulting file to specified location<a class="headerlink" href="#link-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –link . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
 <p><em>Return value: 0</em>
 <em>Return value: 0</em></p>
 </div>
 <div class="section" id="link-the-resulting-file-to-shortcut-non-timestamped-directory">
 <h3>Link the resulting file to SHORTCUT (non-timestamped) directory<a class="headerlink" href="#link-the-resulting-file-to-shortcut-non-timestamped-directory" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="link-the-resulting-file-as-latest-one">
 <h3>Link the resulting file, as LATEST one<a class="headerlink" href="#link-the-resulting-file-as-latest-one" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –latest 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
 <p><em>Return value: 0</em></p>
 </div>
 </div>
@@ -184,23 +166,17 @@ and http queries.</p>
 <h2>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="generate-on-command-line-delete-through-http">
 <h3>Generate on command line, delete through HTTP<a class="headerlink" href="#generate-on-command-line-delete-through-http" title="Permalink to this headline">¶</a></h3>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
 <p><a class="reference external" href="/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="generate-through-http-delete-on-command-line">
 <h3>Generate through HTTP, delete on command line<a class="headerlink" href="#generate-through-http-delete-on-command-line" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<blockquote>
-<div>nutshell –delete demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
 <p><em>Return value: 0</em></p>
 </div>
 </div>
 <div class="section" id="meteorological">
 <h2>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div>nutshell –generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png</div></blockquote>
 <p><em>Return value: 0</em></p>
 </div>
 </div>
