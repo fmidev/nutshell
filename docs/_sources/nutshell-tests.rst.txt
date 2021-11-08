@@ -26,7 +26,7 @@ Help command
 
 .. code-block::
 
-    nutshell --help
+       nutshell --help
 
 *Return value: 0* 
 
@@ -35,7 +35,7 @@ Unknown command
 
 .. code-block::
 
-    nutshell --foo
+       nutshell --foo
 
 *Return value: 2* 
 
@@ -44,7 +44,7 @@ Undefined action
 
 .. code-block::
 
-    nutshell --actions FOO
+       nutshell --actions FOO
 
 *Return value: 2* 
 
@@ -53,7 +53,7 @@ Parsing error
 
 .. code-block::
 
-    nutshell foo.pdf
+       nutshell foo.pdf
 
 *Return value: 1* 
 
@@ -70,7 +70,7 @@ Default action (MAKE)
 
 .. code-block::
 
-    nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
 
@@ -79,7 +79,7 @@ Does product file exist?
 
 .. code-block::
 
-    nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
 
@@ -88,12 +88,12 @@ Action: DELETE product file
 
 .. code-block::
 
-    nutshell --delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell --delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
 .. code-block::
 
-    nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 1* 
 
@@ -102,7 +102,7 @@ Action: MAKE product (generate, if nonexistent)
 
 .. code-block::
 
-    nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
 
@@ -111,7 +111,7 @@ Action: GENERATE (unconditionally)
 
 .. code-block::
 
-    nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
 
@@ -122,7 +122,7 @@ Generated file has them in order.
 
 .. code-block::
 
-    nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+       nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
 *Return value: 0* 
 
@@ -135,7 +135,7 @@ Initial check - valid generation
 
 .. code-block::
 
-    nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+       nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
 
@@ -144,7 +144,7 @@ Error test: image too large
 
 .. code-block::
 
-    nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
+       nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
 
 *Return value: 1* 
 
@@ -153,7 +153,7 @@ Error test: Illegal (negative) arguments
 
 .. code-block::
 
-    nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
+       nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
 
 *Return value: 1* 
 
@@ -162,7 +162,7 @@ Error test: Unsupported feature
 
 .. code-block::
 
-    nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
+       nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
 
 *Return value: 1* 
 
@@ -171,7 +171,7 @@ Error test: Unsupported file format
 
 .. code-block::
 
-    nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
+       nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
 
 *Return value: 1* 
 
@@ -184,9 +184,9 @@ Move the resulting file to specified location
 
 .. code-block::
 
-    nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+       nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-*Return value: 0* 
+*Return value: 130* 
 *Return value: 0* 
 
 Copy the resulting file to specified location
@@ -194,6 +194,15 @@ Copy the resulting file to specified location
 
 .. code-block::
 
-    nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+       nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-*Return value: 130* 
+*Return value: 0* 
+*Return value: 0* 
+
+Link the resulting file to specified location
+---------------------------------------------
+
+.. code-block::
+
+       nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
