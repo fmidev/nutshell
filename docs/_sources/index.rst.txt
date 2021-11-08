@@ -60,6 +60,7 @@ Contents
    nutshell-variables
    nutshell-demo  
    nutshell-code
+   nutshell-tests
 		
 
 		  
