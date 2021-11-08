@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CACHE_ROOT=/opt/nutshell/cache &#8212; NutShell 1.0 documentation</title>
+    <title>Basic tests (cmd line only) &#8212; NutShell 1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -42,133 +42,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="cache-root-opt-nutshell-cache">
-<h1>CACHE_ROOT=/opt/nutshell/cache<a class="headerlink" href="#cache-root-opt-nutshell-cache" title="Permalink to this headline">¶</a></h1>
-<p>CACHE_ROOT=/opt/nutshell/cache</p>
-</div>
-<div class="section" id="basic-tests-cmd-line-only">
+  <div class="section" id="basic-tests-cmd-line-only">
 <h1>Basic tests (cmd line only)<a class="headerlink" href="#basic-tests-cmd-line-only" title="Permalink to this headline">¶</a></h1>
-<p>Help command</p>
-<p>Unknown command</p>
-</div>
-<div class="section" id="testing-cmd-and-http-interfaces">
-<h1>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h1>
-<p>Undefined action</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Parsing error</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Default action (MAKE)</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Does product file exist?</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Action: DELETE product file</p>
-<blockquote>
-<div>run_cmdline
-run_cmdline</div></blockquote>
-<p>Action: MAKE product (generate, if nonexistent)</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Action: GENERATE (unconditionally)</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Try to parameters in wrong order (generated file has them in order)</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Product error message tests…</p>
-<p>Check that test product works</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Error test: image too large</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Error test: Illegal (negative) arguments</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Error test: Unsupported feature</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Error test: Unsupported file format</p>
-<blockquote>
-<div>run_cmdline</div></blockquote>
-<p>Undefined action</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Parsing error</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Default action (MAKE)</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Does product file exist?</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Action: DELETE product file</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a>
-<a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Action: MAKE product (generate, if nonexistent)</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Action: GENERATE (unconditionally)</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Try to parameters in wrong order (generated file has them in order)</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Product error message tests…</p>
-<p>Check that test product works</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Error test: image too large</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Error test: Illegal (negative) arguments</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Error test: Unsupported feature</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Error test: Unsupported file format</p>
-<blockquote>
-<div>run_http</div></blockquote>
-</div>
-<div class="section" id="local-actions-test-copy-link-and-move">
-<h1>Local actions test (copy, link and move)<a class="headerlink" href="#local-actions-test-copy-link-and-move" title="Permalink to this headline">¶</a></h1>
-<p>Move the resulting file to specified location</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Copy the resulting file to specified location</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Link the resulting file to specified location</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Link the resulting file to SHORTCUT (non-timestamped) directory</p>
-<blockquote>
-<div>run_http</div></blockquote>
-<p>Link the resulting file, as LATEST one</p>
-<blockquote>
-<div>run_http</div></blockquote>
-</div>
-<div class="section" id="cmd-and-http-interplay-test">
-<h1>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><blockquote>
-<div>run_http</div></blockquote>
-<p><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-</div></blockquote>
-</div>
-<div class="section" id="meteorological">
-<h1>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div>run_http</div></blockquote>
-</div>
-<div class="section" id="id1">
-<h1>Basic tests (cmd line only)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <p>Help command</p>
 <blockquote>
 <div>nutshell –help</div></blockquote>
@@ -176,8 +51,49 @@ run_cmdline</div></blockquote>
 <blockquote>
 <div>nutshell –foo</div></blockquote>
 </div>
-<div class="section" id="id2">
-<h1>Testing Cmd and Http interfaces<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="testing-cmd-and-http-interfaces">
+<h1>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h1>
+<p>Undefined action</p>
+<blockquote>
+<div>nutshell –actions FOO</div></blockquote>
+<p>Parsing error</p>
+<blockquote>
+<div>nutshell foo.pdf</div></blockquote>
+<p>Default action (MAKE)</p>
+<blockquote>
+<div>nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
+<p>Does product file exist?</p>
+<blockquote>
+<div>nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
+<p>Action: DELETE product file</p>
+<blockquote>
+<div>nutshell –delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
+<p>Action: MAKE product (generate, if nonexistent)</p>
+<blockquote>
+<div>nutshell –make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
+<p>Action: GENERATE (unconditionally)</p>
+<blockquote>
+<div>nutshell –make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
+<p>Try to parameters in wrong order (generated file has them in order)</p>
+<blockquote>
+<div>nutshell –generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png</div></blockquote>
+<p>Product error message tests…</p>
+<p>Check that test product works</p>
+<blockquote>
+<div>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
+<p>Error test: image too large</p>
+<blockquote>
+<div>nutshell –generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png</div></blockquote>
+<p>Error test: Illegal (negative) arguments</p>
+<blockquote>
+<div>nutshell –generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png</div></blockquote>
+<p>Error test: Unsupported feature</p>
+<blockquote>
+<div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png</div></blockquote>
+<p>Error test: Unsupported file format</p>
+<blockquote>
+<div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf</div></blockquote>
 <p>Undefined action</p>
 <blockquote>
 <div>nutshell –actions FOO</div></blockquote>
@@ -220,8 +136,8 @@ run_cmdline</div></blockquote>
 <blockquote>
 <div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf</div></blockquote>
 </div>
-<div class="section" id="id3">
-<h1>Local actions test (copy, link and move)<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="local-actions-test-copy-link-and-move">
+<h1>Local actions test (copy, link and move)<a class="headerlink" href="#local-actions-test-copy-link-and-move" title="Permalink to this headline">¶</a></h1>
 <p>Move the resulting file to specified location</p>
 <blockquote>
 <div>nutshell –move . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
@@ -238,14 +154,14 @@ run_cmdline</div></blockquote>
 <blockquote>
 <div>nutshell –latest 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
 </div>
-<div class="section" id="id4">
-<h1>Cmd and Http interplay test<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="cmd-and-http-interplay-test">
+<h1>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h1>
 <blockquote>
 <div>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 <a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
 </div>
-<div class="section" id="id5">
-<h1>Meteorological…<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="meteorological">
+<h1>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h1>
 <blockquote>
 <div>nutshell –generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png</div></blockquote>
 </div>
