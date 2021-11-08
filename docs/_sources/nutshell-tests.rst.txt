@@ -42,17 +42,20 @@ Test #2 ::
 Undefined action
 ----------------
 
-*Return value: 127* 
+Test #3 ::
 
-Undefined verbosity level
--------------------------
+  nutshell --actions FOO
 
-*Return value: 127* 
+*Return value: 2* 
 
 Parsing error
 -------------
 
-*Return value: 127* 
+Test #4 ::
+
+  nutshell foo.pdf
+
+*Return value: 1* 
 
 Testing Cmd and Http interfaces
 ===============================
@@ -65,7 +68,7 @@ Tests (cmdline)
 Default action (MAKE)
 ---------------------
 
-Test #3 ::
+Test #5 ::
 
   nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -74,7 +77,7 @@ Test #3 ::
 Does product file exist?
 ------------------------
 
-Test #4 ::
+Test #6 ::
 
   nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -83,12 +86,12 @@ Test #4 ::
 Action: DELETE product file
 ---------------------------
 
-Test #5 ::
+Test #7 ::
 
   nutshell --delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 *Return value: 0* 
-Test #6 ::
+Test #8 ::
 
   nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -97,7 +100,7 @@ Test #6 ::
 Action: MAKE product (generate, if nonexistent)
 -----------------------------------------------
 
-Test #7 ::
+Test #9 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -106,7 +109,7 @@ Test #7 ::
 Action: GENERATE (unconditionally)
 ----------------------------------
 
-Test #8 ::
+Test #10 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -117,7 +120,7 @@ Parameters in wrong order (generated file has them in order)
 
 Generated file has them in order.
 
-Test #9 ::
+Test #11 ::
 
   nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
@@ -130,7 +133,7 @@ Product error messages
 Initial check - valid generation
 --------------------------------
 
-Test #10 ::
+Test #12 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -139,7 +142,7 @@ Test #10 ::
 Error test: image too large
 ---------------------------
 
-Test #11 ::
+Test #13 ::
 
   nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
 
@@ -148,7 +151,7 @@ Test #11 ::
 Error test: Illegal (negative) arguments
 ----------------------------------------
 
-Test #12 ::
+Test #14 ::
 
   nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
 
@@ -157,7 +160,7 @@ Test #12 ::
 Error test: Unsupported feature
 -------------------------------
 
-Test #13 ::
+Test #15 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
 
@@ -166,7 +169,7 @@ Test #13 ::
 Error test: Unsupported file format
 -----------------------------------
 
-Test #14 ::
+Test #16 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
 
@@ -219,7 +222,7 @@ Parameters in wrong order (generated file has them in order)
 
 Generated file has them in order.
 
-Test #21 ::
+Test #23 ::
 
   nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
@@ -271,7 +274,7 @@ Local actions: copy, link and move
 Move the resulting file to specified location
 ---------------------------------------------
 
-Test #27 ::
+Test #29 ::
 
   nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -281,7 +284,7 @@ Test #27 ::
 Copy the resulting file to specified location
 ---------------------------------------------
 
-Test #28 ::
+Test #30 ::
 
   nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -291,7 +294,7 @@ Test #28 ::
 Link the resulting file to specified location
 ---------------------------------------------
 
-Test #29 ::
+Test #31 ::
 
   nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -301,7 +304,7 @@ Test #29 ::
 Link the resulting file to SHORTCUT (non-timestamped) directory
 ---------------------------------------------------------------
 
-Test #30 ::
+Test #32 ::
 
   nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -310,7 +313,7 @@ Test #30 ::
 Link the resulting file, as LATEST one
 --------------------------------------
 
-Test #31 ::
+Test #33 ::
 
   nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
 
@@ -319,7 +322,7 @@ Test #31 ::
 Cmd and Http interplay test
 ===========================
 
-Test #32 ::
+Test #34 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -330,7 +333,7 @@ Test #32 ::
 Meteorological...
 =================
 
-Test #34 ::
+Test #36 ::
 
   nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
 
