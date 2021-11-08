@@ -24,10 +24,6 @@ The following commands are for command line only.
 Help command
 ------------
 
-Test 1 ::
-
-  nutshell --help
-
   ::
 
   nutshell --help
@@ -36,10 +32,6 @@ Test 1 ::
 
 Unknown command
 ---------------
-
-Test 2 ::
-
-  nutshell --foo
 
   ::
 
@@ -50,10 +42,6 @@ Test 2 ::
 Undefined action
 ----------------
 
-Test 3 ::
-
-  nutshell --actions FOO
-
   ::
 
   nutshell --actions FOO
@@ -62,10 +50,6 @@ Test 3 ::
 
 Parsing error
 -------------
-
-Test 4 ::
-
-  nutshell foo.pdf
 
   ::
 
@@ -174,10 +158,6 @@ Local actions: copy, link and move
 Move the resulting file to specified location
 ---------------------------------------------
 
-Test 17 ::
-
-  nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
   ::
 
   nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
@@ -187,10 +167,6 @@ Test 17 ::
 
 Copy the resulting file to specified location
 ---------------------------------------------
-
-Test 18 ::
-
-  nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
 
   ::
 
@@ -202,10 +178,6 @@ Test 18 ::
 Link the resulting file to specified location
 ---------------------------------------------
 
-Test 19 ::
-
-  nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
   ::
 
   nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
@@ -216,10 +188,6 @@ Test 19 ::
 Link the resulting file to SHORTCUT (non-timestamped) directory
 ---------------------------------------------------------------
 
-Test 20 ::
-
-  nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
-
   ::
 
   nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
@@ -228,10 +196,6 @@ Test 20 ::
 
 Link the resulting file, as LATEST one
 --------------------------------------
-
-Test 21 ::
-
-  nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
 
   ::
 
@@ -246,10 +210,6 @@ Cmd and Http interplay test
 Generate on command line, delete through HTTP
 ---------------------------------------------
 
-Test 22 ::
-
-  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
   ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
@@ -263,10 +223,6 @@ Generate through HTTP, delete on command line
 
 `$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
-Test 25 ::
-
-  nutshell --delete demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
   ::
 
   nutshell --delete demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
@@ -275,10 +231,6 @@ Test 25 ::
 
 Meteorological...
 =================
-
-Test 26 ::
-
-  nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
 
   ::
 
