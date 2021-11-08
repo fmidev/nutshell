@@ -1,0 +1,277 @@
+
+CACHE_ROOT=/opt/nutshell/cache
+==============================
+
+
+CACHE_ROOT=/opt/nutshell/cache
+
+
+Basic tests (cmd line only)
+===========================
+
+
+Help command
+
+  
+
+Unknown command
+
+  
+
+Testing Cmd and Http interfaces
+===============================
+
+
+Undefined action
+
+   run_cmdline
+
+Parsing error
+
+   run_cmdline
+
+Default action (MAKE)
+
+   run_cmdline
+
+Does product file exist?
+
+   run_cmdline
+
+Action: DELETE product file
+
+   run_cmdline
+   run_cmdline
+
+Action: MAKE product (generate, if nonexistent)
+
+   run_cmdline
+
+Action: GENERATE (unconditionally)
+
+   run_cmdline
+
+Try to parameters in wrong order (generated file has them in order)
+
+   run_cmdline
+
+Product error message tests...
+
+
+Check that test product works
+
+   run_cmdline
+
+Error test: image too large
+
+   run_cmdline
+
+Error test: Illegal (negative) arguments
+
+   run_cmdline
+
+Error test: Unsupported feature
+
+   run_cmdline
+
+Error test: Unsupported file format
+
+   run_cmdline
+
+Undefined action
+
+   run_http
+
+Parsing error
+
+   run_http
+
+Default action (MAKE)
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Does product file exist?
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Action: DELETE product file
+
+  http://localhost:8080/nutshell/NutShell?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Action: MAKE product (generate, if nonexistent)
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Action: GENERATE (unconditionally)
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Try to parameters in wrong order (generated file has them in order)
+
+   run_http
+
+Product error message tests...
+
+
+Check that test product works
+
+   run_http
+
+Error test: image too large
+
+   run_http
+
+Error test: Illegal (negative) arguments
+
+   run_http
+
+Error test: Unsupported feature
+
+   run_http
+
+Error test: Unsupported file format
+
+   run_http
+
+Local actions test (copy, link and move)
+========================================
+
+
+Move the resulting file to specified location
+
+   run_http
+
+Copy the resulting file to specified location
+
+   run_http
+
+Link the resulting file to specified location
+
+   run_http
+
+Link the resulting file to SHORTCUT (non-timestamped) directory
+
+   run_http
+
+Link the resulting file, as LATEST one
+
+   run_http
+
+Cmd and Http interplay test
+===========================
+
+   run_http
+  http://localhost:8080/nutshell/NutShell?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Meteorological...
+=================
+
+   run_http
+
+Basic tests (cmd line only)
+===========================
+
+
+Help command
+
+  nutshell --help
+
+Unknown command
+
+  nutshell --foo
+
+Testing Cmd and Http interfaces
+===============================
+
+
+Undefined action
+
+  nutshell --actions FOO
+
+Parsing error
+
+  nutshell foo.pdf
+
+Default action (MAKE)
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Does product file exist?
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Action: DELETE product file
+
+  http://localhost:8080/nutshell/NutShell?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Action: MAKE product (generate, if nonexistent)
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Action: GENERATE (unconditionally)
+
+  http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Try to parameters in wrong order (generated file has them in order)
+
+  nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+Product error message tests...
+
+
+Check that test product works
+
+  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Error test: image too large
+
+  nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
+
+Error test: Illegal (negative) arguments
+
+  nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
+
+Error test: Unsupported feature
+
+  nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
+
+Error test: Unsupported file format
+
+  nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
+
+Local actions test (copy, link and move)
+========================================
+
+
+Move the resulting file to specified location
+
+  nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+Copy the resulting file to specified location
+
+  nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+Link the resulting file to specified location
+
+  nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+Link the resulting file to SHORTCUT (non-timestamped) directory
+
+  nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+Link the resulting file, as LATEST one
+
+  nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+Cmd and Http interplay test
+===========================
+
+  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  http://localhost:8080/nutshell/NutShell?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+Meteorological...
+=================
+
+  nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png

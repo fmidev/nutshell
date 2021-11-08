@@ -50,9 +50,12 @@
             
   <div class="section" id="commands-and-status-codes">
 <span id="commands"></span><h1>Commands and status codes<a class="headerlink" href="#commands-and-status-codes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="requests">
-<span id="request"></span><h2>Requests<a class="headerlink" href="#requests" title="Permalink to this headline">¶</a></h2>
-<p>Also know as <em>actions</em></p>
+<div class="section" id="actions">
+<span id="request"></span><h2>Actions<a class="headerlink" href="#actions" title="Permalink to this headline">¶</a></h2>
+<p>In NutShell, a product request may contain the following actions, input types and post-processing
+tasks. On command line, they can be set invidually or with <code class="docutils literal notranslate"><span class="pre">--action</span></code> .
+For logical reasons, some of them are mutually exclusive, like <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> and <code class="docutils literal notranslate"><span class="pre">EXISTS</span></code>.
+Some of them, are implicit; for example, <code class="docutils literal notranslate"><span class="pre">MAKE</span></code> includes <code class="docutils literal notranslate"><span class="pre">EXISTS</span></code> and conditionally</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="12%" />
@@ -70,9 +73,9 @@
 <td>–test</td>
 <td>Check existence and permissions of directories and scripts</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXIST</span></code></td>
-<td>–exist</td>
-<td>Check existence and permissions of directories and scripts</td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXISTS</span></code></td>
+<td>–exists</td>
+<td>Check existence of the product</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MAKE</span></code></td>
 <td>–make, -m</td>
@@ -84,7 +87,7 @@
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">GENERATE</span></code></td>
 <td>–generate, -g</td>
-<td>Remake file, even if it exists. Same as <code class="docutils literal notranslate"><span class="pre">--delete</span> <span class="pre">--make</span></code></td>
+<td>Generate file, even if it exists.</td>
 </tr>
 <tr class="row-odd"><td>–</td>
 <td>–copy, -C <cite>file</cite></td>
@@ -100,7 +103,7 @@
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SHORTCUT</span></code></td>
 <td>–shortcut</td>
-<td>Link file to short directory</td>
+<td>Link file to short directory with original filename</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">LATEST</span></code></td>
 <td>–latest, -L</td>
@@ -298,7 +301,7 @@ to the hosting system, NutShell.</p>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Commands and status codes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requests">Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#actions">Actions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#directives">Directives</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#built-in-directives">Built-in directives</a></li>
 </ul>

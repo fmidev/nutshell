@@ -10,23 +10,26 @@ Commands and status codes
 
 .. _request:
 
-Requests
-========
+Actions
+=======
 
-Also know as *actions*
+In NutShell, a product request may contain the following actions, input types and post-processing
+tasks. On command line, they can be set invidually or with ``--action`` .
+For logical reasons, some of them are mutually exclusive, like ``DELETE`` and ``EXISTS``.
+Some of them, are implicit; for example, ``MAKE`` includes ``EXISTS`` and conditionally
 
 ============ ================= ============
  Request     Cmd line arg
 ============ ================= ============
 ``TEST``     --test            Check existence and permissions of directories and scripts
-``EXIST``    --exist           Check existence and permissions of directories and scripts
+``EXISTS``   --exists          Check existence of the product
 ``MAKE``     --make, -m        Generate file, if it does not exist (default request)
 ``DELETE``   --delete, -d      Delete the product file in cache dir
-``GENERATE`` --generate, -g    Remake file, even if it exists. Same as ``--delete --make``
+``GENERATE`` --generate, -g    Generate file, even if it exists.
 --           --copy, -C `file` Copy file 
 --           --move, -m `file` Move file 
 --           --link, -l `file` Link file 
-``SHORTCUT`` --shortcut        Link file to short directory
+``SHORTCUT`` --shortcut        Link file to short directory with original filename
 ``LATEST``   --latest, -L      Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
 ``INPUTS``   --inputs, -I      Check inputs
 ============ ================= ============
