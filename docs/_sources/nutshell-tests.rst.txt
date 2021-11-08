@@ -68,38 +68,38 @@ Tests (http)
 Default action (MAKE)
 ---------------------
 
-  $HTTP $NUTSHELL_URL?`actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Does product file exist?
 ------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Action: DELETE product file
 ---------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
-  $HTTP $NUTSHELL_URL?`actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 8* 
 
 Action: MAKE product (generate, if nonexistent)
 -----------------------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Action: GENERATE (unconditionally)
 ----------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
@@ -108,7 +108,7 @@ Parameters in wrong order (generated file has them in order)
 
 Generated file has them in order.
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
@@ -119,35 +119,35 @@ Product error messages
 Initial check - valid generation
 --------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Error test: image too large
 ---------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png>`_
 
 *Return value: 8* 
 
 Error test: Illegal (negative) arguments
 ----------------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png>`_
 
 *Return value: 8* 
 
 Error test: Unsupported feature
 -------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png>`_
 
 *Return value: 8* 
 
 Error test: Unsupported file format
 -----------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf>`_
 
 *Return value: 8* 
 
@@ -214,14 +214,14 @@ Test 22 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
-  $HTTP $NUTSHELL_URL?`actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Generate through HTTP, delete on command line
 ---------------------------------------------
 
-  $HTTP $NUTSHELL_URL?`actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`
+  $HTTP `$NUTSHELL_URL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png <http://localhost:8080/nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 Test 25 ::
 
