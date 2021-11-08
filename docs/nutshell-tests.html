@@ -72,39 +72,38 @@ and http queries.</p>
 <div class="section" id="testing-cmd-and-http-interfaces">
 <h2>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="tests-http">
-<h2>Tests (http)<a class="headerlink" href="#tests-http" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tests-cmdline">
+<h2>Tests (cmdline)<a class="headerlink" href="#tests-cmdline" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="default-action-make">
 <h3>Default action (MAKE)<a class="headerlink" href="#default-action-make" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="does-product-file-exist">
 <h3>Does product file exist?<a class="headerlink" href="#does-product-file-exist" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="action-delete-product-file">
 <h3>Action: DELETE product file<a class="headerlink" href="#action-delete-product-file" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em>
-<a class="reference external" href="/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 8</em></p>
+.. code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="n">caption</span><span class="p">:</span> <span class="n">Test</span> <span class="n">cmdline</span>
+
+     <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="action-make-product-generate-if-nonexistent">
 <h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#action-make-product-generate-if-nonexistent" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="action-generate-unconditionally">
 <h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#action-generate-unconditionally" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="parameters-in-wrong-order-generated-file-has-them-in-order">
 <h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#parameters-in-wrong-order-generated-file-has-them-in-order" title="Permalink to this headline">¶</a></h3>
 <p>Generated file has them in order.</p>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="product-error-messages">
@@ -112,28 +111,23 @@ and http queries.</p>
 </div>
 <div class="section" id="initial-check-valid-generation">
 <h3>Initial check - valid generation<a class="headerlink" href="#initial-check-valid-generation" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="error-test-image-too-large">
 <h3>Error test: image too large<a class="headerlink" href="#error-test-image-too-large" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png</a></p>
-<p><em>Return value: 8</em></p>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="error-test-illegal-negative-arguments">
 <h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#error-test-illegal-negative-arguments" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png</a></p>
-<p><em>Return value: 8</em></p>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="error-test-unsupported-feature">
 <h3>Error test: Unsupported feature<a class="headerlink" href="#error-test-unsupported-feature" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png</a></p>
-<p><em>Return value: 8</em></p>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="error-test-unsupported-file-format">
 <h3>Error test: Unsupported file format<a class="headerlink" href="#error-test-unsupported-file-format" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf</a></p>
-<p><em>Return value: 8</em></p>
+<p><em>Return value: 1</em></p>
 </div>
 </div>
 <div class="section" id="local-actions-copy-link-and-move">
@@ -206,7 +200,7 @@ and http queries.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tests-http">Tests (http)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tests-cmdline">Tests (cmdline)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#default-action-make">Default action (MAKE)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#does-product-file-exist">Does product file exist?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#action-delete-product-file">Action: DELETE product file</a></li>
