@@ -24,16 +24,20 @@ The following commands are for command line only.
 Help command
 ------------
 
-Try this::
+Test #1 ::
 
   nutshell --help
+
+*Return value: 0 *
 
 Unknown command
 ---------------
 
-Try this::
+Test #2 ::
 
   nutshell --foo
+
+*Return value: 2 *
 
 Testing Cmd and Http interfaces
 ===============================
@@ -46,63 +50,81 @@ Tests (cmdline)
 Undefined action
 ----------------
 
-Try this::
+Test #3 ::
 
   nutshell --actions FOO
+
+*Return value: 2 *
 
 Parsing error
 -------------
 
-Try this::
+Test #4 ::
 
   nutshell foo.pdf
+
+*Return value: 1 *
 
 Default action (MAKE)
 ---------------------
 
-Try this::
+Test #5 ::
 
   nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Does product file exist?
 ------------------------
 
-Try this::
+Test #6 ::
 
   nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Action: DELETE product file
 ---------------------------
 
-Try this::
+Test #7 ::
 
   nutshell --delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-Try this::
+
+*Return value: 0 *
+Test #8 ::
 
   nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 1 *
 
 Action: MAKE product (generate, if nonexistent)
 -----------------------------------------------
 
-Try this::
+Test #9 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Action: GENERATE (unconditionally)
 ----------------------------------
 
-Try this::
+Test #10 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Parameters in wrong order (generated file has them in order)
 ------------------------------------------------------------
 
 Generated file has them in order.
 
-Try this::
+Test #11 ::
 
   nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+*Return value: 0 *
 
 Product error messages
 ----------------------
@@ -111,37 +133,47 @@ Product error messages
 Initial check - valid generation
 --------------------------------
 
-Try this::
+Test #12 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Error test: image too large
 ---------------------------
 
-Try this::
+Test #13 ::
 
   nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
+
+*Return value: 1 *
 
 Error test: Illegal (negative) arguments
 ----------------------------------------
 
-Try this::
+Test #14 ::
 
   nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
+
+*Return value: 1 *
 
 Error test: Unsupported feature
 -------------------------------
 
-Try this::
+Test #15 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
+
+*Return value: 1 *
 
 Error test: Unsupported file format
 -----------------------------------
 
-Try this::
+Test #16 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
+
+*Return value: 1 *
 
 Tests (http)
 ============
@@ -150,51 +182,69 @@ Tests (http)
 Undefined action
 ----------------
 
-Try this::
+Test #17 ::
 
   nutshell --actions FOO
+
+*Return value: 2 *
 
 Parsing error
 -------------
 
-Try this::
+Test #18 ::
 
   nutshell foo.pdf
+
+*Return value: 1 *
 
 Default action (MAKE)
 ---------------------
 
   http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
+*Return value: 0 *
+
 Does product file exist?
 ------------------------
 
   http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
+*Return value: 0 *
+
 Action: DELETE product file
 ---------------------------
 
   http://localhost:8080/nutshell/NutShell?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
   http://localhost:8080/nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 8 *
 
 Action: MAKE product (generate, if nonexistent)
 -----------------------------------------------
 
   http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
+*Return value: 0 *
+
 Action: GENERATE (unconditionally)
 ----------------------------------
 
   http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Parameters in wrong order (generated file has them in order)
 ------------------------------------------------------------
 
 Generated file has them in order.
 
-Try this::
+Test #25 ::
 
   nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+
+*Return value: 0 *
 
 Product error messages
 ----------------------
@@ -203,37 +253,47 @@ Product error messages
 Initial check - valid generation
 --------------------------------
 
-Try this::
+Test #26 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Error test: image too large
 ---------------------------
 
-Try this::
+Test #27 ::
 
   nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
+
+*Return value: 1 *
 
 Error test: Illegal (negative) arguments
 ----------------------------------------
 
-Try this::
+Test #28 ::
 
   nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
+
+*Return value: 1 *
 
 Error test: Unsupported feature
 -------------------------------
 
-Try this::
+Test #29 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
+
+*Return value: 1 *
 
 Error test: Unsupported file format
 -----------------------------------
 
-Try this::
+Test #30 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
+
+*Return value: 1 *
 
 Local actions: copy, link and move
 ==================================
@@ -242,49 +302,67 @@ Local actions: copy, link and move
 Move the resulting file to specified location
 ---------------------------------------------
 
-Try this::
+Test #31 ::
 
   nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+*Return value: 0 *
+*Return value: 0 *
 
 Copy the resulting file to specified location
 ---------------------------------------------
 
-Try this::
+Test #32 ::
 
   nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+*Return value: 0 *
+*Return value: 0 *
 
 Link the resulting file to specified location
 ---------------------------------------------
 
-Try this::
+Test #33 ::
 
   nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+*Return value: 0 *
+*Return value: 0 *
 
 Link the resulting file to SHORTCUT (non-timestamped) directory
 ---------------------------------------------------------------
 
-Try this::
+Test #34 ::
 
   nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+*Return value: 0 *
 
 Link the resulting file, as LATEST one
 --------------------------------------
 
-Try this::
+Test #35 ::
 
   nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
+
+*Return value: 0 *
 
 Cmd and Http interplay test
 ===========================
 
-Try this::
+Test #36 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
   http://localhost:8080/nutshell/NutShell?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+*Return value: 0 *
 
 Meteorological...
 =================
 
-Try this::
+Test #38 ::
 
   nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
+
+*Return value: 0 *
