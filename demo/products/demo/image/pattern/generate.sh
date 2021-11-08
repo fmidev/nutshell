@@ -17,8 +17,9 @@ fi
 
 # Check 1: size limit
 if (( WIDTH <= 0 )) || (( HEIGHT <= 0 )); then
-    # 416 Range Not Satisfiable
-    echo "416 Negative image dimensions: ($WIDTH x $HEIGHT)"
+    # 400 Bad request
+    # 416 Range Not Satisfiable [ wget returns 0! ]
+    echo "400 Negative image dimensions: ($WIDTH x $HEIGHT)"
     exit 1
 fi
 
@@ -26,7 +27,7 @@ fi
 FORMAT=${FORMAT:-'png'}
 if [ $FORMAT != 'png' ] && [ $FORMAT != 'jpg' ] && [ $FORMAT != 'sh' ]; then
     # 415 Unsupported Media Type
-    echo "416 Format not 'png' or 'jpg' (or .sh)"
+    echo "415 Format not 'png' or 'jpg' (or .sh)"
     exit 1
 fi
     

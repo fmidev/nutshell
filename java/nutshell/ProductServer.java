@@ -69,13 +69,18 @@ public class ProductServer { //extends Cache {
 	 */
 	public Path setLogFile(String label){
 		try {
-			Path p = Paths.get("nutshell","log", String.format("nutshell-%s-%s.log",
+			// "nutshell",
+			/*
+			Path p = Paths.get("log", String.format("nutshell-%s-%s.log",
 					logFilenameTimeFormat.format(System.currentTimeMillis()), label));
 			p = ensureFile(cacheRoot, p);
+			 */
+			Path p = Paths.get("/tmp", String.format("nutshell-%s-%s.log",
+					logFilenameTimeFormat.format(System.currentTimeMillis()), label));
 			log.setLogFile(p);
 			log.debug(setup.toString());
 			return p;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.setLogFile(null);
 			return null;
 		}
@@ -1329,6 +1334,7 @@ public class ProductServer { //extends Cache {
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
 			if (attr.isRegularFile() || attr.isSymbolicLink()) {
 				try {
+					log.note(String.format("Deleting file: %s", file));
 					Files.delete(file);
 				} catch (IOException e) {
 					log.warn(e.toString());
@@ -1340,9 +1346,15 @@ public class ProductServer { //extends Cache {
 		// Print each directory visited.
 		@Override
 		public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+
+			// Prevent removing cacheRoot
+			// Todo: fix clearCache
+			if (dir.endsWith("cache"))
+				return CONTINUE;
+
 			try {
+				log.debug(String.format("Delete dir: %s", dir));
 				Files.delete(dir);
-				log.debug(String.format("deleted dir: %s", dir));
 			} catch (IOException e) {
 				log.warn(e.toString());
 			}

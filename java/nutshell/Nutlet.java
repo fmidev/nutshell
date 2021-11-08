@@ -380,7 +380,7 @@ public class Nutlet extends HttpServlet {
 					for (Map.Entry<String, String> e : task.inputs.entrySet()) {
 						String inputFilename = e.getValue();
 						//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
-						String url = String.format("%s%s?actions=TEST&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
+						String url = String.format("%s%s?actions=DEBUG&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
 						linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
 						//Object inp = task.retrievedInputs.get(e.getKey());
 						//if ()

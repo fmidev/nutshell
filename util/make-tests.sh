@@ -5,6 +5,28 @@
 LOG='tests/nutshell.log'
 mkdir --parents tests
 
+# RST doc file
+DOC_FILE=sphinx/source/nutshell-tests.rst
+
+cat >  $DOC_FILE <<EOF
+.. NutShell test demo doc file
+   generated automatically by
+   ${0}
+   ${USER}@${HOSTNAME}
+   (do not edit!)
+
+.. _tests:
+
+=====
+Tests
+=====
+
+This tests are run prior to publishing a release. The tests apply both command line invocations
+and http queries.
+   
+
+EOF
+
 echo "Reading conf file"
 export CACHE_ROOT 
 source nutshell.cnf
@@ -24,9 +46,13 @@ VT100UTILS=${0%/*}'/vt100utils.sh'
 echo $VT100UTILS
 source $VT100UTILS
 
+
+
+
 shopt -s expand_aliases
 alias echo_title='vt100echo blue-bg'  # ,underline'
 alias echo_comment='vt100echo blue -'
+
 alias echo_note='vt100echo cyan'
 alias echo_cmd='vt100echo bright'
 alias echo_debug='vt100echo dark'
@@ -34,7 +60,45 @@ alias echo_error='vt100echo red [ERROR] '
 alias echo_warn='vt100echo yellow [WARNING] '
 alias echo_ok='vt100echo green [OK] '
 
+
+# Super Echo
+function secho(){
+    local style=$1
+    shift
+    
+    case $style in
+	title)
+	    echo    >> $DOC_FILE
+	    echo $* >> $DOC_FILE
+	    echo ${*//?/=} >> $DOC_FILE
+	    echo    >> $DOC_FILE
+	    vt100echo blue-bg $*
+	    ;;
+	title2)
+	    echo    >> $DOC_FILE
+	    echo $* >> $DOC_FILE
+	    echo ${*//?/-} >> $DOC_FILE
+	    echo    >> $DOC_FILE
+	    vt100echo blue    $*
+	    ;;
+	text)
+	    echo $* >> $DOC_FILE
+	    echo    >> $DOC_FILE
+	    vt100echo blue    $*
+	    ;;
+	*)
+	    vt100echo dark $*
+	    ;;
+    esac
+    #echo_$style $*
+}
+
+
 echo_note CACHE_ROOT=$CACHE_ROOT
+#secho title CACHE_ROOT=$CACHE_ROOT
+#secho comment CACHE_ROOT=$CACHE_ROOT
+
+
 
 counter=0
 
@@ -51,9 +115,12 @@ function run_cmdline(){
     counter=$(( counter + 1 ))
     LOG=`printf 'tests/nutshell-%02d-cmd.log' $counter `
 
+    local cmd="nutshell $*"
     echo_cmd "nutshell" $*
     echo $cmd > $LOG.cmd
-    nutshell $* &> $LOG
+    echo -e "Test #$counter ::\n\n  $cmd\n" >> $DOC_FILE
+    #echo "  $cmd" >> $DOC_FILE
+    eval $cmd &> $LOG
     #fgrep 'Final status:' $LOG > $LOG.$counter
     
 }
@@ -68,6 +135,7 @@ function run_http(){
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd
+    echo -e "  ${NUTSHELL_URL}?${params}\n" >> $DOC_FILE
     echo $cmd > $LOG.cmd
     eval $cmd &>> $LOG
     # cp $LOG $LOG.$counter
@@ -102,6 +170,7 @@ function check(){
 	exit 1
     else
 	echo_ok "return value: $STATUS"
+	echo "*Return value: $STATUS *" >> $DOC_FILE
     fi
 
     
@@ -128,98 +197,106 @@ function check(){
 
 
 echo
-echo_title "Basic tests (cmd line only)"
+secho title "Initial tests"
+
+secho text  "The following commands are for command line only."
 
 
-echo_comment "Help command"
+secho title2 "Help command"
 run_cmdline --help 
 check 0 
 
-echo_comment "Unknown command"
+secho title2 "Unknown command"
 run_cmdline --foo
 check 1 
 
+secho title2 "Undefined action"
+$cmd --actions FOO
+check 1 
+
+secho title2 "Undefined verbosity level"
+$cmd --log_level FOO
+check 1 
+    
+secho title2 "Parsing error"
+$cmd foo.pdf
+check 1 
 
 
-echo_title "Testing Cmd and Http interfaces"
+secho title "Testing Cmd and Http interfaces"
 
 #for cmd in run_cmdline run_http; do
 LOOP=${LOOP:-'cmdline,http'}
 for i in ${LOOP//,/ } ; do    
 
+    secho title "Tests ($i)"
+    
     cmd=run_$i
     echo $counter
     
     set_file 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     # set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-    echo_comment "Undefined action"
-    run_cmdline --actions FOO
-    check 1 
-    
-    echo_comment "Parsing error"
-    run_cmdline foo.pdf
-    check 1 
 
-    echo_comment "Default action (MAKE)"
+    secho title2 "Default action (MAKE)"
     $cmd $FILE
     check 0 -f $OUTDIR/$FILE
     # check 0 
 
-    echo_comment "Does product file exist?"
+    secho title2 "Does product file exist?"
     $cmd --exists $FILE 
     check 0 
 
-    echo_comment "Action: DELETE product file"
+    secho title2 "Action: DELETE product file"
     $cmd --delete $FILE 
     check 0 ! -f $OUTDIR/$FILE
 
-    #echo_comment "Now, product file should not exist"
+    #secho title2 "Now, product file should not exist"
     $cmd --exists $FILE 
     check 1 
 
-    echo_comment "Action: MAKE product (generate, if nonexistent)"
+    secho title2 "Action: MAKE product (generate, if nonexistent)"
     $cmd --make $FILE 
     check 0 -f $OUTDIR/$FILE
 
-    echo_comment "Action: GENERATE (unconditionally)"
+    secho title2 "Action: GENERATE (unconditionally)"
     $cmd --make $FILE 
     check 0 -f $OUTDIR/$FILE
 
 
     #echo
-    echo_comment "Try to parameters in wrong order (generated file has them in order)"
+    secho title2 "Parameters in wrong order (generated file has them in order)"
+    secho text   "Generated file has them in order."
     set_file demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
     run_cmdline --generate $FILE
     check 0 ! -f $OUTDIR/$FILE
 
-    echo 
-    echo_comment "Product error message tests..."
+    secho title2 "Product error messages"
     set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     parse $FILE
-    echo_comment "Check that test product works"
-    run_cmdline --generate $FILE
+    secho title2 "Initial check - valid generation"
+    $cmd --generate $FILE
     check 0  -f $OUTDIR/$FILE
     
-    echo_comment "Error test: image too large"
+    secho title2 "Error test: image too large"
     set_file demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
-    run_cmdline --generate $FILE
+    $cmd --generate $FILE
     check 1
     
-    echo_comment "Error test: Illegal (negative) arguments"
+    secho title2 "Error test: Illegal (negative) arguments"
     set_file demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
-    run_cmdline --generate $FILE
+    $cmd --generate $FILE
     check 1
     
-    echo_comment "Error test: Unsupported feature"
+    secho title2 "Error test: Unsupported feature"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
-    run_cmdline --generate $FILE
+    $cmd --generate $FILE
     check 1
     
-    echo_comment "Error test: Unsupported file format"
+    secho title2 "Error test: Unsupported file format"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
-    run_cmdline --generate $FILE
+    $cmd --generate $FILE
     check 1
     
     
@@ -227,31 +304,32 @@ done
 
 set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-echo_title "Local actions test (copy, link and move)"
-echo_comment "Move the resulting file to specified location"
+secho title "Local actions: copy, link and move"
+
+secho title2 "Move the resulting file to specified location"
 run_cmdline --move . --make $FILE 
 check 0 ! -f $OUTDIR/$FILE
 check 0   -f ./$FILE
 
-echo_comment "Copy the resulting file to specified location"
+secho title2 "Copy the resulting file to specified location"
 run_cmdline --copy . --make $FILE 
 check 0  -f $OUTDIR/$FILE
 check 0  -f ./$FILE
 #rm -v ./$FILE
 
-echo_comment "Link the resulting file to specified location"
+secho title2 "Link the resulting file to specified location"
 run_cmdline --link . --make $FILE 
 check 0  -f $OUTDIR/$FILE
 check 0  -f ./$FILE
 #rm -v ./$FILE
 
-echo_comment "Link the resulting file to SHORTCUT (non-timestamped) directory"
+secho title2 "Link the resulting file to SHORTCUT (non-timestamped) directory"
 run_cmdline --shortcut $FILE
 #check 0 -f $OUTDIR/$FILE
 check 0 -L $OUTDIR_SHORT/$FILE
 #check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 
-echo_comment "Link the resulting file, as LATEST one"
+secho title2 "Link the resulting file, as LATEST one"
 run_cmdline --latest $FILE
 #check 0 -f $OUTDIR/$FILE
 #check 0 -L $OUTDIR_SHORT/$FILE
@@ -261,7 +339,7 @@ check 0 -L $OUTDIR_SHORT/$LATEST_FILE
 
 
 
-echo_title "Cmd and Http interplay test"
+secho title "Cmd and Http interplay test"
 
 set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
@@ -270,9 +348,11 @@ run_http     --delete   $FILE
 check 0 ! -f $OUTDIR/$FILE
 
 
-echo_title "Meteorological..."
+secho title "Meteorological..."
 set_file 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
 run_cmdline --generate $FILE
 check 0 -f $OUTDIR/$FILE
 
+
+secho note Finished
 
