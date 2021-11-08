@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Basic tests (cmd line only) &#8212; NutShell 1.0 documentation</title>
+    <title>Tests &#8212; NutShell 1.0 documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,7 +16,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/nutshell-logo.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="NutShell Code" href="nutshell-code.html" /> 
   </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
@@ -26,6 +27,8 @@
         <div class="headertitle"><a
           href="index.html">NutShell 1.0 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="nutshell-code.html" title="NutShell Code"
+             accesskey="P">previous</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
           <a href="genindex.html" title="General Index"
@@ -42,128 +45,273 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="basic-tests-cmd-line-only">
-<h1>Basic tests (cmd line only)<a class="headerlink" href="#basic-tests-cmd-line-only" title="Permalink to this headline">¶</a></h1>
-<p>Help command</p>
-<blockquote>
-<div>nutshell –help</div></blockquote>
-<p>Unknown command</p>
-<blockquote>
-<div>nutshell –foo</div></blockquote>
+  <div class="section" id="tests">
+<span id="id1"></span><h1>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h1>
+<p>This tests are run prior to publishing a release. The tests apply both command line invocations
+and http queries.</p>
+<div class="section" id="initial-tests">
+<h2>Initial tests<a class="headerlink" href="#initial-tests" title="Permalink to this headline">¶</a></h2>
+<p>The following commands are for command line only.</p>
+<div class="section" id="help-command">
+<h3>Help command<a class="headerlink" href="#help-command" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –help</dd>
+</dl>
+</div>
+<div class="section" id="unknown-command">
+<h3>Unknown command<a class="headerlink" href="#unknown-command" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –foo</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="testing-cmd-and-http-interfaces">
-<h1>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h1>
-<p>Undefined action</p>
-<blockquote>
-<div>nutshell –actions FOO</div></blockquote>
-<p>Parsing error</p>
-<blockquote>
-<div>nutshell foo.pdf</div></blockquote>
-<p>Default action (MAKE)</p>
-<blockquote>
-<div>nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Does product file exist?</p>
-<blockquote>
-<div>nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Action: DELETE product file</p>
-<blockquote>
-<div>nutshell –delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Action: MAKE product (generate, if nonexistent)</p>
-<blockquote>
-<div>nutshell –make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Action: GENERATE (unconditionally)</p>
-<blockquote>
-<div>nutshell –make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Try to parameters in wrong order (generated file has them in order)</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png</div></blockquote>
-<p>Product error message tests…</p>
-<p>Check that test product works</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Error test: image too large</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png</div></blockquote>
-<p>Error test: Illegal (negative) arguments</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png</div></blockquote>
-<p>Error test: Unsupported feature</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png</div></blockquote>
-<p>Error test: Unsupported file format</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf</div></blockquote>
-<p>Undefined action</p>
-<blockquote>
-<div>nutshell –actions FOO</div></blockquote>
-<p>Parsing error</p>
-<blockquote>
-<div>nutshell foo.pdf</div></blockquote>
-<p>Default action (MAKE)</p>
+<h2>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="tests-cmdline">
+<h2>Tests (cmdline)<a class="headerlink" href="#tests-cmdline" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="undefined-action">
+<h3>Undefined action<a class="headerlink" href="#undefined-action" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –actions FOO</dd>
+</dl>
+</div>
+<div class="section" id="parsing-error">
+<h3>Parsing error<a class="headerlink" href="#parsing-error" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell foo.pdf</dd>
+</dl>
+</div>
+<div class="section" id="default-action-make">
+<h3>Default action (MAKE)<a class="headerlink" href="#default-action-make" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="does-product-file-exist">
+<h3>Does product file exist?<a class="headerlink" href="#does-product-file-exist" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="action-delete-product-file">
+<h3>Action: DELETE product file<a class="headerlink" href="#action-delete-product-file" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+<dt>Try this: ::</dt>
+<dd>nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="action-make-product-generate-if-nonexistent">
+<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#action-make-product-generate-if-nonexistent" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="action-generate-unconditionally">
+<h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#action-generate-unconditionally" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="parameters-in-wrong-order-generated-file-has-them-in-order">
+<h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#parameters-in-wrong-order-generated-file-has-them-in-order" title="Permalink to this headline">¶</a></h3>
+<p>Generated file has them in order.</p>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png</dd>
+</dl>
+</div>
+<div class="section" id="product-error-messages">
+<h3>Product error messages<a class="headerlink" href="#product-error-messages" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="initial-check-valid-generation">
+<h3>Initial check - valid generation<a class="headerlink" href="#initial-check-valid-generation" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="error-test-image-too-large">
+<h3>Error test: image too large<a class="headerlink" href="#error-test-image-too-large" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png</dd>
+</dl>
+</div>
+<div class="section" id="error-test-illegal-negative-arguments">
+<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#error-test-illegal-negative-arguments" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png</dd>
+</dl>
+</div>
+<div class="section" id="error-test-unsupported-feature">
+<h3>Error test: Unsupported feature<a class="headerlink" href="#error-test-unsupported-feature" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png</dd>
+</dl>
+</div>
+<div class="section" id="error-test-unsupported-file-format">
+<h3>Error test: Unsupported file format<a class="headerlink" href="#error-test-unsupported-file-format" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="tests-http">
+<h2>Tests (http)<a class="headerlink" href="#tests-http" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Undefined action<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –actions FOO</dd>
+</dl>
+</div>
+<div class="section" id="id3">
+<h3>Parsing error<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell foo.pdf</dd>
+</dl>
+</div>
+<div class="section" id="id4">
+<h3>Default action (MAKE)<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Does product file exist?</p>
+</div>
+<div class="section" id="id5">
+<h3>Does product file exist?<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Action: DELETE product file</p>
+</div>
+<div class="section" id="id6">
+<h3>Action: DELETE product file<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a>
 <a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Action: MAKE product (generate, if nonexistent)</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Action: GENERATE (unconditionally)</p>
-<blockquote>
-<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
-<p>Try to parameters in wrong order (generated file has them in order)</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png</div></blockquote>
-<p>Product error message tests…</p>
-<p>Check that test product works</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</div></blockquote>
-<p>Error test: image too large</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png</div></blockquote>
-<p>Error test: Illegal (negative) arguments</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png</div></blockquote>
-<p>Error test: Unsupported feature</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png</div></blockquote>
-<p>Error test: Unsupported file format</p>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf</div></blockquote>
 </div>
-<div class="section" id="local-actions-test-copy-link-and-move">
-<h1>Local actions test (copy, link and move)<a class="headerlink" href="#local-actions-test-copy-link-and-move" title="Permalink to this headline">¶</a></h1>
-<p>Move the resulting file to specified location</p>
+<div class="section" id="id7">
+<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <blockquote>
-<div>nutshell –move . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
-<p>Copy the resulting file to specified location</p>
+<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
+</div>
+<div class="section" id="id8">
+<h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <blockquote>
-<div>nutshell –copy . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
-<p>Link the resulting file to specified location</p>
-<blockquote>
-<div>nutshell –link . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
-<p>Link the resulting file to SHORTCUT (non-timestamped) directory</p>
-<blockquote>
-<div>nutshell –shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
-<p>Link the resulting file, as LATEST one</p>
-<blockquote>
-<div>nutshell –latest 201012161615_test.ppmforge_DIMENSION=2.5.png</div></blockquote>
+<div><a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
+</div>
+<div class="section" id="id9">
+<h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<p>Generated file has them in order.</p>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png</dd>
+</dl>
+</div>
+<div class="section" id="id10">
+<h3>Product error messages<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id11">
+<h3>Initial check - valid generation<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</dd>
+</dl>
+</div>
+<div class="section" id="id12">
+<h3>Error test: image too large<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png</dd>
+</dl>
+</div>
+<div class="section" id="id13">
+<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png</dd>
+</dl>
+</div>
+<div class="section" id="id14">
+<h3>Error test: Unsupported feature<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png</dd>
+</dl>
+</div>
+<div class="section" id="id15">
+<h3>Error test: Unsupported file format<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="local-actions-copy-link-and-move">
+<h2>Local actions: copy, link and move<a class="headerlink" href="#local-actions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="move-the-resulting-file-to-specified-location">
+<h3>Move the resulting file to specified location<a class="headerlink" href="#move-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –move . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</dd>
+</dl>
+</div>
+<div class="section" id="copy-the-resulting-file-to-specified-location">
+<h3>Copy the resulting file to specified location<a class="headerlink" href="#copy-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –copy . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</dd>
+</dl>
+</div>
+<div class="section" id="link-the-resulting-file-to-specified-location">
+<h3>Link the resulting file to specified location<a class="headerlink" href="#link-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –link . –make 201012161615_test.ppmforge_DIMENSION=2.5.png</dd>
+</dl>
+</div>
+<div class="section" id="link-the-resulting-file-to-shortcut-non-timestamped-directory">
+<h3>Link the resulting file to SHORTCUT (non-timestamped) directory<a class="headerlink" href="#link-the-resulting-file-to-shortcut-non-timestamped-directory" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png</dd>
+</dl>
+</div>
+<div class="section" id="link-the-resulting-file-as-latest-one">
+<h3>Link the resulting file, as LATEST one<a class="headerlink" href="#link-the-resulting-file-as-latest-one" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –latest 201012161615_test.ppmforge_DIMENSION=2.5.png</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="cmd-and-http-interplay-test">
-<h1>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-<a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></div></blockquote>
+<h2>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+<a class="reference external" href="http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">http://localhost:8080/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></dd>
+</dl>
 </div>
 <div class="section" id="meteorological">
-<h1>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div>nutshell –generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png</div></blockquote>
+<h2>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Try this: ::</dt>
+<dd>nutshell –generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png</dd>
+</dl>
+</div>
 </div>
 
 
@@ -173,7 +321,7 @@ nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_W
         </div>
         <div class="sidebar">
           <h3>Table of Contents</h3>
-          <ul>
+          <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-commands.html">Commands and status codes</a></li>
@@ -182,6 +330,59 @@ nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_W
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initial-tests">Initial tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#help-command">Help command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unknown-command">Unknown command</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tests-cmdline">Tests (cmdline)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#undefined-action">Undefined action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parsing-error">Parsing error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-action-make">Default action (MAKE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#does-product-file-exist">Does product file exist?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#action-delete-product-file">Action: DELETE product file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#action-make-product-generate-if-nonexistent">Action: MAKE product (generate, if nonexistent)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#action-generate-unconditionally">Action: GENERATE (unconditionally)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameters-in-wrong-order-generated-file-has-them-in-order">Parameters in wrong order (generated file has them in order)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#product-error-messages">Product error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initial-check-valid-generation">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-test-image-too-large">Error test: image too large</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-test-illegal-negative-arguments">Error test: Illegal (negative) arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-test-unsupported-feature">Error test: Unsupported feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-test-unsupported-file-format">Error test: Unsupported file format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tests-http">Tests (http)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Undefined action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Parsing error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Default action (MAKE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Does product file exist?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Action: DELETE product file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Action: MAKE product (generate, if nonexistent)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Action: GENERATE (unconditionally)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Parameters in wrong order (generated file has them in order)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Product error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Error test: image too large</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Error test: Illegal (negative) arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Error test: Unsupported feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Error test: Unsupported file format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#local-actions-copy-link-and-move">Local actions: copy, link and move</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#move-the-resulting-file-to-specified-location">Move the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#copy-the-resulting-file-to-specified-location">Copy the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#link-the-resulting-file-to-specified-location">Link the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#link-the-resulting-file-to-shortcut-non-timestamped-directory">Link the resulting file to SHORTCUT (non-timestamped) directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#link-the-resulting-file-as-latest-one">Link the resulting file, as LATEST one</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cmd-and-http-interplay-test">Cmd and Http interplay test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#meteorological">Meteorological…</a></li>
+</ul>
+</li>
 </ul>
 
           <div role="search">
@@ -202,6 +403,8 @@ nutshell –exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_W
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
+            <a href="nutshell-code.html" title="NutShell Code"
+              >previous</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
             <a href="genindex.html" title="General Index"
