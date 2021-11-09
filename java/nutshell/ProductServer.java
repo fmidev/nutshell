@@ -899,8 +899,9 @@ public class ProductServer { //extends Cache {
 						Files.setPosixFilePermissions(this.outputPath, filePerms);
 					} catch (IOException e) {
 						this.log.warn(e.toString());
-						this.log.warn(String.format("filePerms: %s", filePerms));
-						log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
+						log.warn(String.format("Failed in setting perms %s for file: %s", filePerms, this.outputPath));
+						// this.log.warn(String.format("filePerms: %s", filePerms));
+						//log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
 						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
 
