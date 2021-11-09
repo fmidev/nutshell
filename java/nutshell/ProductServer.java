@@ -1490,6 +1490,7 @@ public class ProductServer { //extends Cache {
 							} catch (NoSuchFieldException e2) {
 								log.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
 								log.error("No such verbosity level: " + arg);
+								System.exit(4);
 								return;
 							}
 						}

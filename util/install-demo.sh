@@ -14,4 +14,4 @@ fi
 
 echo "Under construction..."
 echo "Consider: "
-echo ln -sf $PWD/demo/products/demo /opt/nutshell/products
+echo ln -sf $PWD/demo/products/demo $PRODUCT_ROOT/

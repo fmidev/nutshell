@@ -11,7 +11,7 @@ SIZE="${WIDTH},${HEIGHT}"
 # Check 1: size limit
 if (( WIDTH * HEIGHT > 1000000 )); then
     # 413 Payload Too Large
-    echo "416 Resulting array too large ($WIDTH x $HEIGHT) = $(( WIDTH * HEIGHT / 1000 )) kB"
+    echo "413 Resulting array too large ($WIDTH x $HEIGHT) = $(( WIDTH * HEIGHT / 1000 )) kB"
     exit 1
 fi
 

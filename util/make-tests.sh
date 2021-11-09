@@ -118,7 +118,14 @@ function run_cmdline(){
     local cmd="nutshell $*"
     echo_cmd "nutshell" $*
     echo $cmd > $LOG.cmd
-    echo -e "Test #$counter ::\n\n  $cmd\n" >> $DOC_FILE
+    echo -e "Test $counter ::\n\n  $cmd\n" >> $DOC_FILE
+    #echo -e ".. code-block::\n\n  $cmd\n" >> $DOC_FILE
+    #echo ".. code-block::" >> $DOC_FILE
+    #echo "   :caption: Test $i" >> $DOC_FILE
+    #echo >> $DOC_FILE
+    #echo "       $cmd" >> $DOC_FILE
+    echo >> $DOC_FILE
+    #echo -e "  ::\n\n  $cmd\n" >> $DOC_FILE
     #echo "  $cmd" >> $DOC_FILE
     eval $cmd &> $LOG
     #fgrep 'Final status:' $LOG > $LOG.$counter
@@ -135,7 +142,9 @@ function run_http(){
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd
-    echo -e "  ${NUTSHELL_URL}?${params}\n" >> $DOC_FILE
+    # echo -e "  ${NUTSHELL_URL}?${params}\n" >> $DOC_FILE
+    echo -e "\`\$NUTSHELL?${params} <${HTTP_PREFIX}/NutShell?${params}>\`_\n" >> $DOC_FILE
+    # `Python <http://www.python.org/>`_
     echo $cmd > $LOG.cmd
     eval $cmd &>> $LOG
     # cp $LOG $LOG.$counter
@@ -170,7 +179,7 @@ function check(){
 	exit 1
     else
 	echo_ok "return value: $STATUS"
-	echo "*Return value: $STATUS *" >> $DOC_FILE
+	echo "*Return value: $STATUS* " >> $DOC_FILE
     fi
 
     
@@ -211,15 +220,15 @@ run_cmdline --foo
 check 1 
 
 secho title2 "Undefined action"
-$cmd --actions FOO
+run_cmdline --actions FOO
 check 1 
 
-secho title2 "Undefined verbosity level"
-$cmd --log_level FOO
-check 1 
+#secho title2 "Undefined verbosity level"
+#run_cmdline --log_level FOO
+#xcheck 1 
     
 secho title2 "Parsing error"
-$cmd foo.pdf
+run_cmdline foo.pdf
 check 1 
 
 
@@ -269,7 +278,7 @@ for i in ${LOOP//,/ } ; do
     secho text   "Generated file has them in order."
     set_file demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
-    run_cmdline --generate $FILE
+    $cmd --generate $FILE
     check 0 ! -f $OUTDIR/$FILE
 
     secho title2 "Product error messages"
@@ -337,14 +346,27 @@ check 0 -L $OUTDIR_SHORT/$LATEST_FILE
 
 
 
-
-
 secho title "Cmd and Http interplay test"
 
 set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
+secho title2 "Generate on command line, delete through HTTP"
+
 run_cmdline --generate $FILE
+
 run_http     --delete   $FILE 
+
+check 0 ! -f $OUTDIR/$FILE
+
+
+secho title2 "Generate through HTTP, delete on command line"
+
+run_http    --generate $FILE
+
+run_cmdline --delete   $FILE 
+
+
+
 check 0 ! -f $OUTDIR/$FILE
 
 
