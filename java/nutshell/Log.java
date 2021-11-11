@@ -1,7 +1,6 @@
 package nutshell;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -11,20 +10,46 @@ import java.util.Map;
 
 public class Log {
 
-	
+	final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
+
 	public Log() {
 		startTime = System.currentTimeMillis();
+		//numberFormat = NumberFormat.getIntegerInstance();
 		numberFormat.setMinimumIntegerDigits(5);
 		printStream = System.err;
 	}
 
-	public Log(String s) {
+	/** Create a log similar to an existing log.
+	 *
+	 *  This constructor is handy when creating...
+	 *
+	 *  Note: @printStream is initialized to @System.err , not to that of the mainLog
+	 *
+	 * @param log - existing log
+	 */
+	public Log(Log log) {
+		startTime = System.currentTimeMillis();
+		// TODO: copy
+		numberFormat.setMinimumIntegerDigits(log.numberFormat.getMinimumIntegerDigits());
+		setVerbosity(log.getVerbosity());
+		printStream = System.err;
+	}
+
+	/** Create a log with a given verbosity.
+	 *
+	 * @param name
+	 */
+	public Log(String name) {
 		startTime = System.currentTimeMillis();
 		numberFormat.setMinimumIntegerDigits(5);
-		this.setOwner(s);
+		this.setName(name);
 		printStream = System.err;
 	}
 
+	/** Create a log with a given verbosity.
+	 *
+	 * @param verbosity
+	 */
 	public Log(int verbosity) {
 		this.verbosity = verbosity;
 		startTime = System.currentTimeMillis();
@@ -32,22 +57,121 @@ public class Log {
 		printStream = System.err;
 	}
 
-	String owner = "";
-	
-	public void setOwner(String owner) {
-		this.owner = owner;
+	/** Create a log with a name prefixed with the name of a existing log.
+	 *
+	 *  This constructor is handy when creating a log for a child process.
+	 *
+	 *  Note: @printStream is initialized to @System.err , not to that of the mainLog
+	 *
+	 * @param localName
+	 * @param mainLog - existing log ("parent" or main log)
+	 */
+	public Log(String localName, Log mainLog) {
+		startTime = System.currentTimeMillis();
+		if (mainLog != null){
+			numberFormat.setMinimumIntegerDigits(mainLog.numberFormat.getMinimumIntegerDigits());
+			this.setName(mainLog.getName() + '.' + localName);
+		}
+		else {
+			numberFormat.setMinimumIntegerDigits(5);
+			this.setName(localName);
+		}
+		printStream = System.err;
 	}
+
+
+	String name = "";
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+
+	public void setVerbosity(int verbosity) {
+		this.verbosity = verbosity;
+	}
+
+	public void setVerbosity(String verbosity) throws NoSuchFieldException {
+		for (Map.Entry<Integer, String> entry: statusCodes.entrySet()){
+			if (entry.getValue().equals(verbosity)) {
+				this.verbosity = entry.getKey();
+				return; // true
+			}
+		}
+		throw new NoSuchFieldException(verbosity);
+		//return false;
+	}
+
+	public int getVerbosity() {
+		return verbosity;
+	}
+
+
 
 	public int getStatus() {
 		return status;
 	}
 
-	public Log child(String label){
-		Log log = new Log(this.owner + "." + label);
-		log.printStream = this.printStream;
+	/*
+	public Log getChild(String childName){
+		Log log = new Log(this.name + "." + childName);
+		log.printStream = System.err; //this.printStream;
 		log.verbosity = this.verbosity;
 		return log;
 	}
+
+	 */
+
+	public PrintStream getPrintStream() {
+		return this.printStream;
+	}
+
+	@Override
+	public String toString() {
+		return buffer.toString();
+	}
+
+	public File logFile = null;
+
+	private PrintStream printStream;
+
+
+	public static final int FATAL = 1;
+
+	public static final int ERROR = 2;
+	public static final int WARNING = 3;
+
+	/// Action completed unsuccessfully. // ?
+	public static final int FAIL = 4;
+
+	/// Important information
+	public static final int NOTE = 5;
+
+	/// Less important information
+	public static final int INFO = 6;
+
+	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
+	public static final int WAIT = 7;
+
+	/// Action completed successfully.
+	public static final int OK = 8;
+
+	/// Level under DEBUG.
+	public static final int VERBOSE = 9;
+
+	/// Sometimes informative messages.
+	public static final int DEBUG = 10;
+
+	/// Verbose level. Messages equal or lower value than will be communicated.
+	protected int verbosity = VERBOSE;
+
+	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
+	public boolean VT100 = false;
+
 
 	public Log fatal(String message){
 		return log(FATAL, message);
@@ -88,55 +212,8 @@ public class Log {
 	public Log debug(String message){
 		return log(DEBUG, message);
 	}
-	
-	// Consider INFO?
-	/*
-	public Log chat(String message){
-		return append(CHAT, message);
-	}
-	*/
 
 
-	@Override
-	public String toString() {
-		return buffer.toString();
-	}
-	
-	public PrintStream printStream = System.err;
-
-	public static final int FATAL = 1;
-
-	public static final int ERROR = 2;
-	public static final int WARNING = 3;
-
-	/// Action completed unsuccessfully. // ?
-	public static final int FAIL = 4;
-
-	/// Important information
-	public static final int NOTE = 5;
-
-	/// Less important information
-	public static final int INFO = 6;
-
-	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR. 
-	public static final int WAIT = 7;
-
-	/// Action completed successfully. 
-	public static final int OK = 8;
-	
-	/// Level under DEBUG. 
-	public static final int VERBOSE = 9;
-
-	/// Sometimes informative messages.
-	public static final int DEBUG = 10;
-
-	/// Verbose level. Messages equal or lower value than will be communicated.
-	protected int verbosity = VERBOSE;
-
-	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
-	public boolean VT100 = false;
-
-	public File logFile = null;
 
 	//final static Map<String, Integer> ssCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
 	final static Map<Integer, String> statusCodes; // = ClassUtils.getConstants(Log.class); //new HashMap<>();
@@ -197,8 +274,8 @@ public class Log {
 		if (this.status <= verbosity){
 			buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
 			buffer.append(String.format("%7s", statusCodes.get(this.status)));
-			if (owner != null)
-				buffer.append(':').append(' ').append(owner);
+			if (name != null)
+				buffer.append(':').append(' ').append(name);
 
 			// Ensure printStream to avoid infinite buffer growth
 			// TODO: design control for buffer size.
@@ -236,11 +313,11 @@ public class Log {
 		//append(status,"");
 	}
 
-	public void setLogFile(Path path){
+	public boolean logFileIsSet(){
+		return (this.logFile != null);
+	}
 
-		if (this.logFile != null){
-			// TODO: close!
-		}
+	public void setLogFile(Path path){
 
 		if (path == null){
 			this.printStream = System.err;
@@ -248,12 +325,11 @@ public class Log {
 			return;
 		}
 
-		//Path logPath = cacheRoot.resolve(relativeLogPath);
+		PrintStream oldPrintStream = this.printStream;
 		try {
-			//Path logPath = ensureWritableFile(cacheRoot, this.relativeLogPath);
 			this.logFile = path.toFile();
-			this.debug(String.format("Continuing log in file: %s", this.logFile));
 			FileOutputStream fw = new FileOutputStream(this.logFile);
+			this.debug(String.format("Continuing log in file: %s", this.logFile));
 			this.printStream = new PrintStream(fw);
 			//this.log.printStream = System.err;
 			this.setVerbosity(Log.DEBUG);
@@ -264,6 +340,7 @@ public class Log {
 			this.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 					String.format("Failed in creating log file: %s", path));
 		}
+		oldPrintStream.close();
 		/*
 		catch (IndexedException e) {
 			//e.printStackTrace(); //this.log.printStream);
@@ -273,33 +350,21 @@ public class Log {
 
 	};
 
-	/// TODO: FATAL = 20
+	@Override
+	protected void finalize() throws Throwable {
+		this.printStream.close();
+	}
 
 	long startTime;
 	//String lastMessage = null;
 	protected int status = 0;
 	final protected StringBuffer buffer = new StringBuffer();
-	final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
 
-	public void setVerbosity(int verbosity) {
-		this.verbosity = verbosity;
-	}
-
-	public void setVerbosity(String verbosity) throws NoSuchFieldException {
-		for (Map.Entry<Integer, String> entry: statusCodes.entrySet()){
-			if (entry.getValue().equals(verbosity)) {
-				this.verbosity = entry.getKey();
-				return; // true
-			}
-		}
-		throw new NoSuchFieldException(verbosity);
-		//return false;
-	}
 
 	public static void main(String[] args) {
 		
 		Log log = new Log();
-		log.printStream = null;
+		//log.printStream = null;
 
 		log.note("Starting");
 
@@ -321,9 +386,9 @@ public class Log {
 
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-	
-		String line = null;
+
 		try {
+			String line = null;
 			while (!(line = in.readLine()).isEmpty()) {
 				log.log((int) (Math.random() * 5.0), line);
 			}
@@ -331,21 +396,7 @@ public class Log {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		/*
-		while (true){
-			
-			try {
-				line = in.readLine();
-			} 
-			catch (IOException e) {
-			}
-			if (line.charAt(0) == 'q')
-				break;
-			log.log((int)(Math.random()*5.0),line);
-			
-		}
 
-		 */
 		System.out.println(log.buffer.toString());
 		System.out.println(log);
 	}

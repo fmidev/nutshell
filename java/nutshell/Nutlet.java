@@ -71,6 +71,9 @@ public class Nutlet extends HttpServlet {
 		confDir  = config.getInitParameter("confDir");
 		setup.putAll(readTomcatParameters()); // from ho
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
+		if (!productServer.log.logFileIsSet()){
+			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
+		}
 		httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 	}
 	
@@ -95,7 +98,7 @@ public class Nutlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 
-		productServer.setLogFile("tomcat8");
+		//productServer.setLogFile("tomcat8");
 
 
 		String productStr = request.getParameter("product");

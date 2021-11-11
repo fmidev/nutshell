@@ -64,19 +64,15 @@ public class ProductServer { //extends Cache {
 
 	/**
 	 *
-	 * @param label - Username of other identifier
+	 * @param pathFormat - absolute path of a filename, optionally containing '%s' expanded as timestamp.
 	 * @return
 	 */
-	public Path setLogFile(String label){
+	public Path setLogFile(String pathFormat){
+		if (pathFormat == null)
+			pathFormat = "/tmp/nutshell-%s.log";
 		try {
-			// "nutshell",
-			/*
-			Path p = Paths.get("log", String.format("nutshell-%s-%s.log",
-					logFilenameTimeFormat.format(System.currentTimeMillis()), label));
-			p = ensureFile(cacheRoot, p);
-			 */
-			Path p = Paths.get("/tmp", String.format("nutshell-%s-%s.log",
-					logFilenameTimeFormat.format(System.currentTimeMillis()), label));
+			Path p = Paths.get(String.format(pathFormat,
+					logFilenameTimeFormat.format(System.currentTimeMillis())));
 			log.setLogFile(p);
 			log.debug(setup.toString());
 			return p;
@@ -169,6 +165,14 @@ public class ProductServer { //extends Cache {
 		}
 		setup.put("fileGroupID", fileGroupID);
 
+		Object logPathFormat = setup.get("LOGFILE");
+		if (logPathFormat != null) {
+			Path p = setLogFile(logPathFormat.toString());
+			//System.err.println(String.format("Log file: ", p);
+		}
+		//logPathFormat = "./nutshell-" + System.getenv("USER")+"-%s.log";
+		// Path p = setLogFile(logPathFormat.toString());
+		//
 		// this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
@@ -452,14 +456,15 @@ public class ProductServer { //extends Cache {
 		 *
 		 * @param productStr
 		 * @param actions - definition how a product is retrieved and handled thereafter - @see #Actions
-		 * @param parentLog - utility for logging
+		 * @param parentLog - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
 		 */
 		public Task(String productStr, int actions, HttpLog parentLog) throws ParseException {
 
-			this.creationTime = System.currentTimeMillis();
-
+			// in LOG // this.creationTime = System.currentTimeMillis();
 			this.info = new ProductInfo(productStr);
+			this.log = new HttpLog("["+this.info.PRODUCT_ID+"]", parentLog);
+
 			this.filename = this.info.getFilename();
 			this.actions.set(actions);
 
@@ -481,20 +486,24 @@ public class ProductServer { //extends Cache {
 			this.outputPathTmp = outputDirTmp.resolve(filename);
 			this.storagePath   = storageRoot.resolve(this.relativeOutputDir).resolve(filename);
 
+			/*
 			if (parentLog != null){
-				this.log = parentLog.child("["+this.info.PRODUCT_ID+"]");
+				this.log = new HttpLog("["+this.info.PRODUCT_ID+"]", parentLog);
+				// this.log = parentLog.getChild("["+this.info.PRODUCT_ID+"]");"["+this.info.PRODUCT_ID+"]"
 				// this.log.setLogFile(null);
 			}
 			else {
 				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
 			}
+			*/
+
 
 			try {
 				ensureFile(cacheRoot, this.relativeLogPath);
 				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
-				this.log.setLogFile(null);
+				//this.log.setLogFile(null);
 			}
 
 			//this.log.warn("Where am I?");
@@ -594,8 +603,9 @@ public class ProductServer { //extends Cache {
 			}
 			catch (InterruptedException e) {
 				//this.log.status
+				this.log.note(e.toString());
 				this.log.warn("Interrupted");
-				e.printStackTrace(log.printStream);
+				//e.printStackTrace(log.printStream);
 			}
 			/*
 			catch (IndexedException e) {
@@ -1095,9 +1105,10 @@ public class ProductServer { //extends Cache {
 				return String.format("%s?%s", this.filename, this.directives.toString());
 		}
 
-		final long creationTime;
+		//final long creationTime;
 		
 		public Object result;
+
 
 	}  // Task
 
@@ -1193,7 +1204,7 @@ public class ProductServer { //extends Cache {
 			try {
 
 				//HttpLog subLog = (count==1) ? log.child(key) : null;
-				HttpLog subLog = log.child(key);
+				HttpLog subLog = new HttpLog(key, log);
 
 				Task task = new Task(value, actions.value, subLog);
 				task.setDirectives(directives);
@@ -1438,11 +1449,6 @@ public class ProductServer { //extends Cache {
 		}
 
 		final ProductServer server = new ProductServer();
-		//server.setLogFile();
-		server.log.printStream = System.err;  // System.out  Note: testing STREAM action needs clean stdout
-		//Path serverLogPath = server.cacheRoot.resolve("ProductServer.log");
-		//server.ensureFile(serverLogPath);
-		//server.log.setLogFile(serverLogPath);
 		server.log.setVerbosity(Log.DEBUG);
 		server.timeOut = 20;
 
@@ -1491,7 +1497,7 @@ public class ProductServer { //extends Cache {
 							} catch (NoSuchFieldException e2) {
 								log.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
 								log.error("No such verbosity level: " + arg);
-								System.exit(4);
+								log.warn(String.format("Retaining level: %s", Log.statusCodes.get(log.getVerbosity())));
 								return;
 							}
 						}
@@ -1506,8 +1512,8 @@ public class ProductServer { //extends Cache {
 						}
 						confFile = args[++i];
 						server.readConfig(confFile);
-						Path p = server.setLogFile(System.getenv("USER"));
-						log.note(String.format("Server log %s", p));
+						//log.note(String.format("Server log %s", p));
+						//System.err.println(String.format("Server log %s", p));
 						continue; // Note
 					}
 
@@ -1520,8 +1526,8 @@ public class ProductServer { //extends Cache {
 					// Now, read conf file if not read this far.
 					if (confFile == null){
 						server.readConfig(confFile = "nutshell.cnf");
-						Path p = server.setLogFile(System.getenv("USER"));
-						log.note(String.format("Server log: %s", p));
+						//Path p = server.setLogFile(System.getenv("USER"));
+						//log.note(String.format("Server log: %s", p));
 					}
 
 
@@ -1540,6 +1546,7 @@ public class ProductServer { //extends Cache {
 					else if (opt.equals("http_params")) { // HTTP Get Params
 						String[] p = products.values().toArray(new String[0]);
 						if (p.length == 0){
+							log.warn("give --product <FILE>");
 							System.err.println("Product not defined yet?");
 							System.exit(1);
 						}
@@ -1551,7 +1558,7 @@ public class ProductServer { //extends Cache {
 								actions.add(Actions.MAKE);
 							Task product = server.new Task(p[p.length-1], 0, log);
 							System.out.println(String.format("actions=%s&product=%s", actions, product));
-							System.exit(0);
+							return;
 						}
 					}
 					else if (opt.equals("copy")) {
@@ -1624,7 +1631,7 @@ public class ProductServer { //extends Cache {
 		}
 		catch (Exception e) {
 			log.error(String.format("Unhandled exception: %s", e));
-			e.printStackTrace(log.printStream);
+			//e.printStackTrace(log.printStream);
 			System.exit(1);
 		}
 

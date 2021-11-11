@@ -123,7 +123,7 @@ function run_cmdline(){
     #echo ".. code-block::" >> $DOC_FILE
     #echo "   :caption: Test $i" >> $DOC_FILE
     #echo >> $DOC_FILE
-    #echo "       $cmd" >> $DOC_FILE
+    echo "       $cmd" >> $DOC_FILE
     echo >> $DOC_FILE
     #echo -e "  ::\n\n  $cmd\n" >> $DOC_FILE
     #echo "  $cmd" >> $DOC_FILE

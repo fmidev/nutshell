@@ -136,20 +136,20 @@ public class ExternalGenerator implements ProductServer.Generator {
 	// MAIN
 	@Override
 	public void generate(ProductServer.Task task) throws IndexedException {
-		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.printStream);
+		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 	}
 
 
-	public void generateFile(String[] envArray, PrintStream log) throws IndexedException {
+	public void generateFile(String[] envArray, PrintStream logStream) throws IndexedException {
 
-		//ShellUtils.ProcessReader
-		OutputReader reader = new OutputReader(log);
+		OutputReader reader = new OutputReader(logStream);
 
 		//int exitValue = exec(scriptName, envArray, reader);
 		int exitValue = exec(generatorScript.toString(), envArray, reader);
 		if (exitValue != 0){
 			throw extractErrorMsg(exitValue, reader);
 		}
+
 
 	}
 
@@ -161,7 +161,7 @@ public class ExternalGenerator implements ProductServer.Generator {
 	 */
 	@Override
 	public Map<String,String> getInputList(ProductServer.Task task) throws IndexedException {
-		return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.printStream);
+		return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 	}
 
 	// public Map<String,String> getInputList(String[] env, final PrintStream errorLog) { //throws InterruptedException {
