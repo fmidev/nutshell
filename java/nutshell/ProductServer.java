@@ -67,23 +67,30 @@ public class ProductServer { //extends Cache {
 	 * @param pathFormat - absolute path of a filename, optionally containing '%s' expanded as timestamp.
 	 * @return
 	 */
-	public Path setLogFile(String pathFormat){
+	public Path setLogFile(String pathFormat) {
 		if (pathFormat == null)
 			pathFormat = "/tmp/nutshell-%s.log";
 		try {
 			Path p = Paths.get(String.format(pathFormat,
 					logFilenameTimeFormat.format(System.currentTimeMillis())));
+			//ensureFile(p.getParent(), p.getFileName());
 			log.setLogFile(p);
 			log.debug(setup.toString());
+			try {
+				Files.setPosixFilePermissions(p, filePerms);
+			}
+			catch (IOException e){
+				log.error(String.format("Could not set permissions: %s", filePerms));
+			}
 			return p;
 		} catch (Exception e) {
 			log.setLogFile(null);
 			return null;
 		}
+
 	}
 
-
-	public final Map<String,Object> setup = new HashMap<>();
+public final Map<String,Object> setup = new HashMap<>();
 
 	// TODO: add to config, set in constructor
 	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
