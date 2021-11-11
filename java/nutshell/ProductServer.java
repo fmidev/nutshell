@@ -281,9 +281,13 @@ public final Map<String,Object> setup = new HashMap<>();
 		/// Check if product is in cache memory or disk, but do not generate it if missing.
 		// public static final int QUERY = MEMORY|FILE;
 
+		/** Run script "run.sh" in the product directory (after)
+		 */
+		int RUN = 2048; // PostProcessing!
+
 		/** Go through product request handler checking existence of product generator, memory cache and output directory.
 		 */
-		int DEBUG = 2048; // | INPUTLIST; // "OUTPUT=INFO"
+		int DEBUG = 4096; // | INPUTLIST; // "OUTPUT=INFO"
 
 		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
 		//  public static final int BATCH = 4096;
@@ -1052,6 +1056,13 @@ public final Map<String,Object> setup = new HashMap<>();
 					this.log.info("Result: " + this.result.toString());
 				this.log.note("Task completed: actions=" + this.actions);
 				// status page?
+
+			}
+
+			if (actions.isSet(Actions.RUN)){
+				ShellExec.OutputReader reader = new ShellExec.OutputReader(this.log.getPrintStream());
+				//ShellExec shellExec = new ShellExec(Paths.get("run.sh"), this.productDir);
+				ShellExec.exec("./run.sh", null, productRoot.resolve(productDir), reader);
 
 			}
 

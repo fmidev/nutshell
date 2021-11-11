@@ -3,20 +3,17 @@ package nutshell;
  *  @author Markus.Peura@fmi.fi
  */
 
-import org.omg.Messaging.SyncScopeHelper;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 
 /**
  *
  */
-public class ExternalGenerator implements ProductServer.Generator {
-	
+public class ExternalGenerator extends ShellExec implements ProductServer.Generator {
+	// extends ShellExec
 	// TODO: override these from ProductServer.conf?
 	//static public final String scriptName = "./generate.sh";
 	static public final String scriptName = "generate.sh";
@@ -25,20 +22,21 @@ public class ExternalGenerator implements ProductServer.Generator {
 	final String id;
 
 	//final protected File dir;
-	final protected Path dir;
-	final protected File generatorScript;
-	final protected File inputScript;
+	//final protected Path dir;
+	//final protected File cmd;
+	final protected File inputDeclarationCmd;
 
 	public ExternalGenerator(String id, String dir) throws IndexedException {
+		super(scriptName, dir);
 		this.id = id;
-		this.dir = Paths.get(dir); //new File(dir);
-		this.generatorScript = this.dir.resolve(scriptName).toFile();
-		if (!this.generatorScript.exists())
-			throw new IndexedException(HttpServletResponse.SC_NOT_IMPLEMENTED, String.format("Script %s not found", this.generatorScript));
-		if (!this.generatorScript.canRead())
-			throw new IndexedException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("Script %s unreadable", this.generatorScript));
+		//this.dir = Paths.get(dir); //new File(dir);
+		// this.cmd = this.dir.resolve(scriptName).toFile().getAbsoluteFile();
+		if (!this.cmd.exists())
+			throw new IndexedException(HttpServletResponse.SC_NOT_IMPLEMENTED, String.format("Script %s not found", this.cmd));
+		if (!this.cmd.canRead())
+			throw new IndexedException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("Script %s unreadable", this.cmd));
 
-		this.inputScript     = this.dir.resolve(inputDeclarationScript).toFile();
+		this.inputDeclarationCmd = this.dir.resolve(inputDeclarationScript).toFile();
 	}
 
 
@@ -57,9 +55,10 @@ public class ExternalGenerator implements ProductServer.Generator {
 
 	@Override
 	public boolean hasInputs() {
-		return this.inputScript.exists();
+		return this.inputDeclarationCmd.exists();
 	}
 
+	/*
 	public class OutputReader implements ShellUtils.ProcessReader {
 
 		final PrintStream stream;
@@ -87,12 +86,15 @@ public class ExternalGenerator implements ProductServer.Generator {
 
 	}
 
+	 */
+
 	/** Try to extract numeric value out of script's error dump (last line)
 	 *
-	 * @param exitValue
-	 * @param reader
+	 * parsam exitValue
+	 * param reader
 	 * @return
 	 */
+	/*
 	protected IndexedException extractErrorMsg(int exitValue, OutputReader reader){
 
 		String[] msgErr = IndexedException.split(reader.lastLineErr);
@@ -133,6 +135,8 @@ public class ExternalGenerator implements ProductServer.Generator {
 
 	}
 
+	 */
+
 	// MAIN
 	@Override
 	public void generate(ProductServer.Task task) throws IndexedException {
@@ -140,16 +144,16 @@ public class ExternalGenerator implements ProductServer.Generator {
 	}
 
 
-	public void generateFile(String[] envArray, PrintStream logStream) throws IndexedException {
+	public void generateFile(String[] envArray, PrintStream log) throws IndexedException {
 
-		OutputReader reader = new OutputReader(logStream);
+		//ShellUtils.ProcessReader
+		OutputReader reader = new OutputReader(log);
 
 		//int exitValue = exec(scriptName, envArray, reader);
-		int exitValue = exec(generatorScript.toString(), envArray, reader);
+		int exitValue = exec(cmd.toString(), envArray, dir, reader);
 		if (exitValue != 0){
 			throw extractErrorMsg(exitValue, reader);
 		}
-
 
 	}
 
@@ -185,58 +189,23 @@ public class ExternalGenerator implements ProductServer.Generator {
 		// Todo: construct final
 		//Path script = dir.toPath().resolve(inputDeclarationScript);
 
-		if (inputScript.exists()){
-			if (inputScript.canExecute()){
+		if (inputDeclarationCmd.exists()){
+			if (inputDeclarationCmd.canExecute()){
 				//int exitValue = exec(inputDeclarationScript, env, reader);
-				int exitValue = exec(inputScript.toString(), env, reader);
+				int exitValue = exec(inputDeclarationCmd.toString(), env, dir, reader);
 				if (exitValue != 0){
 					throw extractErrorMsg(exitValue, reader);
 				}
 			}
 			else {
-				errorLog.println("warn(): exists, but not executable: " + inputScript.toString());
+				errorLog.println("warn(): exists, but not executable: " + inputDeclarationCmd.toString());
 			}
 		}
 		else {
-			errorLog.println("Not found: " + inputScript.toString());
+			errorLog.println("Not found: " + inputDeclarationCmd.toString());
 		}
 
 		return result;
-	}
-
-	/** Utility for generators and input lists retrievals.
-	 *
-	 * @param cmd - shell command like "ls" or "/tmp/script.sh"
-	 * @param env - environment variables as assignment strings ["KEY=VALUE", "KEY2=VALUE2", ... ]
-	 * @param reader - handler for standard and error output of the process
-	 * param errorLog
-	 */
-	protected int exec(String cmd, String[] env, ShellUtils.ProcessReader reader){ //}, final PrintStream errorLog) {
-
-		int exitValue = 0;
-
-		try {
-			final Process process = Runtime.getRuntime().exec(cmd, env, dir.toFile());
-			exitValue = ShellUtils.read(process, reader);
-		}
- 		catch (IOException e){
-			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
-			exitValue = +1;
-			//errorLog.println(e.getLocalizedMessage());
-		}
-		catch (InterruptedException e){
-			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
-			exitValue = -1;
-			//errorLog.println(e.getLocalizedMessage());
-		}
-		catch (Exception e){
-			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
-			exitValue = +2;
-			//errorLog.println(e.getLocalizedMessage());
-		}
-
-		return exitValue;
-
 	}
 
 	public static void main(String[] args) {
@@ -253,7 +222,7 @@ public class ExternalGenerator implements ProductServer.Generator {
 		ExternalGenerator generator = null;
 
 		try {
-			generator = new ExternalGenerator("unnamed.generator", dir);
+			generator = new ExternalGenerator("test", dir);
 		} catch (IndexedException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -284,13 +253,14 @@ public class ExternalGenerator implements ProductServer.Generator {
 		}
 
 		final String logname = "ExternalGenerator.log";
-		System.out.println("Writing :" + logname);
+		System.out.println(String.format("Writing log: %s", logname));
 		File logFile = new File(logname);
-		System.out.println("Generate:");
+		System.out.println("Generating...");
 		try {
 			logFile.createNewFile();
 			FileOutputStream fw = new FileOutputStream(logFile);
 			generator.generateFile(env, new PrintStream(fw));
+			System.out.println(String.format("Success! (See log and %s", generator.dir));
 		} catch (IOException | IndexedException e) {
 			e.printStackTrace();
 			return;
