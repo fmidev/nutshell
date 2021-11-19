@@ -415,11 +415,11 @@ public class Nutlet extends HttpServlet {
 			html.appendElement(SimpleHtml.PRE, os.toString("UTF-8")).setAttribute("class", "code");
 			// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
 
+			/*
 			html.appendElement(SimpleHtml.H3, "ProductServer log");
-			//productServer.log.warn("Empty?");
 			html.appendElement(SimpleHtml.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
 			html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
-
+			 */
 			html.appendElement(SimpleHtml.H3, "Corresponding command line");
 			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --actions %s %s";
 			//  if (!task.directives.isEmpty())

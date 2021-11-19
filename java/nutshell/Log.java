@@ -8,9 +8,44 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Log {
+public class Log implements AutoCloseable {
 
+	public static final int FATAL = 1;
+	public static final int ERROR = 2;
+	public static final int WARNING = 3;
+
+	/// Action completed unsuccessfully. // ?
+	public static final int FAIL = 4;
+
+	/// Important information
+	public static final int NOTE = 5;
+
+	/// Less important information
+	public static final int INFO = 6;
+
+	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
+	public static final int WAIT = 7;
+
+	/// Action completed successfully.
+	public static final int OK = 8;
+
+	/// Level under DEBUG.
+	public static final int VERBOSE = 9;
+
+	/// Sometimes informative messages.
+	public static final int DEBUG = 10;
+
+	/// Verbose level. Messages equal or lower value than will be communicated.
+	protected int verbosity = VERBOSE;
+
+	long startTime;
 	final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
+	protected int status = 0;
+
+	final private StringBuffer buffer = new StringBuffer();
+
+	public File logFile = null;
+	private PrintStream printStream;
 
 	public Log() {
 		startTime = System.currentTimeMillis();
@@ -29,6 +64,7 @@ public class Log {
 	 */
 	public Log(Log log) {
 		startTime = System.currentTimeMillis();
+		verbosity = log.getVerbosity();
 		// TODO: copy
 		numberFormat.setMinimumIntegerDigits(log.numberFormat.getMinimumIntegerDigits());
 		setVerbosity(log.getVerbosity());
@@ -42,6 +78,7 @@ public class Log {
 	public Log(String name) {
 		startTime = System.currentTimeMillis();
 		numberFormat.setMinimumIntegerDigits(5);
+		setVerbosity(VERBOSE);
 		this.setName(name);
 		printStream = System.err;
 	}
@@ -68,17 +105,46 @@ public class Log {
 	 */
 	public Log(String localName, Log mainLog) {
 		startTime = System.currentTimeMillis();
+
 		if (mainLog != null){
+			setName(mainLog.getName() + '.' + localName);
+			setVerbosity(mainLog.getVerbosity());
 			numberFormat.setMinimumIntegerDigits(mainLog.numberFormat.getMinimumIntegerDigits());
-			this.setName(mainLog.getName() + '.' + localName);
 		}
 		else {
+			setName(localName);
+			setVerbosity(VERBOSE);
 			numberFormat.setMinimumIntegerDigits(5);
-			this.setName(localName);
 		}
 		printStream = System.err;
 	}
 
+
+	/**
+	 *
+	 * @throws Throwable
+	 */
+	@Override
+	public void close()  {
+		if (logFile != null){
+			warn(String.format("Closing log: %s", logFile));
+		}
+		else if (printStream == null) {
+			warn(String.format("Closing log (unknow output stream)"));
+		}
+		else
+		{
+			// warn(String.format("Closing log (unknow output stream)");
+			warn("Closing log");
+		}
+		this.printStream.close();
+		//System.out.println("closing " + this.getClass().getCanonicalName());
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("finalizing " + this.getClass().getCanonicalName());
+	}
 
 	String name = "";
 	
@@ -106,12 +172,19 @@ public class Log {
 		//return false;
 	}
 
+
+	/** Return current level of verbosity
+	 *
+	 * @return
+	 */
 	public int getVerbosity() {
 		return verbosity;
 	}
 
-
-
+	/** Return current status.
+	 *
+	 * @return
+	 */
 	public int getStatus() {
 		return status;
 	}
@@ -135,39 +208,7 @@ public class Log {
 		return buffer.toString();
 	}
 
-	public File logFile = null;
 
-	private PrintStream printStream;
-
-
-	public static final int FATAL = 1;
-
-	public static final int ERROR = 2;
-	public static final int WARNING = 3;
-
-	/// Action completed unsuccessfully. // ?
-	public static final int FAIL = 4;
-
-	/// Important information
-	public static final int NOTE = 5;
-
-	/// Less important information
-	public static final int INFO = 6;
-
-	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
-	public static final int WAIT = 7;
-
-	/// Action completed successfully.
-	public static final int OK = 8;
-
-	/// Level under DEBUG.
-	public static final int VERBOSE = 9;
-
-	/// Sometimes informative messages.
-	public static final int DEBUG = 10;
-
-	/// Verbose level. Messages equal or lower value than will be communicated.
-	protected int verbosity = VERBOSE;
 
 	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
 	public boolean VT100 = false;
@@ -231,7 +272,7 @@ public class Log {
 				try {
 					statusCodes.put(field.getInt(null), name);
 				} catch (Exception e) {
-				}
+			}
 		}
 
 	}
@@ -350,15 +391,6 @@ public class Log {
 
 	};
 
-	@Override
-	protected void finalize() throws Throwable {
-		this.printStream.close();
-	}
-
-	long startTime;
-	//String lastMessage = null;
-	protected int status = 0;
-	final protected StringBuffer buffer = new StringBuffer();
 
 
 	public static void main(String[] args) {
@@ -397,8 +429,15 @@ public class Log {
 			e.printStackTrace();
 		}
 
-		System.out.println(log.buffer.toString());
-		System.out.println(log);
+		// System.out.println(log.buffer.toString()); EMPTY!
+		//System.out.println(log);
+
+		//System.out.println(log.getClass().getCanonicalName());
+
+		//Log test = new Log();
+		//test.setVerbosity(10);
+		//log.warn("Hey!");
+
 	}
 
 }

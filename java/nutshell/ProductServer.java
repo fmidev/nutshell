@@ -4,6 +4,7 @@ import sun.misc.Signal;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
@@ -13,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.*;
@@ -860,6 +863,7 @@ public final Map<String,Object> setup = new HashMap<>();
 						this.log.error(inputTask.log.indexedException.getMessage());
 						log.log(HttpServletResponse.SC_PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 					}
+					inputTask.log.close(); // close PrintStream
 				}
 
 
@@ -1222,9 +1226,9 @@ public final Map<String,Object> setup = new HashMap<>();
 			try {
 
 				//HttpLog subLog = (count==1) ? log.child(key) : null;
-				HttpLog subLog = new HttpLog(key, log);
+				//HttpLog subLog = new HttpLog(key, log);
 
-				Task task = new Task(value, actions.value, subLog);
+				Task task = new Task(value, actions.value, log);
 				task.setDirectives(directives);
 				task.actions.addCopies(actions.copies);
 				task.actions.addLinks(actions.links);
@@ -1254,7 +1258,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		}
 
 		log.note("Started (" + tasks.size() + ") tasks... ");
-		//wait();
+		// wait();
 
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
@@ -1284,8 +1288,10 @@ public final Map<String,Object> setup = new HashMap<>();
 		return generator;
 	};
 
-	/// Checks if a file exists in cache or storage, return immediately if non-empty or nonexistent, else wait for an empty file to complete.
+	/// Checks if a file exists in cache or storage, wait for completion if needed.
 	/**
+	 *
+	 * return immediately if non-empty or nonexistent, else wait for an empty file to complete.
 	 * @param file
 	 * @param maxEmptySec maximum age of empty file in seconds
 	 * @param log
@@ -1549,7 +1555,10 @@ public final Map<String,Object> setup = new HashMap<>();
 					}
 
 
-					if (opt.equals("product")) {
+					if (opt.equals("version")) {
+						System.out.println(server.getVersionString());
+					}
+					else if (opt.equals("product")) {
 						products.put("product", args[++i]);
 					}
 					else if (opt.equals("parse")) { // Debugging
@@ -1658,20 +1667,23 @@ public final Map<String,Object> setup = new HashMap<>();
 		}
 
 		log.note("Actions: " + actions);
-		log.note(String.format("   COPY(%d): %s", actions.copies.size(), actions.copies));
-		log.note(String.format("   LINK(%d): %s", actions.links.size(),  actions.links));
+		if (!actions.copies.isEmpty())
+			log.note(String.format("   COPY(%d):\t %s", actions.copies.size(), actions.copies));
+		if (!actions.links.isEmpty())
+			log.note(String.format("   LINK(%d):\t %s", actions.links.size(),  actions.links));
+		if (actions.move != null)
+			log.note(String.format("   MOVE: \t %s", actions.move));
 
-		log.note("Directives: " + directives);
-		//System.out.println(directives);
-
+		if (!directives.isEmpty())
+			log.note("Directives: " + directives);
 
 		/// "MAIN"
-
 		int result = 0;
 
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions, directives, log);
-
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
+
+		log.warn("Starting..");
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
@@ -1696,12 +1708,29 @@ public final Map<String,Object> setup = new HashMap<>();
 
 			if (task.outputPath.toFile().exists())
 				log.note(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
+
+			task.log.close();
 		}
 
+		// System.err.println("Eksit");
+		// log.warn("Exiting..");
 		System.exit(result);
 
 	}
 
+	final
+	public List<Integer> version = Arrays.asList(1, 2);
+
+	public String getVersionString() {
+		//Arrays.
+		//
+		//version.stream().toArray();
+		return version.toString();
+		//return version.stream().forEach(System.err::println);
+		//collect(Collectors.joining(",")).toString();
+		//return String.join(",", version.toArray(null));
+		//return Arrays.toString(version.toArray());
+	}
 
 
 }
