@@ -17,7 +17,7 @@ case $NUTSHELL in
 	NUTSHELL="python3.6 -m nutshell.nutshell"
 	;;
     java)
-	NUTSHELL_DIR=${NUTSHELL_DIR:-$HTML_ROOT}
+	NUTSHELL_DIR=${NUTSHELL_DIR:-$HTTP_ROOT}
 	NUTSHELL="java -cp $HTTP_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
 	;;
     *)
