@@ -1689,7 +1689,6 @@ public final Map<String,Object> setup = new HashMap<>();
 			String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
-				//log.warn("Problem(s): ");
 				//log.note(String.format("exception: %s", task.log.indexedException.getMessage()));
 				log.log(task.log.indexedException);
 				if (result < 20)
