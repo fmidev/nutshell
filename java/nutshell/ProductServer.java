@@ -1713,7 +1713,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		}
 
 		// System.err.println("Eksit");
-		// log.warn("Exiting..");
+		log.warn("Exiting..");
 		System.exit(result);
 
 	}
