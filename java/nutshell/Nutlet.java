@@ -403,7 +403,7 @@ public class Nutlet extends HttpServlet {
 				String line = null;
 				while ((line = reader.readLine()) != null){
 					// TODO: detect ERROR, WARNING, # etc and apply colours
-					// Requires separate lines, so something other than StringBuilder
+					// Requires separate  lines, so something other than StringBuilder
 					// builder.append("<b>x</b>").append(line).append('\n');
 					builder.append(line).append('\n');
 				}
