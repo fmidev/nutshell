@@ -6,7 +6,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,7 +34,7 @@ public class Nutlet extends HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static final public String version = "1.2";
+	static final public String version = "1.3";
 
 	final Map<String,Object> setup;
 	final ProductServer productServer;
@@ -55,11 +54,8 @@ public class Nutlet extends HttpServlet {
 		setup.put("startTimeMs", startTime.getTimeInMillis());
 		setup.put("version", version);  // TODO
 		productServer = new ProductServer();
-		productServer.log.setVerbosity(Log.DEBUG);
-		// catalina.out
-		//System.out.println("Hey, started Nutlet");
-		//System.err.println("Hey, errata");
-		productServer.log.warn("What about me?");
+		productServer.serverLog.setVerbosity(Log.DEBUG);
+		productServer.serverLog.note("Nutlet started");
 	}
 
 	String confDir = "";
@@ -71,7 +67,7 @@ public class Nutlet extends HttpServlet {
 		confDir  = config.getInitParameter("confDir");
 		setup.putAll(readTomcatParameters()); // from ho
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
-		if (!productServer.log.logFileIsSet()){
+		if (!productServer.serverLog.logFileIsSet()){
 			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 		}
 		httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
@@ -249,8 +245,8 @@ public class Nutlet extends HttpServlet {
 			try {
 				// track esp. missing inputs
 				//task.log.ok("-------- see separate log --->");
-				productServer.log.info(String.format("Executing... %s", task));
-				productServer.log.debug(String.format("See separate log: %s", task.log.logFile));
+				productServer.serverLog.info(String.format("Executing... %s", task));
+				productServer.serverLog.debug(String.format("See separate log: %s", task.log.logFile));
 				//log.warn(String.format("Executing... %s", task));
 				task.log.ok("Executing...");
 				task.execute();

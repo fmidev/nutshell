@@ -4,7 +4,6 @@ import sun.misc.Signal;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
@@ -14,8 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.*;
@@ -56,12 +53,12 @@ import static java.nio.file.Files.*;
 
 public class ProductServer { //extends Cache {
 
-	final public HttpLog log; // = new HttpLog(getClass().getSimpleName());
+	final public HttpLog serverLog; // = new HttpLog(getClass().getSimpleName());
 	final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 
 	ProductServer(){
-		log = new HttpLog(getClass().getSimpleName());
+		serverLog = new HttpLog(getClass().getSimpleName());
 		//log.setLogFile(ensureFile(cacheRoot));
 	}
 
@@ -77,17 +74,17 @@ public class ProductServer { //extends Cache {
 			Path p = Paths.get(String.format(pathFormat,
 					logFilenameTimeFormat.format(System.currentTimeMillis())));
 			//ensureFile(p.getParent(), p.getFileName());
-			log.setLogFile(p);
-			log.debug(setup.toString());
+			serverLog.setLogFile(p);
+			serverLog.debug(setup.toString());
 			try {
 				Files.setPosixFilePermissions(p, filePerms);
 			}
 			catch (IOException e){
-				log.error(String.format("Could not set permissions: %s", filePerms));
+				serverLog.error(String.format("Could not set permissions: %s", filePerms));
 			}
 			return p;
 		} catch (Exception e) {
-			log.setLogFile(null);
+			serverLog.setLogFile(null);
 			return null;
 		}
 
@@ -144,7 +141,7 @@ public final Map<String,Object> setup = new HashMap<>();
 
 		try {
 			if (path != null) {
-				log.debug("Reading setup: " + path.toString());
+				serverLog.debug("Reading setup: " + path.toString());
 				MapUtils.read(path.toFile(), setup);
 			}
 			this.confFile = path; //Paths.get(path);
@@ -171,7 +168,7 @@ public final Map<String,Object> setup = new HashMap<>();
 			// this.fileGroupID = Files.readAttributes(cacheRoot, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
 			fileGroupID = Integer.parseInt(getAttribute(cacheRoot, "unix:gid").toString());
 		} catch (IOException e) {
-			log.error(String.format("Could not read group of cache dir: %s", cacheRoot));
+			serverLog.error(String.format("Could not read group of cache dir: %s", cacheRoot));
 		}
 		setup.put("fileGroupID", fileGroupID);
 
@@ -389,7 +386,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		if (!exists(path)) {
 			//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(dirPerms));
 			ensureDir(root, relativePath.getParent());
-			log.debug("creating dir: " + path);
+			serverLog.debug("creating dir: " + path);
 			Files.createDirectory(path); //, PosixFilePermissions.asFileAttribute(dirPerms));
 			Files.setPosixFilePermissions(path, dirPerms);
 
@@ -398,8 +395,8 @@ public final Map<String,Object> setup = new HashMap<>();
 				Files.setAttribute(path, "unix:gid", fileGroupID);
 			}
 			catch (IOException e){
-				log.warn(e.toString());
-				log.warn(String.format("could not se unix GID: ",  fileGroupID) );
+				serverLog.warn(e.toString());
+				serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
 			}
 
 		}
@@ -414,7 +411,7 @@ public final Map<String,Object> setup = new HashMap<>();
 
 		if (!exists(path)) {
 			ensureDir(root, relativePath.getParent());
-			log.debug("creating file: " + path);
+			serverLog.debug("creating file: " + path);
 			Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
 			//Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
 			//Files.setPosixFilePermissions(path, filePerms);
@@ -424,8 +421,8 @@ public final Map<String,Object> setup = new HashMap<>();
 			Files.setAttribute(path, "unix:gid", fileGroupID);
 		}
 		catch (IOException e){
-			log.warn(e.toString());
-			log.warn(String.format("could not se unix GID: ",  fileGroupID) );
+			serverLog.warn(e.toString());
+			serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
 		}
 
 		return path;
@@ -500,16 +497,6 @@ public final Map<String,Object> setup = new HashMap<>();
 			this.outputPathTmp = outputDirTmp.resolve(filename);
 			this.storagePath   = storageRoot.resolve(this.relativeOutputDir).resolve(filename);
 
-			/*
-			if (parentLog != null){
-				this.log = new HttpLog("["+this.info.PRODUCT_ID+"]", parentLog);
-				// this.log = parentLog.getChild("["+this.info.PRODUCT_ID+"]");"["+this.info.PRODUCT_ID+"]"
-				// this.log.setLogFile(null);
-			}
-			else {
-				this.log = new HttpLog("<"+this.info.PRODUCT_ID+">");
-			}
-			*/
 
 
 			try {
@@ -1202,6 +1189,8 @@ public final Map<String,Object> setup = new HashMap<>();
 
 		log.info(String.format("Inits (%d) tasks ", count));
 
+		log.info(String.format("Inits (%s) tasks ", taskRequests.entrySet()));
+
 		/// Check COPY & LINK targets (must be directories, if several tasks)
 		if (count > 1){
 
@@ -1223,39 +1212,64 @@ public final Map<String,Object> setup = new HashMap<>();
 		for (Entry<String,String> entry : taskRequests.entrySet()){
 			String key   = entry.getKey();
 			String value = entry.getValue();
+
+			// log.debug(String.format("Starting: %s = %s", key, value));
+			//System.err.println(String.format("xStill shere: %s = %s", key, value));
+
 			try {
 
 				//HttpLog subLog = (count==1) ? log.child(key) : null;
 				//HttpLog subLog = new HttpLog(key, log);
+				log.debug(String.format("Still here: %s = %s", key, value));
+				System.err.println(String.format("Still here: %s = %s", key, value));
 
 				Task task = new Task(value, actions.value, log);
+				System.err.println(String.format("NOTTT here: %s = %s", key, value));
+
+				log.debug(String.format("Still life: %s = %s", key, value));
 				task.setDirectives(directives);
 				task.actions.addCopies(actions.copies);
 				task.actions.addLinks(actions.links);
 				task.actions.addMove(actions.move); // Thread-safe?
 
-				//if (log)
-				task.log.verbosity = log.verbosity;
+				task.log.setVerbosity(log.getVerbosity());
 				log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
 				if (task.log.logFile != null){
-
 					log.info(String.format("See separate log: %s",  task.log.logFile));
-
 				}
 
 				tasks.put(key, task);
-				task.start();
+
+
 			}
 			catch (ParseException e) {
+				System.err.println(String.format("EROR here: %s = %s", key, value));
+
 				/// TODO: is it a fatal error if a product defines its input wrong?
 				log.warn(String.format("Could not parse product: %s(%s)",  key, value));
 				//log.warn(e.getMessage());
 				log.error(e.getLocalizedMessage()); // RETURN?
 			}
 			catch (Exception e) {
+				System.err.println(String.format("EROR2 here: %s = %s", key, value));
 				log.error("Unexpected exception... " + e.getLocalizedMessage());
 			}
+
 		}
+
+		for (Entry<String,Task> entry : tasks.entrySet()){
+			String key = entry.getKey();
+			Task task = entry.getValue();
+
+			try {
+				log.debug(String.format("Starting thread %s: %s", key, task));
+				task.start();
+			}
+			catch (IllegalStateException e){
+				log.error("Already running? " + e.toString());
+			}
+		}
+
 
 		log.note("Started (" + tasks.size() + ") tasks... ");
 		// wait();
@@ -1346,7 +1360,7 @@ public final Map<String,Object> setup = new HashMap<>();
 				//this.delete(this.outputPath);
 			}
 			catch (IOException e) {
-				this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
+				this.serverLog.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
 			}
 
 			return false;
@@ -1370,10 +1384,10 @@ public final Map<String,Object> setup = new HashMap<>();
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
 			if (attr.isRegularFile() || attr.isSymbolicLink()) {
 				try {
-					log.note(String.format("Deleting file: %s", file));
+					serverLog.note(String.format("Deleting file: %s", file));
 					Files.delete(file);
 				} catch (IOException e) {
-					log.warn(e.toString());
+					serverLog.warn(e.toString());
 				}
 			}
 			return CONTINUE;
@@ -1389,10 +1403,10 @@ public final Map<String,Object> setup = new HashMap<>();
 				return CONTINUE;
 
 			try {
-				log.debug(String.format("Delete dir: %s", dir));
+				serverLog.debug(String.format("Delete dir: %s", dir));
 				Files.delete(dir);
 			} catch (IOException e) {
-				log.warn(e.toString());
+				serverLog.warn(e.toString());
 			}
 			return CONTINUE;
 		}
@@ -1400,7 +1414,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		// If there is some error accessing
 		@Override
 		public FileVisitResult visitFileFailed(Path file, IOException e) {
-			log.warn(e.getMessage());
+			serverLog.warn(e.getMessage());
 			return CONTINUE;
 		}
 	}
@@ -1408,30 +1422,30 @@ public final Map<String,Object> setup = new HashMap<>();
 	public void clearCache(boolean confirm) throws IOException {
 
 		if (!this.cacheRoot.endsWith("cache")){
-			log.error("Cache root does not end with 'cache' : " + this.cacheRoot);
+			serverLog.error("Cache root does not end with 'cache' : " + this.cacheRoot);
 			return;
 		}
 
 		Path p = this.cacheRoot.toRealPath();
 		if (!p.endsWith("cache")){
-			log.error("Cache root does not end with 'cache' : " + p);
+			serverLog.error("Cache root does not end with 'cache' : " + p);
 			return;
 		}
 
 		if (confirm){
 			System.err.println(String.format("Delete files in %s ? ", p ));
-			Scanner kbd = new Scanner (System.in);
+			Scanner kbd = new Scanner(System.in);
 			String line = kbd.nextLine();
-			if (line.toLowerCase().charAt(0) != 'y'){
+			if (line.isEmpty() || (line.toLowerCase().charAt(0) != 'y')){
 				System.err.println("Cancelled");
 				return;
 			}
 		}
 
-		log.note("Clearing cache: " + p);
+		serverLog.note("Clearing cache: " + p);
 		Files.walkFileTree(p, new DeleteFiles());
 
-		log.note("Clearing cache completed");
+		serverLog.note("Clearing cache completed");
 		//Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
 
 	}
@@ -1473,16 +1487,16 @@ public final Map<String,Object> setup = new HashMap<>();
 		}
 
 		final ProductServer server = new ProductServer();
-		server.log.setVerbosity(Log.DEBUG);
+		server.serverLog.setVerbosity(Log.DEBUG);
 		server.timeOut = 20;
 
-		HttpLog log = server.log; //.child("CmdLine");
+		HttpLog log = server.serverLog; //.child("CmdLine");
 
 		String confFile = null;
 
-		Map<String,String> products = new HashMap<>();
+		Map<String,String> products = new TreeMap<>();
 		Actions actions = new Actions();
-		Map<String ,String> directives = new HashMap();
+		Map<String ,String> directives = new TreeMap<>();
 
 		Field[] actionFields = Actions.class.getFields();
 
@@ -1506,7 +1520,7 @@ public final Map<String,Object> setup = new HashMap<>();
 					}
 
 					if (opt.equals("verbose")) {
-						log.verbosity = Log.DEBUG;
+						log.setVerbosity(Log.DEBUG);
 						continue;
 					}
 
@@ -1718,7 +1732,7 @@ public final Map<String,Object> setup = new HashMap<>();
 	}
 
 	final
-	public List<Integer> version = Arrays.asList(1, 2);
+	public List<Integer> version = Arrays.asList(1, 3);
 
 	public String getVersionString() {
 		//Arrays.
