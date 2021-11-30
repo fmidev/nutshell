@@ -93,7 +93,35 @@ public class Nutlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 
-		//productServer.setLogFile("tomcat8");
+		Instructions instructions = new Instructions();
+
+		for (String key: new String[]{"actions", "output",  "request", "action"}) {  // request and action deprecating!
+			String[] a = request.getParameterValues(key);
+			if (a != null) {
+				try {
+					instructions.add(a);
+				} catch (Exception e) {
+					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parsing 'request' failed:" + Arrays.toString(a), e.getMessage(), response);
+					return;
+				}
+			}
+		}
+
+		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
+			instructions.remove(ActionType.CLEAR_CACHE);
+			if (!instructions.isEmpty()){
+				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", instructions) );
+			}
+
+			try {
+				productServer.clearCache(false);
+				sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
+						"OK", request, response);
+			} catch (IOException e) {
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), response);
+			}
+			return;
+		}
 
 
 		String productStr = request.getParameter("product");
@@ -123,14 +151,6 @@ public class Nutlet extends HttpServlet {
 								"NutShell server is running since " + setup.get("startTime"), request, response);
 						return;
 					}
-					/*
-					else if (queryString.equals("clearCache")){
-						productServer.clearCache(false);
-						sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
-								"Statistics... ", request, response);
-						return;
-					}
-					 */
 					else {
 						sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
 								String.format("Query: %s", queryString), request, response);
@@ -157,37 +177,6 @@ public class Nutlet extends HttpServlet {
 		}
 
 
-		Instructions instructions = new Instructions();
-		for (String key: new String[]{"actions", "output",  "request", "action"}) {  // request and action deprecating!
-			String[] a = request.getParameterValues(key);
-			if (a != null) {
-				try {
-					instructions.add(a);
-				} catch (Exception e) {
-					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parsing 'request' failed:" + Arrays.toString(a), e.getMessage(), response);
-					return;
-				}
-			}
-		}
-
-
-		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
-			productServer.serverLog.warn("Clearing cache");
-			if (instructions.value != ActionType.CLEAR_CACHE){
-				instructions.remove(ActionType.CLEAR_CACHE);
-				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", instructions) );
-			}
-
-			try {
-				productServer.clearCache(false);
-				sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
-						"Statistics... ", request, response);
-			} catch (IOException e) {
-				productServer.serverLog.log(HttpServletResponse.SC_CONFLICT, "Clearing cache failed");
-			}
-			return;
-			//System.exit(result);
-		}
 
 
 		// Default
