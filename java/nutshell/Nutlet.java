@@ -33,7 +33,7 @@ public class Nutlet extends HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static final public String version = "1.3";
+	static final public String version = "1.4";
 
 	final Map<String,Object> setup;
 	final ProductServer productServer;
@@ -123,12 +123,14 @@ public class Nutlet extends HttpServlet {
 								"NutShell server is running since " + setup.get("startTime"), request, response);
 						return;
 					}
+					/*
 					else if (queryString.equals("clearCache")){
 						productServer.clearCache(false);
 						sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
 								"Statistics... ", request, response);
 						return;
 					}
+					 */
 					else {
 						sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
 								String.format("Query: %s", queryString), request, response);
@@ -167,6 +169,26 @@ public class Nutlet extends HttpServlet {
 				}
 			}
 		}
+
+
+		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
+			productServer.serverLog.warn("Clearing cache");
+			if (instructions.value != ActionType.CLEAR_CACHE){
+				instructions.remove(ActionType.CLEAR_CACHE);
+				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", instructions) );
+			}
+
+			try {
+				productServer.clearCache(false);
+				sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
+						"Statistics... ", request, response);
+			} catch (IOException e) {
+				productServer.serverLog.log(HttpServletResponse.SC_CONFLICT, "Clearing cache failed");
+			}
+			return;
+			//System.exit(result);
+		}
+
 
 		// Default
 		if (instructions.value == 0)
