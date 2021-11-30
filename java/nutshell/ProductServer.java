@@ -660,7 +660,6 @@ public class ProductServer { //extends Cache {
 				}
 
 				//	this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
-
 				// Assume Generator uses input similar to output (File or Object)
 				//final int inputActions = this.actions.value & (ResultType.MEMORY | ResultType.FILE);
 				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
@@ -1334,7 +1333,7 @@ public class ProductServer { //extends Cache {
 		Instructions instructions = new Instructions();
 		Map<String ,String> directives = new TreeMap<>();
 
-		Field[] actionFields = Instructions.class.getFields();
+		//Field[] actionFields = Instructions.class.getFields();
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1391,11 +1390,14 @@ public class ProductServer { //extends Cache {
 						continue; // Note
 					}
 
+					/*
 					if (opt.equals("clearCache")) {
 						log.warn("Clearing cache");
 						server.clearCache(true);
 						continue; // Note
 					}
+
+					 */
 
 					// Now, read conf file if not read this far.
 					if (confFile == null){
@@ -1468,6 +1470,7 @@ public class ProductServer { //extends Cache {
 							}
 							else {
 								// Set actions from invidual args: --make --delete --generate
+								// TODO: longName => LONG_NAME
 								opt = opt.toUpperCase();
 
 								if (HttpLog.statusCodes.containsValue(opt)){
@@ -1516,7 +1519,26 @@ public class ProductServer { //extends Cache {
 			instructions.set(Instructions.MAKE);
 		}
 
+		int result = 0;
+
 		log.note("Actions: " + instructions);
+
+		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
+			log.warn("Clearing cache");
+			if (instructions.value != ActionType.CLEAR_CACHE){
+				instructions.remove(ActionType.CLEAR_CACHE);
+				log.warn(String.format("Discarding remaining instructions: %s", instructions) );
+			}
+
+			try {
+				server.clearCache(true);
+			} catch (IOException e) {
+				log.log(HttpServletResponse.SC_CONFLICT, "Clearing cache failed");
+				result = 4;
+			}
+			System.exit(result);
+		}
+
 		if (!instructions.copies.isEmpty())
 			log.note(String.format("   COPY(%d):\t %s", instructions.copies.size(), instructions.copies));
 		if (!instructions.links.isEmpty())
@@ -1528,7 +1550,6 @@ public class ProductServer { //extends Cache {
 			log.note("Directives: " + directives);
 
 		/// "MAIN"
-		int result = 0;
 
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));

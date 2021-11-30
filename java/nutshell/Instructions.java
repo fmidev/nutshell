@@ -97,7 +97,7 @@ interface ActionType {
 
     /// Computation intensive products are computed in the background; return a notification receipt in HTML format.
     //  public static final int BATCH = 4096;
-    int CLEARCACHE = 16384;
+    int CLEAR_CACHE = 16384;
 
 }
 
