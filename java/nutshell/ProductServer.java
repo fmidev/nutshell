@@ -456,7 +456,7 @@ public class ProductServer { //extends Cache {
 		private void handleInterrupt(Signal signal){
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
 			// System.out.println("Interrupted by Ctrl+C: " + this.outputPath.getFileName());
-			if (instructions.involves(TypeFlags.ResultType.FILE)) {
+			if (instructions.involves(ResultType.FILE)) {
 				try {
 					delete(this.outputPath);
 					delete(this.outputPathTmp); // what about tmpdir?
@@ -484,26 +484,26 @@ public class ProductServer { //extends Cache {
 			// Logical corrections
 
 			if (! this.instructions.copies.isEmpty())
-				this.instructions.add(Instructions.MAKE | TypeFlags.ResultType.FILE);
+				this.instructions.add(Instructions.MAKE | ResultType.FILE);
 
 			if (! this.instructions.links.isEmpty())
-				this.instructions.add(Instructions.MAKE | TypeFlags.ResultType.FILE);
+				this.instructions.add(Instructions.MAKE | ResultType.FILE);
 
 			if (this.instructions.move != null)
-				this.instructions.add(Instructions.MAKE | TypeFlags.ResultType.FILE);
+				this.instructions.add(Instructions.MAKE | ResultType.FILE);
 
 			// Rest default result type
 			// if (this.actions.involves(Actions.MAKE | Actions.DELETE)) { }
-			if (!this.instructions.involves(TypeFlags.ResultType.FILE | TypeFlags.ResultType.MEMORY)) {
+			if (!this.instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
 				// This "type selection" could be also done with Generator?
 				this.log.log(HttpServletResponse.SC_OK, "Setting default result type: FILE");
-				this.instructions.add(TypeFlags.ResultType.FILE);
+				this.instructions.add(ResultType.FILE);
 			}
 
 
 			if (this.instructions.involves(Instructions.DELETE)){
 
-				if (this.instructions.isSet(TypeFlags.ResultType.FILE) ) {
+				if (this.instructions.isSet(ResultType.FILE) ) {
 					try {
 						this.delete(this.outputPath);
 					} catch (IOException e) {
@@ -526,7 +526,7 @@ public class ProductServer { //extends Cache {
 			// This is a potential path, not committing to a physical file yet.
 			File fileFinal = this.outputPath.toFile();
 
-			if (this.instructions.involves(Instructions.EXISTS | TypeFlags.ResultType.FILE) && ! this.instructions.isSet(Instructions.DELETE)) {
+			if (this.instructions.involves(Instructions.EXISTS | ResultType.FILE) && ! this.instructions.isSet(Instructions.DELETE)) {
 
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
 					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
@@ -578,9 +578,9 @@ public class ProductServer { //extends Cache {
 					if (this.instructions.involves(Instructions.GENERATE )){
 						// Consider this.addAction() -> log.debug()
 						if (generator instanceof ExternalGenerator)
-							this.instructions.add(TypeFlags.ResultType.FILE); // PREPARE dir & empty file
+							this.instructions.add(ResultType.FILE); // PREPARE dir & empty file
 						else
-							this.instructions.add(TypeFlags.ResultType.MEMORY);
+							this.instructions.add(ResultType.MEMORY);
 					}
 
 				}
@@ -663,7 +663,8 @@ public class ProductServer { //extends Cache {
 
 				// Assume Generator uses input similar to output (File or Object)
 				//final int inputActions = this.actions.value & (ResultType.MEMORY | ResultType.FILE);
-				final Instructions inputInstructions = new Instructions(this.instructions.value & (TypeFlags.ResultType.MEMORY | TypeFlags.ResultType.FILE));
+				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
+				inputInstructions.add(Instructions.GENERATE);
 				this.log.note(String.format("Input instructions: %s", inputInstructions));
 				//Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, this.log);
 				// Consider forwarding directives?
@@ -770,17 +771,17 @@ public class ProductServer { //extends Cache {
 
 			}
 
-			if (this.instructions.isSet(Instructions.INPUTLIST) && ! this.instructions.involves(Instructions.GENERATE)) {
+			if (this.instructions.isSet(ActionType.INPUTLIST) && ! this.instructions.involves(ActionType.GENERATE)) {
 				this.log.note("Input list: requested");
 				this.result = this.inputs;
 			}
 
 
-			if (this.instructions.isSet(TypeFlags.ResultType.FILE)){
+			if (this.instructions.isSet(ResultType.FILE)){
 				// TODO: save file (of JavaGenerator)
 				// if (this.result instanceof Path)...
 
-				if (this.instructions.isSet(TypeFlags.ActionType.DELETE)){
+				if (this.instructions.isSet(ActionType.DELETE)){
 					if (fileFinal.exists())
 						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length() ));
 					else {
