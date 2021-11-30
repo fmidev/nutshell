@@ -201,7 +201,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                 
         """
 
-        # Consider renaming NutShell "request" to "actions"
+        # Consider renaming NutShell "request" to "instructions"
         s.log = logging.getLogger("NutHandler" + str(++product_server.counter))
         s.log.setLevel(product_server.logger.level)
         
@@ -299,19 +299,19 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             s.wfile.write(ET.tostring(html))
             return
         
-        actions = None
+        instructions = None
         directives = []
         product_name = querydata.get('product', None)
         product_info = None 
         if (product_name):
             product_info = product.Info(filename = product_name)
-            actions = querydata.get('request', ["MAKE"])
+            instructions = querydata.get('request', ["MAKE"])
             directives = querydata['directives']
         else:
-            actions = querydata['request']
+            instructions = querydata['request']
             directives = querydata.get('directives', ["STATUS"])
         
-        s.log.info("Service-request: {0} ".format(actions))
+        s.log.info("Service-request: {0} ".format(instructions))
         s.log.info("Product-name: {0} ".format(product_name))
         s.log.info("Directives: {0} ".format(directives))
 
@@ -325,10 +325,10 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             s.log.info("Product info: {0} ".format(product_info))
             
             # "MAIN"
-            product_request = product_server.make_request(product_info, actions, directives, s.log.getChild("Make_Request"))
-            # print("Phase 3", actions)
+            product_request = product_server.make_request(product_info, instructions, directives, s.log.getChild("Make_Request"))
+            # print("Phase 3", instructions)
             # TODO: 'PATH'
-            if ('MAKE' in actions) and ('STATUS' not in directives):
+            if ('MAKE' in instructions) and ('STATUS' not in directives):
                 if (product_request.status == HTTPStatus.OK) and (product_request.path != ''):
                     # Redirect 
                     # server_name	mpeura10kl
@@ -346,7 +346,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
                     #product_request.log
             else:
                 product_request.status = HTTPStatus.OK
-                #print("Nokemake", actions)
+                #print("Nokemake", instructions)
                 
         if product_request:
             s.send_response(product_request.status.value)
@@ -367,9 +367,9 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # Consider single table for all
         # table = ET.Element('table')
         # append_table(table, data, attributes)
-        if actions:
+        if instructions:
             elem = nutxml.get_by_id(body, 'request')
-            elem.set("value", ','.join(actions))
+            elem.set("value", ','.join(instructions))
  
         if product_request:
             elem = nutxml.get_by_id(body, 'product')
@@ -400,7 +400,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         #elem.text = "Cwd: " + os.cwd + '\n'
             
         if (product_info):
-            if ('INPUTS' in actions):
+            if ('INPUTS' in instructions):
                 if (not product_request.inputs): # what if None?
                     product_request.inputs = product_server.get_input_list(product_info).inputs
 

@@ -397,12 +397,12 @@ class ProductServer:
 
         
 
-    def make_request(self, product_info, actions = ['MAKE'], directives = None, log = None):
+    def make_request(self, product_info, instructions = ['MAKE'], directives = None, log = None):
         """
         Main function.
 
         :param product_info: description of the product (string or nutshell.product.Info)
-        :param actions: what should be done about the product 
+        :param instructions: what should be done about the product
             (``MAKE``, ``DELETE``, ``CHECK`` , ``RETURN``), see :ref:`commands` .
         :param directives: how the product is generated etc 
         :param log: optional logging.logger 
@@ -412,12 +412,12 @@ class ProductServer:
         
         """
 
-        if (type(actions) == str):
-            actions = actions.split(',')
+        if (type(instructions) == str):
+            instructions = instructions.split(',')
 
-        if (type(actions) == list):
-            #actions = set(actions) 
-            actions = nutils.read_conf_text(actions)
+        if (type(instructions) == list):
+            #instructions = set(instructions)
+            instructions = nutils.read_conf_text(instructions)
             
         if (type(directives) == str):
             directives = directives.split(',')
@@ -425,31 +425,31 @@ class ProductServer:
         if (type(directives) == list):
             directives = nutils.read_conf_text(directives)
             
-        pr = request.Generator(self, product_info, log) #, actions, directives, log)
+        pr = request.Generator(self, product_info, log) #, instructions, directives, log)
 
         # Future option
-        if ('GENERATE' in actions):
-            actions['DELETE'] = True
-            actions['MAKE'] = True
-            #actions.add('DELETE')
-            #actions.add('MAKE')
+        if ('GENERATE' in instructions):
+            instructions['DELETE'] = True
+            instructions['MAKE'] = True
+            #instructions.add('DELETE')
+            #instructions.add('MAKE')
             
         # Boolean:
-        LATEST   = ('LATEST' in actions)
-        SHORTCUT = ('SHORTCUT' in actions)
+        LATEST   = ('LATEST' in instructions)
+        SHORTCUT = ('SHORTCUT' in instructions)
 
-        LINK = actions.get('LINK') #   in actions)  
-        COPY = actions.get('COPY')  # in actions) # directives)
-        MOVE = actions.get('MOVE') # in actions) # directives)
+        LINK = instructions.get('LINK') #   in instructions)
+        COPY = instructions.get('COPY')  # in instructions) # directives)
+        MOVE = instructions.get('MOVE') # in instructions) # directives)
          
         if (SHORTCUT or LATEST or LINK or COPY or MOVE):
-            actions['MAKE'] = True
-            #actions['CHECK'] = True
+            instructions['MAKE'] = True
+            #instructions['CHECK'] = True
         
-        MAKE   = ('MAKE'   in actions)     
-        INPUTS = ('INPUTS' in actions)     
-        DELETE = ('DELETE' in actions)     
-        TEST   = ('CHECK'  in actions) 
+        MAKE   = ('MAKE'   in instructions)
+        INPUTS = ('INPUTS' in instructions)
+        DELETE = ('DELETE' in instructions)
+        TEST   = ('CHECK'  in instructions)
                 
         # LOG =    ('LOG'    in pr.directives)        
         # DEBUG =  ('DEBUG'  in pr.directives)        
@@ -560,38 +560,38 @@ class ProductServer:
                             help="Read config file", 
                             metavar="<file>")
      
-        parser.add_argument("-a", "--actions", metavar="<string>",
+        parser.add_argument("-a", "--instructions", metavar="<string>",
                             dest="ACTIONS",
                             default="",
-                            help=f"Comma-separated string of actions: {supported_actions}")
+                            help=f"Comma-separated string of instructions: {supported_actions}")
 
         parser.add_argument("-r", "--request", metavar="<string>",
                             dest="ACTIONS",
                             default="",
-                            help="(Deprecating) Use --actions")
+                            help="(Deprecating) Use --instructions")
     
         parser.add_argument("-d", "--delete",
                             dest="DELETE",
                             action="store_true",
                             #default=False,
-                            help="Delete product file, same as --actions DELETE")
+                            help="Delete product file, same as --instructions DELETE")
 
         
         parser.add_argument("-i", "--inputList",
                             dest="INPUTS",
                             action="store_true",
-                            help="list input for a product, same as --actions INPUTS")
+                            help="list input for a product, same as --instructions INPUTS")
     
         parser.add_argument("-m", "--make",
                             dest="MAKE",
                             action="store_true",
                             #default=False,
-                            help="Make product, same as --actions MAKE")
+                            help="Make product, same as --instructions MAKE")
     
         parser.add_argument("-g", "--generate",
                             dest="GENERATE",
                             action="store_true",
-                            help="Generate product, same as --actions DELETE,MAKE")
+                            help="Generate product, same as --instructions DELETE,MAKE")
     
         parser.add_argument("-t", "--timeout",
                             dest="TIMEOUT",
@@ -702,22 +702,22 @@ if __name__ == '__main__':
                 
     logger.debug(product_server.get_status())
      
-    actions = {} # []
+    instructions = {} # []
 
     if (options.ACTIONS):
-        # actions.extend(options.ACTIONS.split(','))
-        actions = nutils.read_conf_text(options.ACTIONS.split(',')) # No values using ','?
+        # instructions.extend(options.ACTIONS.split(','))
+        instructions = nutils.read_conf_text(options.ACTIONS.split(',')) # No values using ','?
     
     # , 'TEST'
     for i in ['DELETE', 'MAKE', 'GENERATE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
         value = getattr(options, i)
         if (value): # Boolean ok, no numeric args expected, especially not zero
-            actions[i] = value
+            instructions[i] = value
     
-    if (not actions):
-        actions['MAKE'] = True
+    if (not instructions):
+        instructions['MAKE'] = True
 
-    logger.info('Requests:   {0}'.format(actions))
+    logger.info('Requests:   {0}'.format(instructions))
 
     directives = {}
     if (options.DIRECTIVES):
@@ -737,9 +737,9 @@ if __name__ == '__main__':
          
         if (product_info.PRODUCT_ID and product_info.FORMAT):
             
-            product_request = product_server.make_request(product_info, actions, directives) #, logger.getChild("make_request")
+            product_request = product_server.make_request(product_info, instructions, directives) #, logger.getChild("make_request")
     
-            if ('INPUTS' in actions): # or (options.VERBOSE > 6):
+            if ('INPUTS' in instructions): # or (options.VERBOSE > 6):
                 #nutils.print_dict(product_request.inputs)
                 logger.warning("Inputs:")
                 logger.info(product_request.inputs)

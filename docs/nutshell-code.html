@@ -116,7 +116,7 @@ directives determine how the product is generated.</p>
 
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.make_request">
-<code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, actions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>product_info, instructions=['MAKE'], directives=None, log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.make_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -124,7 +124,7 @@ directives determine how the product is generated.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>product_info</strong> – description of the product (string or nutshell.product.Info)</li>
-<li><strong>actions</strong> – what should be done about the product 
+<li><strong>instructions</strong> – what should be done about the product
 (<code class="docutils literal notranslate"><span class="pre">MAKE</span></code>, <code class="docutils literal notranslate"><span class="pre">DELETE</span></code>, <code class="docutils literal notranslate"><span class="pre">CHECK</span></code> , <code class="docutils literal notranslate"><span class="pre">RETURN</span></code>), see <a class="reference internal" href="nutshell-commands.html#commands"><span class="std std-ref">Commands and status codes</span></a> .</li>
 <li><strong>directives</strong> – how the product is generated etc</li>
 <li><strong>log</strong> – optional logging.logger</li>

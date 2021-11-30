@@ -109,7 +109,7 @@ class Generator(Tasklet):
     # Later, use (dir + file) object
     inputs = {}
     
-    #actions = []
+    #instructions = []
     #directives = []
     error_info = None
 
@@ -176,7 +176,7 @@ class Generator(Tasklet):
 
     
     def __init__(self, product_server, product_info, log=None):
-                #actions=None, directives=None, 
+                #instructions=None, directives=None,
 
         if not log:
             log = logging.getLogger("Generator")
@@ -188,11 +188,11 @@ class Generator(Tasklet):
                          log=log)
         
  
-        #        if (actions):
-        #            self.actions = actions
+        #        if (instructions):
+        #            self.instructions = instructions
         #        else:
-        #            self.actions = []
-        #        self.log.debug('actions:' + str(actions))
+        #            self.instructions = []
+        #        self.log.debug('instructions:' + str(instructions))
         #  
         #        if (directives):              
         #            self.directives = directives

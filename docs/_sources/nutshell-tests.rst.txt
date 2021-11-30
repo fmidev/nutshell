@@ -46,7 +46,7 @@ Undefined action
 
 Test 3 ::
 
-  nutshell --actions FOO
+  nutshell --instructions FOO
 
 
 *Return value: 2* 
@@ -198,38 +198,38 @@ Tests (http)
 Default action (MAKE)
 ---------------------
 
-`$NUTSHELL?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Does product file exist?
 ------------------------
 
-`$NUTSHELL?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Action: DELETE product file
 ---------------------------
 
-`$NUTSHELL?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
-`$NUTSHELL?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 8* 
 
 Action: MAKE product (generate, if nonexistent)
 -----------------------------------------------
 
-`$NUTSHELL?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Action: GENERATE (unconditionally)
 ----------------------------------
 
-`$NUTSHELL?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
@@ -238,7 +238,7 @@ Parameters in wrong order (generated file has them in order)
 
 Generated file has them in order.
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
@@ -249,39 +249,39 @@ Product error messages
 Initial check - valid generation
 --------------------------------
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Error test: image too large
 ---------------------------
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png>`_
 
 *Return value: 8* 
 
 Error test: Illegal (negative) arguments
 ----------------------------------------
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png>`_
 
 *Return value: 8* 
 
 Error test: Unsupported feature
 -------------------------------
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png>`_
 
 *Return value: 8* 
 
 Error test: Unsupported file format
 -----------------------------------
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf>`_
 
 *Return value: 8* 
 
-Local actions: copy, link and move
+Local instructions: copy, link and move
 ==================================
 
 
@@ -350,14 +350,14 @@ Test 34 ::
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
 
-`$NUTSHELL?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 *Return value: 0* 
 
 Generate through HTTP, delete on command line
 ---------------------------------------------
 
-`$NUTSHELL?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?actions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
 
 Test 37 ::
 

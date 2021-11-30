@@ -13,7 +13,7 @@ Commands and status codes
 Actions
 =======
 
-In NutShell, a product request may contain the following actions, input types and post-processing
+In NutShell, a product request may contain the following instructions, input types and post-processing
 tasks. On command line, they can be set invidually or with ``--action`` .
 For logical reasons, some of them are mutually exclusive, like ``DELETE`` and ``EXISTS``.
 Some of them, are implicit; for example, ``MAKE`` includes ``EXISTS`` and conditionally
@@ -44,7 +44,7 @@ Some requests specify the product type, for example for ``make`` or ``exist` com
 ============== ================= ============
 
 
-Short forms of command line actions are available in the Python version only.
+Short forms of command line instructions are available in the Python version only.
 
 
 .. _directives:

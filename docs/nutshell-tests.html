@@ -71,7 +71,7 @@ and http queries.</p>
 <div class="section" id="undefined-action">
 <h3>Undefined action<a class="headerlink" href="#undefined-action" title="Permalink to this headline">¶</a></h3>
 <p>Test 3</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">instructions</span> <span class="n">FOO</span>
 </pre></div>
 </div>
 <p><em>Return value: 2</em></p>
@@ -192,35 +192,35 @@ Test 8</p>
 <h2>Tests (http)<a class="headerlink" href="#tests-http" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id2">
 <h3>Default action (MAKE)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id3">
 <h3>Does product file exist?<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id4">
 <h3>Action: DELETE product file<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em>
-<a class="reference external" href="/nutshell/NutShell?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
 <div class="section" id="id6">
 <h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id8">
 <h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id10">
 <h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <p>Generated file has them in order.</p>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id11">
@@ -228,32 +228,32 @@ Test 8</p>
 </div>
 <div class="section" id="id12">
 <h3>Initial check - valid generation<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id14">
 <h3>Error test: image too large<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
 <div class="section" id="id15">
 <h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
 <div class="section" id="id17">
 <h3>Error test: Unsupported feature<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
 <div class="section" id="id18">
 <h3>Error test: Unsupported file format<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf</a></p>
 <p><em>Return value: 8</em></p>
 </div>
 </div>
-<div class="section" id="local-actions-copy-link-and-move">
-<h2>Local actions: copy, link and move<a class="headerlink" href="#local-actions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="local-instructions-copy-link-and-move">
+<h2>Local instructions: copy, link and move<a class="headerlink" href="#local-instructions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="move-the-resulting-file-to-specified-location">
 <h3>Move the resulting file to specified location<a class="headerlink" href="#move-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
 <p>Test 29</p>
@@ -306,12 +306,12 @@ Test 8</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
-<p><a class="reference external" href="/nutshell/NutShell?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="generate-through-http-delete-on-command-line">
 <h3>Generate through HTTP, delete on command line<a class="headerlink" href="#generate-through-http-delete-on-command-line" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?actions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p>Test 37</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
@@ -384,7 +384,7 @@ Test 8</p>
 <li class="toctree-l3"><a class="reference internal" href="#id18">Error test: Unsupported file format</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#local-actions-copy-link-and-move">Local actions: copy, link and move</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#local-instructions-copy-link-and-move">Local instructions: copy, link and move</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#move-the-resulting-file-to-specified-location">Move the resulting file to specified location</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#copy-the-resulting-file-to-specified-location">Copy the resulting file to specified location</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#link-the-resulting-file-to-specified-location">Link the resulting file to specified location</a></li>

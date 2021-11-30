@@ -442,12 +442,12 @@
 
         
 
-<div class="viewcode-block" id="ProductServer.make_request"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="n">directives</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ProductServer.make_request"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.nutshell.ProductServer.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">instructions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">],</span> <span class="n">directives</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main function.</span>
 
 <span class="sd">        :param product_info: description of the product (string or nutshell.product.Info)</span>
-<span class="sd">        :param actions: what should be done about the product </span>
+<span class="sd">        :param instructions: what should be done about the product </span>
 <span class="sd">            (``MAKE``, ``DELETE``, ``CHECK`` , ``RETURN``), see :ref:`commands` .</span>
 <span class="sd">        :param directives: how the product is generated etc </span>
 <span class="sd">        :param log: optional logging.logger </span>
@@ -457,12 +457,12 @@
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">actions</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instructions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">instructions</span> <span class="o">=</span> <span class="n">instructions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="c1">#actions = set(actions) </span>
-            <span class="n">actions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instructions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1">#instructions = set(instructions) </span>
+            <span class="n">instructions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">instructions</span><span class="p">)</span>
             
         <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">directives</span> <span class="o">=</span> <span class="n">directives</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
@@ -470,31 +470,31 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">directives</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">directives</span><span class="p">)</span>
             
-        <span class="n">pr</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span> <span class="c1">#, actions, directives, log)</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span> <span class="c1">#, instructions, directives, log)</span>
 
         <span class="c1"># Future option</span>
-        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;GENERATE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">):</span>
-            <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="c1">#actions.add(&#39;DELETE&#39;)</span>
-            <span class="c1">#actions.add(&#39;MAKE&#39;)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;GENERATE&#39;</span> <span class="ow">in</span> <span class="n">instructions</span><span class="p">):</span>
+            <span class="n">instructions</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">instructions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#instructions.add(&#39;DELETE&#39;)</span>
+            <span class="c1">#instructions.add(&#39;MAKE&#39;)</span>
             
         <span class="c1"># Boolean:</span>
-        <span class="n">LATEST</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>
-        <span class="n">SHORTCUT</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SHORTCUT&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>
+        <span class="n">LATEST</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LATEST&#39;</span> <span class="ow">in</span> <span class="n">instructions</span><span class="p">)</span>
+        <span class="n">SHORTCUT</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SHORTCUT&#39;</span> <span class="ow">in</span> <span class="n">instructions</span><span class="p">)</span>
 
-        <span class="n">LINK</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LINK&#39;</span><span class="p">)</span> <span class="c1">#   in actions)  </span>
-        <span class="n">COPY</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;COPY&#39;</span><span class="p">)</span>  <span class="c1"># in actions) # directives)</span>
-        <span class="n">MOVE</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MOVE&#39;</span><span class="p">)</span> <span class="c1"># in actions) # directives)</span>
+        <span class="n">LINK</span> <span class="o">=</span> <span class="n">instructions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LINK&#39;</span><span class="p">)</span> <span class="c1">#   in instructions)  </span>
+        <span class="n">COPY</span> <span class="o">=</span> <span class="n">instructions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;COPY&#39;</span><span class="p">)</span>  <span class="c1"># in instructions) # directives)</span>
+        <span class="n">MOVE</span> <span class="o">=</span> <span class="n">instructions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MOVE&#39;</span><span class="p">)</span> <span class="c1"># in instructions) # directives)</span>
          
         <span class="k">if</span> <span class="p">(</span><span class="n">SHORTCUT</span> <span class="ow">or</span> <span class="n">LATEST</span> <span class="ow">or</span> <span class="n">LINK</span> <span class="ow">or</span> <span class="n">COPY</span> <span class="ow">or</span> <span class="n">MOVE</span><span class="p">):</span>
-            <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="c1">#actions[&#39;CHECK&#39;] = True</span>
+            <span class="n">instructions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#instructions[&#39;CHECK&#39;] = True</span>
         
-        <span class="n">MAKE</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span>   <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
-        <span class="n">INPUTS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
-        <span class="n">DELETE</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;DELETE&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span>     
-        <span class="n">TEST</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CHECK&#39;</span>  <span class="ow">in</span> <span class="n">actions</span><span class="p">)</span> 
+        <span class="n">MAKE</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MAKE&#39;</span>   <span class="ow">in</span> <span class="n">instructions</span><span class="p">)</span>
+        <span class="n">INPUTS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">instructions</span><span class="p">)</span>
+        <span class="n">DELETE</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;DELETE&#39;</span> <span class="ow">in</span> <span class="n">instructions</span><span class="p">)</span>
+        <span class="n">TEST</span>   <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CHECK&#39;</span>  <span class="ow">in</span> <span class="n">instructions</span><span class="p">)</span>
                 
         <span class="c1"># LOG =    (&#39;LOG&#39;    in pr.directives)        </span>
         <span class="c1"># DEBUG =  (&#39;DEBUG&#39;  in pr.directives)        </span>
@@ -605,38 +605,38 @@
                             <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Read config file&quot;</span><span class="p">,</span> 
                             <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;file&gt;&quot;</span><span class="p">)</span>
      
-        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--actions&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--instructions&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;ACTIONS&quot;</span><span class="p">,</span>
                             <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Comma-separated string of actions: </span><span class="si">{supported_actions}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">help</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Comma-separated string of instructions: </span><span class="si">{supported_actions}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--request&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;ACTIONS&quot;</span><span class="p">,</span>
                             <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;(Deprecating) Use --actions&quot;</span><span class="p">)</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;(Deprecating) Use --instructions&quot;</span><span class="p">)</span>
     
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--delete&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span>
                             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
                             <span class="c1">#default=False,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Delete product file, same as --actions DELETE&quot;</span><span class="p">)</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Delete product file, same as --instructions DELETE&quot;</span><span class="p">)</span>
 
         
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;--inputList&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;INPUTS&quot;</span><span class="p">,</span>
                             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;list input for a product, same as --actions INPUTS&quot;</span><span class="p">)</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;list input for a product, same as --instructions INPUTS&quot;</span><span class="p">)</span>
     
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;--make&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;MAKE&quot;</span><span class="p">,</span>
                             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
                             <span class="c1">#default=False,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Make product, same as --actions MAKE&quot;</span><span class="p">)</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Make product, same as --instructions MAKE&quot;</span><span class="p">)</span>
     
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-g&quot;</span><span class="p">,</span> <span class="s2">&quot;--generate&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;GENERATE&quot;</span><span class="p">,</span>
                             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Generate product, same as --actions DELETE,MAKE&quot;</span><span class="p">)</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Generate product, same as --instructions DELETE,MAKE&quot;</span><span class="p">)</span>
     
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;--timeout&quot;</span><span class="p">,</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;TIMEOUT&quot;</span><span class="p">,</span>
@@ -747,22 +747,22 @@
                 
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">get_status</span><span class="p">())</span>
      
-    <span class="n">actions</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># []</span>
+    <span class="n">instructions</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># []</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">ACTIONS</span><span class="p">):</span>
-        <span class="c1"># actions.extend(options.ACTIONS.split(&#39;,&#39;))</span>
-        <span class="n">actions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">ACTIONS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="c1"># No values using &#39;,&#39;?</span>
+        <span class="c1"># instructions.extend(options.ACTIONS.split(&#39;,&#39;))</span>
+        <span class="n">instructions</span> <span class="o">=</span> <span class="n">nutils</span><span class="o">.</span><span class="n">read_conf_text</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">ACTIONS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span> <span class="c1"># No values using &#39;,&#39;?</span>
     
     <span class="c1"># , &#39;TEST&#39;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="s1">&#39;MAKE&#39;</span><span class="p">,</span> <span class="s1">&#39;GENERATE&#39;</span><span class="p">,</span> <span class="s1">&#39;INPUTS&#39;</span><span class="p">,</span> <span class="s1">&#39;SHORTCUT&#39;</span><span class="p">,</span> <span class="s1">&#39;LATEST&#39;</span><span class="p">,</span> <span class="s1">&#39;LINK&#39;</span><span class="p">,</span> <span class="s1">&#39;MOVE&#39;</span><span class="p">,</span> <span class="s1">&#39;COPY&#39;</span><span class="p">]:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="p">):</span> <span class="c1"># Boolean ok, no numeric args expected, especially not zero</span>
-            <span class="n">actions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">instructions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
     
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">actions</span><span class="p">):</span>
-        <span class="n">actions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">instructions</span><span class="p">):</span>
+        <span class="n">instructions</span><span class="p">[</span><span class="s1">&#39;MAKE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requests:   </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">actions</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Requests:   </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">instructions</span><span class="p">))</span>
 
     <span class="n">directives</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">DIRECTIVES</span><span class="p">):</span>
@@ -782,9 +782,9 @@
          
         <span class="k">if</span> <span class="p">(</span><span class="n">product_info</span><span class="o">.</span><span class="n">PRODUCT_ID</span> <span class="ow">and</span> <span class="n">product_info</span><span class="o">.</span><span class="n">FORMAT</span><span class="p">):</span>
             
-            <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">directives</span><span class="p">)</span> <span class="c1">#, logger.getChild(&quot;make_request&quot;)</span>
+            <span class="n">product_request</span> <span class="o">=</span> <span class="n">product_server</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">product_info</span><span class="p">,</span> <span class="n">instructions</span><span class="p">,</span> <span class="n">directives</span><span class="p">)</span> <span class="c1">#, logger.getChild(&quot;make_request&quot;)</span>
     
-            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">):</span> <span class="c1"># or (options.VERBOSE &gt; 6):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;INPUTS&#39;</span> <span class="ow">in</span> <span class="n">instructions</span><span class="p">):</span> <span class="c1"># or (options.VERBOSE &gt; 6):</span>
                 <span class="c1">#nutils.print_dict(product_request.inputs)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Inputs:&quot;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">product_request</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>

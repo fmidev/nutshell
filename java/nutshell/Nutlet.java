@@ -24,7 +24,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import nutshell.ProductServer.Task;
-import nutshell.ProductServer.Actions;
 
 
 public class Nutlet extends HttpServlet {
@@ -156,12 +155,12 @@ public class Nutlet extends HttpServlet {
 		}
 
 
-		Actions actions = new Actions();
+		Instructions instructions = new Instructions();
 		for (String key: new String[]{"actions", "output",  "request", "action"}) {  // request and action deprecating!
 			String[] a = request.getParameterValues(key);
 			if (a != null) {
 				try {
-					actions.add(a);
+					instructions.add(a);
 				} catch (Exception e) {
 					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parsing 'request' failed:" + Arrays.toString(a), e.getMessage(), response);
 					return;
@@ -170,8 +169,8 @@ public class Nutlet extends HttpServlet {
 		}
 
 		// Default
-		if (actions.value == 0)
-			actions.set(Actions.MAKE | Actions.STREAM);
+		if (instructions.value == 0)
+			instructions.set(Instructions.MAKE | Instructions.STREAM);
 
 
 		/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
@@ -189,7 +188,7 @@ public class Nutlet extends HttpServlet {
 			for (int i = 0; i < path.getNameCount(); i++) {
 				if (path.getName(i).toString().equals("cache")){
 					productStr = path.getFileName().toString();
-					actions.set(Actions.MAKE | Actions.STREAM);
+					instructions.set(Instructions.MAKE | Instructions.STREAM);
 					break;
 				}
 			}
@@ -227,11 +226,11 @@ public class Nutlet extends HttpServlet {
 
 			// Logging: save logs (disk) with instantaneous or save always?
 			//Task task = productServer.new Task(filename, action.value,  log);
-			Task task = productServer.new Task(filename, actions.value,null);
+			Task task = productServer.new Task(filename, instructions.value,null);
 
-			if (task.actions.isSet(Actions.LATEST)){
+			if (task.instructions.isSet(Instructions.LATEST)){
 				task.log.note("Action 'LATEST' not allowed in HTTP interface, discarding it");
-				task.actions.remove(Actions.LATEST);
+				task.instructions.remove(Instructions.LATEST);
 			}
 
 			//String[] directives = request.getParameterValues("directives");
@@ -265,11 +264,11 @@ public class Nutlet extends HttpServlet {
 				final boolean statusOK = (task.log.getStatus() >= Log.NOTE);
 				//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
-				if (statusOK && task.actions.isSet(Actions.STREAM)) {
+				if (statusOK && task.instructions.isSet(Instructions.STREAM)) {
 					sendToStream(task, response);
 					return;
 				}
-				else if (statusOK && task.actions.isSet(Actions.REDIRECT)) {
+				else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
 					String url = String.format("%s/cache/%s?redirect=NO", request.getContextPath(), task.relativeOutputPath);
 					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
 					response.sendRedirect(url);
@@ -284,7 +283,7 @@ public class Nutlet extends HttpServlet {
 				//}
 				else {
 
-					if (!task.actions.isSet(ProductServer.Actions.DEBUG)) {
+					if (!task.instructions.isSet(Instructions.DEBUG)) {
 						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 								os.toString("UTF8"), request, response);
 						return;
@@ -297,9 +296,9 @@ public class Nutlet extends HttpServlet {
 
 				response.setStatus(e.index);
 
-				task.actions.add(Actions.DEBUG);
-				task.actions.add(Actions.DEBUG);
-				task.actions.add(Actions.INPUTLIST);
+				task.instructions.add(Instructions.DEBUG);
+				task.instructions.add(Instructions.DEBUG);
+				task.instructions.add(Instructions.INPUTLIST);
 				/*
 				switch (e.index){
 					case HttpServletResponse.SC_PRECONDITION_FAILED:
@@ -340,7 +339,7 @@ public class Nutlet extends HttpServlet {
 			html.appendElement(elem);
 
 
-			if (task.actions.isSet(Actions.DEBUG)) {
+			if (task.instructions.isSet(Instructions.DEBUG)) {
 
 				Map<String,Object> map = new LinkedHashMap<>();
 
@@ -367,7 +366,7 @@ public class Nutlet extends HttpServlet {
 				Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
 				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
-				map.put("actions", actions);
+				map.put("actions", instructions);
 				map.put("directives", task.directives);
 
 				html.appendTable(map, "Product generator");
@@ -421,7 +420,7 @@ public class Nutlet extends HttpServlet {
 			//  if (!task.directives.isEmpty())
 			//	cmdLine += String.format("--directives %s", task.directives.toString());
 			String name = productServer.getClass().getCanonicalName();
-			html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, actions, task.info)).setAttribute("class", "code");
+			html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
 
 			html.appendTable(task.info.getParamEnv(null), "Product parameters");
 

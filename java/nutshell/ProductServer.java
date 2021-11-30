@@ -90,7 +90,7 @@ public class ProductServer { //extends Cache {
 
 	}
 
-public final Map<String,Object> setup = new HashMap<>();
+	public final Map<String,Object> setup = new HashMap<>();
 
 	// TODO: add to config, set in constructor
 	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
@@ -201,175 +201,6 @@ public final Map<String,Object> setup = new HashMap<>();
 			return Paths.get("");
 	}
 
-	public interface ResultType {
-
-		/** The product is in memory cache
-		 */
-		int MEMORY = 1; // "RESULT=MEMORY"
-
-		/** Product should be saved on disk. System side generator may save it anyway.
-		 *   – return immediately in success
-		 */
-		int FILE = 2; // "RESULT=FILE"
-
-		/** Link file to short directory
-		 *
-		 */
-		int SHORTCUT = 4 | FILE; // "POSTOP=LINK_SHORTCUT"
-
-		/** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
-		 */
-		int LATEST = 8 | FILE;  // "POSTOP=LINK_LATEST"
-
-
-	}
-
-	/** Specifies, what will be done after product has been generated (or checked).
-	 *
-	 *  If unset, a status report is returned, including path/link to the result.
-	 *
-	 */
-	public interface OutputType {
-
-
-		/** HTTP only: client will be redirected to URL of generated product
-		 *  Strictly speaking - needs no file, but a result (file or object).
-		 *
-		 * @see Nutlet#doGet
-		 */
-		int REDIRECT = 16 | ResultType.FILE;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
-
-		/** Output in a stream (Currently, HTTP only. Future option: standard output.)
-		 *
-		 * @see Nutlet#doGet
-		 */
-		int STREAM = 32;  // "OUTPUT=STREAM"
-
-	}
-
-	public interface ActionType {
-
-		/** Only checks existence of product (used with @MEMORY or @FILE)
-		 *
-		 *  Returns immediately, if a non-empty product instance is found.
-		 *  If an empty product is found, waits for completion.
-		 */
-		int EXISTS = 64; // "OUTPUT=INFO"
-
-		/** Delete the product file on disk (future option: also in memory cache).
-		 */
-		int DELETE = 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
-
-		/** Retrieve input list.
-		 */
-		int INPUTLIST = 256; // a "hidden" flag? "OUTPUT=INFO"
-
-		/** The product is (re)generated. Used with MEMORY and FILE
-		 *
-		 */
-		int GENERATE = 512; //  | INPUTLIST;
-
-		/** Conditional generate: create product only if it does not exist. Used with MEMORY and FILE
-		 *
-		 *  In program flow, MEMORY and FILE will be checked first, and only if they fail, GENERATION takes place.
-		 */
-		int MAKE = 1024 | EXISTS;
-		//public final int MAKE = EXIST | GENERATE;
-		// A "hidden" flag? actually unclear, should be either RESULT=FILE or RESULT=MEMORY (but not RESULT=null);
-		// Also, acts like "make both MEMORY and FILE objects".
-
-		/// Check if product is in cache memory or disk, but do not generate it if missing.
-		// public static final int QUERY = MEMORY|FILE;
-
-		/** Run script "run.sh" in the product directory (after)
-		 */
-		int RUN = 2048; // PostProcessing!
-
-		/** Go through product request handler checking existence of product generator, memory cache and output directory.
-		 */
-		int DEBUG = 4096; // | INPUTLIST; // "OUTPUT=INFO"
-
-		/// Computation intensive products are computed in the background; return a notification receipt in HTML format.
-		//  public static final int BATCH = 4096;
-
-	}
-
-
-	public static class Actions extends Flags implements ActionType, ResultType, OutputType {
-
-		public Actions(){
-		}
-
-		public Actions(int a){
-			this.value = a;
-		}
-
-		public boolean isEmpty() {
-			return (value == 0);
-		}
-
-
-		/** Add specific request to copy the result.
-		 *
-		 *  Several requests can be added.
-		 *
-		 * @param filename - target file
-		 */
-		public void addCopy(String filename){
-			copies.add(Paths.get(filename));
-		}
-
-		/** Add specific request to copy the result.
-		 *
-		 * @param copies - target files
-		 */
-		public void addCopies(List<Path> copies){
-			if (copies != null)
-				this.copies.addAll(copies);
-		}
-
-
-		/** Add specific request to list the result.
-		 *
-		 *  Several requests can be added.
-		 *
-		 * @param filename
-		 */
-		public void addLink(String filename){
-			links.add(Paths.get(filename));
-		}
-
-		/** Add specific request to link the result.
-		 *
-		 *  Several requests can be added.
-		 *
-		 * @param links - filenames pointing to the original result
-		 */
-		public void addLinks(List<Path> links){
-			if (links != null)
-				this.links.addAll(links);
-		}
-
-		/** Add specific request to link the result.
-		 *
-		 *  Several requests can be added.
-		 *
-		 * @param path - target
-		 */
-		public void addMove(String path){
-			if (path != null)
-				move = Paths.get(path);
-		}
-
-		public void addMove(Path path){
-			move = path;
-		}
-
-		protected List<Path> copies = new ArrayList<>();
-		protected List<Path> links  = new ArrayList<>();
-		protected Path move = null;
-
-	}
 
 	//public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
 	public Path ensureDir(Path root, Path relativePath) throws IOException {
@@ -442,7 +273,7 @@ public final Map<String,Object> setup = new HashMap<>();
 
 		final public String filename;
 
-		final public Actions actions = new Actions();
+		final public Instructions instructions = new Instructions();
 
 		public Path timeStampDir;
 		public Path productDir;
@@ -466,18 +297,18 @@ public final Map<String,Object> setup = new HashMap<>();
 		/** Product generation task defining a product instance and operations on it.
 		 *
 		 * @param productStr
-		 * @param actions - definition how a product is retrieved and handled thereafter - @see #Actions
+		 * @param instructions - definition how a product is retrieved and handled thereafter - @see #Actions
 		 * @param parentLog - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
 		 */
-		public Task(String productStr, int actions, HttpLog parentLog) throws ParseException {
+		public Task(String productStr, int instructions, HttpLog parentLog) throws ParseException {
 
 			// in LOG // this.creationTime = System.currentTimeMillis();
 			this.info = new ProductInfo(productStr);
 			this.log = new HttpLog("["+this.info.PRODUCT_ID+"]", parentLog);
 
 			this.filename = this.info.getFilename();
-			this.actions.set(actions);
+			this.instructions.set(instructions);
 
 			// Relative
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
@@ -498,7 +329,6 @@ public final Map<String,Object> setup = new HashMap<>();
 			this.storagePath   = storageRoot.resolve(this.relativeOutputDir).resolve(filename);
 
 
-
 			try {
 				ensureFile(cacheRoot, this.relativeLogPath);
 				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
@@ -508,7 +338,7 @@ public final Map<String,Object> setup = new HashMap<>();
 			}
 
 			//this.log.warn("Where am I?");
-			this.log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getId(), this.actions, this.directives)); //  this.toString()
+			this.log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getId(), this.instructions, this.directives)); //  this.toString()
 			this.result = null;
 		}
 
@@ -626,7 +456,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		private void handleInterrupt(Signal signal){
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
 			// System.out.println("Interrupted by Ctrl+C: " + this.outputPath.getFileName());
-			if (actions.involves(ResultType.FILE)) {
+			if (instructions.involves(TypeFlags.ResultType.FILE)) {
 				try {
 					delete(this.outputPath);
 					delete(this.outputPathTmp); // what about tmpdir?
@@ -653,27 +483,27 @@ public final Map<String,Object> setup = new HashMap<>();
 
 			// Logical corrections
 
-			if (! this.actions.copies.isEmpty())
-				this.actions.add(Actions.MAKE | ResultType.FILE);
+			if (! this.instructions.copies.isEmpty())
+				this.instructions.add(Instructions.MAKE | TypeFlags.ResultType.FILE);
 
-			if (! this.actions.links.isEmpty())
-				this.actions.add(Actions.MAKE | ResultType.FILE);
+			if (! this.instructions.links.isEmpty())
+				this.instructions.add(Instructions.MAKE | TypeFlags.ResultType.FILE);
 
-			if (this.actions.move != null)
-				this.actions.add(Actions.MAKE | ResultType.FILE);
+			if (this.instructions.move != null)
+				this.instructions.add(Instructions.MAKE | TypeFlags.ResultType.FILE);
 
 			// Rest default result type
 			// if (this.actions.involves(Actions.MAKE | Actions.DELETE)) { }
-			if (!this.actions.involves(ResultType.FILE | ResultType.MEMORY)) {
+			if (!this.instructions.involves(TypeFlags.ResultType.FILE | TypeFlags.ResultType.MEMORY)) {
 				// This "type selection" could be also done with Generator?
 				this.log.log(HttpServletResponse.SC_OK, "Setting default result type: FILE");
-				this.actions.add(ResultType.FILE);
+				this.instructions.add(TypeFlags.ResultType.FILE);
 			}
 
 
-			if (this.actions.involves(Actions.DELETE)){
+			if (this.instructions.involves(Instructions.DELETE)){
 
-				if (this.actions.isSet(ResultType.FILE) ) {
+				if (this.instructions.isSet(TypeFlags.ResultType.FILE) ) {
 					try {
 						this.delete(this.outputPath);
 					} catch (IOException e) {
@@ -688,7 +518,7 @@ public final Map<String,Object> setup = new HashMap<>();
 			//  Note: Java Generators do not need disk, unless FILE
 			//  WRONG, ... MAKE will always require FILE
 
-			if (this.actions.isSet(Actions.MEMORY)) {
+			if (this.instructions.isSet(Instructions.MEMORY)) {
 				// Not implemented yet
 				// this.result = new BufferedImage();
 			}
@@ -696,7 +526,7 @@ public final Map<String,Object> setup = new HashMap<>();
 			// This is a potential path, not committing to a physical file yet.
 			File fileFinal = this.outputPath.toFile();
 
-			if (this.actions.involves(Actions.EXISTS | ResultType.FILE) && ! this.actions.isSet(Actions.DELETE)) {
+			if (this.instructions.involves(Instructions.EXISTS | TypeFlags.ResultType.FILE) && ! this.instructions.isSet(Instructions.DELETE)) {
 
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
 					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
@@ -728,8 +558,8 @@ public final Map<String,Object> setup = new HashMap<>();
 				else { // if (this.actions.isSet(Actions.EXIST)){
 					this.log.log(HttpServletResponse.SC_NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
 					//this.log.log(HttpServletResponse.SC_OK, String.format("File does not exist: %s", this.outputPath));
-					if (this.actions.isSet(Actions.MAKE)) {
-						this.actions.add(Actions.GENERATE);
+					if (this.instructions.isSet(Instructions.MAKE)) {
+						this.instructions.add(Instructions.GENERATE);
 					}
 				}
 
@@ -737,32 +567,34 @@ public final Map<String,Object> setup = new HashMap<>();
 
 
 			// Retrieve Geneator, if needed
-			if (this.actions.involves(Actions.GENERATE | Actions.INPUTLIST | Actions.DEBUG)){
+			if (this.instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.DEBUG)){
 
 				this.log.log(HttpServletResponse.SC_OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
 				try {
 					generator = getGenerator(this.info.PRODUCT_ID);
-					this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+					//this.log.log(HttpServletResponse.SC_CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+					this.log.log(HttpServletResponse.SC_CREATED, generator.toString());
 
-					if (this.actions.involves(Actions.GENERATE )){
+					if (this.instructions.involves(Instructions.GENERATE )){
+						// Consider this.addAction() -> log.debug()
 						if (generator instanceof ExternalGenerator)
-							this.actions.add(ResultType.FILE); // PREPARE dir & empty file
+							this.instructions.add(TypeFlags.ResultType.FILE); // PREPARE dir & empty file
 						else
-							this.actions.add(ResultType.MEMORY);
+							this.instructions.add(TypeFlags.ResultType.MEMORY);
 					}
 
 				}
 				catch (IndexedException e){
 					this.log.log(HttpServletResponse.SC_CONFLICT, "Generator does not exist");
 					this.log.log(e);
-					this.actions.remove(Actions.GENERATE);
-					this.actions.remove(Actions.INPUTLIST);
-					this.actions.remove(Actions.DEBUG);
+					this.instructions.remove(Instructions.GENERATE);
+					this.instructions.remove(Instructions.INPUTLIST);
+					this.instructions.remove(Instructions.DEBUG);
 				}
 
 			}
 
-			if (this.actions.isSet(Actions.DELETE)) {
+			if (this.instructions.isSet(Instructions.DELETE)) {
 
 				if (fileFinal.exists()) {
 					this.log.log(HttpServletResponse.SC_CONFLICT, String.format("Failed in deleting: %s ", this.outputPath));
@@ -771,8 +603,8 @@ public final Map<String,Object> setup = new HashMap<>();
 					this.log.log(HttpServletResponse.SC_NO_CONTENT, String.format("Deleted: %s ", this.outputPath));
 				}
 
-				if (this.actions.involves(Actions.GENERATE|Actions.EXISTS)){
-					this.log.log(HttpServletResponse.SC_MULTIPLE_CHOICES, String.format("Mutually contradicting actions: %s ", this.actions));
+				if (this.instructions.involves(Instructions.GENERATE| Instructions.EXISTS)){
+					this.log.log(HttpServletResponse.SC_MULTIPLE_CHOICES, String.format("Mutually contradicting actions: %s ", this.instructions));
 				}
 
 				return;
@@ -780,7 +612,7 @@ public final Map<String,Object> setup = new HashMap<>();
 
 
 			// Generate or at least list inputs
-			if (this.actions.involves(Actions.INPUTLIST  | Actions.GENERATE)) { //
+			if (this.instructions.involves(Instructions.INPUTLIST  | Instructions.GENERATE)) { //
 
 				this.log.debug(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
 
@@ -796,7 +628,7 @@ public final Map<String,Object> setup = new HashMap<>();
 					log.log(e);
 
 					this.log.warn("Removing GENERATE from actions");
-					this.actions.remove(Actions.GENERATE);
+					this.instructions.remove(Instructions.GENERATE);
 				}
 
 				if (!this.inputs.isEmpty())
@@ -806,7 +638,7 @@ public final Map<String,Object> setup = new HashMap<>();
 
 
 
-			if (this.actions.isSet(Actions.GENERATE)) {
+			if (this.instructions.isSet(Instructions.GENERATE)) {
 
 				this.log.reset(); // Forget old sins
 
@@ -830,9 +662,12 @@ public final Map<String,Object> setup = new HashMap<>();
 				//	this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
 
 				// Assume Generator uses input similar to output (File or Object)
-				final int inputActions = this.actions.value & (ResultType.MEMORY | ResultType.FILE);
-
-				Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, this.log);
+				//final int inputActions = this.actions.value & (ResultType.MEMORY | ResultType.FILE);
+				final Instructions inputInstructions = new Instructions(this.instructions.value & (TypeFlags.ResultType.MEMORY | TypeFlags.ResultType.FILE));
+				this.log.note(String.format("Input instructions: %s", inputInstructions));
+				//Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, this.log);
+				// Consider forwarding directives?
+				Map<String,Task> tasks = executeMany(this.inputs, inputInstructions, null, this.log);
 
 				// Collect results
 				for (Entry<String,Task> entry : tasks.entrySet()){
@@ -935,17 +770,17 @@ public final Map<String,Object> setup = new HashMap<>();
 
 			}
 
-			if (this.actions.isSet(Actions.INPUTLIST) && ! this.actions.involves(Actions.GENERATE)) {
+			if (this.instructions.isSet(Instructions.INPUTLIST) && ! this.instructions.involves(Instructions.GENERATE)) {
 				this.log.note("Input list: requested");
 				this.result = this.inputs;
 			}
 
 
-			if (this.actions.isSet(ResultType.FILE)){
+			if (this.instructions.isSet(TypeFlags.ResultType.FILE)){
 				// TODO: save file (of JavaGenerator)
 				// if (this.result instanceof Path)...
 
-				if (this.actions.isSet(ActionType.DELETE)){
+				if (this.instructions.isSet(TypeFlags.ActionType.DELETE)){
 					if (fileFinal.exists())
 						this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length() ));
 					else {
@@ -971,7 +806,7 @@ public final Map<String,Object> setup = new HashMap<>();
 					this.log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
 
 					// "Post processing"
-					if (this.actions.isSet(Actions.SHORTCUT)){
+					if (this.instructions.isSet(Instructions.SHORTCUT)){
 						if (this.info.isDynamic()) {
 							try {
 								Path dir = ensureDir(cacheRoot,productDir); //, dirPerms);
@@ -984,7 +819,7 @@ public final Map<String,Object> setup = new HashMap<>();
 							log.debug("Static product (no TIMESTAMP), skipped shortcut");
 					}
 
-					if (this.actions.isSet(Actions.LATEST)){
+					if (this.instructions.isSet(Instructions.LATEST)){
 						if (this.info.isDynamic()) {
 							try {
 								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
@@ -1000,7 +835,7 @@ public final Map<String,Object> setup = new HashMap<>();
 
 
 
-					for (Path path: this.actions.copies) {
+					for (Path path: this.instructions.copies) {
 						try {
 							this.copy(this.outputPath, path); // Paths.get(path)
 						} catch (IOException e) {
@@ -1010,7 +845,7 @@ public final Map<String,Object> setup = new HashMap<>();
 						}
 					}
 
-					for (Path path: this.actions.links) {
+					for (Path path: this.instructions.links) {
 						try {
 							this.link(this.outputPath, path, false); // Paths.get(path)
 						} catch (IOException e) {
@@ -1019,13 +854,13 @@ public final Map<String,Object> setup = new HashMap<>();
 						}
 					}
 
-					if (this.actions.move != null) {
+					if (this.instructions.move != null) {
 						try {
-							this.move(this.outputPath, this.actions.move);
-							this.result = this.actions.move;
-							this.log.log(HttpServletResponse.SC_MOVED_PERMANENTLY, String.format("Moved: %s", this.actions.move));
+							this.move(this.outputPath, this.instructions.move);
+							this.result = this.instructions.move;
+							this.log.log(HttpServletResponse.SC_MOVED_PERMANENTLY, String.format("Moved: %s", this.instructions.move));
 						} catch (IOException e) {
-							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Moving failed: %s", this.actions.move));
+							this.log.log(HttpServletResponse.SC_FORBIDDEN, String.format("Moving failed: %s", this.instructions.move));
 							this.log.log(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 						}
 					}
@@ -1045,12 +880,12 @@ public final Map<String,Object> setup = new HashMap<>();
 			else {
 				if (this.result != null) // Object?
 					this.log.info("Result: " + this.result.toString());
-				this.log.note("Task completed: actions=" + this.actions);
+				this.log.note("Task completed: actions=" + this.instructions);
 				// status page?
 
 			}
 
-			if (actions.isSet(Actions.RUN)){
+			if (instructions.isSet(Instructions.RUN)){
 				ShellExec.OutputReader reader = new ShellExec.OutputReader(this.log.getPrintStream());
 				//ShellExec shellExec = new ShellExec(Paths.get("run.sh"), this.productDir);
 				ShellExec.exec("./run.sh", null, productRoot.resolve(productDir), reader);
@@ -1171,12 +1006,12 @@ public final Map<String,Object> setup = new HashMap<>();
 	/** Run a set of tasks in parallel.
 	 *
 	 * @param taskRequests
-	 * @param actions
+	 * @param instructions
 	 * @param directives
 	 * @param log
 	 * @return
 	 */
-	public Map<String,Task> executeMany(Map<String,String> taskRequests, Actions actions, Map directives, HttpLog log){
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, Instructions instructions, Map directives, HttpLog log){
 
 		Map<String,Task> tasks = new HashMap<>();
 
@@ -1194,13 +1029,13 @@ public final Map<String,Object> setup = new HashMap<>();
 		/// Check COPY & LINK targets (must be directories, if several tasks)
 		if (count > 1){
 
-			for (Path p : actions.copies){
+			for (Path p : instructions.copies){
 				if (!p.toFile().isDirectory()) {
 					log.warn(String.format("Several tasks (%d), but single COPY target: %s", count, p));
 				}
 			}
 
-			for (Path p : actions.links){
+			for (Path p : instructions.links){
 				if (!p.toFile().isDirectory()){
 					log.warn(String.format("Several tasks (%d), but single LINK target: %s", count, p));
 				}
@@ -1223,14 +1058,14 @@ public final Map<String,Object> setup = new HashMap<>();
 				log.debug(String.format("Still here: %s = %s", key, value));
 				System.err.println(String.format("Still here: %s = %s", key, value));
 
-				Task task = new Task(value, actions.value, log);
+				Task task = new Task(value, instructions.value, log);
 				System.err.println(String.format("NOTTT here: %s = %s", key, value));
 
 				log.debug(String.format("Still life: %s = %s", key, value));
 				task.setDirectives(directives);
-				task.actions.addCopies(actions.copies);
-				task.actions.addLinks(actions.links);
-				task.actions.addMove(actions.move); // Thread-safe?
+				task.instructions.addCopies(instructions.copies);
+				task.instructions.addLinks(instructions.links);
+				task.instructions.addMove(instructions.move); // Thread-safe?
 
 				task.log.setVerbosity(log.getVerbosity());
 				log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
@@ -1463,7 +1298,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		System.err.println("    --verbose <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
 		System.err.println("    --debug : same as --verbose DEBUG");
 		System.err.println("    --conf <file> : read configuration file");
-		System.err.println("    --actions <string> : main operation: " + String.join(",", Flags.getKeys(Actions.class)));
+		System.err.println("    --actions <string> : main operation: " + String.join(",", Flags.getKeys(Instructions.class)));
 		System.err.println("      (all the actions can be also supplied invidually: --make --delete --generate ... )");
 		System.err.println("    --copy <target>: copy file to target (repeatable)");
 		System.err.println("    --link <target>: link file to target (repeatable)");
@@ -1495,10 +1330,10 @@ public final Map<String,Object> setup = new HashMap<>();
 		String confFile = null;
 
 		Map<String,String> products = new TreeMap<>();
-		Actions actions = new Actions();
+		Instructions instructions = new Instructions();
 		Map<String ,String> directives = new TreeMap<>();
 
-		Field[] actionFields = Actions.class.getFields();
+		Field[] actionFields = Instructions.class.getFields();
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1595,21 +1430,21 @@ public final Map<String,Object> setup = new HashMap<>();
 							if (p.length > 1){
 								System.err.println("Several products defined, using last");
 							}
-							if (actions.isEmpty())
-								actions.add(Actions.MAKE);
+							if (instructions.isEmpty())
+								instructions.add(Instructions.MAKE);
 							Task product = server.new Task(p[p.length-1], 0, log);
-							System.out.println(String.format("actions=%s&product=%s", actions, product));
+							System.out.println(String.format("actions=%s&product=%s", instructions, product));
 							return;
 						}
 					}
 					else if (opt.equals("copy")) {
-						actions.addCopy(args[++i]);
+						instructions.addCopy(args[++i]);
 					}
 					else if (opt.equals("link")) {
-						actions.addLink(args[++i]);
+						instructions.addLink(args[++i]);
 					}
 					else if (opt.equals("move")) {
-						actions.addMove(args[++i]);
+						instructions.addMove(args[++i]);
 					}
 					else if (opt.equals("directives")) {
 						for (String d : args[++i].split("\\|")) { // Note: regexp
@@ -1628,7 +1463,7 @@ public final Map<String,Object> setup = new HashMap<>();
 							if (opt.equals("actions")) {
 								opt = args[++i];
 								log.info("Adding actions: " + opt);
-								actions.set(opt);
+								instructions.set(opt);
 							}
 							else {
 								// Set actions from invidual args: --make --delete --generate
@@ -1641,13 +1476,13 @@ public final Map<String,Object> setup = new HashMap<>();
 
 								//Field field =
 								log.info("Adding action:" + opt);
-								Actions.class.getField(opt); // ensure field exists
-								actions.add(opt);
+								Instructions.class.getField(opt); // ensure field exists
+								instructions.add(opt);
 							}
 						}
 						catch (NoSuchFieldException|IllegalAccessException e) {
 							log.note("Use following action codes: ");
-							for (Field field : Actions.class.getFields()) {
+							for (Field field : Instructions.class.getFields()) {
 								String name = field.getName();
 								if (name.equals(name.toUpperCase())) {
 									try {
@@ -1676,17 +1511,17 @@ public final Map<String,Object> setup = new HashMap<>();
 			System.exit(1);
 		}
 
-		if (actions.isEmpty()){
-			actions.set(Actions.MAKE);
+		if (instructions.isEmpty()){
+			instructions.set(Instructions.MAKE);
 		}
 
-		log.note("Actions: " + actions);
-		if (!actions.copies.isEmpty())
-			log.note(String.format("   COPY(%d):\t %s", actions.copies.size(), actions.copies));
-		if (!actions.links.isEmpty())
-			log.note(String.format("   LINK(%d):\t %s", actions.links.size(),  actions.links));
-		if (actions.move != null)
-			log.note(String.format("   MOVE: \t %s", actions.move));
+		log.note("Actions: " + instructions);
+		if (!instructions.copies.isEmpty())
+			log.note(String.format("   COPY(%d):\t %s", instructions.copies.size(), instructions.copies));
+		if (!instructions.links.isEmpty())
+			log.note(String.format("   LINK(%d):\t %s", instructions.links.size(),  instructions.links));
+		if (instructions.move != null)
+			log.note(String.format("   MOVE: \t %s", instructions.move));
 
 		if (!directives.isEmpty())
 			log.note("Directives: " + directives);
@@ -1694,7 +1529,7 @@ public final Map<String,Object> setup = new HashMap<>();
 		/// "MAIN"
 		int result = 0;
 
-		Map<String,ProductServer.Task> tasks = server.executeMany(products, actions, directives, log);
+		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
 
 		log.warn("Starting..");

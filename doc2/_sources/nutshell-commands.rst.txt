@@ -14,7 +14,7 @@ Commands and status codes
 Requests
 ========
 
-Also know as *actions*
+Also know as *instructions*
 
 ============ ================= ============
  Action      Cmd line option

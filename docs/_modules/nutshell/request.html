@@ -154,7 +154,7 @@
     <span class="c1"># Later, use (dir + file) object</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
     
-    <span class="c1">#actions = []</span>
+    <span class="c1">#instructions = []</span>
     <span class="c1">#directives = []</span>
     <span class="n">error_info</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -221,7 +221,7 @@
 
     
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-                <span class="c1">#actions=None, directives=None, </span>
+                <span class="c1">#instructions=None, directives=None, </span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="p">:</span>
             <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;Generator&quot;</span><span class="p">)</span>
@@ -233,11 +233,11 @@
                          <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
         
  
-        <span class="c1">#        if (actions):</span>
-        <span class="c1">#            self.actions = actions</span>
+        <span class="c1">#        if (instructions):</span>
+        <span class="c1">#            self.instructions = instructions</span>
         <span class="c1">#        else:</span>
-        <span class="c1">#            self.actions = []</span>
-        <span class="c1">#        self.log.debug(&#39;actions:&#39; + str(actions))</span>
+        <span class="c1">#            self.instructions = []</span>
+        <span class="c1">#        self.log.debug(&#39;instructions:&#39; + str(instructions))</span>
         <span class="c1">#  </span>
         <span class="c1">#        if (directives):              </span>
         <span class="c1">#            self.directives = directives</span>
