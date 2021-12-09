@@ -53,6 +53,7 @@ class ProductServer:
 
     PRODUCT_ROOT = '.'
     CACHE_ROOT = '.'
+    STORAGE_ROOT = '.'
     TIME_DIR_SYNTAX = '{YEAR}/{MONTH}/{DAY}'
     SHELL_GENERATOR_SCRIPT = 'generate.sh'
     SHELL_INPUT_SCRIPT = 'input.sh'
@@ -136,6 +137,10 @@ class ProductServer:
         """Return the abolute path (Path) to CACHE_ROOT directory. """
         return Path(self.CACHE_ROOT).absolute()
     
+    def get_storage_root(self):
+        """Return the abolute path (Path) to CACHE_ROOT directory. """
+        return Path(self.STORAGE_ROOT).absolute()
+    
     def get_product_dir(self, product_info):
         """Return the directory containing product generator script 
             (generate.sh) and possible configurations etc"""
@@ -159,7 +164,7 @@ class ProductServer:
     def get_generator_dir(self, product_info):
         path = Path(self.PRODUCT_ROOT, *product_info.PRODUCT_ID.split('.'))
         return str(path.absolute())
-        #return self.PRODUCT_ROOT+os.sep+product_info.PRODUCT_ID.replace('.', os.sep)
+        # return self.PRODUCT_ROOT+os.sep+product_info.PRODUCT_ID.replace('.', os.sep)
 
    
 
@@ -251,6 +256,8 @@ class ProductServer:
 
         :param pr[nutshell.product.Info]: description of the product (string or nutshell.product.Info)
         """
+
+            
         if (pr.path.exists()):  
             pr.log.debug('File exists: {0}'.format(pr.path))
             stat = pr.path.stat()
@@ -285,6 +292,14 @@ class ProductServer:
                 pr.set_status(HTTPStatus.REQUEST_TIMEOUT)
                 # pr.set_status(HTTPStatus.SERVICE_UNAVAILABLE)  # 503
                 # return 
+        elif (pr.path_storage.exists()):
+            pr.log.info('Stored file exists: {0}'.format(pr.path_storage))
+            pr.log.info('Linking to: {0}'.format(pr.path))
+            # LINK
+            # pr.path.symlink_to(pr.path_storage.resolve())
+            self.ensure_output_dir(pr.path.parent)
+            nutils.symlink(pr.path, pr.path_storage)
+            pr.set_status(HTTPStatus.OK)
         else:
             pr.log.debug('File not found: {0}'.format(pr.path))
             if (pr.product_info.TIMESTAMP == 'LATEST'):

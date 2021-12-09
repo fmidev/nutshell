@@ -31,7 +31,7 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     final TreeMap<String,Object> INPUT_PARAMETERS = new TreeMap<String, Object>();
 
     // unused
-    public String postProcessingInfo;
+    // public String postProcessingInfo;
 
 
     //final

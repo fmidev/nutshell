@@ -169,20 +169,38 @@ public class Flags {
         static final int C = 64;
     }
     */
+    enum Liput {
+        MIKA,
+        MÄKI
+    }
+
+    protected static int count;
+
+    static int mika = 0;
+
+    static {
+        count = 1;
+    }
 
     public static void main(String[] args) {
 
 
 
+        class Lipat extends Liput {
+        }
+
+        //Liput liput;
+        System.out.println(Liput.MIKA.ordinal());
+        System.out.println(Liput.MÄKI.ordinal());
+        System.out.println(String.format(" %d ", Liput.MÄKI));
+        //Liput.MIKA.ordinal();
+
         // class Access { // extends Flags implements AccessFlags {
         // class Access extends Flags implements AccessFlags {
         class Access extends Flags { // implements AccessFlags {
-
             static public final int READ  = 1;
             static public final int WRITE = 2;
             static public final int EXEC  = 4;
-
-
         }
 
         Access access2 = new Access();
@@ -192,9 +210,6 @@ public class Flags {
             final public int SUDO = WRITE|READ;
         };
 
-        //Map<String,Integer> map = ClassUtils.getConstants(access.getClass());
-        //Map<String,Integer> map = ClassUtils.getConstants(access.getClass());
-        //System.out.println(access.getEntries());
         System.out.println(ClassUtils.getConstants(access.getClass()).entrySet());
 
         for (String s : args) {
@@ -204,16 +219,12 @@ public class Flags {
             try {
                 int i = Integer.parseInt(s);
                 access.set(i);
-                //System.out.println(String.format("%s:: %s", s, Arrays.toString(Flags.getFlags(nuevo, i))));
-                //System.out.println(String.format("%s.  %s", s, Arrays.toString(Flags.getFlags(Flags.class, i))));
             } catch (NumberFormatException e) {
                 try {
                     access.set(s);
                 } catch (NoSuchFieldException | IllegalAccessException e2) {
                     e2.printStackTrace();
                 }
-                //System.out.println(String.format("%s:: %d", s, Flags.getValue(nuevo, s)));
-                //System.out.println(String.format("%s.  %d", s, Flags.getValue(Flags.class, s)));
             }
 
             System.out.printf("  %d=\t %s%n", access.value, access.toString());

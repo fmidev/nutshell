@@ -95,7 +95,7 @@ public class Nutlet extends HttpServlet {
 
 		Instructions instructions = new Instructions();
 
-		for (String key: new String[]{"actions", "output",  "request", "action"}) {  // request and action deprecating!
+		for (String key: new String[]{"instructions", "actions", "output", "request"}) {  // request and action deprecating!
 			String[] a = request.getParameterValues(key);
 			if (a != null) {
 				try {
@@ -245,7 +245,7 @@ public class Nutlet extends HttpServlet {
 			}
 
 			//String[] directives = request.getParameterValues("directives");
-			task.setDirectives(request.getParameterMap());
+			task.info.setDirectives(request.getParameterMap());
 			//task.log.setVerbosity(log.verbosity);
 
 			task.log.note(task.toString());
@@ -378,7 +378,7 @@ public class Nutlet extends HttpServlet {
 				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
 				map.put("actions", instructions);
-				map.put("directives", task.directives);
+				map.put("directives", task.info.directives);
 
 				html.appendTable(map, "Product generator");
 

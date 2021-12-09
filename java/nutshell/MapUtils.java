@@ -145,6 +145,29 @@ public class MapUtils {
 		return set.toArray(new String[set.size()]);
 	}
 
+	/** Set values given as a string "KEY=VALUE,KEY2=VALUE2,..."
+	 *
+	 * @param s
+	 * @param separatorRegExp
+	 * @param map
+	 *
+	 * @return map
+	 */
+	static public Map<String,String> setEntries(String s, String separatorRegExp, String defaultValue, Map<String,String> map){
+
+		for (String d : s.split(separatorRegExp)) { // Note: regexp
+			int j = d.indexOf('=');
+			if (j > 1) {
+				map.put(d.substring(0, j), d.substring(j + 1));
+			} else {
+				map.put(d, defaultValue);
+			}
+		}
+
+		return map;
+
+	}
+
 
 	static public Map<String, Object> getMap(Object src){
 		return getMap(src, new HashMap<String,Object>());

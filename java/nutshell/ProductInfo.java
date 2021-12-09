@@ -2,6 +2,7 @@ package nutshell;
 
 
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,12 +33,50 @@ class ProductInfo extends ProductParameters {
 
 	protected static final Pattern compressionRe = Pattern.compile("^(.*)\\.(zip|gz)$");
 
+	//
+	public final Map<String,String> directives = new HashMap<>();
+
+	/**
+	 *
+	 * @param s
+	 * @param separator  - typically "\\|" or
+	 * @return
+	 */
+	public Map<String,String> setDirectives(String s, String separator){
+		MapUtils.setEntries(s, separator, "true", directives);
+		return directives;
+	}
+
+	/** Imports map to directives map, converting array values to comma-separated strings.
+	 *
+	 * @param map
+	 */
+	public Map<String,String> setDirectives(Map<String,String[]> map){
+
+		if (map != null) {
+			for (Map.Entry<String, String[]> entry : map.entrySet()) { //parameters.entrySet()) {
+				String key = entry.getKey();
+				if (key.equals(key.toUpperCase())) {
+					String[] value = entry.getValue();
+					if ((value != null) && (value.length > 0))
+						directives.put(key, String.join(",", value));
+				}
+			}
+		}
+
+		return directives;
+	}
+
+
 	public ProductInfo(String productStr) throws ParseException { //,Log log){
 
 		String[] s = productStr.split("\\?", 2);
 		String filename = s[0];
 		//String filenameUncompressed = filename;
-		postProcessingInfo = (s.length==2) ? s[1] : "";
+		if (s.length == 2){
+			setDirectives(s[1], "\\?");
+		}
+		//postProcessingInfo = (s.length==2) ? s[1] : "";
 
 		/// Parse compression extension, like .gz in .txt.gz)
 		final Matcher cm = compressionRe.matcher(filename);

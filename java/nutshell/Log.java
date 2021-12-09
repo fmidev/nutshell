@@ -128,23 +128,25 @@ public class Log implements AutoCloseable {
 	public void close()  {
 		if (logFile != null){
 			warn(String.format("Closing log: %s", logFile));
+			this.printStream.close();
 		}
 		else if (printStream == null) {
 			warn(String.format("Closing log (unknow output stream)"));
 		}
 		else
 		{
-			// warn(String.format("Closing log (unknow output stream)");
-			warn("Closing log");
+			// warn(String.format("Closing log (unknow output stream)")
+			warn("NOT closing log: " + this.printStream.toString());
 		}
-		this.printStream.close();
 		//System.out.println("closing " + this.getClass().getCanonicalName());
 	}
 
+	/*
 	@Override
 	protected void finalize() throws Throwable {
 		System.out.println("finalizing " + this.getClass().getCanonicalName());
 	}
+	 */
 
 	String name = "";
 	
@@ -360,13 +362,20 @@ public class Log implements AutoCloseable {
 
 	public void setLogFile(Path path){
 
+		close();
+		/*
+		 	Todo: there is a chance that something is written no to the log
+		 	until a new printStream is set
+		 */
+
+
 		if (path == null){
 			this.printStream = System.err;
 			this.logFile = null;
 			return;
 		}
 
-		PrintStream oldPrintStream = this.printStream;
+		// PrintStream oldPrintStream = this.printStream;
 		try {
 			this.logFile = path.toFile();
 			FileOutputStream fw = new FileOutputStream(this.logFile);
@@ -381,7 +390,8 @@ public class Log implements AutoCloseable {
 			this.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 					String.format("Failed in creating log file: %s", path));
 		}
-		oldPrintStream.close();
+
+		// oldPrintStream.close();
 		/*
 		catch (IndexedException e) {
 			//e.printStackTrace(); //this.log.printStream);

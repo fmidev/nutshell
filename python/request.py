@@ -59,15 +59,18 @@ class Tasklet(shell.Task):
         filename        = s.product_info.get_filename()
         filename_latest = s.product_info.get_filename_latest()
 
-        s.CACHE_ROOT = s.product_server.get_cache_root()
-        s.TIME_DIR   = s.product_server.get_time_dir(product_info)
-        s.PROD_DIR   = s.product_server.get_product_dir(product_info)
+        s.CACHE_ROOT   = s.product_server.get_cache_root()
+        # Needed? :
+        s.STORAGE_ROOT = s.product_server.get_storage_root()
+        s.TIME_DIR     = s.product_server.get_time_dir(product_info)
+        s.PROD_DIR     = s.product_server.get_product_dir(product_info)
         
-        s.path_relative = Path(              s.TIME_DIR, s.PROD_DIR, filename)
-        s.path          = Path(s.CACHE_ROOT, s.TIME_DIR, s.PROD_DIR, filename)
-        s.path_tmp      = Path(s.CACHE_ROOT, s.TIME_DIR, s.PROD_DIR, 'tmp-' + secrets.token_hex(4),  filename)  
-        s.path_static   = Path(s.CACHE_ROOT,             s.PROD_DIR, filename)
-        s.path_latest   = Path(s.CACHE_ROOT,             s.PROD_DIR, filename_latest)
+        s.path_relative = Path(                s.TIME_DIR, s.PROD_DIR, filename)
+        s.path_storage  = Path(s.STORAGE_ROOT, s.TIME_DIR, s.PROD_DIR, filename)
+        s.path          = Path(s.CACHE_ROOT,   s.TIME_DIR, s.PROD_DIR, filename)
+        s.path_tmp      = Path(s.CACHE_ROOT,   s.TIME_DIR, s.PROD_DIR, 'tmp-' + secrets.token_hex(4),  filename)  
+        s.path_static   = Path(s.CACHE_ROOT,               s.PROD_DIR, filename)
+        s.path_latest   = Path(s.CACHE_ROOT,               s.PROD_DIR, filename_latest)
 
         s.OUTDIR     = s.path_tmp.parent  # Note         
         s.OUTFILE    = filename        

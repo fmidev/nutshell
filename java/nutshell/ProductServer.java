@@ -271,6 +271,7 @@ public class ProductServer { //extends Cache {
 		final HttpLog log;
 		final ProductInfo info;
 
+		/// Checked "normalized" filename, with ordered parameters.
 		final public String filename;
 
 		final public Instructions instructions = new Instructions();
@@ -290,11 +291,13 @@ public class ProductServer { //extends Cache {
 		public Path outputPathTmp;
 		public Path storagePath;
 
-		public final Map<String,String> directives = new HashMap<>();
+		//public final Map<String,String> directives = new HashMap<>();
 		public final Map<String,String> inputs = new HashMap<>();
 		public final Map<String,Object> retrievedInputs = new HashMap<>();
 
 		/** Product generation task defining a product instance and operations on it.
+		 *
+		 *  In this version, directives can be set but only through '?'
 		 *
 		 * @param productStr
 		 * @param instructions - definition how a product is retrieved and handled thereafter - @see #Actions
@@ -303,6 +306,7 @@ public class ProductServer { //extends Cache {
 		 */
 		public Task(String productStr, int instructions, HttpLog parentLog) throws ParseException {
 
+			// final String[] productDef = [productInfo, directives]
 			// in LOG // this.creationTime = System.currentTimeMillis();
 			this.info = new ProductInfo(productStr);
 			this.log = new HttpLog("["+this.info.PRODUCT_ID+"]", parentLog);
@@ -338,30 +342,15 @@ public class ProductServer { //extends Cache {
 			}
 
 			//this.log.warn("Where am I?");
-			this.log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getId(), this.instructions, this.directives)); //  this.toString()
+			this.log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getId(), this.instructions, this.info.directives)); //  this.toString()
 			this.result = null;
 		}
 
 
-
-		/** Imports map to directives map, converting array values to comma-separated strings.
-		 *
-		 * @param map
-		 */
-		public void setDirectives(Map<String,String[]> map){
-
-			if (map == null)
-				return;
-
-			for (Map.Entry<String,String[]> entry : map.entrySet() ){ //parameters.entrySet()) {
-				String key = entry.getKey().toString();
-				if (key.equals(key.toUpperCase())){
-					String[] value = entry.getValue();
-					if ((value != null) && (value.length > 0))
-						directives.put(key, String.join(",", value));
-				}
-			}
+		public String getStatus(){
+			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getId(), this.info, this.instructions, this.info.directives)); //  this.toString()
 		}
+
 
 		//public boolean move(File src, File dst){
 		public Path move(Path src, Path dst) throws IOException {
@@ -479,7 +468,8 @@ public class ProductServer { //extends Cache {
 
 			Generator generator = null;
 
-			this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Starting %s", this.info.PRODUCT_ID));
+			//this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Starting %s", this.info.PRODUCT_ID));
+			this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Preparing %s", this));
 
 			// Logical corrections
 
@@ -493,12 +483,15 @@ public class ProductServer { //extends Cache {
 				this.instructions.add(Instructions.MAKE | ResultType.FILE);
 
 			// Rest default result type
-			// if (this.actions.involves(Actions.MAKE | Actions.DELETE)) { }
+			// if (this.instructions.involves(Actions.MAKE | Actions.DELETE)) { }
 			if (!this.instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
 				// This "type selection" could be also done with Generator?
 				this.log.log(HttpServletResponse.SC_OK, "Setting default result type: FILE");
 				this.instructions.add(ResultType.FILE);
 			}
+
+			this.log.log(HttpServletResponse.SC_ACCEPTED, String.format("Starting %s", this));
+			this.log.log(String.format("Starting: %s ", this.getStatus())); //  this.toString()
 
 
 			if (this.instructions.involves(Instructions.DELETE)){
@@ -526,7 +519,9 @@ public class ProductServer { //extends Cache {
 			// This is a potential path, not committing to a physical file yet.
 			File fileFinal = this.outputPath.toFile();
 
-			if (this.instructions.involves(Instructions.EXISTS | ResultType.FILE) && ! this.instructions.isSet(Instructions.DELETE)) {
+			if (this.instructions.involves(Instructions.EXISTS | ResultType.FILE) && ! this.instructions.isSet(ActionType.DELETE)) {
+
+				this.log.debug(String.format("Storage path: %s", storagePath));
 
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
 					this.log.log(HttpServletResponse.SC_OK, String.format("Stored file exists: %s", this.storagePath));
@@ -555,7 +550,7 @@ public class ProductServer { //extends Cache {
 					this.result = this.outputPath;
 					this.log.log(HttpServletResponse.SC_OK, String.format("File exists: %s", this.outputPath));
 				}
-				else { // if (this.actions.isSet(Actions.EXIST)){
+				else { // if (this.instructions.isSet(Actions.EXIST)){
 					this.log.log(HttpServletResponse.SC_NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
 					//this.log.log(HttpServletResponse.SC_OK, String.format("File does not exist: %s", this.outputPath));
 					if (this.instructions.isSet(Instructions.MAKE)) {
@@ -604,7 +599,7 @@ public class ProductServer { //extends Cache {
 				}
 
 				if (this.instructions.involves(Instructions.GENERATE| Instructions.EXISTS)){
-					this.log.log(HttpServletResponse.SC_MULTIPLE_CHOICES, String.format("Mutually contradicting actions: %s ", this.instructions));
+					this.log.log(HttpServletResponse.SC_MULTIPLE_CHOICES, String.format("Mutually contradicting instructions: %s ", this.instructions));
 				}
 
 				return;
@@ -627,7 +622,7 @@ public class ProductServer { //extends Cache {
 					log.log(HttpServletResponse.SC_CONFLICT, "Input list retrieval failed");
 					log.log(e);
 
-					this.log.warn("Removing GENERATE from actions");
+					this.log.warn("Removing GENERATE from instructions");
 					this.instructions.remove(Instructions.GENERATE);
 				}
 
@@ -647,7 +642,7 @@ public class ProductServer { //extends Cache {
 				// return;
 
 				// Mark this task being processed (empty file)
-				// if (this.actions.isSet(ResultType.FILE) && !fileFinal.exists()){
+				// if (this.instructions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
 					ensureDir(cacheRoot, relativeOutputDirTmp); //, dirPerms);
 					ensureDir(cacheRoot, relativeOutputDir); //,    dirPerms);
@@ -661,7 +656,7 @@ public class ProductServer { //extends Cache {
 
 				//	this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
 				// Assume Generator uses input similar to output (File or Object)
-				//final int inputActions = this.actions.value & (ResultType.MEMORY | ResultType.FILE);
+				//final int inputActions = this.instructions.value & (ResultType.MEMORY | ResultType.FILE);
 				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
 				inputInstructions.add(Instructions.GENERATE);
 				this.log.note(String.format("Input instructions: %s", inputInstructions));
@@ -880,7 +875,7 @@ public class ProductServer { //extends Cache {
 			else {
 				if (this.result != null) // Object?
 					this.log.info("Result: " + this.result.toString());
-				this.log.note("Task completed: actions=" + this.instructions);
+				this.log.note("Task completed: instructions=" + this.instructions);
 				// status page?
 
 			}
@@ -935,7 +930,7 @@ public class ProductServer { //extends Cache {
 				env.putAll(this.retrievedInputs);
 			}
 
-			env.putAll(this.directives);
+			env.putAll(this.info.directives);
 
 			return env;
 		}
@@ -943,10 +938,10 @@ public class ProductServer { //extends Cache {
 
 		@Override
 		public String toString() {
-			if (this.directives.isEmpty())
+			if (this.info.directives.isEmpty())
 				return String.format("%s", this.filename);
 			else
-				return String.format("%s?%s", this.filename, this.directives.toString());
+				return String.format("%s?%s", this.filename, this.info.directives.toString());
 		}
 
 		//final long creationTime;
@@ -963,17 +958,10 @@ public class ProductServer { //extends Cache {
 
 		/**
 		 */
-		// Consider Object as return type (java class returning product)
-		//int generate(Map<String,Object> parameters, PrintStream log); // throws IOException, InterruptedException ;
-		//void generate(Task task, Map<String,Object> parameters); // throws IOException, InterruptedException ;
-		//void generateFile(ProductParameters parameters, Map<String,Object> inputs, Map<String,String> envMap,Path outFile, PrintStream log) throws IndexedException; // throws IOException, InterruptedException ;
 		void generate(Task task) throws IndexedException; // throws IOException, InterruptedException ;
 
-		//Map<String,String> getInputList(Map<String,Object> parameters, PrintStream log);
-		//Map<String,String> getInputList(Task task);
-		//Map<String,String> getInputList(ProductParameters parameters, Map<String,String> envMap, PrintStream log);
 		// Semantics? (List or retrieved objects)
-		boolean hasInputs();
+		// boolean hasInputs();
 
 		/** Declare inputs required for this product generation task.
 		 *
@@ -991,14 +979,14 @@ public class ProductServer { //extends Cache {
 	 * 2) demo (main function)
 	 *
 	 * @param taskRequests
-	 * @param actions
+	 * @param instructions
 	 * @param log
 	 * @return - the completed set of tasks, including failed ones.
 	 *
 	 */
 	/*
-	public Map<String,Task> executeMany(Map<String,String> taskRequests, int actions, Map directives, HttpLog log) {
-		return executeMany(taskRequests, new Actions(actions), directives, log);
+	public Map<String,Task> executeMany(Map<String,String> taskRequests, int instructions, Map directives, HttpLog log) {
+		return executeMany(taskRequests, new Actions(instructions), directives, log);
 	}
 
 	 */
@@ -1056,19 +1044,26 @@ public class ProductServer { //extends Cache {
 				//HttpLog subLog = (count==1) ? log.child(key) : null;
 				//HttpLog subLog = new HttpLog(key, log);
 				log.debug(String.format("Still here: %s = %s", key, value));
-				System.err.println(String.format("Still here: %s = %s", key, value));
+				System.out.println(String.format("Still there: %s = %s", key, value));
 
 				Task task = new Task(value, instructions.value, log);
-				System.err.println(String.format("NOTTT here: %s = %s", key, value));
+				System.out.println(String.format("NOTTTTTTTTTT here: %s = %s", key, value));
 
 				log.debug(String.format("Still life: %s = %s", key, value));
-				task.setDirectives(directives);
+				task.info.setDirectives(directives);
 				task.instructions.addCopies(instructions.copies);
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
 
+				log.warn(String.format("Directives: %s = %s", key, directives));
+
+				log.warn(String.format("Prepared TASK: %s = %s", key, task));
+
+
 				task.log.setVerbosity(log.getVerbosity());
-				log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				/// XXX
+				//log.debug(String.format("Starting thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				//log.debug(String.format("Starting thread: %s", task));
 				if (task.log.logFile != null){
 					log.info(String.format("See separate log: %s",  task.log.logFile));
 				}
@@ -1089,8 +1084,13 @@ public class ProductServer { //extends Cache {
 				System.err.println(String.format("EROR2 here: %s = %s", key, value));
 				log.error("Unexpected exception... " + e.getLocalizedMessage());
 			}
+			finally {
+				System.out.println("Final.." + key);
+			}
 
 		}
+
+		log.note("Starting (" + tasks.size() + ") tasks");
 
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
@@ -1106,7 +1106,6 @@ public class ProductServer { //extends Cache {
 		}
 
 
-		log.note("Started (" + tasks.size() + ") tasks... ");
 		// wait();
 
 		for (Entry<String,Task> entry : tasks.entrySet()){
@@ -1298,8 +1297,8 @@ public class ProductServer { //extends Cache {
 		System.err.println("    --verbose <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
 		System.err.println("    --debug : same as --verbose DEBUG");
 		System.err.println("    --conf <file> : read configuration file");
-		System.err.println("    --actions <string> : main operation: " + String.join(",", Flags.getKeys(Instructions.class)));
-		System.err.println("      (all the actions can be also supplied invidually: --make --delete --generate ... )");
+		System.err.println("    --instructions <string> : main operation: " + String.join(",", Flags.getKeys(Instructions.class)));
+		System.err.println("      (all the instructions can be also supplied invidually: --make --delete --generate ... )");
 		System.err.println("    --copy <target>: copy file to target (repeatable)");
 		System.err.println("    --link <target>: link file to target (repeatable)");
 		System.err.println("    --move <target>: move file to target");
@@ -1333,7 +1332,7 @@ public class ProductServer { //extends Cache {
 		Instructions instructions = new Instructions();
 		Map<String ,String> directives = new TreeMap<>();
 
-		//Field[] actionFields = Instructions.class.getFields();
+		//Field[] instructionFields = Instructions.class.getFields();
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1436,7 +1435,7 @@ public class ProductServer { //extends Cache {
 							if (instructions.isEmpty())
 								instructions.add(Instructions.MAKE);
 							Task product = server.new Task(p[p.length-1], 0, log);
-							System.out.println(String.format("actions=%s&product=%s", instructions, product));
+							System.out.println(String.format("instructions=%s&product=%s", instructions, product));
 							return;
 						}
 					}
@@ -1450,6 +1449,8 @@ public class ProductServer { //extends Cache {
 						instructions.addMove(args[++i]);
 					}
 					else if (opt.equals("directives")) {
+						MapUtils.setEntries( args[++i],"\\|", "true", directives);
+						/*
 						for (String d : args[++i].split("\\|")) { // Note: regexp
 							log.info("Adding directive: " + d);
 							int j = d.indexOf('=');
@@ -1459,17 +1460,19 @@ public class ProductServer { //extends Cache {
 								directives.put(d, "true");
 							}
 						}
+
+						 */
 					}
 					else {
 						// Actions
 						try {
-							if (opt.equals("actions")) {
+							if (opt.equals("instructions")) {
 								opt = args[++i];
-								log.info("Adding actions: " + opt);
+								log.info("Adding instructions: " + opt);
 								instructions.set(opt);
 							}
 							else {
-								// Set actions from invidual args: --make --delete --generate
+								// Set instructions from invidual args: --make --delete --generate
 								// TODO: longName => LONG_NAME
 								opt = opt.toUpperCase();
 
@@ -1479,13 +1482,13 @@ public class ProductServer { //extends Cache {
 								}
 
 								//Field field =
-								log.info("Adding action:" + opt);
+								log.info("Adding instruction:" + opt);
 								Instructions.class.getField(opt); // ensure field exists
 								instructions.add(opt);
 							}
 						}
 						catch (NoSuchFieldException|IllegalAccessException e) {
-							log.note("Use following action codes: ");
+							log.note("Use following instruction codes: ");
 							for (Field field : Instructions.class.getFields()) {
 								String name = field.getName();
 								if (name.equals(name.toUpperCase())) {
@@ -1496,8 +1499,8 @@ public class ProductServer { //extends Cache {
 									}
 								}
 							}
-							//log.log(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("No such action code: %s", opt));
-							log.error(String.format("No such action code: %s", opt));
+							//log.log(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("No such instruction code: %s", opt));
+							log.error(String.format("No such instruction code: %s", opt));
 							System.exit(2);
 						}
 
@@ -1550,11 +1553,10 @@ public class ProductServer { //extends Cache {
 			log.note("Directives: " + directives);
 
 		/// "MAIN"
+		//log.warn("Starting..");
 
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
-
-		log.warn("Starting..");
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
@@ -1589,7 +1591,7 @@ public class ProductServer { //extends Cache {
 	}
 
 	final
-	public List<Integer> version = Arrays.asList(1, 3);
+	public List<Integer> version = Arrays.asList(1, 4);
 
 	public String getVersionString() {
 		//Arrays.

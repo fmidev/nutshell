@@ -50,92 +50,15 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 	@Override
 	public String toString() {
-		return "ExternalGenerator{" + id + ':' + dir + '}';
+		return String.format("%s[%s] @%s",getClass().getSimpleName(), id, dir);
 	}
 
-	@Override
+	//@Override
+	/*
 	public boolean hasInputs() {
 		return this.inputDeclarationCmd.exists();
 	}
-
-	/*
-	public class OutputReader implements ShellUtils.ProcessReader {
-
-		final PrintStream stream;
-
-		OutputReader(PrintStream log) {
-			stream = log;
-			lastLineOut = null;
-			lastLineErr = null;
-		}
-
-		public String lastLineOut;
-		public String lastLineErr;
-
-		@Override
-		public void handleStdOut(String line) {
-			lastLineOut = line;
-			stream.println(line);
-		}
-
-		@Override
-		public void handleStdErr(String line) {
-			lastLineErr = line;
-			stream.println(line);
-		}
-
-	}
-
-	 */
-
-	/** Try to extract numeric value out of script's error dump (last line)
-	 *
-	 * parsam exitValue
-	 * param reader
-	 * @return
-	 */
-	/*
-	protected IndexedException extractErrorMsg(int exitValue, OutputReader reader){
-
-		String[] msgErr = IndexedException.split(reader.lastLineErr);
-
-		String code = msgErr[0];
-		String text = msgErr[1];
-
-		// System.err.println(String.format("%s = %s", code, text));
-		if (code.isEmpty() || text.isEmpty()){
-			String[] msgOut = IndexedException.split(reader.lastLineOut);
-			if (code.isEmpty()) {
-				if (!msgOut[0].isEmpty()) {
-					code = msgOut[0];
-					if (!msgOut[1].isEmpty()) { // "numeric force": replace error msg
-						text = msgOut[1]; // override even if
-					}
-				}
-			}
-			if (text.isEmpty()) { // Rare mixed case: code from stderr, text from stdout
-				text = msgOut[1];
-			}
-			//System.err.println(String.format("%s > %s", code, text));
-		}
-
-		if (text.isEmpty()){
-			text = "Script error without message";
-		}
-
-		int i = 0;
-		try {
-			i = Integer.parseInt(code); // ! NumberFormatException
-		}
-		catch (NumberFormatException e){
-			i = 501;
-		}
-		return new IndexedException(i, String.format("%s (exit value=%d)", text, exitValue));
-		//System.err.println(String.format("%s $ %s", code, text));
-
-	}
-
-	 */
+ 	*/
 
 	// MAIN
 	@Override
