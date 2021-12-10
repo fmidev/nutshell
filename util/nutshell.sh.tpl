@@ -32,20 +32,21 @@ case $NUTSHELL in
 	;;
 esac     
 
-if [ $# == 0 ]; then
-    ${NUTSHELL} --help
-else
+if [ $# != 0 ]; then
+
     ${NUTSHELL} --log_level DEBUG --conf ${NUTSHELL_DIR}/nutshell.cnf $*
+    RESULT=$?
+    if [ $RESULT != 0 ]; then
+	echo !!
+	echo "# Error: something went wrong, return code: $RESULT "
+    else
+	exit 0
+    fi
 fi
 
-if [ $? != 0 ]; then
-    echo !!
-    echo "# Something went wrong! "
-    echo "# NUTSHELL=$NUTSHELL"
-    echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
-    echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
-    echo "# HTTP_ROOT=$HTTP_ROOT"
-fi
-
+echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
+echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
+echo "# HTTP_ROOT=$HTTP_ROOT"
+echo "# NUTSHELL=$NUTSHELL"
 
 
