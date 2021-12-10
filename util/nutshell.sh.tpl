@@ -42,11 +42,19 @@ if [ $# != 0 ]; then
     else
 	exit 0
     fi
+    
 fi
 
+echo "Nutshell ($NUTSHELL_VERSION version)"
+echo "Markus Peura 2021 Finnish Meteorological Institute"
+echo
+echo "# This script: $0"
+echo "# Invoked by $USER@$HOSTNAME"
 echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
 echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
 echo "# HTTP_ROOT=$HTTP_ROOT"
 echo "# NUTSHELL=$NUTSHELL"
+echo
+echo "For help or debugging, invoke this version directly, for example: $NUTSHELL --version"
 
 
