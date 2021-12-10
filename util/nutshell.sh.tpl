@@ -55,6 +55,11 @@ echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
 echo "# HTTP_ROOT=$HTTP_ROOT"
 echo "# NUTSHELL=$NUTSHELL"
 echo
-echo "For help or debugging, invoke this version directly, for example: $NUTSHELL --version"
-
+echo "Usage: nutshell <arguments>"
+echo "Arguments are those of this $NUTSHELL_VERSION version, listed with: "
+echo "  $NUTSHELL --help"
+echo
+echo "For debugging, invoke this ($NUTSHELL_VERSION) version directly, for example:"
+echo "  $NUTSHELL --version"
+echo
 
