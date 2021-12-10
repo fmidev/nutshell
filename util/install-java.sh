@@ -132,15 +132,6 @@ else
 fi
 echo
 
-if [ -w $NUTSHELL_XML/ ]; then
-    cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
-else
-    NUTSHELL_XML_NEW=./html/nutshell.xml.new
-    echo "# WARNING: cannot write directly to: $NUTSHELL_XML"
-    echo "# WARNING: writing a draft to:   $NUTSHELL_XML_NEW"
-    echo "# Consider: diff $NUTSHELL_XML  $NUTSHELL_XML_NEW"
-    NUTSHELL_XML=$NUTSHELL_XML_NEW
-fi
 echo
 
 #echo "consider: sudo /etc/init.d/tomcat8  restart"

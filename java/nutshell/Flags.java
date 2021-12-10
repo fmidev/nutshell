@@ -184,10 +184,8 @@ public class Flags {
 
     public static void main(String[] args) {
 
-
-
-        class Lipat extends Liput {
-        }
+        //class Lipat extends Liput {
+        //}
 
         //Liput liput;
         System.out.println(Liput.MIKA.ordinal());
