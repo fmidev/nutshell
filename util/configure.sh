@@ -9,14 +9,16 @@ source util/config-init.sh
 
 
 #CONF_FILE="install-$NUTSHELL_VERSION.cnf"
+read_and_backup_file  $CONF_FILE 
 
-if [ -f $CONF_FILE ]; then
-    vt100echo green "Reading existing conf file: $CONF_FILE"
-    source $CONF_FILE
-else
-    vt100echo yellow "CONF_FILE=$CONF_FILE does not exist"
-    #CONF_SCRIPT="util/configure-$NUTSHELL_VERSION.sh"
-fi
+
+#if [ -f $CONF_FILE ]; then
+#    vt100echo green "Reading existing conf file: $CONF_FILE"
+#    source $CONF_FILE
+#else
+#    vt100echo yellow "CONF_FILE=$CONF_FILE does not exist"
+#    #CONF_SCRIPT="util/configure-$NUTSHELL_VERSION.sh"
+#fi
 
 #if [ ! -v NUTSHELL_ROOT ]; then
 #    vt100echo red "NUTSHELL_ROOT undefined"
