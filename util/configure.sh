@@ -5,7 +5,7 @@
 prefix=${prefix:-'/usr/local'}
 
 source util/vt100utils.sh
-source util/config-utils.sh
+source util/config-init.sh
 
 
 #CONF_FILE="install-$NUTSHELL_VERSION.cnf"

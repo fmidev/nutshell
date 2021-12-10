@@ -3,7 +3,7 @@
 NUTSHELL_VERSION=${1:-'tomcat'}
 
 source util/vt100utils.sh
-source util/config-utils.sh
+source util/config-init.sh
 
 #vt100echo green "Main options"
 #ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
