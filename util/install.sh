@@ -5,11 +5,13 @@ NUTSHELL_VERSION=${1:-'tomcat'}
 source util/vt100utils.sh
 source util/config-init.sh
 
+show_variable CONF_FILE
+
 #vt100echo green "Main options"
 #ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
+#CONF_FILE="nutshell-$NUTSHELL_VERSION.cnf"
 
-CONF_FILE="nutshell-$NUTSHELL_VERSION.cnf"
-show_variable CONF_FILE
+
 
 if [ -f $CONF_FILE ]; then
     vt100echo green "Reading CONF_FILE=$CONF_FILE "

@@ -184,7 +184,7 @@ fi
 
 # CONF_FILE="install-$NUTSHELL_VERSION.cnf"
 # CONF_FILE=${CONF_FILE:-'nutshell.cnf'}
-CONF_FILE=${CONF_FILE:-"nutshell-$NUTSHELL_VERSION.cnf"}
+CONF_FILE=${CONF_FILE:-"nutshell-$NUTSHELL_VERSION-$HOSTNAME.cnf"}
 
 
 
