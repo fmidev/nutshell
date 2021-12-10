@@ -146,8 +146,8 @@ fi
 
 NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell
 show_variable NUTSHELL_SH
-export NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR
-cat util/nutshell.sh.tpl | envsubst '$NUTSHELL_ROOT $NUTSHELL_VERSION $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
+export HTTP_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR
+cat util/nutshell.sh.tpl | envsubst '$HTTP_ROOT $NUTSHELL_VERSION $NUTSHELL_ROOT $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
 if [ $? == 0 ]; then
     chmod -v gu+x $NUTSHELL_SH
     vt100echo green "# Installed $NUTSHELL_SH"

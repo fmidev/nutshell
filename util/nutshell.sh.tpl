@@ -26,7 +26,7 @@ case $NUTSHELL in
 	NUTSHELL="java -cp $HTTP_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
 	;;
     *)
-	echo "NUTSHELL_VERSION must be 'java', 'tomcat' or 'python'"
+	echo "NUTSHELL must be 'java', 'tomcat' or 'python'"
 	#NUTSHELL='echo'
 	exit
 	;;
@@ -37,5 +37,15 @@ if [ $# == 0 ]; then
 else
     ${NUTSHELL} --log_level DEBUG --conf ${NUTSHELL_DIR}/nutshell.cnf $*
 fi
+
+if [ $? != 0 ]; then
+    echo !!
+    echo "# Something went wrong! "
+    echo "# NUTSHELL=$NUTSHELL"
+    echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
+    echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
+    echo "# HTTP_ROOT=$HTTP_ROOT"
+fi
+
 
 
