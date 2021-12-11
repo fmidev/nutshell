@@ -4,7 +4,7 @@
 
 # NOTE: this file should be source'd only.
 
-
+export DATE=`date +'%Y-%m-%d %H:%M'`
 
 # Bash special
 function goodbye {
@@ -14,6 +14,33 @@ function goodbye {
 }
 trap goodbye EXIT
 
+
+function backup_file(){
+
+    local FILE=$1
+
+    vt100echo cyan "Saving back-up:"
+    #local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1 | tr -cd '[0-9]'` &> /dev/null
+    local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1` &> /dev/null
+    # echo $BACKUP_INDEX
+    #show_variable BACKUP_INDEX
+    BACKUP_INDEX=${BACKUP_INDEX%.*}
+    BACKUP_INDEX=${BACKUP_INDEX##*.}
+    #show_variable BACKUP_INDEX
+
+    if [ "$BACKUP_INDEX" == '' ]; then
+	BACKUP_INDEX='01'
+    else
+	BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
+    fi
+    # show_variable BACKUP_INDEX
+    BACKUP_FILE=$FILE.$BACKUP_INDEX.bak
+    cp -vi $FILE $FILE.$BACKUP_INDEX.bak
+    if [ ! -e $BACKUP_FILE ]; then
+	vt100echo yellow "Warning: could not save: $BACKUP_FILE "
+    fi
+
+}
 
 function read_and_backup_file(){
 
@@ -32,16 +59,7 @@ function read_and_backup_file(){
 	#echo "Reading: '$FILE'"
 	source $FILE
 
-	echo "Saving back-up:"
-	local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1 | tr -cd '[0-9]'` &> /dev/null
-	# echo $BACKUP_INDEX
-	if [ "$BACKUP_INDEX" == '' ]; then
-	    BACKUP_INDEX='01'
-	else
-	    BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
-	fi
-	cp -vi $FILE $FILE.$BACKUP_INDEX.bak
-
+	backup_file $FILE
 	echo 
     fi
 

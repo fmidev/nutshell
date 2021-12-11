@@ -5,7 +5,8 @@ NUTSHELL_VERSION=${1:-'tomcat'}
 source util/vt100utils.sh
 source util/config-init.sh
 
-show_variable CONF_FILE
+
+
 
 #vt100echo green "Main options"
 #ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
@@ -14,18 +15,22 @@ show_variable CONF_FILE
 
 
 if [ -f $CONF_FILE ]; then
-    vt100echo green "Reading CONF_FILE=$CONF_FILE "
+    #vt100echo green "Reading CONF_FILE=$CONF_FILE "
+    vt100echo green "Reading conf file"
+    show_variable CONF_FILE
     source $CONF_FILE
-    show_variable TOMCAT_CONF_DIR
+    show_variable CONF_FILE
 else
-    vt100echo yellow "CONF_FILE=$CONF_FILE does not exist"
-    CONF_SCRIPT="util/configure-$NUTSHELL_VERSION.sh"
-    if [ -x $CONF_SCRIPT ]; then
-	$CONF_SCRIPT
-    else
-	vt100echo red "CONF_SCRIPT=$CONF_SCRIPT does not exist"
-	exit 1
-    fi
+    vt100echo yellow "Conf file does not exist"
+    show_variable CONF_FILE
+    #CONF_SCRIPT="util/configure-$NUTSHELL_VERSION.sh"
+    #if [ -x $CONF_SCRIPT ]; then
+    #	$CONF_SCRIPT
+    #else
+    #vt100echo red "CONF_SCRIPT=$CONF_SCRIPT does not exist"
+    vt100echo yellow "Run first: util/configure.sh $NUTSHELL_VERSION"
+    exit 1
+    #fi
 fi
 
 
@@ -40,10 +45,12 @@ show_variable NUTSHELL_ROOT
 if [ -d $NUTSHELL_ROOT ]; then
     ls -dl $NUTSHELL_ROOT
 else
-    mkdir -v --parent $NUTSHELL_CONF_DIR
+    mkdir -v --parent $NUTSHELL_ROOT
 fi
 echo
 
+backup_file ${NUTSHELL_ROOT}/nutshell.cnf
+cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
 
 
 prepare_dir $PRODUCT_ROOT products
@@ -80,9 +87,22 @@ else
 
 fi
 
+#vt100echo green "# Setting WEB-INF/web.xml"
+
+if [ $NUTSHELL_VERSION == 'python' ]; then
+
+    # This ensures python naming for nutshell.nutshell -> nutshell/nutshell.py
+    mkdir -v --parents $NUTSHELL_ROOT/nutshell/
+    cp -v python/*.py  $NUTSHELL_ROOT/nutshell/
+    
+    unset NUTSHELL_JAR_DIR
+    
+fi
+
+
 if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
-    cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
+    #cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
 
     show_variable NUTSHELL_JAR_DIR
     mkdir -v --parents $NUTSHELL_JAR_DIR/
@@ -94,7 +114,6 @@ fi
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
     vt100echo green "# Setting WEB-INF/web.xml"
-    export DATE=`date +'%Y-%m-%d %H:%M'`
     WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
     cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 
@@ -148,8 +167,9 @@ fi
 
 NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell
 show_variable NUTSHELL_SH
-export HTTP_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR
-cat util/nutshell.sh.tpl | envsubst '$HTTP_ROOT $NUTSHELL_VERSION $NUTSHELL_ROOT $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
+#DATE=`date --iso-8601=minutes`
+export USER HOSTNAME HTTP_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR
+cat util/nutshell.sh.tpl | envsubst '$DATE $USER $HOSTNAME $HTTP_ROOT $NUTSHELL_VERSION $NUTSHELL_ROOT $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
 if [ $? == 0 ]; then
     chmod -v gu+x $NUTSHELL_SH
     vt100echo green "# Installed $NUTSHELL_SH"

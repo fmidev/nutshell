@@ -1,34 +1,36 @@
 #!/bin/bash
 
 # NutShell wrapper script
-#
 # Markus.Peura@fmi.fi
 #
+# Installed on ${DATE} by ${USER}@${HOSTNAME}
+# 
 
-#export NUTSHELL_ROOT
-export PYTHONPATH=$PYTHONPATH:$NUTSHELL_ROOT
-#export HTTP_ROOT=$HTTP_ROOT
+
 
 # Workarounds for envsubst
 NUTSHELL=${NUTSHELL_VERSION:-$NUTSHELL_VERSION}
 NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
-NUTSHELL_JAR=${NUTSHELL_JAR:-$NUTSHELL_JAR_DIR/Nutlet.jar}
 
 case $NUTSHELL in
     python)
+	export PYTHONPATH=$PYTHONPATH:$NUTSHELL_ROOT
 	NUTSHELL="python3.6 -m nutshell.nutshell"
 	;;
     java)
+	NUTSHELL_JAR=${NUTSHELL_JAR:-$NUTSHELL_JAR_DIR/Nutlet.jar}
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
 	;;
     tomcat)
 	# This may be same as above
-	NUTSHELL="java -cp $HTTP_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
+	NUTSHELL_JAR=${NUTSHELL_JAR:-"$HTTP_ROOT/WEB-INF/lib/Nutlet.jar"}
+	#NUTSHELL="java -cp $HTTP_ROOT/WEB-INF/lib/Nutlet.jar nutshell.ProductServer"
+	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
 	;;
     *)
 	echo "NUTSHELL must be 'java', 'tomcat' or 'python'"
 	#NUTSHELL='echo'
-	exit
+	exit 1
 	;;
 esac     
 

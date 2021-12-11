@@ -28,8 +28,8 @@ read_and_backup_file  $CONF_FILE
 
 
 
-echo -n "# Conf by $USER, " > $CONF_FILE
-date >> $CONF_FILE
+echo "# Conf by $USER@$HOSTNAME on $DATE " > $CONF_FILE
+#date >> $CONF_FILE
 echo >> $CONF_FILE
 
 
