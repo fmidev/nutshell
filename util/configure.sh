@@ -7,29 +7,10 @@ prefix=${prefix:-'/usr/local'}
 source util/vt100utils.sh
 source util/config-init.sh
 
-
-#CONF_FILE="install-$NUTSHELL_VERSION.cnf"
 read_and_backup_file  $CONF_FILE 
 
 
-#if [ -f $CONF_FILE ]; then
-#    vt100echo green "Reading existing conf file: $CONF_FILE"
-#    source $CONF_FILE
-#else
-#    vt100echo yellow "CONF_FILE=$CONF_FILE does not exist"
-#    #CONF_SCRIPT="util/configure-$NUTSHELL_VERSION.sh"
-#fi
-
-#if [ ! -v NUTSHELL_ROOT ]; then
-#    vt100echo red "NUTSHELL_ROOT undefined"
-#    exit 2
-#fi
-
-
-
-
 echo "# Conf by $USER@$HOSTNAME on $DATE " > $CONF_FILE
-#date >> $CONF_FILE
 echo >> $CONF_FILE
 
 
@@ -93,31 +74,21 @@ ask_variable NUTSHELL_ROOT "$prefix/nutshell" "Directory for nutshell.cnf, defau
 
 ask_variable PRODUCT_ROOT "$NUTSHELL_ROOT/products" "Root directory for product generators"
 check_dir_syntax PRODUCT_ROOT
-#prepare_dir $PRODUCT_ROOT products
 
 ask_variable STORAGE_ROOT "$NUTSHELL_ROOT/storage" "Root directory for rolling archive (optional, externally maintained)"
 check_dir_syntax STORAGE_ROOT
 
 ask_variable CACHE_ROOT "$NUTSHELL_ROOT/cache" "Root directory for cache"
 check_dir_syntax CACHE_ROOT
-#prepare_dir $CACHE_ROOT cache
 
 ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache directories"
 ask_variable FILE_PERMS "rwxrwxr--" "Permissions for cache files"
 
-
-#prepare_dir $STORAGE_ROOT storage
-
 ask_variable CMD_SCRIPT_DIR "$prefix/bin" "Directory for command line wrapper script 'nutshell'"
 check_dir_syntax CMD_SCRIPT_DIR
 
-#ask_variable NUTSHELL_CONF_DIR "$PKG_ROOT" "Directory for primary configuration file:"
-#check_dir_syntax NUTSHELL_CONF_DIR
 
 
-
-
-# ask_variable PATH2 "" "Additional command search path appended to PATH."
 
 echo
 vt100echo green "Resulting configuration: "

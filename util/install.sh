@@ -115,11 +115,13 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
     vt100echo green "# Setting WEB-INF/web.xml"
     WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
+    export NUTSHELL_ROOT
     cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 
     show_variable WEB_XML
     if [ -f $WEB_XML ]; then
 	#cp -va $WEB_XML{,.old}
+	backup_file $WEB_XML
 	cp -v $WEB_XML{,.old}
 	pushd $HTTP_ROOT/WEB-INF/ &> /dev/null
 	diff web.xml.old web.xml.new

@@ -34,6 +34,8 @@ case $NUTSHELL in
 	;;
 esac     
 
+RESULT=0
+
 if [ $# != 0 ]; then
 
     ${NUTSHELL} --log_level DEBUG --conf ${NUTSHELL_DIR}/nutshell.cnf $*
@@ -67,3 +69,4 @@ echo "For debugging, invoke this ($NUTSHELL_VERSION) version directly, for examp
 echo "  $NUTSHELL --version"
 echo
 
+return $RESULT

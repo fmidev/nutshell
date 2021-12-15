@@ -27,9 +27,19 @@ and http queries.
 
 EOF
 
-echo "Reading conf file"
-export CACHE_ROOT 
-source nutshell.cnf
+#CONF_FILE=${1:-"nutshell-tomcat-$USER@$HOSTNAME.cnf"}
+CONF_FILE=${1:-"nutshell-tomcat-$HOSTNAME.cnf"}
+if [ -f $CONF_FILE ]; then
+    echo "Reading conf file"
+    export CACHE_ROOT
+    source $CONF_FILE
+else
+    echo "Conf file $CONF_FILE not found"
+    echo "Give conf file as argument"
+    exit 1
+fi
+
+
 
 # Todo: in conf file URL_BASE?
 
