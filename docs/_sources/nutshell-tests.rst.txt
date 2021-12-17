@@ -26,26 +26,31 @@ Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java
 ::
 
   nutshell --help
+  # return value: 0
 
 **Unknown command**
 ::
 
   nutshell --foo
+  # return value: 2
 
 **Undefined action**
 ::
 
   nutshell --actions FOO
+  # return value: 2
 
 **Parsing error**
 ::
 
   nutshell 12345_pdf
+  # return value: 1
 
 **Undefined product**
 ::
 
   nutshell foo.pdf
+  # return value: 1
 
 
 
@@ -56,26 +61,31 @@ Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=py
 ::
 
   nutshell --help
+  # return value: 0
 
 **Unknown command**
 ::
 
   nutshell --foo
+  # return value: 2
 
 **Undefined action**
 ::
 
   nutshell --actions FOO
+  # return value: 2
 
 **Parsing error**
 ::
 
   nutshell 12345_pdf
+  # return value: 1
 
 **Undefined product**
 ::
 
   nutshell foo.pdf
+  # return value: 1
 
 
 
@@ -94,31 +104,37 @@ Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java
 ::
 
   nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 0
 
 **Does the product file exist?**
 ::
 
   nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 0
 
 **Action: DELETE product file**
 ::
 
   nutshell --delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 0
 
 **Now, the product file should not exist**
 ::
 
   nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 1
 
 **Action: MAKE product (generate, if nonexistent)**
 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 0
 
 **Action: GENERATE (unconditionally)**
 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 0
 
 **Parameters in wrong order (generated file has them in order)**
 Generated file has them in order.
@@ -126,6 +142,7 @@ Generated file has them in order.
 ::
 
   nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
+  # return value: 0
 
 **Product error messages**
 
@@ -135,282 +152,27 @@ Initial check - valid generation
 ::
 
   nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+  # return value: 0
 
 **Error test: image too large**
 ::
 
   nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
+  # return value: 1
 
 **Error test: Illegal (negative) arguments**
 ::
 
   nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
+  # return value: 1
 
 **Error test: Unsupported feature**
 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
+  # return value: 1
 
 **Error test: Unsupported file format**
 ::
 
   nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
-
-Tests
-=====
-
-
-Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=python`` .
-
-
-**Default action (MAKE)**
-::
-
-  nutshell 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Does the product file exist?**
-::
-
-  nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Action: DELETE product file**
-::
-
-  nutshell --delete 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Now, the product file should not exist**
-::
-
-  nutshell --exists 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Action: MAKE product (generate, if nonexistent)**
-::
-
-  nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Action: GENERATE (unconditionally)**
-::
-
-  nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Parameters in wrong order (generated file has them in order)**
-Generated file has them in order.
-
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
-
-**Product error messages**
-
-Initial check - valid generation
---------------------------------
-
-::
-
-  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-**Error test: image too large**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
-
-**Error test: Illegal (negative) arguments**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
-
-**Error test: Unsupported feature**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
-
-**Error test: Unsupported file format**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
-
-Tests
-=====
-
-
-Http version. The commands below have been prefixed with ``NUTSHELL_VERSION=http`` .
-
-
-**Default action (MAKE)**
-`$NUTSHELL?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Does the product file exist?**
-`$NUTSHELL?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Action: DELETE product file**
-`$NUTSHELL?instructions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Now, the product file should not exist**
-`$NUTSHELL?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Action: MAKE product (generate, if nonexistent)**
-`$NUTSHELL?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Action: GENERATE (unconditionally)**
-`$NUTSHELL?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Parameters in wrong order (generated file has them in order)**
-Generated file has them in order.
-
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Product error messages**
-
-Initial check - valid generation
---------------------------------
-
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Error test: image too large**
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png>`_
-
-
-**Error test: Illegal (negative) arguments**
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png>`_
-
-
-**Error test: Unsupported feature**
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png>`_
-
-
-**Error test: Unsupported file format**
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf>`_
-
-
-Local actions: copy, link and move
-----------------------------------
-
-
-Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java`` .
-
-
-**Move the resulting file to specified location**
-::
-
-  nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Copy the resulting file to specified location**
-::
-
-  nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Link the resulting file to specified location**
-::
-
-  nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Link the resulting file to SHORTCUT (non-timestamped) directory**
-::
-
-  nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Link the resulting file, as LATEST one**
-::
-
-  nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=python`` .
-
-
-**Move the resulting file to specified location**
-::
-
-  nutshell --move . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Copy the resulting file to specified location**
-::
-
-  nutshell --copy . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Link the resulting file to specified location**
-::
-
-  nutshell --link . --make 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Link the resulting file to SHORTCUT (non-timestamped) directory**
-::
-
-  nutshell --shortcut 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-**Link the resulting file, as LATEST one**
-::
-
-  nutshell --latest 201012161615_test.ppmforge_DIMENSION=2.5.png
-
-Cmd and Http interplay test
-===========================
-
-
-Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java`` .
-
-
-**Generate on command line, delete through HTTP**
-::
-
-  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-`$NUTSHELL?instructions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Generate through HTTP, delete on command line**
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-::
-
-  nutshell --delete demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=python`` .
-
-
-**Generate on command line, delete through HTTP**
-::
-
-  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-`$NUTSHELL?instructions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=DELETE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-
-**Generate through HTTP, delete on command line**
-`$NUTSHELL?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
-
-::
-
-  nutshell --delete demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-
-Meteorological...
-=================
-
-
-Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java`` .
-
-
-**Java version:**
-::
-
-  nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
-
-Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=python`` .
-
-
-**Python version:**
-::
-
-  nutshell --generate 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
-
-Http version. The commands below have been prefixed with ``NUTSHELL_VERSION=http`` .
-
-
-**Http version:**
-`$NUTSHELL?instructions=GENERATE&product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png </nutshell/NutShell?instructions=GENERATE&product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png>`_
-
