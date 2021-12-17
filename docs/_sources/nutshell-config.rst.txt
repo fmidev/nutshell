@@ -15,22 +15,10 @@ can be applied to build one, ``nutshell.cnf``.
 Example configuration
 ---------------------
 
-A configration file might look like this: ::
+A configration file might look like this:
 
-  # Root of cache directory, often on separate resource:
-  CACHE_ROOT='/home/mpeura/venison/cache'
+.. include:: nutshell-tomcat.cnf
 
-  # Root of product generator (script) directories
-  PRODUCT_ROOT='/home/mpeura/venison/products'
-
-  # Root directory for HTTP server (optional).
-  HTML_ROOT='./html'
-
-  # Port for HTTP server.
-  HTTP_PORT='8088'
-
-  # URL directory prefix (future option).
-  HTTP_PREFIX='nutshell/'
 
 
 Configuration file may contain relative paths, which are expanded

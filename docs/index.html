@@ -94,7 +94,7 @@ but suits to product computation more generally.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-commands.html">Commands and status codes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-commands.html#instructions">Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-commands.html#actions">Actions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nutshell-commands.html#directives">Directives</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-commands.html#built-in-directives">Built-in directives</a></li>
 </ul>
@@ -151,10 +151,16 @@ but suits to product computation more generally.</p>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#unknown-command">Unknown command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#undefined-action">Undefined action</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#parsing-error">Parsing error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#undefined-product">Undefined product</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id2">Help command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id3">Unknown command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id4">Undefined action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id5">Parsing error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id6">Undefined product</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#tests-cmdline">Tests (cmdline)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#tests-java">Tests (java)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#default-action-make">Default action (MAKE)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#does-product-file-exist">Does product file exist?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#action-delete-product-file">Action: DELETE product file</a></li>
@@ -169,22 +175,37 @@ but suits to product computation more generally.</p>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#error-test-unsupported-file-format">Error test: Unsupported file format</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#tests-http">Tests (http)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id2">Default action (MAKE)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id3">Does product file exist?</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id4">Action: DELETE product file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id6">Action: MAKE product (generate, if nonexistent)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id8">Action: GENERATE (unconditionally)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id10">Parameters in wrong order (generated file has them in order)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id11">Product error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id12">Initial check - valid generation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id14">Error test: image too large</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id15">Error test: Illegal (negative) arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#tests-python">Tests (python)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id7">Default action (MAKE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id8">Does product file exist?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id9">Action: DELETE product file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id10">Action: MAKE product (generate, if nonexistent)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id11">Action: GENERATE (unconditionally)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id12">Parameters in wrong order (generated file has them in order)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id13">Product error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id14">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id15">Error test: image too large</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id16">Error test: Illegal (negative) arguments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id17">Error test: Unsupported feature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id18">Error test: Unsupported file format</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#local-instructions-copy-link-and-move">Local instructions: copy, link and move</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#tests-http">Tests (http)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id19">Default action (MAKE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id20">Does product file exist?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id21">Action: DELETE product file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id23">Action: MAKE product (generate, if nonexistent)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id25">Action: GENERATE (unconditionally)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id27">Parameters in wrong order (generated file has them in order)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id28">Product error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id29">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id31">Error test: image too large</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id32">Error test: Illegal (negative) arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id34">Error test: Unsupported feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id35">Error test: Unsupported file format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#local-actions-copy-link-and-move">Local actions: copy, link and move</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#move-the-resulting-file-to-specified-location">Move the resulting file to specified location</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#copy-the-resulting-file-to-specified-location">Copy the resulting file to specified location</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#link-the-resulting-file-to-specified-location">Link the resulting file to specified location</a></li>
@@ -192,12 +213,27 @@ but suits to product computation more generally.</p>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#link-the-resulting-file-as-latest-one">Link the resulting file, as LATEST one</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#id36">Local actions: copy, link and move</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id37">Move the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id38">Copy the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id39">Link the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id40">Link the resulting file to SHORTCUT (non-timestamped) directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id41">Link the resulting file, as LATEST one</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#cmd-and-http-interplay-test">Cmd and Http interplay test</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#generate-on-command-line-delete-through-http">Generate on command line, delete through HTTP</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#generate-through-http-delete-on-command-line">Generate through HTTP, delete on command line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id43">Generate on command line, delete through HTTP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id45">Generate through HTTP, delete on command line</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#meteorological">Meteorological…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#meteorological">Meteorological…</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#java-version">Java version:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#python-version">Python version:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#http-version">Http version:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

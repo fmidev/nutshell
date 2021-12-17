@@ -55,22 +55,31 @@ can be applied to build one, <code class="docutils literal notranslate"><span cl
 <div class="section" id="example-configuration">
 <h2>Example configuration<a class="headerlink" href="#example-configuration" title="Permalink to this headline">¶</a></h2>
 <p>A configration file might look like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Root of cache directory, often on separate resource:</span>
-<span class="n">CACHE_ROOT</span><span class="o">=</span><span class="s1">&#39;/home/mpeura/venison/cache&#39;</span>
-
-<span class="c1"># Root of product generator (script) directories</span>
-<span class="n">PRODUCT_ROOT</span><span class="o">=</span><span class="s1">&#39;/home/mpeura/venison/products&#39;</span>
-
-<span class="c1"># Root directory for HTTP server (optional).</span>
-<span class="n">HTML_ROOT</span><span class="o">=</span><span class="s1">&#39;./html&#39;</span>
-
-<span class="c1"># Port for HTTP server.</span>
-<span class="n">HTTP_PORT</span><span class="o">=</span><span class="s1">&#39;8088&#39;</span>
-
-<span class="c1"># URL directory prefix (future option).</span>
-<span class="n">HTTP_PREFIX</span><span class="o">=</span><span class="s1">&#39;nutshell/&#39;</span>
-</pre></div>
-</div>
+<p># Conf by <a class="reference external" href="mailto:mpeura&#37;&#52;&#48;mpeura10kl">mpeura<span>&#64;</span>mpeura10kl</a> on 2021-12-17 10:11</p>
+<p># Port for HTTP server
+HTTP_PORT=’8000’</p>
+<p># Root directory for HTTP server
+HTTP_ROOT=’/opt/nutshell’</p>
+<p># URL prefix
+HTTP_PREFIX=’/nutshell’</p>
+<p># Optional: directory for nutshell.xml
+TOMCAT_CONF_DIR=’/var/cache/tomcat8/Catalina/localhost/nutshell’</p>
+<p># Directory for nutshell.cnf, default dir for cache, storage, products
+NUTSHELL_ROOT=’/opt/nutshell’</p>
+<p># Location of JAR file for cmd line access (Java versions only)
+NUTSHELL_JAR_DIR=’/opt/nutshell/WEB-INF/lib’</p>
+<p># Root directory for product generators
+PRODUCT_ROOT=’/opt/nutshell/products’</p>
+<p># Root directory for rolling archive (optional, externally maintained)
+STORAGE_ROOT=’/opt/nutshell/storage’</p>
+<p># Root directory for cache
+CACHE_ROOT=’/opt/nutshell/cache’</p>
+<p># Permissions for cache directories
+DIR_PERMS=’rwxrwxr-x’</p>
+<p># Permissions for cache files
+FILE_PERMS=’rwxrwxr–’</p>
+<p># Directory for command line wrapper script ‘nutshell’
+CMD_SCRIPT_DIR=’/usr/local/bin’</p>
 <p>Configuration file may contain relative paths, which are expanded
 with respect to working directory upon invocation. So for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">some</span><span class="o">/</span><span class="n">working</span><span class="o">/</span><span class="nb">dir</span><span class="o">/</span>
@@ -102,6 +111,7 @@ Whenever possible, absolute paths should be used.</p>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nutshell-tests.html">Tests</a></li>
 </ul>
 
           <div role="search">

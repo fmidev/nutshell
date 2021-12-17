@@ -51,11 +51,13 @@
 and http queries.</p>
 <div class="section" id="initial-tests">
 <h2>Initial tests<a class="headerlink" href="#initial-tests" title="Permalink to this headline">¶</a></h2>
-<p>The following commands are for command line only.</p>
+<p>The command line tests (java version).</p>
 <div class="section" id="help-command">
 <h3>Help command<a class="headerlink" href="#help-command" title="Permalink to this headline">¶</a></h3>
 <p>Test 1</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
 </pre></div>
 </div>
 <p><em>Return value: 0</em></p>
@@ -63,7 +65,9 @@ and http queries.</p>
 <div class="section" id="unknown-command">
 <h3>Unknown command<a class="headerlink" href="#unknown-command" title="Permalink to this headline">¶</a></h3>
 <p>Test 2</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
 </pre></div>
 </div>
 <p><em>Return value: 2</em></p>
@@ -71,7 +75,9 @@ and http queries.</p>
 <div class="section" id="undefined-action">
 <h3>Undefined action<a class="headerlink" href="#undefined-action" title="Permalink to this headline">¶</a></h3>
 <p>Test 3</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">instructions</span> <span class="n">FOO</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
 </pre></div>
 </div>
 <p><em>Return value: 2</em></p>
@@ -79,7 +85,70 @@ and http queries.</p>
 <div class="section" id="parsing-error">
 <h3>Parsing error<a class="headerlink" href="#parsing-error" title="Permalink to this headline">¶</a></h3>
 <p>Test 4</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="mi">12345</span><span class="n">_pdf</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="mi">12345</span><span class="n">_pdf</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="undefined-product">
+<h3>Undefined product<a class="headerlink" href="#undefined-product" title="Permalink to this headline">¶</a></h3>
+<p>Test 5</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em>
+The command line tests (python version).</p>
+</div>
+<div class="section" id="id2">
+<h3>Help command<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Test 6</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="id3">
+<h3>Unknown command<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>Test 7</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="id4">
+<h3>Undefined action<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>Test 8</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="id5">
+<h3>Parsing error<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>Test 9</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="mi">12345</span><span class="n">_pdf</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="mi">12345</span><span class="n">_pdf</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="id6">
+<h3>Undefined product<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>Test 10</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
 </pre></div>
 </div>
 <p><em>Return value: 1</em></p>
@@ -88,101 +157,249 @@ and http queries.</p>
 <div class="section" id="testing-cmd-and-http-interfaces">
 <h2>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="tests-cmdline">
-<h2>Tests (cmdline)<a class="headerlink" href="#tests-cmdline" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tests-java">
+<h2>Tests (java)<a class="headerlink" href="#tests-java" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="default-action-make">
 <h3>Default action (MAKE)<a class="headerlink" href="#default-action-make" title="Permalink to this headline">¶</a></h3>
-<p>Test 5</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em></p>
-</div>
-<div class="section" id="does-product-file-exist">
-<h3>Does product file exist?<a class="headerlink" href="#does-product-file-exist" title="Permalink to this headline">¶</a></h3>
-<p>Test 6</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em></p>
-</div>
-<div class="section" id="action-delete-product-file">
-<h3>Action: DELETE product file<a class="headerlink" href="#action-delete-product-file" title="Permalink to this headline">¶</a></h3>
-<p>Test 7</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em>
-Test 8</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+<p>Test 11</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 1</em></p>
 </div>
-<div class="section" id="action-make-product-generate-if-nonexistent">
-<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#action-make-product-generate-if-nonexistent" title="Permalink to this headline">¶</a></h3>
-<p>Test 9</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+<div class="section" id="does-product-file-exist">
+<h3>Does product file exist?<a class="headerlink" href="#does-product-file-exist" title="Permalink to this headline">¶</a></h3>
+<p>Test 12</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="action-delete-product-file">
+<h3>Action: DELETE product file<a class="headerlink" href="#action-delete-product-file" title="Permalink to this headline">¶</a></h3>
+<p>Test 13</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em>
+Test 14</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="action-make-product-generate-if-nonexistent">
+<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#action-make-product-generate-if-nonexistent" title="Permalink to this headline">¶</a></h3>
+<p>Test 15</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="action-generate-unconditionally">
 <h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#action-generate-unconditionally" title="Permalink to this headline">¶</a></h3>
-<p>Test 10</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+<p>Test 16</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="parameters-in-wrong-order-generated-file-has-them-in-order">
 <h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#parameters-in-wrong-order-generated-file-has-them-in-order" title="Permalink to this headline">¶</a></h3>
 <p>Generated file has them in order.</p>
-<p>Test 11</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+<p>Test 17</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
+<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="product-error-messages">
 <h3>Product error messages<a class="headerlink" href="#product-error-messages" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="initial-check-valid-generation">
 <h3>Initial check - valid generation<a class="headerlink" href="#initial-check-valid-generation" title="Permalink to this headline">¶</a></h3>
-<p>Test 12</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+<p>Test 18</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="error-test-image-too-large">
+<h3>Error test: image too large<a class="headerlink" href="#error-test-image-too-large" title="Permalink to this headline">¶</a></h3>
+<p>Test 19</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="error-test-illegal-negative-arguments">
+<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#error-test-illegal-negative-arguments" title="Permalink to this headline">¶</a></h3>
+<p>Test 20</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="error-test-unsupported-feature">
+<h3>Error test: Unsupported feature<a class="headerlink" href="#error-test-unsupported-feature" title="Permalink to this headline">¶</a></h3>
+<p>Test 21</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="error-test-unsupported-file-format">
+<h3>Error test: Unsupported file format<a class="headerlink" href="#error-test-unsupported-file-format" title="Permalink to this headline">¶</a></h3>
+<p>Test 22</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+</div>
+<div class="section" id="tests-python">
+<h2>Tests (python)<a class="headerlink" href="#tests-python" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h3>Default action (MAKE)<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>Test 23</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="error-test-image-too-large">
-<h3>Error test: image too large<a class="headerlink" href="#error-test-image-too-large" title="Permalink to this headline">¶</a></h3>
-<p>Test 13</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+<div class="section" id="id8">
+<h3>Does product file exist?<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>Test 24</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="id9">
+<h3>Action: DELETE product file<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<p>Test 25</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em>
+Test 26</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 2</em></p>
+</div>
+<div class="section" id="id10">
+<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p>Test 27</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="id11">
+<h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<p>Test 28</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="id12">
+<h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<p>Generated file has them in order.</p>
+<p>Test 29</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="id13">
+<h3>Product error messages<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id14">
+<h3>Initial check - valid generation<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<p>Test 30</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="id15">
+<h3>Error test: image too large<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<p>Test 31</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 1</em></p>
 </div>
-<div class="section" id="error-test-illegal-negative-arguments">
-<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#error-test-illegal-negative-arguments" title="Permalink to this headline">¶</a></h3>
-<p>Test 14</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+<div class="section" id="id16">
+<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<p>Test 32</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 1</em></p>
 </div>
-<div class="section" id="error-test-unsupported-feature">
-<h3>Error test: Unsupported feature<a class="headerlink" href="#error-test-unsupported-feature" title="Permalink to this headline">¶</a></h3>
-<p>Test 15</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
+<div class="section" id="id17">
+<h3>Error test: Unsupported feature<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<p>Test 33</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 1</em></p>
 </div>
-<div class="section" id="error-test-unsupported-file-format">
-<h3>Error test: Unsupported file format<a class="headerlink" href="#error-test-unsupported-file-format" title="Permalink to this headline">¶</a></h3>
-<p>Test 16</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
+<div class="section" id="id18">
+<h3>Error test: Unsupported file format<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<p>Test 34</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
 </pre></div>
 </div>
 <p><em>Return value: 1</em></p>
@@ -190,109 +407,175 @@ Test 8</p>
 </div>
 <div class="section" id="tests-http">
 <h2>Tests (http)<a class="headerlink" href="#tests-http" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id2">
-<h3>Default action (MAKE)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id19">
+<h3>Default action (MAKE)<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="id3">
-<h3>Does product file exist?<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id20">
+<h3>Does product file exist?<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="id4">
-<h3>Action: DELETE product file<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id21">
+<h3>Action: DELETE product file<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em>
 <a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
-<div class="section" id="id6">
-<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id23">
+<h3>Action: MAKE product (generate, if nonexistent)<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="id8">
-<h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id25">
+<h3>Action: GENERATE (unconditionally)<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="id10">
-<h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id27">
+<h3>Parameters in wrong order (generated file has them in order)<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
 <p>Generated file has them in order.</p>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="id11">
-<h3>Product error messages<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id28">
+<h3>Product error messages<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h3>
 </div>
-<div class="section" id="id12">
-<h3>Initial check - valid generation<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id29">
+<h3>Initial check - valid generation<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="id14">
-<h3>Error test: image too large<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id31">
+<h3>Error test: image too large<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
-<div class="section" id="id15">
-<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id32">
+<h3>Error test: Illegal (negative) arguments<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
-<div class="section" id="id17">
-<h3>Error test: Unsupported feature<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id34">
+<h3>Error test: Unsupported feature<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png</a></p>
 <p><em>Return value: 8</em></p>
 </div>
-<div class="section" id="id18">
-<h3>Error test: Unsupported file format<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id35">
+<h3>Error test: Unsupported file format<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf</a></p>
 <p><em>Return value: 8</em></p>
 </div>
 </div>
-<div class="section" id="local-instructions-copy-link-and-move">
-<h2>Local instructions: copy, link and move<a class="headerlink" href="#local-instructions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="local-actions-copy-link-and-move">
+<h2>Local actions: copy, link and move<a class="headerlink" href="#local-actions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="move-the-resulting-file-to-specified-location">
 <h3>Move the resulting file to specified location<a class="headerlink" href="#move-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
-<p>Test 29</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+<p>Test 47</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em>
+<p><em>Return value: 1</em>
 <em>Return value: 0</em></p>
 </div>
 <div class="section" id="copy-the-resulting-file-to-specified-location">
 <h3>Copy the resulting file to specified location<a class="headerlink" href="#copy-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
-<p>Test 30</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+<p>Test 48</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em>
+<p><em>Return value: 1</em>
 <em>Return value: 0</em></p>
 </div>
 <div class="section" id="link-the-resulting-file-to-specified-location">
 <h3>Link the resulting file to specified location<a class="headerlink" href="#link-the-resulting-file-to-specified-location" title="Permalink to this headline">¶</a></h3>
-<p>Test 31</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+<p>Test 49</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em>
+<em>Return value: 0</em></p>
+</div>
+<div class="section" id="link-the-resulting-file-to-shortcut-non-timestamped-directory">
+<h3>Link the resulting file to SHORTCUT (non-timestamped) directory<a class="headerlink" href="#link-the-resulting-file-to-shortcut-non-timestamped-directory" title="Permalink to this headline">¶</a></h3>
+<p>Test 50</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="link-the-resulting-file-as-latest-one">
+<h3>Link the resulting file, as LATEST one<a class="headerlink" href="#link-the-resulting-file-as-latest-one" title="Permalink to this headline">¶</a></h3>
+<p>Test 51</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
+</div>
+</div>
+<div class="section" id="id36">
+<h2>Local actions: copy, link and move<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id37">
+<h3>Move the resulting file to specified location<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h3>
+<p>Test 52</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 0</em>
 <em>Return value: 0</em></p>
 </div>
-<div class="section" id="link-the-resulting-file-to-shortcut-non-timestamped-directory">
-<h3>Link the resulting file to SHORTCUT (non-timestamped) directory<a class="headerlink" href="#link-the-resulting-file-to-shortcut-non-timestamped-directory" title="Permalink to this headline">¶</a></h3>
-<p>Test 32</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+<div class="section" id="id38">
+<h3>Copy the resulting file to specified location<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h3>
+<p>Test 53</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em>
+<em>Return value: 0</em></p>
+</div>
+<div class="section" id="id39">
+<h3>Link the resulting file to specified location<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
+<p>Test 54</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 0</em>
+<em>Return value: 0</em></p>
+</div>
+<div class="section" id="id40">
+<h3>Link the resulting file to SHORTCUT (non-timestamped) directory<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h3>
+<p>Test 55</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 0</em></p>
 </div>
-<div class="section" id="link-the-resulting-file-as-latest-one">
-<h3>Link the resulting file, as LATEST one<a class="headerlink" href="#link-the-resulting-file-as-latest-one" title="Permalink to this headline">¶</a></h3>
-<p>Test 33</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+<div class="section" id="id41">
+<h3>Link the resulting file, as LATEST one<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h3>
+<p>Test 56</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 0</em></p>
@@ -302,8 +585,10 @@ Test 8</p>
 <h2>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="generate-on-command-line-delete-through-http">
 <h3>Generate on command line, delete through HTTP<a class="headerlink" href="#generate-on-command-line-delete-through-http" title="Permalink to this headline">¶</a></h3>
-<p>Test 34</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+<p>Test 57</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
@@ -312,20 +597,64 @@ Test 8</p>
 <div class="section" id="generate-through-http-delete-on-command-line">
 <h3>Generate through HTTP, delete on command line<a class="headerlink" href="#generate-through-http-delete-on-command-line" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p>Test 37</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+<p>Test 60</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 </pre></div>
 </div>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="id43">
+<h3>Generate on command line, delete through HTTP<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h3>
+<p>Test 61</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
 <p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="id45">
+<h3>Generate through HTTP, delete on command line<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
+<p>Test 64</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
 </div>
 </div>
 <div class="section" id="meteorological">
 <h2>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h2>
-<p>Test 38</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
+<div class="section" id="java-version">
+<h3>Java version:<a class="headerlink" href="#java-version" title="Permalink to this headline">¶</a></h3>
+<p>Test 65</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;java&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p><em>Return value: 1</em></p>
+</div>
+<div class="section" id="python-version">
+<h3>Python version:<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h3>
+<p>Test 66</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
+
+     <span class="n">NUTSHELL_VERSION</span><span class="o">=</span><span class="s1">&#39;python&#39;</span> <span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p><em>Return value: 0</em></p>
+</div>
+<div class="section" id="http-version">
+<h3>Http version:<a class="headerlink" href="#http-version" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png">$NUTSHELL?instructions=GENERATE&amp;product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png</a></p>
+<p><em>Return value: 0</em></p>
+</div>
 </div>
 </div>
 
@@ -351,10 +680,16 @@ Test 8</p>
 <li class="toctree-l3"><a class="reference internal" href="#unknown-command">Unknown command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#undefined-action">Undefined action</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parsing-error">Parsing error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#undefined-product">Undefined product</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Help command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Unknown command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Undefined action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Parsing error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Undefined product</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tests-cmdline">Tests (cmdline)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tests-java">Tests (java)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#default-action-make">Default action (MAKE)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#does-product-file-exist">Does product file exist?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#action-delete-product-file">Action: DELETE product file</a></li>
@@ -369,22 +704,37 @@ Test 8</p>
 <li class="toctree-l3"><a class="reference internal" href="#error-test-unsupported-file-format">Error test: Unsupported file format</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#tests-http">Tests (http)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Default action (MAKE)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Does product file exist?</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Action: DELETE product file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">Action: MAKE product (generate, if nonexistent)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">Action: GENERATE (unconditionally)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id10">Parameters in wrong order (generated file has them in order)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id11">Product error messages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id12">Initial check - valid generation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id14">Error test: image too large</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id15">Error test: Illegal (negative) arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tests-python">Tests (python)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Default action (MAKE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Does product file exist?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Action: DELETE product file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Action: MAKE product (generate, if nonexistent)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Action: GENERATE (unconditionally)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Parameters in wrong order (generated file has them in order)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Product error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Error test: image too large</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Error test: Illegal (negative) arguments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id17">Error test: Unsupported feature</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id18">Error test: Unsupported file format</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#local-instructions-copy-link-and-move">Local instructions: copy, link and move</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tests-http">Tests (http)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id19">Default action (MAKE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">Does product file exist?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id21">Action: DELETE product file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">Action: MAKE product (generate, if nonexistent)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id25">Action: GENERATE (unconditionally)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id27">Parameters in wrong order (generated file has them in order)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id28">Product error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id29">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id31">Error test: image too large</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id32">Error test: Illegal (negative) arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id34">Error test: Unsupported feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id35">Error test: Unsupported file format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#local-actions-copy-link-and-move">Local actions: copy, link and move</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#move-the-resulting-file-to-specified-location">Move the resulting file to specified location</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#copy-the-resulting-file-to-specified-location">Copy the resulting file to specified location</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#link-the-resulting-file-to-specified-location">Link the resulting file to specified location</a></li>
@@ -392,12 +742,27 @@ Test 8</p>
 <li class="toctree-l3"><a class="reference internal" href="#link-the-resulting-file-as-latest-one">Link the resulting file, as LATEST one</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#id36">Local actions: copy, link and move</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id37">Move the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id38">Copy the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id39">Link the resulting file to specified location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id40">Link the resulting file to SHORTCUT (non-timestamped) directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id41">Link the resulting file, as LATEST one</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#cmd-and-http-interplay-test">Cmd and Http interplay test</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#generate-on-command-line-delete-through-http">Generate on command line, delete through HTTP</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#generate-through-http-delete-on-command-line">Generate through HTTP, delete on command line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id43">Generate on command line, delete through HTTP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id45">Generate through HTTP, delete on command line</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#meteorological">Meteorological…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#meteorological">Meteorological…</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#java-version">Java version:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-version">Python version:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#http-version">Http version:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
