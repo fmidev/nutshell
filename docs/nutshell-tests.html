@@ -244,187 +244,24 @@ Generated file has them in order.</p>
 </div>
 <div class="section" id="http-version">
 <h3>Http version<a class="headerlink" href="#http-version" title="Permalink to this headline">¶</a></h3>
-<p><strong>Default action (MAKE)</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Does the product file exist?</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Action: DELETE product file</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Now, the product file should not exist</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 8</div></blockquote>
-<p><strong>Action: MAKE product (generate, if nonexistent)</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
+<dl class="docutils">
+<dt><strong>Default action (MAKE)</strong></dt>
+<dd>/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+# return value: 0</dd>
+<dt><strong>Does the product file exist?</strong></dt>
+<dd>/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+# return value: 0</dd>
+<dt><strong>Action: DELETE product file</strong></dt>
+<dd>/nutshell/NutShell?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+# return value: 0</dd>
+<dt><strong>Now, the product file should not exist</strong></dt>
+<dd>/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+# return value: 8</dd>
+<dt><strong>Action: MAKE product (generate, if nonexistent)</strong></dt>
+<dd>/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+# return value: 0</dd>
+</dl>
 <p><strong>Action: GENERATE (unconditionally)</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Parameters in wrong order (generated file has them in order)</strong>
-Generated file has them in order.</p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Initial check - valid generation</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Error test: image too large</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png">link…</a></p>
-<blockquote>
-<div># return value: 8</div></blockquote>
-<p><strong>Error test: Illegal (negative) arguments</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png">link…</a></p>
-<blockquote>
-<div># return value: 8</div></blockquote>
-<p><strong>Error test: Unsupported feature</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png">link…</a></p>
-<blockquote>
-<div># return value: 8</div></blockquote>
-<p><strong>Error test: Unsupported file format</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf">link…</a></p>
-<blockquote>
-<div># return value: 8</div></blockquote>
-</div>
-</div>
-<div class="section" id="local-actions-copy-link-and-move">
-<h2>Local actions: copy, link and move<a class="headerlink" href="#local-actions-copy-link-and-move" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id15">
-<h3>Java version<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
-<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
-<p><strong>Move the resulting file to specified location</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Copy the resulting file to specified location</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Link the resulting file to specified location</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Link the resulting file to SHORTCUT (non-timestamped) directory</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Link the resulting file, as LATEST one</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id16">
-<h3>Python version<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
-<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=python</span></code> .</p>
-<p><strong>Move the resulting file to specified location</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Copy the resulting file to specified location</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Link the resulting file to specified location</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Link the resulting file to SHORTCUT (non-timestamped) directory</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Link the resulting file, as LATEST one</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="cmd-and-http-interplay-test">
-<h2>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id17">
-<h3>Java version<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
-<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
-<p><strong>Generate on command line, delete through HTTP</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Generate through HTTP, delete on command line</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id20">
-<h3>Python version<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
-<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=python</span></code> .</p>
-<p><strong>Generate on command line, delete through HTTP</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
-<p><strong>Generate through HTTP, delete on command line</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">link…</a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-<span class="c1"># return value: 1</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="meteorological">
-<h2>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id23">
-<h3>Java version<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
-<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
-<p><strong>Java version:</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id24">
-<h3>Python version<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
-<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=python</span></code> .</p>
-<p><strong>Python version:</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id25">
-<h3>Http version<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
-<p><strong>Http version:</strong></p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png">link…</a></p>
-<blockquote>
-<div># return value: 0</div></blockquote>
 </div>
 </div>
 </div>
@@ -455,22 +292,6 @@ Generated file has them in order.</p>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Java version</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">Python version</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#http-version">Http version</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#local-actions-copy-link-and-move">Local actions: copy, link and move</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id15">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id16">Python version</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#cmd-and-http-interplay-test">Cmd and Http interplay test</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id17">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id20">Python version</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#meteorological">Meteorological…</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id23">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id24">Python version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id25">Http version</a></li>
 </ul>
 </li>
 </ul>
