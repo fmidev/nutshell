@@ -51,360 +51,274 @@
 and http queries.</p>
 <div class="section" id="initial-tests">
 <h2>Initial tests<a class="headerlink" href="#initial-tests" title="Permalink to this headline">¶</a></h2>
-<p>The command line tests (java version).</p>
+<blockquote>
+<div><ul class="simple">
+<li>Java version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code>.</li>
+</ul>
+</div></blockquote>
 <div class="section" id="help-command">
 <h3>Help command<a class="headerlink" href="#help-command" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="unknown-command">
 <h3>Unknown command<a class="headerlink" href="#unknown-command" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 </div>
 <div class="section" id="undefined-action">
 <h3>Undefined action<a class="headerlink" href="#undefined-action" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 </div>
 <div class="section" id="parsing-error">
 <h3>Parsing error<a class="headerlink" href="#parsing-error" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="mi">12345</span><span class="n">_pdf</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="undefined-product">
 <h3>Undefined product<a class="headerlink" href="#undefined-product" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> nutshell foo.pdf
+
+ # return value: 2
+- Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=python``.
 </pre></div>
 </div>
-<p><em>Return value: 2</em>
-The command line tests (python version).</p>
 </div>
 <div class="section" id="id2">
 <h3>Help command<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 </div>
 <div class="section" id="id3">
 <h3>Unknown command<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">foo</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 </div>
 <div class="section" id="id4">
 <h3>Undefined action<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">actions</span> <span class="n">FOO</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 </div>
 <div class="section" id="id5">
 <h3>Parsing error<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="mi">12345</span><span class="n">_pdf</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 </div>
 <div class="section" id="id6">
 <h3>Undefined product<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 </div>
 </div>
 <div class="section" id="testing-cmd-and-http-interfaces">
 <h2>Testing Cmd and Http interfaces<a class="headerlink" href="#testing-cmd-and-http-interfaces" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="tests-java">
-<h2>Tests (java)<a class="headerlink" href="#tests-java" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h2>Tests<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>Java version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code>.</li>
+</ul>
+</div></blockquote>
 <p><em>Default action (MAKE)</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Does product file exist?</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Action: DELETE product file</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 <p><em>Action: MAKE product (generate, if nonexistent)</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Action: GENERATE (unconditionally)</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Parameters in wrong order (generated file has them in order)</em>
 Generated file has them in order.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Product error messages</em></p>
 <div class="section" id="initial-check-valid-generation">
 <h3>Initial check - valid generation<a class="headerlink" href="#initial-check-valid-generation" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Error test: image too large</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 <p><em>Error test: Illegal (negative) arguments</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 <p><em>Error test: Unsupported feature</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 <p><em>Error test: Unsupported file format</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 </div>
 </div>
-<div class="section" id="tests-python">
-<h2>Tests (python)<a class="headerlink" href="#tests-python" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id8">
+<h2>Tests<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>Python version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=python</span></code>.</li>
+</ul>
+</div></blockquote>
 <p><em>Default action (MAKE)</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 <p><em>Does product file exist?</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 <p><em>Action: DELETE product file</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">exists</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 2</span>
 </pre></div>
 </div>
-<p><em>Return value: 2</em></p>
 <p><em>Action: MAKE product (generate, if nonexistent)</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 <p><em>Action: GENERATE (unconditionally)</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 <p><em>Parameters in wrong order (generated file has them in order)</em>
 Generated file has them in order.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 <p><em>Product error messages</em></p>
-<div class="section" id="id7">
-<h3>Initial check - valid generation<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id9">
+<h3>Initial check - valid generation<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
+
+<span class="c1"># return value: 0</span>
 </pre></div>
 </div>
-<p><em>Return value: 0</em></p>
 <p><em>Error test: image too large</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Error test: Illegal (negative) arguments</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Error test: Unsupported feature</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 <p><em>Error test: Unsupported file format</em></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
+
+<span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p><em>Return value: 1</em></p>
 </div>
 </div>
-<div class="section" id="tests-http">
-<h2>Tests (http)<a class="headerlink" href="#tests-http" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h2>Tests<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>Http version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=http</span></code>.</li>
+</ul>
+</div></blockquote>
 <p><em>Default action (MAKE)</em>
 <a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Does product file exist?</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Action: DELETE product file</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 8</em></p>
-<p><em>Action: MAKE product (generate, if nonexistent)</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Action: GENERATE (unconditionally)</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=EXISTS,MAKE&amp;product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Parameters in wrong order (generated file has them in order)</em>
-Generated file has them in order.</p>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Product error messages</em></p>
-<div class="section" id="id11">
-<h3>Initial check - valid generation<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Error test: image too large</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=1200_PATTERN=OCTAGONS_WIDTH=1200.png</a></p>
-<p><em>Return value: 8</em></p>
-<p><em>Error test: Illegal (negative) arguments</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=-200_PATTERN=OCTAGONS_WIDTH=-300.png</a></p>
-<p><em>Return value: 8</em></p>
-<p><em>Error test: Unsupported feature</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=SQUARE_WIDTH=200.png</a></p>
-<p><em>Return value: 8</em></p>
-<p><em>Error test: Unsupported file format</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=200.pdf</a></p>
-<p><em>Return value: 8</em></p>
-</div>
-<div class="section" id="local-actions-copy-link-and-move">
-<h3>Local actions: copy, link and move<a class="headerlink" href="#local-actions-copy-link-and-move" title="Permalink to this headline">¶</a></h3>
-<p><em>Move the resulting file to specified location</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em>
-<em>Return value: 0</em></p>
-<p><em>Copy the resulting file to specified location</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em>
-<em>Return value: 0</em></p>
-<p><em>Link the resulting file to specified location</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em>
-<em>Return value: 0</em></p>
-<p><em>Link the resulting file to SHORTCUT (non-timestamped) directory</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em></p>
-<p><em>Link the resulting file, as LATEST one</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em></p>
-</div>
-<div class="section" id="id14">
-<h3>Local actions: copy, link and move<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
-<p><em>Move the resulting file to specified location</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">move</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em>
-<em>Return value: 0</em></p>
-<p><em>Copy the resulting file to specified location</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">copy</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em>
-<em>Return value: 0</em></p>
-<p><em>Link the resulting file to specified location</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">link</span> <span class="o">.</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em>
-<em>Return value: 0</em></p>
-<p><em>Link the resulting file to SHORTCUT (non-timestamped) directory</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">shortcut</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em></p>
-<p><em>Link the resulting file, as LATEST one</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">latest</span> <span class="mi">201012161615</span><span class="n">_test</span><span class="o">.</span><span class="n">ppmforge_DIMENSION</span><span class="o">=</span><span class="mf">2.5</span><span class="o">.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em></p>
-</div>
-</div>
-<div class="section" id="cmd-and-http-interplay-test">
-<h2>Cmd and Http interplay test<a class="headerlink" href="#cmd-and-http-interplay-test" title="Permalink to this headline">¶</a></h2>
-<p><em>Generate on command line, delete through HTTP</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Generate through HTTP, delete on command line</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em></p>
-<p><em>Generate on command line, delete through HTTP</em></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><a class="reference external" href="/nutshell/NutShell?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=DELETE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<p><em>Return value: 0</em></p>
-<p><em>Generate through HTTP, delete on command line</em>
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png">$NUTSHELL?instructions=GENERATE&amp;product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png</a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">delete</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em></p>
-</div>
-<div class="section" id="meteorological">
-<h2>Meteorological…<a class="headerlink" href="#meteorological" title="Permalink to this headline">¶</a></h2>
-<p><a href="#id18"><span class="problematic" id="id19">*</span></a>Java version: *</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 1</em></p>
-<p><a href="#id20"><span class="problematic" id="id21">*</span></a>Python version: *</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="mi">201708121600</span><span class="n">_radar</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">comp_BBOX</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span><span class="mi">58</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">64</span><span class="n">_CTARGET</span><span class="o">=</span><span class="n">C_PALETTE</span><span class="o">=</span><span class="n">default_SITES</span><span class="o">=</span><span class="n">fikor</span><span class="p">,</span><span class="n">fiika</span><span class="p">,</span><span class="n">fivan_SIZE</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span><span class="mf">800.</span><span class="n">png</span>
-</pre></div>
-</div>
-<p><em>Return value: 0</em></p>
-<p><a href="#id22"><span class="problematic" id="id23">*</span></a>Http version: *
-<a class="reference external" href="/nutshell/NutShell?instructions=GENERATE&amp;product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png">$NUTSHELL?instructions=GENERATE&amp;product=201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png</a></p>
-<p><em>Return value: 0</em></p>
+<blockquote>
+<div># return value: 0</div></blockquote>
+<p><em>Does product file exist?</em></p>
 </div>
 </div>
 
@@ -439,22 +353,15 @@ Generated file has them in order.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tests-java">Tests (java)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id7">Tests</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#initial-check-valid-generation">Initial check - valid generation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#tests-python">Tests (python)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id7">Initial check - valid generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">Tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Initial check - valid generation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#tests-http">Tests (http)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id11">Initial check - valid generation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#local-actions-copy-link-and-move">Local actions: copy, link and move</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id14">Local actions: copy, link and move</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#cmd-and-http-interplay-test">Cmd and Http interplay test</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#meteorological">Meteorological…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">Tests</a></li>
 </ul>
 </li>
 </ul>
