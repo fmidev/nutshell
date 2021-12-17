@@ -34,7 +34,7 @@ Some of them, are implicit; for example, ``MAKE`` includes ``EXISTS`` and condit
 ``INPUTS``   --inputs, -I      Check inputs
 ============ ================= ============
 
-Some requests specify the product type, for example for ``make`` or ``exist` commands:` 
+Some requests specify the product type, for example for ``make`` or ``exist`` commands:` 
 
 ============== ================= ============
  Instance type   
