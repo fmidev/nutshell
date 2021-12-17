@@ -767,5 +767,8 @@ if __name__ == '__main__':
             logger.warning('Could not parse product')
             fail = True
             #exit(1)
-            
-    exit(0)
+
+    if (fail):
+        exit(1)
+    else:
+        exit(0)

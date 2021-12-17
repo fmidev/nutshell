@@ -1046,11 +1046,11 @@ public class ProductServer { //extends Cache {
 
 				//HttpLog subLog = (count==1) ? log.child(key) : null;
 				//HttpLog subLog = new HttpLog(key, log);
-				log.debug(String.format("Still here: %s = %s", key, value));
-				System.out.println(String.format("Still there: %s = %s", key, value));
+				// log.debug(String.format("# Still here: %s = %s", key, value));
+				// System.out.println(String.format("# Still there: %s = %s", key, value));
 
 				Task task = new Task(value, instructions.value, log);
-				System.out.println(String.format("NOTTTTTTTTTT here: %s = %s", key, value));
+				//System.out.println(String.format("# NOTTTTTTTTTT here: %s = %s", key, value));
 
 				log.debug(String.format("Still life: %s = %s", key, value));
 				task.info.setDirectives(directives);
@@ -1076,53 +1076,60 @@ public class ProductServer { //extends Cache {
 
 			}
 			catch (ParseException e) {
-				System.err.println(String.format("EROR here: %s = %s", key, value));
+				//System.err.println(String.format("EROR here: %s = %s", key, value));
 
-				/// TODO: is it a fatal error if a product defines its input wrong?
+				// TODO: is it a fatal error if a product defines its input wrong? Answer: YES
 				log.warn(String.format("Could not parse product: %s(%s)",  key, value));
 				//log.warn(e.getMessage());
-				log.error(e.getLocalizedMessage()); // RETURN?
+				log.log(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getLocalizedMessage());
+				//log.error(e.getLocalizedMessage()); // RETURN?
 			}
 			catch (Exception e) {
-				System.err.println(String.format("EROR2 here: %s = %s", key, value));
-				log.error("Unexpected exception... " + e.getLocalizedMessage());
+				// System.err.println(String.format("EROR2 here: %s = %s", key, value));
+				log.error(String.format("Unexpected exception in crating product %s(%s)", key, value));
+				log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
 			}
 			finally {
-				System.out.println("Final.." + key);
+				//System.out.println("Final.." + key);
 			}
 
 		}
 
-		log.note("Starting (" + tasks.size() + ") tasks");
 
-		for (Entry<String,Task> entry : tasks.entrySet()){
-			String key = entry.getKey();
-			Task task = entry.getValue();
+		if (tasks.size() > 0){
 
-			try {
-				log.debug(String.format("Starting thread %s: %s", key, task));
-				task.start();
+			log.note(String.format("Starting (%d) tasks", tasks.size()));
+
+			for (Entry<String,Task> entry : tasks.entrySet()){
+				String key = entry.getKey();
+				Task task = entry.getValue();
+
+				try {
+					log.debug(String.format("Starting thread %s: %s", key, task));
+					task.start();
+				}
+				catch (IllegalStateException e){
+					log.error("Already running? " + e.toString());
+				}
 			}
-			catch (IllegalStateException e){
-				log.error("Already running? " + e.toString());
-			}
-		}
 
 
-		// wait();
+			// wait();
 
-		for (Entry<String,Task> entry : tasks.entrySet()){
-			String key = entry.getKey();
-			Task task = entry.getValue();
-			try {
-				task.join();
-				log.debug(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+			for (Entry<String,Task> entry : tasks.entrySet()){
+				String key = entry.getKey();
+				Task task = entry.getValue();
+				try {
+					task.join();
+					log.debug(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+				}
+				catch (InterruptedException e) {
+					log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+					log.warn(String.format("Pending file? : ", task.outputPathTmp));
+				}
+				log.log(String.format("Final status: %s", task.log.indexedException));
 			}
-			catch (InterruptedException e) {
-				log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
-				log.warn(String.format("Pending file? : ", task.outputPathTmp));
-			}
-			log.log(String.format("Final status: %s", task.log.indexedException));
+
 		}
 
 		return tasks;
@@ -1560,6 +1567,10 @@ public class ProductServer { //extends Cache {
 
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
+		if (log.getStatus() >= Log.ERROR){
+			++result;
+			// quit?
+		}
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 			String key = entry.getKey();
@@ -1589,6 +1600,7 @@ public class ProductServer { //extends Cache {
 
 		// System.err.println("Eksit");
 		log.warn("Exiting..");
+		log.close();
 		System.exit(result);
 
 	}

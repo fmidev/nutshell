@@ -202,7 +202,7 @@ class Info:
                 self.EXTENSION = self.FORMAT
                 self.COMPRESSION = ''
             else:
-                raise SyntaxError("could nut parse: " + extension)
+                raise SyntaxError("could not parse: " + extension)
         # print (self.__dict__)
 
     # NOTE: remove PARAMS!

@@ -95,7 +95,7 @@ if [ $NUTSHELL_VERSION == 'python' ]; then
     mkdir -v --parents $NUTSHELL_ROOT/nutshell/
     cp -v python/*.py  $NUTSHELL_ROOT/nutshell/
     
-    unset NUTSHELL_JAR_DIR
+    # unset NUTSHELL_JAR_DIR
     
 fi
 

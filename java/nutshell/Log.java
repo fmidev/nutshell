@@ -135,8 +135,7 @@ public class Log implements AutoCloseable {
 		}
 		else
 		{
-			// warn(String.format("Closing log (unknow output stream)")
-			warn("NOT closing log: " + this.printStream.toString());
+			// warn("NOT closing log (stdout/stderr): " + this.printStream.toString());
 		}
 		//System.out.println("closing " + this.getClass().getCanonicalName());
 	}

@@ -171,9 +171,12 @@ function run_http(){
     # cp $LOG $LOG.$counter
 }
 
+
+# TODO: python --parse
+
 function parse(){
     local FILE=$1
-    nutshell --parse $FILE &> /dev/null  > nutshell.inf 
+    NUTSHELL_VERSION=java nutshell --parse $FILE &> /dev/null  > nutshell.inf 
     export PRODUCT_ID TIMESTAMP='' YEAR='' MONTH='' DAY=''
     source nutshell.inf
     OUTDIR=$CACHE_ROOT/$YEAR/$MONTH/$DAY/${PRODUCT_ID//.//}
@@ -258,6 +261,10 @@ for i in ${LOOP//,/ } ; do
     #xcheck 1 
     
     secho title2 "Parsing error"
+    $cmd 12345_pdf
+    check 1 
+
+    secho title2 "Undefined product"
     $cmd foo.pdf
     check 1 
 
@@ -343,70 +350,95 @@ for i in ${LOOP//,/ } ; do
     
 done
 
-set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-secho title "Local actions: copy, link and move"
+for i in ${LOOP//,/ } ; do
 
-secho title2 "Move the resulting file to specified location"
-run_cmdline --move . --make $FILE 
-check 0 ! -f $OUTDIR/$FILE
-check 0   -f ./$FILE
+    if [ $i == 'http' ]; then
+	continue
+    fi
 
-secho title2 "Copy the resulting file to specified location"
-run_cmdline --copy . --make $FILE 
-check 0  -f $OUTDIR/$FILE
-check 0  -f ./$FILE
-#rm -v ./$FILE
+    cmd=run_$i
+    
+    set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-secho title2 "Link the resulting file to specified location"
-run_cmdline --link . --make $FILE 
-check 0  -f $OUTDIR/$FILE
-check 0  -f ./$FILE
-#rm -v ./$FILE
+    secho title "Local actions: copy, link and move"
 
-secho title2 "Link the resulting file to SHORTCUT (non-timestamped) directory"
-run_cmdline --shortcut $FILE
-#check 0 -f $OUTDIR/$FILE
-check 0 -L $OUTDIR_SHORT/$FILE
-#check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
+    secho title2 "Move the resulting file to specified location"
+    $cmd --move . --make $FILE 
+    check 0 ! -f $OUTDIR/$FILE
+    check 0   -f ./$FILE
+    
+    secho title2 "Copy the resulting file to specified location"
+    $cmd --copy . --make $FILE 
+    check 0  -f $OUTDIR/$FILE
+    check 0  -f ./$FILE
+    #rm -v ./$FILE
+    
+    secho title2 "Link the resulting file to specified location"
+    $cmd --link . --make $FILE 
+    check 0  -f $OUTDIR/$FILE
+    check 0  -f ./$FILE
+    #rm -v ./$FILE
+    
+    secho title2 "Link the resulting file to SHORTCUT (non-timestamped) directory"
+    $cmd --shortcut $FILE
+    #check 0 -f $OUTDIR/$FILE
+    check 0 -L $OUTDIR_SHORT/$FILE
+    #check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
+    
+    secho title2 "Link the resulting file, as LATEST one"
+    $cmd --latest $FILE
+    #check 0 -f $OUTDIR/$FILE
+    #check 0 -L $OUTDIR_SHORT/$FILE
+    check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 
-secho title2 "Link the resulting file, as LATEST one"
-run_cmdline --latest $FILE
-#check 0 -f $OUTDIR/$FILE
-#check 0 -L $OUTDIR_SHORT/$FILE
-check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
-
-
-
+done
+    
+    
 secho title "Cmd and Http interplay test"
+
 
 set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
-secho title2 "Generate on command line, delete through HTTP"
+for i in ${LOOP//,/ } ; do
 
-run_cmdline --generate $FILE
+    if [ $i == 'http' ]; then
+	continue
+    fi
 
-run_http     --delete   $FILE 
+    cmd=run_$i
 
-check 0 ! -f $OUTDIR/$FILE
+    secho title2 "Generate on command line, delete through HTTP"
+    
+    $cmd --generate $FILE
+    run_http     --delete   $FILE 
 
-
-secho title2 "Generate through HTTP, delete on command line"
-
-run_http    --generate $FILE
-
-run_cmdline --delete   $FILE 
+    check 0 ! -f $OUTDIR/$FILE
 
 
+    secho title2 "Generate through HTTP, delete on command line"
 
-check 0 ! -f $OUTDIR/$FILE
+    run_http    --generate $FILE
+    $cmd --delete   $FILE 
+    check 0 ! -f $OUTDIR/$FILE
+
+done
 
 
 secho title "Meteorological..."
 set_file 201708121600_radar.rack.comp_BBOX=18,58,28,64_CTARGET=C_PALETTE=default_SITES=fikor,fiika,fivan_SIZE=800,800.png
-run_cmdline --generate $FILE
-check 0 -f $OUTDIR/$FILE
 
+echo
+
+for i in ${LOOP//,/ } ; do
+
+    cmd=run_$i
+
+    secho title2 "${i^} version: "    
+    $cmd --generate $FILE
+    check 0 -f $OUTDIR/$FILE
+
+done
 
 secho note Finished
 

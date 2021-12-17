@@ -42,8 +42,9 @@ if [ $# != 0 ]; then
     ${NUTSHELL} --log_level DEBUG --conf ${NUTSHELL_DIR}/nutshell.cnf $*
     RESULT=$?
     if [ $RESULT != 0 ]; then
-	echo !!
+	#echo !!
 	echo "# Error: something went wrong, return code: $RESULT "
+	echo
     else
 	exit 0
     fi
