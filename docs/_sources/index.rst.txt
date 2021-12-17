@@ -77,7 +77,7 @@ References
 ==========
 
 .. [Peura2008] Markus Peura,
-    `*On-demand processing architecture for radar image products*, <erad2008-0004-extended.pdf>`_
+    `On-demand processing architecture for radar image products, <erad2008-0004-extended.pdf>`_
     Proceedings of the fifth European Conference on Radar in Meteorology and Hydrology (ERAD2008),
     Helsinki, Finland, Finnish Meteorological Institute, June 2008
 
