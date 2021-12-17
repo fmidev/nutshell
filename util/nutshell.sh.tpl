@@ -11,6 +11,7 @@
 # Workarounds for envsubst
 NUTSHELL=${NUTSHELL_VERSION:-$NUTSHELL_VERSION}
 NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
+#NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
 
 case $NUTSHELL in
     python)
@@ -69,4 +70,4 @@ echo "For debugging, invoke this ($NUTSHELL_VERSION) version directly, for examp
 echo "  $NUTSHELL --version"
 echo
 
-return $RESULT
+exit $RESULT

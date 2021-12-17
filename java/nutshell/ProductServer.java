@@ -104,7 +104,10 @@ public class ProductServer { //extends Cache {
 	public Path cacheRoot   = Paths.get(".");
 	//public Path storageRoot   = Paths.get(".");
 	public Path productRoot = Paths.get(".");
+	//protected Path storageRoot = Paths.get(".");
 	protected Path storageRoot = Paths.get(".");
+	// Consider
+	final protected List<StringMapper> storagePaths = new LinkedList<>();
 
 	static final public Path cachePrefix = Paths.get("cache");
 

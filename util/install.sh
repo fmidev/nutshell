@@ -70,7 +70,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     mkdir -v --parents $HTTP_ROOT/template
     mkdir -v --parents $HTTP_ROOT/img
 
-    NUTSHELL_JAR_DIR=$HTTP_ROOT/WEB-INF/lib
+    NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-"$HTTP_ROOT/WEB-INF/lib"}
 
     #mkdir -v --parents $HTTP_ROOT/WEB-INF
     #mkdir -v --parents $HTTP_ROOT/WEB-INF/lib
@@ -80,8 +80,8 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     # cp -v $CONF_FILE ${HTTP_ROOT}/nutshell.cnf
     #fi
     #if [ $NUTSHELL_VERSION == 'java' ]; then
-else
-    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT/jar
+    #else
+    #NUTSHELL_JAR_DIR=$NUTSHELL_ROOT/jar
 
     
 

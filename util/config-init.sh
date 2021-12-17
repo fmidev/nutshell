@@ -89,23 +89,36 @@ function show_variable(){
     vt100echo cyan "# $1=$value"
 }
 
+# write_variable <key> <value>  <comment>
+#
+function write_variable(){
+    local conf_file=${CONF_FILE:-/dev/tty}
+    local key=$1
+    local value=$2
+    shift 2
+    echo "# $*" >> $conf_file
+    echo "$key='$value'" >> $conf_file
+    echo >> $conf_file
+}
+
 # Utility to change default variables (above)
 # ARGS: <variable-name> <prompt-text>
 function ask_variable(){
     echo
     local key=$1
     local default=$2
-    local X
+    local value
     eval X="\${$key:-'$default'}"
     shift 2
     echo $*
     read -e  -i "$X" -p "  $key=" $key
-    eval X=\$$key
-    if [ "$CONF_FILE" != '' ]; then 
-	echo "# $*" >> $CONF_FILE
-	echo "$key='$X'" >> $CONF_FILE
-	echo >> $CONF_FILE
-    fi
+    eval value=\$$key
+    write_variable $key "$value"  $*
+    # if [ "$CONF_FILE" != '' ]; then 
+    #	echo "# $*" >> $CONF_FILE
+    #	echo "$key='$X'" >> $CONF_FILE
+    #	echo >> $CONF_FILE
+    # fi
 }
 
 # Add leading '/' and remove trailing '/'

@@ -62,15 +62,24 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     ask_variable TOMCAT_CONF_DIR "$prefix/tomcat/conf/Catalina/localhost/nutshell" "Optional: directory for nutshell.xml"
     check_dir_syntax TOMCAT_CONF_DIR
 
-    echo
+    NUTSHELL_JAR_DIR=$HTTP_ROOT/WEB-INF/lib
+       
+    #  else
     
 fi
+
+echo
+
+
 
 
 vt100echo blue "Nutshell product server configuration"
 
 ask_variable NUTSHELL_ROOT "$prefix/nutshell" "Directory for nutshell.cnf, default dir for cache, storage, products"
 
+NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-$NUTSHELL_ROOT/jar}
+show_variable NUTSHELL_JAR_DIR
+write_variable NUTSHELL_JAR_DIR $NUTSHELL_JAR_DIR  "Location of JAR file for cmd line access (Java versions only)"
 
 ask_variable PRODUCT_ROOT "$NUTSHELL_ROOT/products" "Root directory for product generators"
 check_dir_syntax PRODUCT_ROOT

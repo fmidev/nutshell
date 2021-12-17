@@ -119,14 +119,25 @@ function set_file(){
     parse $FILE
 }
 
+function run_java(){
+    run_cmdline java $*
+}
+
+function run_python(){
+    run_cmdline python $*
+}
 
 function run_cmdline(){
 
+    local nutshell_version=$1
+    shift
+    
     counter=$(( counter + 1 ))
     LOG=`printf 'tests/nutshell-%02d-cmd.log' $counter `
 
-    local cmd="nutshell $*"
-    echo_cmd "nutshell" $*
+    local cmd="NUTSHELL_VERSION='$nutshell_version' nutshell $*"
+    #echo_cmd "nutshell" $*
+    echo_cmd $cmd
     echo $cmd > $LOG.cmd
     echo -e "Test $counter ::\n\n  $cmd\n" >> $DOC_FILE
     #echo -e ".. code-block::\n\n  $cmd\n" >> $DOC_FILE
@@ -218,34 +229,46 @@ function check(){
 echo
 secho title "Initial tests"
 
-secho text  "The following commands are for command line only."
+LOOP=${LOOP:-'java,python,http'}
 
+for i in ${LOOP//,/ } ; do
 
-secho title2 "Help command"
-run_cmdline --help 
-check 0 
+    if [ $i == 'http' ]; then
+	continue
+    fi
 
-secho title2 "Unknown command"
-run_cmdline --foo
-check 1 
+    secho text  "The command line tests ($i version)."
 
-secho title2 "Undefined action"
-run_cmdline --actions FOO
-check 1 
-
-#secho title2 "Undefined verbosity level"
-#run_cmdline --log_level FOO
-#xcheck 1 
+    cmd=run_$i
     
-secho title2 "Parsing error"
-run_cmdline foo.pdf
-check 1 
+    secho title2 "Help command"
+    $cmd --help 
+    check 0 
+    
+    secho title2 "Unknown command"
+    $cmd --foo
+    check 1 
+    
+    secho title2 "Undefined action"
+    $cmd --actions FOO
+    check 1 
+    
+    #secho title2 "Undefined verbosity level"
+    #run_cmdline --log_level FOO
+    #xcheck 1 
+    
+    secho title2 "Parsing error"
+    $cmd foo.pdf
+    check 1 
+
+done
+
+
 
 
 secho title "Testing Cmd and Http interfaces"
 
 #for cmd in run_cmdline run_http; do
-LOOP=${LOOP:-'cmdline,http'}
 for i in ${LOOP//,/ } ; do    
 
     secho title "Tests ($i)"
@@ -255,7 +278,6 @@ for i in ${LOOP//,/ } ; do
     
     set_file 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     # set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
-
 
     secho title2 "Default action (MAKE)"
     $cmd $FILE
