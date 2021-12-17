@@ -264,23 +264,53 @@ Http version
 
 
 **Default action (MAKE)**
-  /nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+- `\link 35 </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
   # return value: 0
 
 **Does the product file exist?**
-  /nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+- `\link 36 </nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
   # return value: 0
 
 **Action: DELETE product file**
-  /nutshell/NutShell?instructions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+- `\link 37 </nutshell/NutShell?instructions=DELETE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
   # return value: 0
 
 **Now, the product file should not exist**
-  /nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+- `\link 38 </nutshell/NutShell?instructions=EXISTS&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
   # return value: 8
 
 **Action: MAKE product (generate, if nonexistent)**
-  /nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
+
+- `\link 39 </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
   # return value: 0
 
 **Action: GENERATE (unconditionally)**
+
+- `\link 40 </nutshell/NutShell?instructions=EXISTS,MAKE&product=201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
+  # return value: 0
+
+**Parameters in wrong order (generated file has them in order)**
+Generated file has them in order.
+
+
+- `\link 41 </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
+  # return value: 0
+
+**Initial check - valid generation**
+
+- `\link 42 </nutshell/NutShell?instructions=GENERATE&product=demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png>`_
+
+  # return value: 0
+
+**Error test: image too large**
