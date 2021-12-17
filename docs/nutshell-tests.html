@@ -51,7 +51,9 @@
 and http queries.</p>
 <div class="section" id="initial-tests">
 <h2>Initial tests<a class="headerlink" href="#initial-tests" title="Permalink to this headline">¶</a></h2>
-<p>Java version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
+<div class="section" id="java-version">
+<h3>Java ‘version<a class="headerlink" href="#java-version" title="Permalink to this headline">¶</a></h3>
+<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
 <p><strong>Help command</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
 <span class="c1"># return value: 0</span>
@@ -77,7 +79,10 @@ and http queries.</p>
 <span class="c1"># return value: 1</span>
 </pre></div>
 </div>
-<p>Python version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=python</span></code> .</p>
+</div>
+<div class="section" id="python-version">
+<h3>Python ‘version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h3>
+<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=python</span></code> .</p>
 <p><strong>Help command</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">help</span>
 <span class="c1"># return value: 0</span>
@@ -102,6 +107,7 @@ and http queries.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="n">foo</span><span class="o">.</span><span class="n">pdf</span>
 <span class="c1"># return value: 1</span>
 </pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="testing-cmd-and-http-interfaces">
@@ -109,7 +115,9 @@ and http queries.</p>
 </div>
 <div class="section" id="id2">
 <h2>Tests<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>Java version. The commands below have been prefixed with <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
+<div class="section" id="id3">
+<h3>Java ‘version<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p><em>The commands below have been prefixed with</em> <code class="docutils literal notranslate"><span class="pre">NUTSHELL_VERSION=java</span></code> .</p>
 <p><strong>Default action (MAKE)</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
 <span class="c1"># return value: 0</span>
@@ -132,44 +140,6 @@ and http queries.</p>
 </div>
 <p><strong>Action: MAKE product (generate, if nonexistent)</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Action: GENERATE (unconditionally)</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">make</span> <span class="mi">201412161845</span><span class="n">_demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Parameters in wrong order (generated file has them in order)</strong>
-Generated file has them in order.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Product error messages</strong></p>
-<div class="section" id="initial-check-valid-generation">
-<h3>Initial check - valid generation<a class="headerlink" href="#initial-check-valid-generation" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS_WIDTH</span><span class="o">=</span><span class="mf">300.</span><span class="n">png</span>
-<span class="c1"># return value: 0</span>
-</pre></div>
-</div>
-<p><strong>Error test: image too large</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">1200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">1200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 1</span>
-</pre></div>
-</div>
-<p><strong>Error test: Illegal (negative) arguments</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=-</span><span class="mi">300</span><span class="n">_HEIGHT</span><span class="o">=-</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 1</span>
-</pre></div>
-</div>
-<p><strong>Error test: Unsupported feature</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">SQUARE</span><span class="o">.</span><span class="n">png</span>
-<span class="c1"># return value: 1</span>
-</pre></div>
-</div>
-<p><strong>Error test: Unsupported file format</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nutshell</span> <span class="o">--</span><span class="n">generate</span> <span class="n">demo</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pattern_WIDTH</span><span class="o">=</span><span class="mi">200</span><span class="n">_HEIGHT</span><span class="o">=</span><span class="mi">200</span><span class="n">_PATTERN</span><span class="o">=</span><span class="n">OCTAGONS</span><span class="o">.</span><span class="n">pdf</span>
 </pre></div>
 </div>
 </div>
@@ -193,10 +163,14 @@ Generated file has them in order.</p>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-code.html">NutShell Code</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tests</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#initial-tests">Initial tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#initial-tests">Initial tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#java-version">Java ‘version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-version">Python ‘version</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id2">Tests</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#initial-check-valid-generation">Initial check - valid generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Java ‘version</a></li>
 </ul>
 </li>
 </ul>

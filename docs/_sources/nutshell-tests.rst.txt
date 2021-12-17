@@ -19,7 +19,10 @@ Initial tests
 =============
 
 
-Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java`` .
+Java 'version
+-------------
+
+*The commands below have been prefixed with* ``NUTSHELL_VERSION=java`` .
 
 
 **Help command**
@@ -54,7 +57,10 @@ Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java
 
 
 
-Python version. The commands below have been prefixed with ``NUTSHELL_VERSION=python`` .
+Python 'version
+---------------
+
+*The commands below have been prefixed with* ``NUTSHELL_VERSION=python`` .
 
 
 **Help command**
@@ -97,7 +103,10 @@ Tests
 =====
 
 
-Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java`` .
+Java 'version
+-------------
+
+*The commands below have been prefixed with* ``NUTSHELL_VERSION=java`` .
 
 
 **Default action (MAKE)**
@@ -128,51 +137,3 @@ Java version. The commands below have been prefixed with ``NUTSHELL_VERSION=java
 ::
 
   nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-  # return value: 0
-
-**Action: GENERATE (unconditionally)**
-::
-
-  nutshell --make 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-  # return value: 0
-
-**Parameters in wrong order (generated file has them in order)**
-Generated file has them in order.
-
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
-  # return value: 0
-
-**Product error messages**
-
-Initial check - valid generation
---------------------------------
-
-::
-
-  nutshell --generate demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
-  # return value: 0
-
-**Error test: image too large**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
-  # return value: 1
-
-**Error test: Illegal (negative) arguments**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
-  # return value: 1
-
-**Error test: Unsupported feature**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
-  # return value: 1
-
-**Error test: Unsupported file format**
-::
-
-  nutshell --generate demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
