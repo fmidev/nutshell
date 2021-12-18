@@ -1567,9 +1567,14 @@ public class ProductServer { //extends Cache {
 
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
-		if (log.getStatus() >= Log.ERROR){
+
+		System.err.println(log.indexedException);
+		System.err.println(log);
+		System.err.println(log.getStatus());
+		if (log.getStatus() <= Log.ERROR){
+
+			//log.warn("Oh no, eror: %d " + log.getStatus());
 			++result;
-			// quit?
 		}
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {

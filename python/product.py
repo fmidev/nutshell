@@ -116,7 +116,7 @@ class Info:
         :returns: instance (possibly incomplete, to be adjusted with separate 
              method calls) 
     
-        See :ref:`Info`. Parameters equivalent at initialisation.
+        See :ref:nutshell.product.Info. Parameters equivalent at initialisation.
         """
         
         self.FORMAT = 'xxx'

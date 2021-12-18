@@ -2,7 +2,7 @@
 
 # Test script for nutshell 
 
-LOG='tests/nutshell.log'
+LOG='log/nutshell.log'
 mkdir --parents tests
 
 # RST doc file
@@ -21,8 +21,8 @@ cat >  $DOC_FILE <<EOF
 Tests
 =====
 
-This tests are run prior to publishing a release. The tests apply both command line invocations
-and http queries.
+These tests are run prior to publishing a release. 
+Most tests involve both command line and http queries.
    
 
 EOF
@@ -91,9 +91,29 @@ function secho(){
 	    echo    >> $DOC_FILE
 	    vt100echo blue    $*
 	    ;;
+	title3)
+	    echo    >> $DOC_FILE
+	    echo '**'$*'**' >> $DOC_FILE
+	    ;;
 	text)
 	    echo $* >> $DOC_FILE
 	    echo    >> $DOC_FILE
+	    vt100echo blue    $*
+	    ;;
+	version)
+	    local version=$1
+	    local string="${version^} version"
+	    shift
+	    vt100echo cyan "# NUTSHELL_VERSION=$version"
+	    echo >> $DOC_FILE
+	    echo $string >> $DOC_FILE
+	    echo ${string//?/-} >> $DOC_FILE
+	    echo >> $DOC_FILE
+	    #${version^} 'version.
+	    if [  $version != 'http' ]; then
+		echo '*The commands below have been prefixed with* ``'NUTSHELL_VERSION=$version'`` .'  >> $DOC_FILE
+	    echo >> $DOC_FILE
+	    fi
 	    vt100echo blue    $*
 	    ;;
 	*)
@@ -131,41 +151,38 @@ function run_cmdline(){
 
     local nutshell_version=$1
     shift
-    
-    counter=$(( counter + 1 ))
-    LOG=`printf 'tests/nutshell-%02d-cmd.log' $counter `
 
-    local cmd="NUTSHELL_VERSION='$nutshell_version' nutshell $*"
+    # globals
+    counter=$(( counter + 1 ))
+    LOG=`printf "log/nutshell-%02d-${nutshell_version}.log" $counter `
+
+    #local cmd="NUTSHELL_VERSION='$nutshell_version' nutshell $*"
+    local cmd="nutshell $*"
     #echo_cmd "nutshell" $*
-    echo_cmd $cmd
-    echo $cmd > $LOG.cmd
-    echo -e "Test $counter ::\n\n  $cmd\n" >> $DOC_FILE
-    #echo -e ".. code-block::\n\n  $cmd\n" >> $DOC_FILE
-    #echo ".. code-block::" >> $DOC_FILE
-    #echo "   :caption: Test $i" >> $DOC_FILE
-    #echo >> $DOC_FILE
-    echo "       $cmd" >> $DOC_FILE
-    echo >> $DOC_FILE
-    #echo -e "  ::\n\n  $cmd\n" >> $DOC_FILE
-    #echo "  $cmd" >> $DOC_FILE
-    eval $cmd &> $LOG
-    #fgrep 'Final status:' $LOG > $LOG.$counter
+    echo_cmd "$cmd (test $counter)"
+    echo -e "::\n\n  $cmd" >> $DOC_FILE
+    cmd="NUTSHELL_VERSION='$nutshell_version' $cmd"
+    echo "$cmd" > $LOG.cmd
+    eval "$cmd"  &> $LOG
     
 }
 
 function run_http(){
     
     counter=$(( counter + 1 ))
-    LOG=`printf 'tests/nutshell-%02d-http.log' $counter `
+    # global, yes!
+    LOG=`printf 'log/nutshell-%02d-http.log' $counter `
 
     #echo_warn params...
     local params=`nutshell $* --http_params 2> /dev/null`
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd
-    # echo -e "  ${NUTSHELL_URL}?${params}\n" >> $DOC_FILE
-    echo -e "\`\$NUTSHELL?${params} <${HTTP_PREFIX}/NutShell?${params}>\`_\n" >> $DOC_FILE
-    # `Python <http://www.python.org/>`_
+    #echo -e "\`\$NUTSHELL?${params} <${HTTP_PREFIX}/NutShell?${params}>\`_\n" >> $DOC_FILE
+    #echo -e "  ${HTTP_PREFIX}/NutShell?${params}" >> $DOC_FILE
+    echo >> $DOC_FILE
+    echo -e "- \`\link $counter <${HTTP_PREFIX}/NutShell?${params}>\`_\n" >> $DOC_FILE
+    
     echo $cmd > $LOG.cmd
     eval $cmd &>> $LOG
     # cp $LOG $LOG.$counter
@@ -193,20 +210,30 @@ function parse(){
 
 function check(){
 
-    STATUS=$?
+    local STATUS=$?
+    #local REQUIRE_STATUS=${1:-0}
 
-    local REQUIRE_STATUS=${1:-0}
+    if [ $# != 0 ]; then
 
-    if [ $STATUS == 0 ] && [ $REQUIRE_STATUS != 0 ] ; then
-	vt100cmd yellow cat $LOG
- 	echo_error "return value: $STATUS"
-	exit 1
-    else
-	echo_ok "return value: $STATUS"
-	echo "*Return value: $STATUS* " >> $DOC_FILE
+	##local REQUIRE_STATUS=${1:-0}
+	local REQUIRE_STATUS=$1
+	local s=$(( STATUS == 0 ))
+	local r=$(( REQUIRE_STATUS == 0 ))
+	
+	if [ $s != $r ] ; then
+	    vt100cmd yellow cat $LOG
+ 	    echo_error "return value: $STATUS"
+	    exit 1
+	fi
+
     fi
-
     
+
+
+    echo_ok "return value: $STATUS"
+    echo "  # return value: $STATUS" >> $DOC_FILE
+
+    # Further tests (optional)
     shift
     
     if [ $# != 0 ]; then
@@ -240,19 +267,19 @@ for i in ${LOOP//,/ } ; do
 	continue
     fi
 
-    secho text  "The command line tests ($i version)."
+    secho version $i
 
     cmd=run_$i
     
-    secho title2 "Help command"
+    secho title3 "Help command"
     $cmd --help 
     check 0 
     
-    secho title2 "Unknown command"
+    secho title3 "Unknown command"
     $cmd --foo
     check 1 
     
-    secho title2 "Undefined action"
+    secho title3 "Undefined action"
     $cmd --actions FOO
     check 1 
     
@@ -260,14 +287,16 @@ for i in ${LOOP//,/ } ; do
     #run_cmdline --log_level FOO
     #xcheck 1 
     
-    secho title2 "Parsing error"
+    secho title3 "Parsing error"
     $cmd 12345_pdf
     check 1 
 
-    secho title2 "Undefined product"
+    secho title3 "Undefined product"
     $cmd foo.pdf
     check 1 
 
+    secho text
+    
 done
 
 
@@ -278,7 +307,9 @@ secho title "Testing Cmd and Http interfaces"
 #for cmd in run_cmdline run_http; do
 for i in ${LOOP//,/ } ; do    
 
-    secho title "Tests ($i)"
+    #secho title "Tests"
+
+    secho version $i
     
     cmd=run_$i
     echo $counter
@@ -286,63 +317,63 @@ for i in ${LOOP//,/ } ; do
     set_file 201412161845_demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     # set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
-    secho title2 "Default action (MAKE)"
+    secho title3 "Default action (MAKE)"
     $cmd $FILE
     check 0 -f $OUTDIR/$FILE
     # check 0 
 
-    secho title2 "Does product file exist?"
+    secho title3 "Does the product file exist?"
     $cmd --exists $FILE 
     check 0 
 
-    secho title2 "Action: DELETE product file"
+    secho title3 "Action: DELETE product file"
     $cmd --delete $FILE 
     check 0 ! -f $OUTDIR/$FILE
 
-    #secho title2 "Now, product file should not exist"
+    secho title3 "Now, the product file should not exist"
     $cmd --exists $FILE 
     check 1 
 
-    secho title2 "Action: MAKE product (generate, if nonexistent)"
+    secho title3 "Action: MAKE product (generate, if nonexistent)"
     $cmd --make $FILE 
     check 0 -f $OUTDIR/$FILE
 
-    secho title2 "Action: GENERATE (unconditionally)"
+    secho title3 "Action: GENERATE (unconditionally)"
     $cmd --make $FILE 
     check 0 -f $OUTDIR/$FILE
 
 
     #echo
-    secho title2 "Parameters in wrong order (generated file has them in order)"
+    secho title3 "Parameters in wrong order (generated file has them in order)"
     secho text   "Generated file has them in order."
     set_file demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png
 
     $cmd --generate $FILE
     check 0 ! -f $OUTDIR/$FILE
 
-    secho title2 "Product error messages"
+    #secho title3 "Product error messages"
     set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     parse $FILE
-    secho title2 "Initial check - valid generation"
+    secho title3 "Initial check - valid generation"
     $cmd --generate $FILE
     check 0  -f $OUTDIR/$FILE
     
-    secho title2 "Error test: image too large"
+    secho title3 "Error test: image too large"
     set_file demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
     $cmd --generate $FILE
     check 1
     
-    secho title2 "Error test: Illegal (negative) arguments"
+    secho title3 "Error test: Illegal (negative) arguments"
     set_file demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
     $cmd --generate $FILE
     check 1
     
-    secho title2 "Error test: Unsupported feature"
+    secho title3 "Error test: Unsupported feature"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png
     $cmd --generate $FILE
     check 1
     
-    secho title2 "Error test: Unsupported file format"
+    secho title3 "Error test: Unsupported file format"
     set_file demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf
     $cmd --generate $FILE
     check 1
@@ -351,45 +382,44 @@ for i in ${LOOP//,/ } ; do
 done
 
 
+
+secho title "Local actions: copy, link and move"
+
+set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
+
 for i in ${LOOP//,/ } ; do
 
     if [ $i == 'http' ]; then
 	continue
     fi
 
-    cmd=run_$i
+    secho version $i
     
-    set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
+    cmd=run_$i
 
-    secho title "Local actions: copy, link and move"
-
-    secho title2 "Move the resulting file to specified location"
+    secho title3 "Move the resulting file to specified location"
     $cmd --move . --make $FILE 
     check 0 ! -f $OUTDIR/$FILE
     check 0   -f ./$FILE
     
-    secho title2 "Copy the resulting file to specified location"
+    secho title3 "Copy the resulting file to specified location"
     $cmd --copy . --make $FILE 
     check 0  -f $OUTDIR/$FILE
     check 0  -f ./$FILE
-    #rm -v ./$FILE
+
     
-    secho title2 "Link the resulting file to specified location"
+    secho title3 "Link the resulting file to specified location"
     $cmd --link . --make $FILE 
     check 0  -f $OUTDIR/$FILE
     check 0  -f ./$FILE
-    #rm -v ./$FILE
+
     
-    secho title2 "Link the resulting file to SHORTCUT (non-timestamped) directory"
+    secho title3 "Link the resulting file to SHORTCUT (non-timestamped) directory"
     $cmd --shortcut $FILE
-    #check 0 -f $OUTDIR/$FILE
     check 0 -L $OUTDIR_SHORT/$FILE
-    #check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
     
-    secho title2 "Link the resulting file, as LATEST one"
+    secho title3 "Link the resulting file, as LATEST one"
     $cmd --latest $FILE
-    #check 0 -f $OUTDIR/$FILE
-    #check 0 -L $OUTDIR_SHORT/$FILE
     check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 
 done
@@ -406,9 +436,11 @@ for i in ${LOOP//,/ } ; do
 	continue
     fi
 
+    secho version $i
+    
     cmd=run_$i
 
-    secho title2 "Generate on command line, delete through HTTP"
+    secho title3 "Generate on command line, delete through HTTP"
     
     $cmd --generate $FILE
     run_http     --delete   $FILE 
@@ -416,7 +448,7 @@ for i in ${LOOP//,/ } ; do
     check 0 ! -f $OUTDIR/$FILE
 
 
-    secho title2 "Generate through HTTP, delete on command line"
+    secho title3 "Generate through HTTP, delete on command line"
 
     run_http    --generate $FILE
     $cmd --delete   $FILE 
@@ -434,7 +466,9 @@ for i in ${LOOP//,/ } ; do
 
     cmd=run_$i
 
-    secho title2 "${i^} version: "    
+    secho version $i
+
+    secho title3 "${i^} version:"    
     $cmd --generate $FILE
     check 0 -f $OUTDIR/$FILE
 
