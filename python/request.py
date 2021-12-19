@@ -32,13 +32,16 @@ import secrets # for random hex string secrets.token_hex(12)
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
+# TODO: rename to action?
+
+
 from . import nutils
 from . import product
 from . import shell
 
 
 class Tasklet(shell.Task):
-    """Base class for shell operations (:any:`InputQuery` and :any:`Generator`)
+    """Intermediate class for shell operations (:any:`InputQuery` and :any:`Generator`)
     """
     
     def __init__(self, product_server, product_info, script_filename, log = None):

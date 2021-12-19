@@ -77,7 +77,7 @@ class ProductServer:
     counter = 0
 
     #error_code_regexp = re.compile("^\s*([0-9]+)\\.(zip|gz)$")
-
+    supported_instructions = ['DELETE','EXISTS','MAKE','GENERATE','INPUTS','SHORTCUT','LATEST','LINK','MOVE','COPY']
     
     def init_path(self, dirname, verify=False):
         """ Expand relative path to absolute, optionally check that exists. """ 
@@ -252,8 +252,11 @@ class ProductServer:
 
     def query_file(self, pr):
         """
-        Main function.
+        Check if file exits or is under generation.
 
+        A file is interpreted as being under generation if a corresponding,
+        "relatively new" empty file exists.
+        
         :param pr[nutshell.product.Info]: description of the product (string or nutshell.product.Info)
         """
 
@@ -314,17 +317,10 @@ class ProductServer:
         :param pr[nutshell.product.Info]: description of the product
         """
 
-        self.query_file(pr)
-        """
-        Check if file exits or is under generation.
-
-        A file is interpreted as being under generation if a corresponding,
-        "relatively new" empty file exists.
-        
-        """
-        if (pr.status == HTTPStatus.OK):
-            pr.returncode = 0
-            return
+        #self.query_file(pr)
+        #if (pr.status == HTTPStatus.OK):
+        #    pr.returncode = 0
+        #    return
         
         # only TEST at this point
         if (pr.script.exists()):
@@ -443,11 +439,9 @@ class ProductServer:
         pr = request.Generator(self, product_info, log) #, instructions, directives, log)
 
         # Future option
-        if ('GENERATE' in instructions):
-            instructions['DELETE'] = True
-            instructions['MAKE'] = True
-            #instructions.add('DELETE')
-            #instructions.add('MAKE')
+        #if ('GENERATE' in instructions):
+        #   instructions['DELETE'] = True
+         #  instructions['MAKE'] = True
             
         # Boolean:
         LATEST   = ('LATEST' in instructions)
@@ -461,34 +455,71 @@ class ProductServer:
             instructions['MAKE'] = True
             #instructions['CHECK'] = True
         
-        MAKE   = ('MAKE'   in instructions)
+        # TODO: redesign
+        DELETE = ('DELETE' in instructions) #or ('GENERATE' in instructions) 
+        EXISTS = ('EXISTS' in instructions)
+        MAKE   = ('MAKE'   in instructions) 
+        GENERATE = ('GENERATE' in instructions) 
         INPUTS = ('INPUTS' in instructions)
-        DELETE = ('DELETE' in instructions)
         TEST   = ('CHECK'  in instructions)
                 
         # LOG =    ('LOG'    in pr.directives)        
         # DEBUG =  ('DEBUG'  in pr.directives)        
 
         # MAIN
-        if (DELETE):
+        if (DELETE or GENERATE):
             if (pr.path.is_file()):
                 pr.path.unlink()
+            if (pr.path.exists()):
+                pr.log.warning(f"Could not delete file: {pr.path}") 
+                pr.set_status(HTTPStatus.CONFLICT)
+            else:
+                pr.set_status(HTTPStatus.OK)
+            # else ?
+
+        if (EXISTS or MAKE):
+            self.query_file(pr)
+            """
+            Check if file exits or is under generation.
+
+            A file is interpreted as being under generation if a corresponding,
+            "relatively new" empty file exists.  
+            """
+            if (pr.status == HTTPStatus.OK):
+                pr.returncode = 0                
+                #GENERATE = False
+                EXISTS   = False # No second check needed
+                #return
+            elif MAKE:
+                GENERATE = True
+                EXISTS   = True
+            else:
+                pr.set_status(HTTPStatus.NOT_FOUND)
+          
 
         # MAIN
-        if (MAKE):
-            pr.log.info("Making... {0}".format(pr.path.name)) 
+        if (GENERATE):
+            pr.log.info("Making/generating... {0}".format(pr.path.name)) 
             self.make_prod(pr, directives, TEST) 
+        
+        if (EXISTS):
+            pr.log.info(f"Exists?... {pr.path.name}")
+            if (pr.path.exists()):
+                pr.set_status(HTTPStatus.OK)
+            else:
+                pr.set_status(HTTPStatus.NOT_FOUND) 
         elif (INPUTS):
             pr.log.info("Inputs... {0}".format(pr.path.name))
             input_info = pr.get_input_list(directives)
             print(input_info.inputs)
         else:
-            pr.log.info("NOT Making... {0}".format(pr.path.name)) 
+            pr.log.info("No further main instructions for  {pr.path.name}") 
+           #pr.log.info("NOT Making... {0}".format(pr.path.name)) 
 
         if (pr.status != HTTPStatus.OK):
-            pr.log.warning("Make status: {0}".format(pr.status)) 
+            pr.log.warning("Action status: {0} for: {1}".format(pr.status, instructions)) 
             pr.log.warning(pr.status) 
-            pr.log.warning("Make failed: {0}".format(pr.path)) 
+            pr.log.warning("Action failed: {0}".format(pr.path)) 
             return pr              
             
           
@@ -568,7 +599,7 @@ class ProductServer:
         parser = product.Info.get_arg_parser(parser)
         # parser = argparse.ArgumentParser()
 
-        supported_actions = 'DELETE,MAKE,GENERATE,INPUTS,SHORTCUT,LATEST,LINK,MOVE,COPY'
+        #supported_instructions = 'DELETE,EXISTS,MAKE,GENERATE,INPUTS,SHORTCUT,LATEST,LINK,MOVE,COPY'
         
         parser.add_argument("-c", "--conf", dest="CONF",
                             default=None, # "nutshell.cnf", #ProductServer.CONF_FILE?
@@ -576,12 +607,12 @@ class ProductServer:
                             metavar="<file>")
      
         parser.add_argument("-a", "--instructions", metavar="<string>",
-                            dest="ACTIONS",
+                            dest="INSTRUCTIONS",
                             default="",
-                            help=f"Comma-separated string of instructions: {supported_actions}")
+                            help=f"Comma-separated string of instructions: {ProductServer.supported_instructions}")
 
         parser.add_argument("-r", "--request", metavar="<string>",
-                            dest="ACTIONS",
+                            dest="INSTRUCTIONS",
                             default="",
                             help="(Deprecating) Use --instructions")
     
@@ -590,6 +621,12 @@ class ProductServer:
                             action="store_true",
                             #default=False,
                             help="Delete product file, same as --instructions DELETE")
+
+        parser.add_argument("-e", "--exists",
+                            dest="EXISTS",
+                            action="store_true",
+                            #default=False,
+                            help="Check only if product exists")
 
         
         parser.add_argument("-i", "--inputList",
@@ -719,12 +756,13 @@ if __name__ == '__main__':
      
     instructions = {} # []
 
-    if (options.ACTIONS):
-        # instructions.extend(options.ACTIONS.split(','))
-        instructions = nutils.read_conf_text(options.ACTIONS.split(',')) # No values using ','?
+    if (options.INSTRUCTIONS):
+        # instructions.extend(options.INSTRUCTIONS.split(','))
+        instructions = nutils.read_conf_text(options.INSTRUCTIONS.split(',')) # No values using ','?
     
     # , 'TEST'
-    for i in ['DELETE', 'MAKE', 'GENERATE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
+    #for i in ['DELETE', 'MAKE', 'GENERATE', 'INPUTS', 'SHORTCUT', 'LATEST', 'LINK', 'MOVE', 'COPY']:
+    for i in ProductServer.supported_instructions:
         value = getattr(options, i)
         if (value): # Boolean ok, no numeric args expected, especially not zero
             instructions[i] = value
@@ -732,7 +770,7 @@ if __name__ == '__main__':
     if (not instructions):
         instructions['MAKE'] = True
 
-    logger.info('Requests:   {0}'.format(instructions))
+    logger.info(f'Requests: {instructions}')
 
     directives = {}
     if (options.DIRECTIVES):

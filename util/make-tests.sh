@@ -174,7 +174,7 @@ function run_http(){
     LOG=`printf 'log/nutshell-%02d-http.log' $counter `
 
     #echo_warn params...
-    local params=`nutshell $* --http_params 2> /dev/null`
+    local params=`NUTSHELL_VERSION=java nutshell $* --http_params 2> /dev/null`
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd
