@@ -77,13 +77,16 @@
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(message)s&#39;, datefmt=&#39;%m/%d/%Y %I:%M:%S %p&#39;)</span>
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(levelname)s %(name)s : %(message)s&#39;, datefmt=&#39;%Y%m%d%H:%M:%S&#39;)</span>
 
+<span class="c1"># TODO: rename to action?</span>
+
+
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nutils</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">shell</span>
 
 
 <div class="viewcode-block" id="Tasklet"><a class="viewcode-back" href="../../nutshell-code.html#nutshell.request.Tasklet">[docs]</a><span class="k">class</span> <span class="nc">Tasklet</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base class for shell operations (:any:`InputQuery` and :any:`Generator`)</span>
+    <span class="sd">&quot;&quot;&quot;Intermediate class for shell operations (:any:`InputQuery` and :any:`Generator`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">product_server</span><span class="p">,</span> <span class="n">product_info</span><span class="p">,</span> <span class="n">script_filename</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>

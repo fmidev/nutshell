@@ -151,7 +151,9 @@ the file (if succefully generated) and information about the process.</p>
 <dl class="method">
 <dt id="nutshell.nutshell.ProductServer.query_file">
 <code class="descname">query_file</code><span class="sig-paren">(</span><em>pr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/nutshell.html#ProductServer.query_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.nutshell.ProductServer.query_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main function.</p>
+<dd><p>Check if file exits or is under generation.</p>
+<p>A file is interpreted as being under generation if a corresponding,
+“relatively new” empty file exists.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -390,7 +392,7 @@ Setting is logged.</p>
 <dl class="class">
 <dt id="nutshell.request.Tasklet">
 <em class="property">class </em><code class="descclassname">nutshell.request.</code><code class="descname">Tasklet</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>script_filename</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/request.html#Tasklet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.request.Tasklet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for shell operations (<a class="reference internal" href="#nutshell.request.InputQuery" title="nutshell.request.InputQuery"><code class="xref any py py-class docutils literal notranslate"><span class="pre">InputQuery</span></code></a> and <a class="reference internal" href="#nutshell.request.Generator" title="nutshell.request.Generator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>)</p>
+<dd><p>Intermediate class for shell operations (<a class="reference internal" href="#nutshell.request.InputQuery" title="nutshell.request.InputQuery"><code class="xref any py py-class docutils literal notranslate"><span class="pre">InputQuery</span></code></a> and <a class="reference internal" href="#nutshell.request.Generator" title="nutshell.request.Generator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>)</p>
 </dd></dl>
 
 </div>
