@@ -72,8 +72,8 @@ Java version
 
 Installation::
 
-  util/configure.sh
-  util/install-java.sh
+  util/configure.sh tomcat
+  util/install.sh   tomcat
 
 
 

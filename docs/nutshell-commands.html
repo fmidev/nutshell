@@ -50,12 +50,12 @@
             
   <div class="section" id="commands-and-status-codes">
 <span id="commands"></span><h1>Commands and status codes<a class="headerlink" href="#commands-and-status-codes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="actions">
-<span id="request"></span><h2>Actions<a class="headerlink" href="#actions" title="Permalink to this headline">¶</a></h2>
-<p>In NutShell, a product request may contain the following instructions, input types and post-processing
-tasks. On command line, they can be set invidually or with <code class="docutils literal notranslate"><span class="pre">--action</span></code> .
+<div class="section" id="instructions">
+<span id="request"></span><h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
+<p>A product query may contain the following requests called <em>instructions</em> in NutShell: actions, input types and post-processing
+tasks. On command line, they can be set invidually or with <code class="docutils literal notranslate"><span class="pre">--instructions</span></code> .
 For logical reasons, some of them are mutually exclusive, like <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> and <code class="docutils literal notranslate"><span class="pre">EXISTS</span></code>.
-Some of them, are implicit; for example, <code class="docutils literal notranslate"><span class="pre">MAKE</span></code> includes <code class="docutils literal notranslate"><span class="pre">EXISTS</span></code> and conditionally</p>
+Some of them, are implicit; for example, <code class="docutils literal notranslate"><span class="pre">MAKE</span></code> includes <code class="docutils literal notranslate"><span class="pre">EXISTS</span></code> and conditionally sets <code class="docutils literal notranslate"><span class="pre">GENERATE</span></code>.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="12%" />
@@ -69,49 +69,49 @@ Some of them, are implicit; for example, <code class="docutils literal notransla
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">TEST</span></code></td>
-<td>–test</td>
-<td>Check existence and permissions of directories and scripts</td>
-</tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXISTS</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">EXISTS</span></code></td>
 <td>–exists</td>
 <td>Check existence of the product</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">MAKE</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">MAKE</span></code></td>
 <td>–make, -m</td>
 <td>Generate file, if it does not exist (default request)</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">DELETE</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">DELETE</span></code></td>
 <td>–delete, -d</td>
 <td>Delete the product file in cache dir</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">GENERATE</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">GENERATE</span></code></td>
 <td>–generate, -g</td>
 <td>Generate file, even if it exists.</td>
 </tr>
-<tr class="row-odd"><td>–</td>
+<tr class="row-even"><td>–</td>
 <td>–copy, -C <cite>file</cite></td>
 <td>Copy file</td>
 </tr>
-<tr class="row-even"><td>–</td>
+<tr class="row-odd"><td>–</td>
 <td>–move, -m <cite>file</cite></td>
 <td>Move file</td>
 </tr>
-<tr class="row-odd"><td>–</td>
+<tr class="row-even"><td>–</td>
 <td>–link, -l <cite>file</cite></td>
 <td>Link file</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SHORTCUT</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">SHORTCUT</span></code></td>
 <td>–shortcut</td>
 <td>Link file to short directory with original filename</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">LATEST</span></code></td>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">LATEST</span></code></td>
 <td>–latest, -L</td>
 <td>Link file to short directory, <code class="docutils literal notranslate"><span class="pre">$TIMESTAMP</span></code> replaced with <code class="docutils literal notranslate"><span class="pre">'LATEST'</span></code></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">INPUTS</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">INPUTS</span></code></td>
 <td>–inputs, -I</td>
 <td>Check inputs</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">TEST</span></code></td>
+<td>–test</td>
+<td>Check existence and permissions of directories and scripts</td>
 </tr>
 </tbody>
 </table>
@@ -139,7 +139,7 @@ Some of them, are implicit; for example, <code class="docutils literal notransla
 </tr>
 </tbody>
 </table>
-<p>Short forms of command line instructions are available in the Python version only.</p>
+<p>Note: short forms of command line instructions are available in the Python version only.</p>
 </div>
 <div class="section" id="directives">
 <span id="id1"></span><h2>Directives<a class="headerlink" href="#directives" title="Permalink to this headline">¶</a></h2>
@@ -301,7 +301,7 @@ to the hosting system, NutShell.</p>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-usage.html">Using NutShell</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Commands and status codes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#actions">Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#instructions">Instructions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#directives">Directives</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#built-in-directives">Built-in directives</a></li>
 </ul>

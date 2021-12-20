@@ -48,10 +48,18 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-nutshell.nutshell">
-<span id="nutshell-code"></span><h1>NutShell Code<a class="headerlink" href="#module-nutshell.nutshell" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="nutshell-code">
+<h1>NutShell Code<a class="headerlink" href="#nutshell-code" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="java-version">
+<h2>Java version<a class="headerlink" href="#java-version" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>[jdoc]</li>
+</ul>
+</div>
+<div class="section" id="module-nutshell.nutshell">
+<span id="python-version"></span><h2>Python version<a class="headerlink" href="#module-nutshell.nutshell" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="main-module-nutshell-nutshell">
-<h2>Main module – nutshell.nutshell<a class="headerlink" href="#main-module-nutshell-nutshell" title="Permalink to this headline">¶</a></h2>
+<h3>Main module – nutshell.nutshell<a class="headerlink" href="#main-module-nutshell-nutshell" title="Permalink to this headline">¶</a></h3>
 <p>This module contains ProductServer class, which receives product
 requests and forwards them to product generators. A ProductServer
 instance also manages disk resources defined in 
@@ -175,7 +183,7 @@ The entries are copied to respective member of self.</p>
 
 </div>
 <span class="target" id="module-nutshell.httpd"></span><div class="section" id="http-server-nutshell-httpd">
-<h2>HTTP Server – nutshell.httpd<a class="headerlink" href="#http-server-nutshell-httpd" title="Permalink to this headline">¶</a></h2>
+<h3>HTTP Server – nutshell.httpd<a class="headerlink" href="#http-server-nutshell-httpd" title="Permalink to this headline">¶</a></h3>
 <p>Server can be started with command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span>  <span class="o">-</span><span class="n">m</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">httpd</span> <span class="o">-</span><span class="n">c</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">cnf</span>
 </pre></div>
@@ -215,7 +223,7 @@ The entries are copied to respective member of self.</p>
 
 </div>
 <span class="target" id="module-nutshell.product"></span><div class="section" id="product-definitions-and-requests-nutshell-product">
-<h2>Product definitions and requests – nutshell.product<a class="headerlink" href="#product-definitions-and-requests-nutshell-product" title="Permalink to this headline">¶</a></h2>
+<h3>Product definitions and requests – nutshell.product<a class="headerlink" href="#product-definitions-and-requests-nutshell-product" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nutshell.product.Info">
 <em class="property">class </em><code class="descclassname">nutshell.product.</code><code class="descname">Info</code><span class="sig-paren">(</span><em>product=None</em>, <em>filename=None</em>, <em>product_id=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/product.html#Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.product.Info" title="Permalink to this definition">¶</a></dt>
@@ -327,7 +335,7 @@ Consequently, possible <em>time zones</em> will be also discarded.</p>
 
 </div>
 <span class="target" id="module-nutshell.request"></span><div class="section" id="product-requests-nutshell-request">
-<h2>Product requests – nutshell.request<a class="headerlink" href="#product-requests-nutshell-request" title="Permalink to this headline">¶</a></h2>
+<h3>Product requests – nutshell.request<a class="headerlink" href="#product-requests-nutshell-request" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nutshell.request.Generator">
 <em class="property">class </em><code class="descclassname">nutshell.request.</code><code class="descname">Generator</code><span class="sig-paren">(</span><em>product_server</em>, <em>product_info</em>, <em>log=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nutshell/request.html#Generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nutshell.request.Generator" title="Permalink to this definition">¶</a></dt>
@@ -397,7 +405,7 @@ Setting is logged.</p>
 
 </div>
 <span class="target" id="module-nutshell.shell"></span><div class="section" id="escape-from-python-nutshell-shell">
-<h2>Escape from Python – nutshell.shell<a class="headerlink" href="#escape-from-python-nutshell-shell" title="Permalink to this headline">¶</a></h2>
+<h3>Escape from Python – nutshell.shell<a class="headerlink" href="#escape-from-python-nutshell-shell" title="Permalink to this headline">¶</a></h3>
 <p>This module contains utilities for running shell scripts.</p>
 <dl class="class">
 <dt id="nutshell.shell.Task">
@@ -430,7 +438,7 @@ this threshold is at least logging.ERROR and logging.DEBUG, respecively</li>
 
 </div>
 <span class="target" id="module-nutshell.nutils"></span><div class="section" id="utilities-nutshell-nutils">
-<h2>Utilities – nutshell.nutils<a class="headerlink" href="#utilities-nutshell-nutils" title="Permalink to this headline">¶</a></h2>
+<h3>Utilities – nutshell.nutils<a class="headerlink" href="#utilities-nutshell-nutils" title="Permalink to this headline">¶</a></h3>
 <p>Utilities for handling objects and configuration files.</p>
 <dl class="function">
 <dt id="nutshell.nutils.debug_dict">
@@ -485,7 +493,7 @@ currently, uses mask 777</p>
 
 </div>
 <div class="section" id="module-nutshell.nutxml">
-<span id="html-utilities-nutshell-nutxml"></span><h2>HTML utilities – nutshell.nutxml<a class="headerlink" href="#module-nutshell.nutxml" title="Permalink to this headline">¶</a></h2>
+<span id="html-utilities-nutshell-nutxml"></span><h3>HTML utilities – nutshell.nutxml<a class="headerlink" href="#module-nutshell.nutxml" title="Permalink to this headline">¶</a></h3>
 <p>Utilities for main modules of NutShell</p>
 <dl class="class">
 <dt id="nutshell.nutxml.KeyValueRowGenerator">
@@ -507,6 +515,7 @@ currently, uses mask 777</p>
 
 </div>
 </div>
+</div>
 
 
           </div>
@@ -524,13 +533,17 @@ currently, uses mask 777</p>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-variables.html">NutShell Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-demo.html">Demo</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">NutShell Code</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-module-nutshell-nutshell">Main module – nutshell.nutshell</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#http-server-nutshell-httpd">HTTP Server – nutshell.httpd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#product-definitions-and-requests-nutshell-product">Product definitions and requests – nutshell.product</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#product-requests-nutshell-request">Product requests – nutshell.request</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#escape-from-python-nutshell-shell">Escape from Python – nutshell.shell</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#utilities-nutshell-nutils">Utilities – nutshell.nutils</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutxml">HTML utilities – nutshell.nutxml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#java-version">Java version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nutshell.nutshell">Python version</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#main-module-nutshell-nutshell">Main module – nutshell.nutshell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#http-server-nutshell-httpd">HTTP Server – nutshell.httpd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#product-definitions-and-requests-nutshell-product">Product definitions and requests – nutshell.product</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#product-requests-nutshell-request">Product requests – nutshell.request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#escape-from-python-nutshell-shell">Escape from Python – nutshell.shell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utilities-nutshell-nutils">Utilities – nutshell.nutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-nutshell.nutxml">HTML utilities – nutshell.nutxml</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-tests.html">Tests</a></li>

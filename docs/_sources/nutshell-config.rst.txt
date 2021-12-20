@@ -20,7 +20,6 @@ A configration file might look like this:
 .. include:: nutshell-tomcat.cnf
 
 
-
 Configuration file may contain relative paths, which are expanded
 with respect to working directory upon invocation. So for example::
 

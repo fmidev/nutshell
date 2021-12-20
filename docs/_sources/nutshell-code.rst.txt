@@ -7,6 +7,14 @@
 NutShell Code
 =============
 
+Java version
+============
+
+* [jdoc]_
+
+Python version
+==============
+
 .. automodule:: nutshell.nutshell
    :members:
 
@@ -30,3 +38,4 @@ HTML utilities -- nutshell.nutxml
 .. automodule:: nutshell.nutxml
    :members:
      
+.. _jdoc: ./jdoc
