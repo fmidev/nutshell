@@ -19,6 +19,18 @@ import static java.nio.file.Files.*;
 
 //import javax.servlet.http.HttpServletResponse;
 
+/* TODO: swallows exceptions in command line use?
+ * TODO: separate cache at least for java generators
+ * TODO: communicate failure with HTTP request codes
+ * TODO: design defaults for WRITE
+ *
+ * TODO: add i/o handlers (See Image IO Registry), use {@link Serializable}.
+ * TODO: simplify REQUEST, add request=GENERATE,
+ * TODO: use SAVE/STREAM in sub-requests
+ * TODO: 404: apply directs stream, without redirect.
+ * TODO: add reset/ generatorMap.clear()
+ * NEW
+ */
 
 /** Extends Cache by not only storing and retrieving existing files,
  *  but also generating them on request. 
@@ -35,22 +47,8 @@ import static java.nio.file.Files.*;
  *  map do not have a timestamp. On the other hand, some meteorological products may 
  *  have several timestamps, like computing time and valid time.
  * 
- * @author Markus Peura fmi.fi Jan 26, 2011
- *
- * TODO: swallows exceptions in command line use?
- * TODO: separate cache at least for java generators
- * TODO: communicate failure with HTTP request codes
- * TODO: design defaults for WRITE
- * 
- * TODO: add i/o handlers (See Image IO Registry), use {@link Serializable}.
- * TODO: simplify REQUEST, add request=GENERATE, 
- * TODO: use SAVE/STREAM in sub-requests
- * TODO: 404: apply directs stream, without redirect. 
- * TODO: add reset/ generatorMap.clear()
- *  NEW
+ *  @author Markus Peura fmi.fi Jan 26, 2011
  */
-
-
 public class ProductServer { //extends Cache {
 
 	final public HttpLog serverLog; // = new HttpLog(getClass().getSimpleName());

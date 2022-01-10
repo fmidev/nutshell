@@ -72,19 +72,6 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
     NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-"$HTTP_ROOT/WEB-INF/lib"}
 
-    #mkdir -v --parents $HTTP_ROOT/WEB-INF
-    #mkdir -v --parents $HTTP_ROOT/WEB-INF/lib
-    #cp -vi {./tomcat8,$HTTP_ROOT}/WEB-INF/lib/Nutlet.jar
-    #cp -v ./nutshell.cnf ${HTTP_ROOT}/
-    
-    # cp -v $CONF_FILE ${HTTP_ROOT}/nutshell.cnf
-    #fi
-    #if [ $NUTSHELL_VERSION == 'java' ]; then
-    #else
-    #NUTSHELL_JAR_DIR=$NUTSHELL_ROOT/jar
-
-    
-
 fi
 
 #vt100echo green "# Setting WEB-INF/web.xml"
@@ -116,6 +103,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     vt100echo green "# Setting WEB-INF/web.xml"
     WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
     export NUTSHELL_ROOT
+    export HOSTNAME    
     cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 
     show_variable WEB_XML

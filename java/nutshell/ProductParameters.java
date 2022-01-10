@@ -16,6 +16,9 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
      */
     public String TIMESTAMP;
 
+    /**
+     *   Note: in future versions, this may change. Products may have time resolution of days or seconds.
+     */
     static
     final public DateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm");
 
@@ -25,6 +28,11 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     protected long time;
 
     /// Product-specific parameters
+    /**
+     *  In the future, this may be multiple (array of parameter maps).
+     *
+     * @see #INPUT_PARAMETERS
+     */
     final TreeMap<String,Object> PARAMETERS = new TreeMap<String, Object>();
 
     /// Product-specific parameters that are also forwarded to (automated) input product request

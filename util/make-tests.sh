@@ -231,8 +231,10 @@ function check(){
 
 
     echo_ok "return value: $STATUS"
-    echo "  # return value: $STATUS" >> $DOC_FILE
-
+    if [ $STATUS != 0 ]; then
+	echo "  # return value: $STATUS" >> $DOC_FILE
+    fi
+	
     # Further tests (optional)
     shift
     

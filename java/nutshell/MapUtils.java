@@ -1,7 +1,10 @@
 package nutshell;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -136,6 +139,11 @@ public class MapUtils {
 		}
 	}
 
+	/** Constructs an array of entries: ["KEY=VALUE", "KEY2=VALUE2", ..., "KEYn=VALUEn"]
+	 *
+	 * @param map
+	 * @return
+	 */
 	static public String[] getEntries(Map<?,?> map){
 		//return map.entrySet().toArray(new String[map.size()]);
 		Set<String> set = new HashSet<>();
@@ -170,19 +178,30 @@ public class MapUtils {
 
 
 	static public Map<String, Object> getMap(Object src){
-		return getMap(src, new HashMap<String,Object>());
+		return getMap(new HashMap<String,Object>(), src);
 	}
 
-		
+	static public Map<String, Object> getMap(Object src, int modifiers){
+		return getFields(new HashMap<String,Object>(), src, modifiers);
+	}
+
+
+	static public Map<String, Object> getMap(Map<String, Object> map, Object src){
+		return getFields(map, src, Modifier.STATIC);
+	}
+
+
 	// See also configuration
-	static public Map<String, Object> getMap(Object src, Map<String, Object> map){
-		
+	static public Map<String, Object> getFields(Map<String, Object> map, Object src, int modifiers){
+		// java.lang.reflect.Modifier.is
+		//Modifier.PUBLIC
 		Field[] fields = src.getClass().getFields();
 		for (Field field : fields) {
-			if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())){ // consider Bool nonStatic
+			if ((field.getModifiers() & modifiers) > 0){
+				// if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())){ // consider Bool nonStatic
 				String name = field.getName();		
 				try {
-					map.put(name,field.get(src));
+					map.put(name, field.get(src));
 				} catch (Exception e) {
 					map.put(name, e.getMessage());
 				}					
@@ -190,7 +209,39 @@ public class MapUtils {
 		}
 		return map;
 	}
-	
+
+	static public Map<String, Object> getMethods(Object src) {
+		return getMethods(new HashMap<String, Object>(), src);
+	}
+
+	static public Map<String, Object> getMethods(Map<String, Object> map, Object src) { //}, int modifiers){
+
+		final Object[] empty = new Object[0]; // ??
+
+		Method[] methods =  src.getClass().getMethods();
+		for (Method method : methods) {
+			// if (method.isAccessible())
+			String name = method.getName();
+			if (name.startsWith("get") && (method.getParameterCount()==0) && (method.getReturnType() != void.class)){
+				Object value = null;
+				try {
+					value = method.invoke(src, empty);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					// value = e.getClass().getName();
+					value = e.getMessage();
+				}
+				if (value == null)
+					value = "";
+				map.put(name, value.toString()); // +method.toGenericString()); // or object?
+
+			}
+
+		}
+
+		return map;
+	}
+
+
 	/**
 	 * @param args
 	 */

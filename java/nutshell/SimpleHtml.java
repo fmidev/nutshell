@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 
@@ -31,6 +32,7 @@ public class SimpleHtml extends SimpleXML{
 	public static final String HEAD  = "head";
 	public static final String TITLE = "title";
 	public static final String META  = "meta";
+	public static final String BASE  = "base";
 	public static final String BODY  = "body";
 	public static final String H1    = "h1";
 	public static final String H2    = "h2";
@@ -251,16 +253,17 @@ public class SimpleHtml extends SimpleXML{
 		return table;
 	}
 
+	// Todo: variadic str, str2, ...
 	public static NodeList readBody(String path) throws ParserConfigurationException, IOException, SAXException {
-		Document comp = SimpleXML.readDocument(path);
-	/*
-		return readBody(comp);
+		return readBody(Paths.get(path));
 	}
-	public static NodeList readBody(Document comp) {
-	*/
+
+	public static NodeList readBody(Path path) throws ParserConfigurationException, IOException, SAXException {
+		Document comp = SimpleXML.readDocument(path);
 		NodeList body = comp.getElementsByTagName("body");
 		final int nodes = body.getLength();
 		if (nodes == 0){
+			// Consider reading <HTML> contents?
 			throw new NullPointerException("File contained no 'body' element");
 		}
 		else if (nodes > 1){
@@ -310,7 +313,6 @@ public class SimpleHtml extends SimpleXML{
 			catch (Exception e){
 				String msg = e.getMessage();
 				//System.err.println(msg);
-				System.err.println("MIKA");
 				Element li = html.appendElement(PRE);
 				li.setTextContent(msg);
 				//html.title.setTextContent(msg);

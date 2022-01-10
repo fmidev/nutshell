@@ -40,7 +40,7 @@ public class ShellUtils {
 		return ShellUtils.run(cmdArray, env, directory);
 	}
 	
-
+	/*
 	static public String[] mapToArray(Map<String, Object> map){
 		Set<String> set = new HashSet<>();
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -49,6 +49,7 @@ public class ShellUtils {
 		//return set.toArray(new String[set.size()]);
 		return set.toArray(new String[0]);
 	}
+	 */
 
 	/** Create a directory in which all the components are writable.
 	 *
@@ -56,7 +57,6 @@ public class ShellUtils {
 	 * @param subdir - subdirectory
 	 * @return - resulting directory (root and path concatenated)
 	 * @throws IOException
-	 */
 	static public Path makeWritableDir(Path root, Path subdir) throws IOException{
 
 		if (subdir == null)
@@ -90,6 +90,7 @@ public class ShellUtils {
 
 		return dirPath;
 	}
+	 */
 
 	interface ProcessReader {
 		void handleStdOut(String line);

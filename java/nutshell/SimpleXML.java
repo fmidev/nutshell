@@ -1,8 +1,6 @@
 package nutshell;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -71,7 +69,24 @@ public class SimpleXML {
 		return appendElement(parent, tag, null);
 	}
 
-	public static Transformer getTransformer() {
+	public static Node prune(Node node){
+
+		NodeList list = node.getChildNodes();
+		for (int i=0; i< list.getLength(); ++i) {
+			Node child = list.item(i);
+			prune(child);
+			String text = child.getTextContent();
+			if (!text.isEmpty()){
+				if (text.trim().isEmpty()) {
+					child.setTextContent("");
+				}
+			}
+		}
+
+		return node;
+	}
+
+	public static Transformer getTransformer(int indent) {
 		
 		// Make a transformer factory to create the Transformer
 		TransformerFactory tFactory = TransformerFactory.newInstance();
@@ -80,8 +95,10 @@ public class SimpleXML {
 		try {
 			Transformer transformer = tFactory.newTransformer();
 			// https://stackoverflow.com/questions/1384802/java-how-to-indent-xml-generated-by-transformer
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			if (indent > 0) {
+				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.format("%d", indent));
+			}
 			return transformer;
 		} catch (TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -95,7 +112,7 @@ public class SimpleXML {
 	// Streamable: File or Writer
 	public static void writeDocument(Document document, StreamResult result) {
 
-		Transformer transformer = getTransformer();
+		Transformer transformer = getTransformer(2);
 		
 		// Mark the document as a DOM (XML) source
 		DOMSource source = new DOMSource(document);
@@ -108,9 +125,18 @@ public class SimpleXML {
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
+			// result.getOutputStream()
 			e.printStackTrace();
 		}
 	}
+
+	/*
+	public static <T> void writeDocument(Document document, T file) {
+		System.out.println(file); // OK
+		writeDocument(document,  new StreamResult(file)); // NOT OK
+	}
+	 */
+
 
 	public static void writeDocument(Document document, File file) {
 		writeDocument(document,  new StreamResult(file));
@@ -123,6 +149,7 @@ public class SimpleXML {
 	public static void writeDocument(Document document, PrintWriter writer) {
 		writeDocument(document,  new StreamResult(writer));
 	}
+
 
 	static public Document readDocument(Path path) throws ParserConfigurationException, IOException, SAXException {
 		return readDocument(path.toFile());
@@ -156,36 +183,61 @@ public class SimpleXML {
 
 	public static void main(String[] args){
 
+		String fileName = null;
+
 		// https://stackoverflow.com/questions/4142046/create-xml-file-using-java
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		try {
 
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		Document doc = null;
+		Node rootElement = null;
 
-			Document doc = docBuilder.newDocument();
-
-			Element rootElement = doc.createElement("company");
-			doc.appendChild(rootElement);
-
-			//staff elements
-			Element staff = doc.createElement("Staff");
-			rootElement.appendChild(staff);
-
-			//set attribute to staff element
-			Attr attr = doc.createAttribute("id");
-			attr.setValue("1");
-			staff.setAttributeNode(attr);
-
-			System.out.println(doc.toString());
-			
-			File file = new File("mika.html");
-			SimpleXML.writeDocument(doc, file);
-			
-			
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (args.length == 0) {
+			try {
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+				doc = docBuilder.newDocument();
+				rootElement = doc.createElement("company");
+				doc.appendChild(rootElement);
+			}
+			catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.exit(-1);
+			}
 		}
+		else {
+			try {
+				doc = SimpleXML.readDocument(args[0]);
+				prune(doc);
+				rootElement = doc.getFirstChild();
+			} catch (ParserConfigurationException | IOException | SAXException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
+
+		//Document doc = docBuilder.newDocument();
+
+		//Element rootElement = doc.createElement("company");
+
+
+		//staff elements
+		Element staff = doc.createElement("Staff");
+		rootElement.appendChild(staff);
+
+
+		//set attribute to staff element
+		// == staff.setAttribute("id", "1");
+		Attr attr = doc.createAttribute("id");
+		attr.setValue("1");
+		staff.setAttributeNode(attr);
+
+		System.out.println(doc.toString());
+
+		File file = new File("out.xml");
+		SimpleXML.writeDocument(doc, file);
+
+		//SimpleHtml.readDocument()
+			
 
 	}
 }

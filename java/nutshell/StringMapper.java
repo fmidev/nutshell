@@ -6,19 +6,15 @@ import java.util.regex.Pattern;
 
 /** Assigns Map values recipient occurrences of $KEY or ${KEY} in a given string.
  *
+ *  @author Markus Peura fmi.fi
  */
-public class StringMapper { //extends StringComposer {
+public class StringMapper extends LinkedList<Object> {
 
 	//public Object pattern[] = null;
 
-	final List<Object> list = new LinkedList<Object>();;
+	//final List<Object> list = new LinkedList<Object>();;
 
-	// public String keyRegex = "\\$\\{(\\w+)\\}";
-	//public Map map;
-	// public Date date;
-
-	final static String validChars = "a-zA-Z0-9_";
-
+	static private final String validChars = "a-zA-Z0-9_";
 
 	// For ${whatsoever code}
 	final Pattern curlyVariable = Pattern.compile("^([^\\$]*)" + "\\$\\{([^\\}]*)\\}" + "(.*)$");
@@ -85,8 +81,8 @@ public class StringMapper { //extends StringComposer {
 	 *
 	 */
 	public void parse(String s){
-		list.clear();
-		parse(list, s);
+		this.clear();
+		parse(this, s);
 	}
 
 	protected void parse(List<Object> list, String s){
@@ -125,7 +121,7 @@ public class StringMapper { //extends StringComposer {
 	
 	public String debug(){
 		StringBuffer buffer = new StringBuffer();
-		for (Object item: list){
+		for (Object item: this){
 			if (item instanceof StringLet){
 				buffer.append("<" + item + ">");
 			}
@@ -145,7 +141,7 @@ public class StringMapper { //extends StringComposer {
 
 	public String toString(Map map){
 		StringBuffer buffer = new StringBuffer();
-		for (Object item: list){
+		for (Object item: this){
 			if (item instanceof StringLet){
 				buffer.append(map.getOrDefault(item.toString(), "")); // .toString()
 			}
@@ -180,7 +176,7 @@ public class StringMapper { //extends StringComposer {
 			text = args[0];
 		}
 		else {
-			text = "Hello $NAME! Today is $DATE. Value of PI=$PI.";
+			text = "Hello ${NAME}! Today is ${DATE}. Value of PI=${PI}.";
 			System.out.println("Usage: " + StringMapper.class.getName() + " <text> [String KEY1=VALUE1 KEY2=VALUE2 ...]");
 			System.out.println("String may contain entries, $KEY or ${KEY}.");
 			System.out.println("The variables will be expanded.\n");
@@ -188,25 +184,28 @@ public class StringMapper { //extends StringComposer {
 
 		StringMapper stringMapper = new StringMapper(text);
 		System.out.println("Sample text: '" + text + "'");
-		System.out.println("String mapper: '" + stringMapper + "'");
+		System.out.println("String mapper (raw): '" + stringMapper + "'");
+
+		stringMapper.addFirst("Eka.");
+		stringMapper.addLast("Vika.");
 
 
 		Map<String,Object> map = new HashMap<String,Object>();
-		//StringMapper stringMapper = new StringMapper(map,example);
 
-
-		
 		map.put("NAME","Matti Meikäläinen");
 		map.put("DATE",new Date());
 		map.put("PI",Math.PI);
+
 		for (int i=1; i<args.length; i++){
 			String s[] = args[i].split("=",2);
 			if (s.length == 2)
 				map.put(s[0],s[1]);
 		}
+		stringMapper.addAll(map.keySet());
 
 		System.out.println("Map '" + map + "'");
-		
+		System.out.println("String mapper (raw): '" + stringMapper + "'");
+
 		System.out.println(stringMapper.toString(map));
 
 		
