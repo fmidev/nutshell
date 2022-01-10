@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <base href="/nutshell/NutShell" target="test"/>
+  </head>
+  <body>
+    <h1>Tests</h1>
+    <img src="?product=201012171200_test.ppmforge_WIDTH=100.png" alt="Sample product"/>
+    <ul>
+      <!-- li><a href="NutShell" target="venisonMonitor" >status</a> - a conscise description</li -->
+      <li>Product queries using <tt>test.ppmforge</tt> fractal image demo product
+	<ul><li><a href="?product=201012170840_test.ppmforge.png" target="product">simple query</a></li><!-- li><a href="?product=201012170840_test.ppmforge.png&amp;request=MAKE" target="product" >simple query</a></li --><li><a href="?product=201012161600_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5.png" target="product">several parameters</a></li><li><a href="?product=201012170840_test.ppmforge_WIDTH=1005.png" target="product">query producing an error message</a> (too large image)</li><li><a href="NutShell?product=201012170850_test.ppmforge_WIDTH=466.png&amp;request=MAKE,REDIRECT" target="product">query with client redirect</a></li><li><a href="NutShell?product=201012170850_test.ppmforge_WIDTH=466.png&amp;request=DELETE" target="venisonMonitor">product deletion request</a></li><li><a href="cache/2010/12/17/test/ppmforge/201012170850_test.ppmforge_WIDTH=466.png" target="product">query using target dir and file</a></li></ul>
+      </li>
+    </ul>
+  </body>
+</html>

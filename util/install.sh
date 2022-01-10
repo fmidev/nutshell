@@ -67,9 +67,16 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
     show_variable HTTP_ROOT
     mkdir -v --parents $HTTP_ROOT
-    mkdir -v --parents $HTTP_ROOT/template
+    #mkdir -v --parents $HTTP_ROOT/template # OBSOLETE!
+    mkdir -v --parents $HTTP_ROOT/nutweb
+    cp -v html/nutweb/*.html $HTTP_ROOT/nutweb/
     mkdir -v --parents $HTTP_ROOT/img
 
+    
+    #for i in html/nutweb/*.HTML; do	
+    #done
+
+    
     NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-"$HTTP_ROOT/WEB-INF/lib"}
 
 fi

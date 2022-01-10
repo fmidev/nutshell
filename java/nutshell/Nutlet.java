@@ -36,6 +36,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 	static final public String version = "1.4";
 
+	String confDir = "";
+
+
 	//final Map<String,Object> setup;
 	final ProductServer productServer;
 	//final GregorianCalendar startTime;
@@ -47,13 +50,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	 *
 	 */
 	public Nutlet() {
-		/*
-		setup = new HashMap<>();
-		GregorianCalendar startTime = new GregorianCalendar();
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		setup.put("startTime", simpleDateFormat.format(startTime.getTime()));
-		setup.put("startTimeMs", startTime.getTimeInMillis());
-		 */
 		setup.put("version", version);  // TODO
 		productServer = new ProductServer();
 		productServer.serverLog.setVerbosity(Log.DEBUG);
@@ -66,6 +62,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		confDir  = config.getInitParameter("confDir");
 		/** **
 		confDir  = config.getInitParameter("confDir");
 		setup.putAll(readTomcatParameters()); // from ho

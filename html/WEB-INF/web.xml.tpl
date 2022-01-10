@@ -52,6 +52,16 @@
     </init-param>
 
     <init-param>
+      <param-name>htmlTemplate</param-name>
+      <param-value>nutweb/template.html</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>htmlRoot</param-name>
+      <param-value>${NUTSHELL_ROOT}</param-value>
+    </init-param>
+
+    <init-param>
       <param-name>buildDate</param-name>
       <param-value>${DATE}</param-value>
     </init-param>

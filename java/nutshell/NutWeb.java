@@ -25,8 +25,14 @@ import org.w3c.dom.NodeList;
 
 public class NutWeb extends HttpServlet {
 
-	String confDir = "";
 	String httpRoot = "";
+
+	/** Name of the HTML document in which the other HTML doc will be embedded.
+	 *
+	 *  Uses BODY contents
+	 *
+	 */
+	String htmlTemplate = "";
 
 
 	private static final long serialVersionUID;
@@ -53,10 +59,9 @@ public class NutWeb extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		confDir  = config.getInitParameter("confDir");
 		httpRoot = config.getInitParameter("htmlRoot");
-		setup.putAll(getTomcatParameters()); // from ho
-
+		htmlTemplate = config.getInitParameter("htmlTemplate");
+		setup.putAll(getTomcatParameters());
 	}
 	
 
@@ -155,7 +160,8 @@ public class NutWeb extends HttpServlet {
 	 */
 	protected SimpleHtml getHtmlPage(){ // throws IOException, SAXException, ParserConfigurationException {
 
-		Path path = Paths.get(httpRoot,"template", "main.html");
+		//Path path = Paths.get(httpRoot,"template", "main.html");
+		Path path = Paths.get(httpRoot,htmlTemplate);
 
 		SimpleHtml html = null;
 		try {
@@ -361,47 +367,6 @@ public class NutWeb extends HttpServlet {
 	}
 
 
-
-
-	///
-
-	/** Return TomCat request parameters
-	 *
-	 * @param request
-	 * @return
-	 */
-	/*
-	protected Map<String, Object> getConf(HttpServletRequest request) {
-		
-		final Object[] empty = new Object[0];
-				
-		Map<String, Object> conf = new HashMap<String, Object>();
-
-		// TODO: generalize in nutshell.ClassUtils? See also raiddeer.Configuration
-		Method[] methods =  HttpServletRequest.class.getMethods();
-		for (Method method : methods) {
-			String name = method.getName();
-			if (name.startsWith("get") && (method.getParameterCount()==0) && (method.getReturnType() != void.class)){
-				Object value = null;
-				try {
-					value = method.invoke(request, empty);
-				} catch (IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e) {
-					//e1.printStackTrace();
-					value = e.getClass().getName();
-				}
-				if (value == null)
-					value = "";
-				conf.put(name, value.toString());
-			
-			}
-				
-		}
-		
-		return conf;
-	}
-
-	 */
 
 
 	/**
