@@ -69,7 +69,13 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     mkdir -v --parents $HTTP_ROOT
     #mkdir -v --parents $HTTP_ROOT/template # OBSOLETE!
     mkdir -v --parents $HTTP_ROOT/nutweb
-    cp -v html/nutweb/*.html $HTTP_ROOT/nutweb/
+    for i in html/nutweb/*.html; do
+	if [ ${i##*/} == 'template.html' ]; then
+	    cp -v $i $HTTP_ROOT/nutweb/
+	else
+	    cp -v $i $HTTP_ROOT/
+	fi
+    done
     mkdir -v --parents $HTTP_ROOT/img
 
     
@@ -100,7 +106,7 @@ if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
     show_variable NUTSHELL_JAR_DIR
     mkdir -v --parents $NUTSHELL_JAR_DIR/
-    cp -vi html/WEB-INF/lib/Nutlet.jar $NUTSHELL_JAR_DIR/
+    cp -v html/WEB-INF/lib/Nutlet.jar $NUTSHELL_JAR_DIR/
     #NUTSHELL_CP=$NUTSHELL_JAR_DIR/Nutlet.jar
     
 fi

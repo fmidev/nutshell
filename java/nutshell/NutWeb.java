@@ -179,7 +179,7 @@ public class NutWeb extends HttpServlet {
 		html.main = html.getUniqueElement(SimpleHtml.SPAN, "main"); // html.createElement(SimpleHtml.SPAN)	;
 
 		Element elem = html.getUniqueElement(SimpleHtml.SPAN, "version");
-		elem.setTextContent(String.format("Java Version (%s) root=%s ", getClass().getSimpleName(), httpRoot));
+		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), httpRoot, htmlTemplate));
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " ?version? " +  ") built " + getServletConfig().getInitParameter("buildDate") + httpRoot);
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") installed " + getServletConfig().getInitParameter("installDate"));
 		return html;

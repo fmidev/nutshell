@@ -141,11 +141,11 @@ public class SimpleHtml extends SimpleXML{
 		}
 	}
 
-	/** Returns an element with given ID, or creates it if missing.
+	/** If found, returns the element with given ID, else creates and appends it in doc.
 	 *
 	 * @param tag - HTML tag, like "TABLE"
 	 * @param id - standard HTML attribute "id"
-	 * @return
+	 * @return Desired element
 	 */
 	protected Element getUniqueElement(String tag, String id){
 

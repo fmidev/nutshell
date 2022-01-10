@@ -175,6 +175,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				html.appendTable(request.getParameterMap(), "Several parameters");
 			}
 
+			Element elem = html.getUniqueElement(SimpleHtml.SPAN, "pageName");
+			elem.setTextContent(String.format(" Page: %s",pageName ));
+			//html.appendElement(SimpleHtml.H2, "Testi");
+
 			response.setStatus(HttpServletResponse.SC_OK); // tes
 			sendToStream(html.document, response);
 			return;
