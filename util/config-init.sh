@@ -164,26 +164,26 @@ function prepare_dir {
     local dst_DIR=\$NUTSHELL_ROOT/$dst_subdir
 
     if [ -d $src_dir ]; then
-	echo "# Directory exists: $src_dir"
+	vt100echo green "# Directory exists: $src_dir"
     else
 	mkdir -v --parents $src_dir
     fi
     
     if [ $dst_dir -ef $src_dir ]; then
-	echo "# Directory/link exists already: $dst_DIR"
+	vt100echo green "# Directory/link exists already: $dst_DIR"
 	return
     fi
     
     if [ -d $dst_dir ]; then
-	echo "# ! Another directory exists: $dst_DIR"
+	vt100echo cyan "# ! Another directory exists: $dst_DIR"
     fi
 
     if [ -L $dst_dir ]; then
-	echo "# ! Another link exists: $dst_DIR"
+	vt100echo cyan "# ! Another link exists: $dst_DIR"
     fi
 
     #echo "Supressed: Linking $src_dir to $dst_DIR"
-    vt100echo cyan "Consider soft linking: "    
+    vt100echo cyan "# Consider soft linking: "    
     if ! [ $src_dir -ef $dst_dir ]; then
 	## ln -sfv $src_dir $dst_dir
 	vt100echo cyan "ln -sfv $src_dir $dst_dir"
