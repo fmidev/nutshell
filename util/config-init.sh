@@ -182,12 +182,14 @@ function prepare_dir {
 	echo "# ! Another link exists: $dst_DIR"
     fi
 
-    echo "Linking $src_dir to $dst_DIR"
+    #echo "Supressed: Linking $src_dir to $dst_DIR"
+    vt100echo cyan "Consider soft linking: "    
     if ! [ $src_dir -ef $dst_dir ]; then
-	ln -sfv $src_dir $dst_dir
-	if [ $? != 0 ]; then	
-	    echo "# Linking failed!"
-	fi
+	## ln -sfv $src_dir $dst_dir
+	vt100echo cyan "ln -sfv $src_dir $dst_dir"
+	#if [ $? != 0 ]; then	
+	#    echo "# Linking failed!"
+	#fi
     fi
     
 }

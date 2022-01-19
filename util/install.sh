@@ -53,6 +53,9 @@ backup_file ${NUTSHELL_ROOT}/nutshell.cnf
 cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
 
 
+# if [ "$CMD_SCRIPT_DIR" != '' ]; then
+# fi
+    
 prepare_dir $PRODUCT_ROOT products
 echo 
 
