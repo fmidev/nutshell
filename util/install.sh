@@ -166,7 +166,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     
 fi
 
-if [ $CMD_SCRIPT_DIR != '' ]; then
+if [ "$CMD_SCRIPT_DIR" != '' ]; then
 
     NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell
     show_variable NUTSHELL_SH
