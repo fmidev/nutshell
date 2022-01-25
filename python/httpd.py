@@ -35,10 +35,10 @@ logging.basicConfig(format='%(levelname)s\t %(name)s:%(funcName)s: %(message)s')
 #logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-from . import nutils
-from . import nutxml    
-from . import product
-from . import nutshell
+from nutshell import nutils
+from nutshell import nutxml    
+from nutshell import product
+from nutshell import nutshell
 
 HTTPStatus = nutshell.HTTPStatus
 

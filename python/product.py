@@ -28,8 +28,9 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
-from . import nutils
-#from . import shell
+#from . import nutils
+from nutshell import nutils
+
 
 
 def parse_timestamp2(timestamp, result = None):

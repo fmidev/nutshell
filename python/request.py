@@ -8,7 +8,7 @@ Product requests -- nutshell.request
 
 """
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'Markus.Peura@fmi.fi'
 
 # import os
@@ -35,9 +35,9 @@ import secrets # for random hex string secrets.token_hex(12)
 # TODO: rename to action?
 
 
-from . import nutils
-from . import product
-from . import shell
+from nutshell import nutils
+from nutshell import product
+from nutshell import shell
 
 
 class Tasklet(shell.Task):

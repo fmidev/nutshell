@@ -41,9 +41,13 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
-from . import nutils
-from . import product 
-from . import request
+from nutshell import nutils
+from nutshell import product 
+from nutshell import request
+
+# from . import nutils
+# from . import product 
+# from . import request
 
 
 
@@ -328,10 +332,10 @@ class ProductServer:
         else:
             pr.log.warning('Generator script not found: {0}'.format(pr.script))
             # Consider case of copied valid product (without local generator)            
-            pr.path = ''
             if (not TEST):
                 pr.set_status(HTTPStatus.NOT_IMPLEMENTED) # Not Implemented
                 return
+            #pr.path = Path()
 
         # TODO: if not stream?
         pr.log.debug('Ensuring cache dir for: {0}'.format(pr.path))
@@ -503,7 +507,7 @@ class ProductServer:
             self.make_prod(pr, directives, TEST) 
         
         if (EXISTS):
-            pr.log.info(f"Exists?... {pr.path.name}")
+            pr.log.info(f"Exists? {pr.path.name}")
             if (pr.path.exists()):
                 pr.set_status(HTTPStatus.OK)
             else:
@@ -513,8 +517,7 @@ class ProductServer:
             input_info = pr.get_input_list(directives)
             print(input_info.inputs)
         else:
-            pr.log.info("No further main instructions for  {pr.path.name}") 
-           #pr.log.info("NOT Making... {0}".format(pr.path.name)) 
+            pr.log.info(f"No further main instructions for  {pr.path.name}") 
 
         if (pr.status != HTTPStatus.OK):
             pr.log.warning("Action status: {0} for: {1}".format(pr.status, instructions)) 
