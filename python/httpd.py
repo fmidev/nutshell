@@ -61,7 +61,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
     @staticmethod
     def _get_html_template():
         """Read HTML template dir and return it for modifications."""
-        try:
+        try:            
             os.chdir(product_server.HTTP_ROOT) # !!
             html = ET.parse(product_server.HTML_TEMPLATE).getroot()
         except IOError as err:
@@ -455,6 +455,8 @@ def run_http(product_server):
         print('Warning: cache dir does not exist: {0}'.format(cache))
     # elif not writable:
 
+    os.chdir(product_server.HTTP_ROOT)
+    
     print('Starting: http://{0}:{1}/nutshell/'.format( httpd.server_name, httpd.server_port))
   
     
