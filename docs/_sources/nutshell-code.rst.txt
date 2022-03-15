@@ -10,7 +10,7 @@ NutShell Code
 Java version
 ============
 
-* `JavaDoc <./jdoc>`_
+* `JavaDoc <./jdoc/index.html>`_
 
 
 Python version

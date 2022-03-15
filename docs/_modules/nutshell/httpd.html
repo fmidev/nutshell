@@ -80,10 +80,10 @@
 <span class="c1">#logging.basicConfig(format=&#39;%(levelname)s:%(message)s&#39;, level=logging.DEBUG)</span>
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(message)s&#39;, datefmt=&#39;%m/%d/%Y %I:%M:%S %p&#39;)</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nutils</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nutxml</span>    
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">product</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nutshell</span>
+<span class="kn">from</span> <span class="nn">nutshell</span> <span class="k">import</span> <span class="n">nutils</span>
+<span class="kn">from</span> <span class="nn">nutshell</span> <span class="k">import</span> <span class="n">nutxml</span>    
+<span class="kn">from</span> <span class="nn">nutshell</span> <span class="k">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">nutshell</span> <span class="k">import</span> <span class="n">nutshell</span>
 
 <span class="n">HTTPStatus</span> <span class="o">=</span> <span class="n">nutshell</span><span class="o">.</span><span class="n">HTTPStatus</span>
 
@@ -106,7 +106,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_html_template</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot;Read HTML template dir and return it for modifications.&quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>            
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span><span class="p">)</span> <span class="c1"># !!</span>
             <span class="n">html</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTML_TEMPLATE</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -500,6 +500,8 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: cache dir does not exist: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cache</span><span class="p">))</span>
     <span class="c1"># elif not writable:</span>
 
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">product_server</span><span class="o">.</span><span class="n">HTTP_ROOT</span><span class="p">)</span>
+    
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting: http://</span><span class="si">{0}</span><span class="s1">:</span><span class="si">{1}</span><span class="s1">/nutshell/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">httpd</span><span class="o">.</span><span class="n">server_name</span><span class="p">,</span> <span class="n">httpd</span><span class="o">.</span><span class="n">server_port</span><span class="p">))</span>
   
     

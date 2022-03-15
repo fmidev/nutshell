@@ -100,6 +100,7 @@ Code  Standard Enum Name        NutShell   Comment
 ==== ========================== ========== ==========
 102  PROCESSING                 x          
 200  OK                         x          Request completed successfully
+403  Forbidden                  x          Resource exists, but access restricted
 404  Not Found                  x          File not found (Generator may exist)
 405  Method Not Allowed         x 
 408  Request Timeout            x

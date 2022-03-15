@@ -73,8 +73,9 @@
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(message)s&#39;, datefmt=&#39;%m/%d/%Y %I:%M:%S %p&#39;)</span>
 <span class="c1">#logging.basicConfig(format=&#39;%(asctime)s %(levelname)s %(name)s : %(message)s&#39;, datefmt=&#39;%Y%m%d%H:%M:%S&#39;)</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nutils</span>
-<span class="c1">#from . import shell</span>
+<span class="c1">#from . import nutils</span>
+<span class="kn">from</span> <span class="nn">nutshell</span> <span class="k">import</span> <span class="n">nutils</span>
+
 
 
 <span class="k">def</span> <span class="nf">parse_timestamp2</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
