@@ -36,11 +36,20 @@ fi
 
 vt100echo green "Checking Nutshell root directory"
 
+if [ $NUTSHELL_VERSION == 'docker-java' ]; then
+    NUTSHELL_ROOT="$PWD/docker"
+    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
+#    NUTSHELL_ROOT='/opt/nutshell'
+#    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+#    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
+fi
 
 if [ ! -v NUTSHELL_ROOT ]; then
     vt100echo red "NUTSHELL_ROOT undefined, exiting..."
     exit 2
 fi
+
 
 show_variable NUTSHELL_ROOT
 if [ -d $NUTSHELL_ROOT ]; then
@@ -53,9 +62,9 @@ echo
 backup_file ${NUTSHELL_ROOT}/nutshell.cnf
 cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
 
-if [ $NUTSHELL_VERSION == 'docker-java' ]; then
-    NUTSHELL_ROOT='/opt/nutshell'
-fi
+
+
+
 
 
 # if [ "$CMD_SCRIPT_DIR" != '' ]; then

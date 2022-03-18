@@ -16,7 +16,7 @@ case $NUTSHELL in
 	# NUTSHELL="python3.6 -m nutshell.nutshell"
 	NUTSHELL="python3.8 -m nutshell.nutshell"
 	;;
-    java)
+    java || docker-java)
 	# Modify this to use a JAR file separate from Tomcat
 	NUTSHELL_JAR=${NUTSHELL_JAR:-$NUTSHELL_JAR_DIR/Nutlet.jar}
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"

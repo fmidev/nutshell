@@ -25,9 +25,12 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 fi
 
 if [ $NUTSHELL_VERSION == 'docker-java' ]; then
-    NUTSHELL_ROOT="$PWD/docker"
+    NUTSHELL_ROOT='/opt/nutshell'
     NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
     CMD_SCRIPT_DIR=$NUTSHELL_ROOT
+#    NUTSHELL_ROOT="$PWD/docker"
+#    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+#    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
 fi
 
 
