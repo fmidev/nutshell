@@ -13,7 +13,8 @@ NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
 case $NUTSHELL in
     python)
 	export PYTHONPATH=$PYTHONPATH:$NUTSHELL_ROOT
-	NUTSHELL="python3.6 -m nutshell.nutshell"
+	# NUTSHELL="python3.6 -m nutshell.nutshell"
+	NUTSHELL="python3.8 -m nutshell.nutshell"
 	;;
     java)
 	# Modify this to use a JAR file separate from Tomcat

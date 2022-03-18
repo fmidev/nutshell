@@ -1,0 +1,38 @@
+# Conf for Dockered Java version of NutShell
+
+# Port for HTTP server
+# HTTP_PORT='8000'
+
+# Root directory for HTTP server
+# HTTP_ROOT='/opt/nutshell'
+
+# URL prefix
+# HTTP_PREFIX='/nutshell'
+
+# Optional: directory for nutshell.xml
+# TOMCAT_CONF_DIR='/var/cache/tomcat8/Catalina/localhost/nutshell'
+
+# Directory for nutshell.cnf, default dir for cache, storage, products
+NUTSHELL_ROOT='/opt/nutshell'
+
+# Location of JAR file for cmd line access (Java versions only)
+NUTSHELL_JAR_DIR='/opt/nutshell/WEB-INF/lib'
+
+# Root directory for product generators
+PRODUCT_ROOT='/opt/nutshell/products'
+
+# Root directory for rolling archive (optional, externally maintained)
+STORAGE_ROOT='/opt/nutshell/storage'
+
+# Root directory for cache
+CACHE_ROOT='/opt/nutshell/cache'
+
+# Permissions for cache directories
+DIR_PERMS='rwxrwxr-x'
+
+# Permissions for cache files
+FILE_PERMS='rwxrwxr--'
+
+# Directory for command line wrapper script 'nutshell'
+CMD_SCRIPT_DIR='/usr/local/bin'
+
