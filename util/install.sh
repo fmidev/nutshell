@@ -80,6 +80,9 @@ if [ $NUTSHELL_VERSION != 'docker-java' ]; then
 
     prepare_dir $CACHE_ROOT cache
     echo
+else
+    
+    NUTSHELL_ROOT="/opt/nutshell"
     
 fi
 
