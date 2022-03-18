@@ -24,6 +24,13 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     HTTP_PORT=${HTTP_PORT:-'8000'}
 fi
 
+if [ $NUTSHELL_VERSION == 'docker-java' ]; then
+    NUTSHELL_ROOT="$PWD/docker"
+    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
+fi
+
+
 
 vt100echo green "Accept or modify the following directories"
 # echo "Directory and url paths must have a leading but no trailing slash '/'."
