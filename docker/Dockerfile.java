@@ -1,8 +1,8 @@
-# Install environment & dependencies for rack
+# Install environment & dependencies for NutShell
 
 # FROM ubuntu:18.04
 
-FROM openjdk:16-alpine3.13
+# FROM openjdk:16-alpine3.13
 
 FROM tomcat:jdk8-openjdk
 
