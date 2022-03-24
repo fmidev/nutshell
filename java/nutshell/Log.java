@@ -163,14 +163,25 @@ public class Log implements AutoCloseable {
 	}
 
 	public void setVerbosity(String verbosity) throws NoSuchFieldException {
-		for (Map.Entry<Integer, String> entry: statusCodes.entrySet()){
-			if (entry.getValue().equals(verbosity)) {
-				this.verbosity = entry.getKey();
-				return; // true
-			}
+
+		try {
+			int level = Integer.parseInt(verbosity);
+			this.setVerbosity(level);
 		}
-		throw new NoSuchFieldException(verbosity);
-		//return false;
+		catch (NumberFormatException e) {
+			for (Map.Entry<Integer, String> entry: statusCodes.entrySet()){
+				if (entry.getValue().equals(verbosity)) {
+					this.verbosity = entry.getKey();
+					return; // true
+				}
+			}
+			this.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
+			this.warn(String.format("No such verbosity level: %s" + verbosity));
+			this.warn(String.format("Retaining level: %s", Log.statusCodes.get(this.getVerbosity())));
+			//return;
+			throw new NoSuchFieldException(verbosity);
+		}
+
 	}
 
 

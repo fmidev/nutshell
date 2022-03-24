@@ -119,6 +119,9 @@ public class ProductServer { //extends Cache {
 	final DateFormat timeStampDirFormat = 
 			new SimpleDateFormat("yyyy"+File.separatorChar+"MM"+File.separatorChar+"dd");
 
+	//protected final List<Path> configFiles = new LinkedList<>();
+
+
 	static public int counter = 0;
 
 	static public int getProcessId(){
@@ -1056,9 +1059,10 @@ public class ProductServer { //extends Cache {
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
 
-				log.warn(String.format("Directives: %s = %s", key, directives));
+				if ((directives != null) && !directives.isEmpty())
+					log.note(String.format("Directives: %s = %s", key, directives));
 
-				log.warn(String.format("Prepared TASK: %s = %s", key, task));
+				log.info(String.format("Prepared TASK: %s = %s", key, task));
 
 
 				task.log.setVerbosity(log.getVerbosity());
@@ -1084,7 +1088,7 @@ public class ProductServer { //extends Cache {
 			}
 			catch (Exception e) {
 				// System.err.println(String.format("EROR2 here: %s = %s", key, value));
-				log.error(String.format("Unexpected exception in crating product %s(%s)", key, value));
+				log.error(String.format("Unexpected exception in creating product %s(%s)", key, value));
 				log.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
 			}
 			finally {
@@ -1302,8 +1306,9 @@ public class ProductServer { //extends Cache {
 		System.err.println();
 		System.err.println("Options: ");
 		System.err.println("    --help: this help dump");
-		System.err.println("    --verbose <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
-		System.err.println("    --debug : same as --verbose DEBUG");
+		System.err.println("    --log_level <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
+		System.err.println("    --verbose : same as --log_level INFO");
+		System.err.println("    --debug : same as --log_level DEBUG");
 		System.err.println("    --conf <file> : read configuration file");
 		System.err.println("    --instructions <string> : main operation: " + String.join(",", Flags.getKeys(Instructions.class)));
 		System.err.println("      (all the instructions can be also supplied invidually: --make --delete --generate ... )");
@@ -1357,6 +1362,9 @@ public class ProductServer { //extends Cache {
 					String opt = arg.substring(2);
 
 					if (opt.equals("help")) {
+						System.err.println(String.format("version: %s", server.getVersionString()));
+						System.err.println(String.format("confFile: %s", server.confFile));
+						System.err.println();
 						help();
 						return;
 					}
@@ -1368,6 +1376,8 @@ public class ProductServer { //extends Cache {
 
 					if (opt.equals("log_level")) {
 						arg = args[++i];
+						log.setVerbosity(arg);
+						/*
 						try {
 							int level = Integer.parseInt(arg);
 							log.setVerbosity(level);
@@ -1381,6 +1391,8 @@ public class ProductServer { //extends Cache {
 								return;
 							}
 						}
+
+						 */
 						continue;
 					}
 
@@ -1485,7 +1497,8 @@ public class ProductServer { //extends Cache {
 								opt = opt.toUpperCase();
 
 								if (HttpLog.statusCodes.containsValue(opt)){
-									log.error(String.format("Not implemented, use --log_level %s", opt));
+									log.setVerbosity(opt);
+									//log.error(String.format("Not implemented, use --log_level %s", opt));
 									continue;
 								}
 
@@ -1566,9 +1579,9 @@ public class ProductServer { //extends Cache {
 		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
 
-		System.err.println(log.indexedException);
-		System.err.println(log);
-		System.err.println(log.getStatus());
+		//System.err.println(log.indexedException);
+		////System.err.println(log);
+		// System.err.println(log.getStatus());
 		if (log.getStatus() <= Log.ERROR){
 
 			//log.warn("Oh no, eror: %d " + log.getStatus());
@@ -1598,18 +1611,25 @@ public class ProductServer { //extends Cache {
 			if (task.outputPath.toFile().exists())
 				log.note(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
 
+			if (task.instructions.isSet(ActionType.INPUTLIST)){
+
+				for (Map.Entry<String,String> ec: task.inputs.entrySet()) {
+					System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
+				}
+			}
+
 			task.log.close();
 		}
 
 		// System.err.println("Eksit");
-		log.warn("Exiting..");
+		log.info("Exiting..");
 		log.close();
 		System.exit(result);
 
 	}
 
 	final
-	public List<Integer> version = Arrays.asList(1, 4);
+	public List<Integer> version = Arrays.asList(1, 5);
 
 	public String getVersionString() {
 		//Arrays.
