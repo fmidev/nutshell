@@ -477,7 +477,7 @@ public class Log implements AutoCloseable {
 	@Override
 	public void close()  {
 		if (logFile != null){
-			warn(String.format("Closing log: %s", logFile));
+			info(String.format("Closing log: %s", logFile));
 			this.printStream.close();
 		}
 		else if (printStream == null) {

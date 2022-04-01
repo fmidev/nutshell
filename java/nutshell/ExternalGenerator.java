@@ -88,18 +88,21 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	 */
 	@Override
 	public Map<String,String> getInputList(ProductServer.Task task) throws IndexedException {
-		return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
+		//return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
+		return getInputList(MapUtils.toArray(task.getParamEnv()), task.log);
 	}
 
 	// public Map<String,String> getInputList(String[] env, final PrintStream errorLog) { //throws InterruptedException {
-	public Map<String,String> getInputList(String[] env, PrintStream errorLog) throws IndexedException {
+	//public Map<String,String> getInputList(String[] env, PrintStream errorLog) throws IndexedException {
+	public Map<String,String> getInputList(String[] env, Log errorLog) throws IndexedException {
 		//public Map<String,String> getInputList(ProductServer.Task task) { //throws InterruptedException {
 		final Map<String, String> result = new HashMap<>();
 
 		// String[] env = MapUtils.toArray(parameters.getParamEnv(null));
 		// String[] env = MapUtils.toArray(parameters);
 
-		OutputReader reader =  new OutputReader(errorLog){ //new ShellUtils.ProcessReader() {
+		//OutputReader reader =  new OutputReader(errorLog){ //new ShellUtils.ProcessReader() {
+		OutputReader reader =  new OutputReader(errorLog.getPrintStream()){ //new ShellUtils.ProcessReader() {
 
 			@Override
 			public void handleStdOut(String line) {
@@ -121,11 +124,13 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 				}
 			}
 			else {
-				errorLog.println("warn(): exists, but not executable: " + inputDeclarationCmd.toString());
+				errorLog.warn(String.format("Cannot execute input declarator script: '%s'", inputDeclarationCmd ));
+				//errorLog.println("# WARNING: exists, but not executable: " + inputDeclarationCmd.toString());
 			}
 		}
 		else {
-			errorLog.println("Not found: " + inputDeclarationCmd.toString());
+			errorLog.info(String.format("Input declarator script not found: '%s'", inputDeclarationCmd ));
+			// errorLog.println("# INFO: not found: " + inputDeclarationCmd.toString());
 		}
 
 		return result;
@@ -141,6 +146,8 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 		}
 
 		String dir = args[0];
+
+		Log log = new Log("test");
 
 		ExternalGenerator generator = null;
 
@@ -165,7 +172,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		System.out.println("Inputs:");
 		try {
-			Map<String,String> map = generator.getInputList(env, System.out);
+			Map<String,String> map = generator.getInputList(env, log);
 			for (Entry<String,String> entry: map.entrySet()){
 				System.out.println(String.format("\t%s=%s", entry.getKey(), entry.getValue()));
 			}

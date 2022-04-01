@@ -131,7 +131,7 @@ public class ProductServer { //extends Cache {
 	/** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
 	 *
 	 */
-	//public String cmdPath = "";
+	protected String cmdPathExt = "";
 
 	protected void readConfig(){
 		readConfig(confFile);
@@ -184,7 +184,7 @@ public class ProductServer { //extends Cache {
 		//logPathFormat = "./nutshell-" + System.getenv("USER")+"-%s.log";
 		// Path p = setLogFile(logPathFormat.toString());
 		//
-		// this.cmdPath     = setup.getOrDefault("PATH2", ".").toString();
+		this.cmdPathExt = setup.getOrDefault("PATH_EXT", "").toString();
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
 	}
@@ -916,9 +916,13 @@ public class ProductServer { //extends Cache {
 				}
 			}
 
+
 			// Consider keeping Objects, and calling .toString() only upon ExternalGenerator?
 			env.put("OUTDIR",  this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
+
+			if (!cmdPathExt.isEmpty())
+				env.put("PATH",  "$PATH:" + cmdPathExt);
 
 			if (! this.retrievedInputs.isEmpty()){
 				env.put("INPUTKEYS", String.join(",", this.retrievedInputs.keySet().toArray(new String[0])));
@@ -1456,6 +1460,10 @@ public class ProductServer { //extends Cache {
 						}
 
 						 */
+					}
+					else if (opt.equals("path")) {
+						server.cmdPathExt = args[++i];
+						//products.put("product", args[++i]);
 					}
 					else {
 						// Actions
