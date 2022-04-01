@@ -1,28 +1,18 @@
 package nutshell;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import nutshell.ProductServer.Task;
 
@@ -52,7 +42,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	public Nutlet() {
 		setup.put("version", version);  // TODO
 		productServer = new ProductServer();
-		productServer.serverLog.setVerbosity(Log.DEBUG);
+		productServer.serverLog.setVerbosity(Log.Status.DEBUG);
 		productServer.serverLog.note("Nutlet started");
 	}
 
@@ -299,11 +289,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				}
 
 				//if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
-				final boolean statusOK = (task.log.getStatus() >= Log.NOTE);
+				final boolean statusOK = (task.log.getStatus() >= Log.Status.NOTE.level);
 				//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
 				if (statusOK && task.instructions.isSet(Instructions.STREAM)) {
 					// sendToStream(task, response);
+					//Log.Level.NOTE.ordinal();
 					task.log.debug("sendToStream: " + task.outputPath);
 					try {
 						sendToStream(task.outputPath, response);

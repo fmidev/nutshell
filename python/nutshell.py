@@ -632,7 +632,7 @@ class ProductServer:
                             help="Check only if product exists")
 
         
-        parser.add_argument("-i", "--inputList",
+        parser.add_argument("-i", "--inputlist",
                             dest="INPUTS",
                             action="store_true",
                             help="list input for a product, same as --instructions INPUTS")

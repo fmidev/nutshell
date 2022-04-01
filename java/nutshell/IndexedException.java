@@ -3,7 +3,7 @@ package nutshell;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class IndexedException extends Exception {
+public class IndexedException extends Exception implements Indexed {
 
     public IndexedException(int index){
         super("Unnamed exception");
@@ -15,6 +15,15 @@ public class IndexedException extends Exception {
         this.index = index;
     }
 
+    public IndexedException(Indexed indexed, String message){
+        super(message);
+        this.index = indexed.getIndex();
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
+    }
 
     static public String[] split(String s){
         String[] result = {"",""};
@@ -71,4 +80,5 @@ public class IndexedException extends Exception {
         }
 
     }
+
 }
