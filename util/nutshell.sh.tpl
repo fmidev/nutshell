@@ -38,7 +38,7 @@ RESULT=0
 if [ $# != 0 ]; then
 
     # --log_level DEBUG
-    ${NUTSHELL} --log_level 3 --conf ${NUTSHELL_DIR}/nutshell.cnf $*
+    ${NUTSHELL} --log_level NOTE --conf ${NUTSHELL_DIR}/nutshell.cnf $*
     RESULT=$?
     if [ $RESULT != 0 ]; then
 	#echo !!

@@ -5,7 +5,7 @@
 prefix=${prefix:-'/usr/local'}
 
 source util/vt100utils.sh
-source util/config-init.sh
+source util/init-config.sh
 
 read_and_backup_file  $CONF_FILE 
 
@@ -86,6 +86,10 @@ echo
 vt100echo blue "Nutshell product server configuration"
 
 ask_variable NUTSHELL_ROOT "$prefix/nutshell" "Directory for nutshell.cnf, default dir for cache, storage, products"
+
+#vt100echo cyan "Current \$PATH=$PATH"
+show_variable PATH
+ask_variable PATH_EXT "" "Command path extension 'dir:dir2:dir3...'"
 
 NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-$NUTSHELL_ROOT/jar}
 show_variable NUTSHELL_JAR_DIR

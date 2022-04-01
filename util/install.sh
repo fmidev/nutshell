@@ -3,7 +3,7 @@
 NUTSHELL_VERSION=${1:-'tomcat'}
 
 source util/vt100utils.sh
-source util/config-init.sh
+source util/init-config.sh
 
 
 

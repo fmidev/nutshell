@@ -131,7 +131,7 @@ public class ProductServer { //extends Cache {
 	/** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
 	 *
 	 */
-	protected String cmdPathExt = "";
+	protected String cmdPath = System.getenv("PATH");
 
 	protected void readConfig(){
 		readConfig(confFile);
@@ -184,14 +184,16 @@ public class ProductServer { //extends Cache {
 		//logPathFormat = "./nutshell-" + System.getenv("USER")+"-%s.log";
 		// Path p = setLogFile(logPathFormat.toString());
 		//
-		this.cmdPathExt = setup.getOrDefault("PATH_EXT", "").toString();
+		if (setup.containsKey("PATH_EXT"))
+			this.cmdPath += ":" + setup.get("PATH_EXT").toString();
+		setup.put("cmdPath", this.cmdPath);
 		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
 		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
 	}
 
 	@Override
 	public String toString() {
-		return MapUtils.getMap(this).toString();
+		return MapUtils.getMap(this).toString() + "\n" + setup.toString();
 	}
 
 	Path getProductDir(String productID){
@@ -921,8 +923,10 @@ public class ProductServer { //extends Cache {
 			env.put("OUTDIR",  this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
 
-			if (!cmdPathExt.isEmpty())
-				env.put("PATH",  "$PATH:" + cmdPathExt);
+			if (!cmdPath.isEmpty()) {
+				env.put("PATH", cmdPath);
+				log.special("PATH=" + cmdPath);
+			}
 
 			if (! this.retrievedInputs.isEmpty()){
 				env.put("INPUTKEYS", String.join(",", this.retrievedInputs.keySet().toArray(new String[0])));
@@ -1364,7 +1368,7 @@ public class ProductServer { //extends Cache {
 					}
 
 					if (opt.equals("verbose")) {
-						log.setVerbosity(Log.Status.DEBUG);
+						log.setVerbosity(Log.Status.LOG);
 						continue;
 					}
 
@@ -1437,6 +1441,9 @@ public class ProductServer { //extends Cache {
 							return;
 						}
 					}
+					else if (opt.equals("status")) { // Debugging
+						System.out.println(server.toString());
+					}
 					else if (opt.equals("copy")) {
 						instructions.addCopy(args[++i]);
 					}
@@ -1462,7 +1469,8 @@ public class ProductServer { //extends Cache {
 						 */
 					}
 					else if (opt.equals("path")) {
-						server.cmdPathExt = args[++i];
+						server.cmdPath = args[++i]; // overríde!
+						server.setup.put("cmdPath", server.cmdPath);
 						//products.put("product", args[++i]);
 					}
 					else {

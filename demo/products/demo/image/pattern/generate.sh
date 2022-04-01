@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "# $PATH"
 
 SIZE=${SIZE:-"256,256"}
 SIZE=( ${SIZE/,/ } )
