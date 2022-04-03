@@ -438,10 +438,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendElement(SimpleHtml.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
 			html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
 			 */
-			html.appendElement(SimpleHtml.H3, "Corresponding command line");
-			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --actions %s %s";
+			html.appendElement(SimpleHtml.H3, "Corresponding command lines:");
+			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
 			String name = productServer.getClass().getCanonicalName();
 			html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
+
+			String cmdLine2 = "nutshell --verbose --conf %s --instructions ";
+			html.appendElement(SimpleHtml.PRE, String.format(cmdLine2, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
 
 			html.appendTable(task.info.getParamEnv(null), "Product parameters");
 

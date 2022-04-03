@@ -52,12 +52,10 @@ import static java.nio.file.Files.*;
 public class ProductServer { //extends Cache {
 
 	final public HttpLog serverLog; // = new HttpLog(getClass().getSimpleName());
-	final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
-
+	static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 	ProductServer(){
 		serverLog = new HttpLog(getClass().getSimpleName());
-		//log.setLogFile(ensureFile(cacheRoot));
 	}
 
 	/**
@@ -89,6 +87,9 @@ public class ProductServer { //extends Cache {
 	}
 
 	public final Map<String,Object> setup = new HashMap<>();
+
+	/// Experimental log of products and their inputs(s)
+	public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
 	// TODO: add to config, set in constructor
 	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
@@ -196,6 +197,41 @@ public class ProductServer { //extends Cache {
 		return MapUtils.getMap(this).toString() + "\n" + setup.toString();
 	}
 
+	/** Genarate dot graph
+	 *
+	 *  Can be converted with:  dot file.dot -Tpng -o dot.png
+	 *
+	 *  TODO: Generalize, with DotWrapper.getFields() to distinguish variations of the same product(ID)
+	 *  | my.product.abc [RAVAKE,PNG] |
+	 *  | CONF   | RAVAKE             |
+	 *  | FORMAT | PNG                |
+	 *
+	 * @param stream – output stream (file).
+	 *
+	 */
+	protected void dumpStatisticsDot(PrintStream stream){
+		//PrintStream stream = System.out;
+
+		stream.println("digraph P");
+		stream.println('{');
+		for (Map.Entry<String,Map<String,String>> entry: statistics.entrySet()) {
+			String source = entry.getKey();
+			String srcKey = source.replace('.','_');
+			Map<String,String> targets = entry.getValue();
+			stream.println(String.format(" %s [label=\"%s\", color=\"blue\"];", srcKey, source));
+			for (Entry<String,String> dst: targets.entrySet()) {
+
+				String dstID = dst.getValue();
+				String dstKey = dstID.replace('.','_');
+				//String dst = inputEntry.getValue();
+				//stream.println(String.format(" %s [label=\"%s\", style=filled, color=\"green\"];", dstKey, dstID));
+				//String dstKey = dst.replace('.','_');
+				stream.println(String.format("  %s -> %s [label=\"%s\"];", srcKey, dstKey, dst.getKey()));
+			}
+		}
+		stream.println('}');
+	}
+
 	Path getProductDir(String productID){
 		return Paths.get(productID.replace(".", File.separator));
 	}
@@ -218,7 +254,7 @@ public class ProductServer { //extends Cache {
 			return root;
 
 		Path path = root.resolve(relativePath);
-		//this.log.warn(String.format("Checking: %s/./%s",  root, relativePath));
+		//log.warn(String.format("Checking: %s/./%s",  root, relativePath));
 
 		if (!exists(path)) {
 			//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(dirPerms));
@@ -277,6 +313,11 @@ public class ProductServer { //extends Cache {
 		final HttpLog log;
 		final ProductInfo info;
 
+		final public int id;
+		public int getTaskId(){
+			return id;
+		}
+
 		/// Checked "normalized" filename, with ordered parameters.
 		final public String filename;
 
@@ -314,6 +355,8 @@ public class ProductServer { //extends Cache {
 
 			// final String[] productDef = [productInfo, directives]
 			// in LOG // this.creationTime = System.currentTimeMillis();
+			this.id = getProcessId();
+
 			this.info = new ProductInfo(productStr);
 			this.log = new HttpLog("["+this.info.PRODUCT_ID+"]", parentLog);
 
@@ -324,11 +367,11 @@ public class ProductServer { //extends Cache {
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
 			this.timeStampDir = getTimestampDir(this.info.time);
 			this.relativeOutputDir    = this.timeStampDir.resolve(this.productDir);
-			this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve("tmp" + getId());
+			this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve("tmp" + getTaskId());
 			this.relativeOutputPath = relativeOutputDir.resolve(filename);
 
-			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getId() + ".log");
-			this.relativeLogPath    = relativeOutputDir.resolve(filename + "." + getId() + ".log");
+			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
+			this.relativeLogPath    = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
 
 			// Absolute
 			this.outputDir     = cacheRoot.resolve(this.relativeOutputDir);
@@ -341,27 +384,27 @@ public class ProductServer { //extends Cache {
 
 			try {
 				ensureFile(cacheRoot, this.relativeLogPath);
-				this.log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
+				log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
-				//this.log.setLogFile(null);
+				//log.setLogFile(null);
 			}
 
-			//this.log.warn("Where am I?");
-			this.log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getId(), this.instructions, this.info.directives)); //  this.toString()
+			//log.warn("Where am I?");
+			log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
 			this.result = null;
 		}
 
 
 		public String getStatus(){
-			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getId(), this.info, this.instructions, this.info.directives)); //  this.toString()
+			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
 		}
 
 
 		//public boolean move(File src, File dst){
 		public Path move(Path src, Path dst) throws IOException {
-			this.log.note(String.format("Move: from: %s ", src));
-			this.log.note(String.format("        to: %s ", dst));
+			log.note(String.format("Move: from: %s ", src));
+			log.note(String.format("        to: %s ", dst));
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
 			//Files.setPosixFilePermissions(dst, filePerms);
@@ -371,16 +414,16 @@ public class ProductServer { //extends Cache {
 		}
 
 		public Path copy(Path src, Path dst) throws IOException {
-			this.log.note(String.format("Copy: from: %s ", src));
-			this.log.note(String.format("        to: %s ", dst));
+			log.note(String.format("Copy: from: %s ", src));
+			log.note(String.format("        to: %s ", dst));
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
 			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
 		public Path link(Path src, Path dst, boolean force) throws IOException {
-			this.log.note(String.format("Link: from: %s ", src));
-			this.log.note(String.format("        to: %s ", dst));
+			log.note(String.format("Link: from: %s ", src));
+			log.note(String.format("        to: %s ", dst));
 
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
@@ -388,14 +431,14 @@ public class ProductServer { //extends Cache {
 			if (Files.exists(dst)){
 
 				if (Files.isSymbolicLink(dst)){
-					this.log.note(String.format("Link exists: %s ", dst));
+					log.note(String.format("Link exists: %s ", dst));
 				}
 				else {
-					this.log.note(String.format("File (not Link) exists: %s ", dst));
+					log.note(String.format("File (not Link) exists: %s ", dst));
 				}
 
 				if (Files.isSameFile(src, dst)){
-					this.log.note("File and link are equal");
+					log.note("File and link are equal");
 					if (!force){
 						return dst;
 					}
@@ -410,7 +453,7 @@ public class ProductServer { //extends Cache {
 		}
 
 		public boolean delete(Path dst) throws IOException {
-			this.log.note(String.format("Deleting: %s ", dst));
+			log.note(String.format("Deleting: %s ", dst));
 			return deleteIfExists(dst);
 			//return file.delete();
 		}
@@ -428,17 +471,17 @@ public class ProductServer { //extends Cache {
 				execute();
 			}
 			catch (InterruptedException e) {
-				//this.log.status
-				this.log.note(e.toString());
-				this.log.warn("Interrupted");
+				//log.status
+				log.note(e.toString());
+				log.warn("Interrupted");
 				//e.printStackTrace(log.printStream);
 			}
 			/*
 			catch (IndexedException e) {
-				this.log.warn("NutShell indexed exception --->");
-				//this.log.error(e.getMessage());
-				this.log.log(e);
-				this.log.warn("NutShell indexed exception <---");
+				log.warn("NutShell indexed exception --->");
+				//log.error(e.getMessage());
+				log.log(e);
+				log.warn("NutShell indexed exception <---");
 			}
 			 */
 		}
@@ -474,41 +517,51 @@ public class ProductServer { //extends Cache {
 
 			Generator generator = null;
 
-			//this.log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this.info.PRODUCT_ID));
-			this.log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Preparing %s", this));
+			//log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this.info.PRODUCT_ID));
+			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Preparing %s", this));
 
 			// Logical corrections
 
-			if (! this.instructions.copies.isEmpty())
-				this.instructions.add(Instructions.MAKE | ResultType.FILE);
+			if (! instructions.copies.isEmpty())
+				instructions.add(Instructions.MAKE | ResultType.FILE);
 
-			if (! this.instructions.links.isEmpty())
-				this.instructions.add(Instructions.MAKE | ResultType.FILE);
+			if (! instructions.links.isEmpty())
+				instructions.add(Instructions.MAKE | ResultType.FILE);
 
-			if (this.instructions.move != null)
-				this.instructions.add(Instructions.MAKE | ResultType.FILE);
+			if (instructions.move != null)
+				instructions.add(Instructions.MAKE | ResultType.FILE);
 
 			// Rest default result type
 			// if (this.instructions.involves(Actions.MAKE | Actions.DELETE)) { }
-			if (!this.instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
+			if (!instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
 				// This "type selection" could be also done with Generator?
-				this.log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
-				this.instructions.add(ResultType.FILE);
+				log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
+				instructions.add(ResultType.FILE);
 			}
 
-			this.log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
-			this.log.log(String.format("Starting: %s ", this.getStatus())); //  this.toString()
+			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
+			log.log(String.format("Starting: %s ", getStatus())); //  this.toString()
 
 
-			if (this.instructions.involves(Instructions.DELETE)){
+			/// Main DELETE operation
+			if (instructions.involves(Instructions.DELETE)){
 
-				if (this.instructions.isSet(ResultType.FILE) ) {
+				if (instructions.isSet(ResultType.FILE) ) {
 					try {
-						this.delete(this.outputPath);
+						this.delete(outputPath);
 					} catch (IOException e) {
-						this.log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", this.outputPath, e.getMessage()));
+						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", outputPath, e.getMessage()));
 						//return;
 					}
+				}
+
+				if (instructions.involves(Instructions.GENERATE | Instructions.EXISTS)){
+					//log.log(HttpLog.HttpStatus.MULTIPLE_CHOICES, String.format("Mutually contradicting instructions: %s ", this.instructions));
+					log.experimental(String.format("Mutually contradicting instructions: %s ", instructions));
+					// TODO: fix, still doesn't work
+					instructions.remove(Instructions.DELETE);
+					instructions.add(Instructions.GENERATE); // | Instructions.INPUTLIST);
+					log.experimental(String.format("Adjusted instructions: %s ", instructions));
 				}
 
 			}
@@ -517,50 +570,54 @@ public class ProductServer { //extends Cache {
 			//  Note: Java Generators do not need disk, unless FILE
 			//  WRONG, ... MAKE will always require FILE
 
-			if (this.instructions.isSet(Instructions.MEMORY)) {
+			if (instructions.isSet(Instructions.MEMORY)) {
 				// Not implemented yet
 				// this.result = new BufferedImage();
 			}
 
 			// This is a potential path, not committing to a physical file yet.
-			File fileFinal = this.outputPath.toFile();
+			File fileFinal = outputPath.toFile();
 
-			if (this.instructions.involves(Instructions.EXISTS | ResultType.FILE) && ! this.instructions.isSet(ActionType.DELETE)) {
+			/// "MAIN"
+			if (instructions.involves(Instructions.EXISTS | ResultType.FILE) && ! instructions.isSet(ActionType.DELETE)) {
 
-				this.log.debug(String.format("Storage path: %s", storagePath));
+				log.debug(String.format("Checking storage path: %s", storagePath));
 
 				if (storagePath.toFile().exists() && ! fileFinal.exists()){
-					this.log.log(HttpLog.HttpStatus.OK, String.format("Stored file exists: %s", this.storagePath));
+					log.log(HttpLog.HttpStatus.OK, String.format("Stored file exists: %s", this.storagePath));
 
 					try {
 						ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					}
 					catch (IOException e) {
-						this.log.warn(e.getMessage());
-						this.log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in creating dir (with permissions): %s", this.outputDir));
+						log.warn(e.getMessage());
+						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in creating dir (with permissions): %s", this.outputDir));
 						//e.printStackTrace();
 					}
 
 					try {
-						this.link(this.storagePath, this.outputPath, false);
+						this.link(storagePath, outputPath, false);
 					}
 					catch (IOException e) {
-						this.log.error(e.getMessage());
-						this.log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in linking: %s <- %s", this.outputPath, storagePath));
+						log.error(e.getMessage());
+						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in linking: %s <- %s", this.outputPath, storagePath));
 						//e.printStackTrace();
 					}
 				}
 				// Don't wait (so the other process will "notice" ie fail)
-				else if (queryFile(fileFinal, 90, this.log)) {
+				else if (queryFile(fileFinal, 90, log)) {
 					// Order? Does it delete immediately?
-					this.result = this.outputPath;
-					this.log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", this.outputPath));
+					result = outputPath;
+					log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", this.outputPath));
 				}
 				else { // if (this.instructions.isSet(Actions.EXIST)){
-					this.log.log(HttpLog.HttpStatus.NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
-					//this.log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", this.outputPath));
+					//log.warn(String.format("File does not exist: %s", this.outputPath));
+					// TODO: ERROR is a contradiction, unless file strictly required?
 					if (this.instructions.isSet(Instructions.MAKE)) {
 						this.instructions.add(Instructions.GENERATE);
+						log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", this.outputPath));
+					} else {
+						log.log(HttpLog.HttpStatus.NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
 					}
 				}
 
@@ -568,83 +625,82 @@ public class ProductServer { //extends Cache {
 
 
 			// Retrieve Geneator, if needed
-			if (this.instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.DEBUG)){
+			if (instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.DEBUG)){
 
-				this.log.log(HttpLog.HttpStatus.OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
+				log.log(HttpLog.HttpStatus.OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
 				try {
 					generator = getGenerator(this.info.PRODUCT_ID);
-					//this.log.log(HttpLog.HttpStatus.CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
-					this.log.log(HttpLog.HttpStatus.CREATED, generator.toString());
+					//log.log(HttpLog.HttpStatus.CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
+					log.log(HttpLog.HttpStatus.CREATED, generator.toString());
 
-					if (this.instructions.involves(Instructions.GENERATE )){
+					if (instructions.involves(Instructions.GENERATE )){
 						// Consider this.addAction() -> log.debug()
 						if (generator instanceof ExternalGenerator)
-							this.instructions.add(ResultType.FILE); // PREPARE dir & empty file
+							instructions.add(ResultType.FILE); // PREPARE dir & empty file
 						else
-							this.instructions.add(ResultType.MEMORY);
+							instructions.add(ResultType.MEMORY);
 					}
 
 				}
 				catch (IndexedException e){
-					this.log.log(HttpLog.HttpStatus.CONFLICT, "Generator does not exist");
-					this.log.log(e);
-					this.instructions.remove(Instructions.GENERATE);
-					this.instructions.remove(Instructions.INPUTLIST);
-					this.instructions.remove(Instructions.DEBUG);
+					log.log(HttpLog.HttpStatus.CONFLICT, "Generator does not exist");
+					log.log(e);
+					instructions.remove(Instructions.GENERATE);
+					instructions.remove(Instructions.INPUTLIST);
+					instructions.remove(Instructions.DEBUG);
 				}
 
 			}
 
-			if (this.instructions.isSet(Instructions.DELETE)) {
+			if (instructions.isSet(Instructions.DELETE) && ! instructions.involves(Instructions.MAKE)) {
 
 				if (fileFinal.exists()) {
-					this.log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting: %s ", this.outputPath));
+					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting: %s ", this.outputPath));
 				}
 				else {
-					this.log.log(HttpLog.HttpStatus.NO_CONTENT, String.format("Deleted: %s ", this.outputPath));
+					log.log(HttpLog.HttpStatus.NO_CONTENT, String.format("Deleted: %s ", this.outputPath));
 				}
 
-				if (this.instructions.involves(Instructions.GENERATE| Instructions.EXISTS)){
-					this.log.log(HttpLog.HttpStatus.MULTIPLE_CHOICES, String.format("Mutually contradicting instructions: %s ", this.instructions));
+				if (! (instructions.involves(Instructions.GENERATE | Instructions.EXISTS))){
+					return;
 				}
-
-				return;
 			}
 
 
 			// Generate or at least list inputs
 			if (this.instructions.involves(Instructions.INPUTLIST  | Instructions.GENERATE)) { //
 
-				this.log.debug(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
+				log.debug(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
 
-				this.inputs.clear(); // needed?
+				inputs.clear(); // needed?
 
 				try {
-					this.inputs.putAll(generator.getInputList(this));
-					this.log.debug(this.inputs.toString());
+					inputs.putAll(generator.getInputList(this));
+					log.debug(this.inputs.toString());
+					//statistics.put(info.PRODUCT_ID, inputs.keySet());
 					//System.err.println("## " + this.inputs);
 				}
 				catch (Exception e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, "Input list retrieval failed");
 					log.log(e);
 
-					this.log.warn("Removing GENERATE from instructions");
-					this.instructions.remove(Instructions.GENERATE);
+					log.warn("Removing GENERATE from instructions");
+					instructions.remove(Instructions.GENERATE);
 				}
 
-				if (!this.inputs.isEmpty())
-					this.log.info(String.format("Collected (%d) input requests for: %s", this.inputs.size(), this.info.PRODUCT_ID));
+				if (!inputs.isEmpty())
+					log.info(String.format("Collected (%d) input requests for: %s", this.inputs.size(), this.info.PRODUCT_ID));
 
 			}
 
 
 
-			if (this.instructions.isSet(Instructions.GENERATE)) {
+			if (instructions.isSet(Instructions.GENERATE)) {
 
-				this.log.reset(); // Forget old sins
+				log.reset(); // Forget old sins
 
-				this.log.info("Generate!");
-				// this.log.info("No generation request, returning.");
+				log.info("Generate!");
+				// log.info("No generation request, returning.");
 				// return;
 
 				// Mark this task being processed (empty file)
@@ -656,61 +712,69 @@ public class ProductServer { //extends Cache {
 					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				}
 				catch (IOException e) {
-					this.log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
+					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
 					return;
 				}
 
-				//	this.log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
+				//	log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
 				// Assume Generator uses input similar to output (File or Object)
 				//final int inputActions = this.instructions.value & (ResultType.MEMORY | ResultType.FILE);
+				//final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
 				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
 				//inputInstructions.add(Instructions.GENERATE);
 				inputInstructions.add(Instructions.MAKE);
-				this.log.note(String.format("Input instructions: %s", inputInstructions));
-				//Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, this.log);
+				log.special(String.format("Input instructions: %s", inputInstructions));
+				//Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, log);
 				// Consider forwarding directives?
-				Map<String,Task> tasks = executeMany(this.inputs, inputInstructions, null, this.log);
+				Map<String,Task> inputTasks = executeMany(this.inputs, inputInstructions, null, log);
 
+				Map<String,String> inputStats = new HashMap<>();
 				// Collect results
-				for (Entry<String,Task> entry : tasks.entrySet()){
+				for (Entry<String,Task> entry : inputTasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 					if (inputTask.result != null){
 						String r = inputTask.result.toString();
-						this.log.note(String.format("Retrieved: %s = %s", key, r));
+						log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
+						// Stats
+						inputStats.put(key, inputTask.info.getID());
+						if (!statistics.containsKey(inputTask.info.getID()))
+							statistics.put(inputTask.info.getID(), new HashMap<>()); // Marker
+						//statistics.put(info.getID(), inputTask.info.getID())
 						if (inputTask.log.indexedException.index > 300){
-							this.log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
+							log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
 						}
 					}
 					else {
-						this.log.error(inputTask.log.indexedException.getMessage());
+						log.warn(inputTask.log.indexedException.getMessage());
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
+						log.reset(); // Forget that anyway...
 					}
 					inputTask.log.close(); // close PrintStream
 				}
-
+				statistics.put(info.getID(), inputStats);
 
 				/// MAIN
-				this.log.note("Running Generator: " + this.info.PRODUCT_ID);
+				log.note("Running Generator: " + info.PRODUCT_ID);
 
-				File fileTmp   = this.outputPathTmp.toFile();
+				File fileTmp = outputPathTmp.toFile();
 
 				try {
 					generator.generate(this);
 				}
 				catch (IndexedException e) {
 
-					this.log.log(e);
+					log.log(e);
 
 					try {
 						this.delete(this.outputPathTmp);
 						//this.delete(fileFinal);
 					}
 					catch (Exception e2) {
-						this.log.error(e2.getLocalizedMessage());
+						log.error(e2.getLocalizedMessage());
 					}
-					//this.log.error(e.getMessage());
+					//log.error(e.getMessage());
 					//throw e;
 					//return false;
 				}
@@ -718,27 +782,29 @@ public class ProductServer { //extends Cache {
 
 				if (fileTmp.length() > 0){
 
-					this.log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
+					/// Override
+					log.setStatus(Log.Status.OK);
+					log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
 
 					// Let's take this slowly...
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
 					} catch (IOException e) {
-						this.log.warn(e.toString());
-						//this.log.warn(String.format("filePerms: %s", filePerms));
+						log.warn(e.toString());
+						//log.warn(String.format("filePerms: %s", filePerms));
 						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
-						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+						// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
 
 
 					try {
 						Files.setPosixFilePermissions(this.outputPath, filePerms);
 					} catch (IOException e) {
-						this.log.warn(e.toString());
+						log.warn(e.toString());
 						log.warn(String.format("Failed in setting perms %s for file: %s", filePerms, this.outputPath));
-						// this.log.warn(String.format("filePerms: %s", filePerms));
-						//log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
-						// this.log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+						// log.warn(String.format("filePerms: %s", filePerms));
+						// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
+						// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
 
 
@@ -746,53 +812,53 @@ public class ProductServer { //extends Cache {
 				}
 				else {
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
-					// this.log.error("Generator failed in producing tmp file: " + fileTmp.getName());
+					// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
 					try {
 						this.delete(this.outputPathTmp);
 					}
 					catch (Exception e) {
 						/// TODO: is it a fatal error if a product defines its input wrong?
-						this.log.error(e.getMessage()); // RETURN?
+						log.error(e.getMessage()); // RETURN?
 						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
 					}
 				}
 
 			}
 
-			if (this.instructions.isSet(ActionType.INPUTLIST) && ! this.instructions.involves(ActionType.GENERATE)) {
-				this.log.note("Input list: requested");
-				this.result = this.inputs;
+			if (instructions.isSet(ActionType.INPUTLIST) && ! instructions.involves(ActionType.GENERATE)) {
+				log.note("Input list: requested");
+				result = inputs;
 			}
 
 
-			if (this.instructions.isSet(ResultType.FILE)){
+			if (instructions.isSet(ResultType.FILE)){
 				// TODO: save file (of JavaGenerator)
 				// if (this.result instanceof Path)...
 
 				if (this.instructions.isSet(ActionType.DELETE)){
 					if (fileFinal.exists())
-						this.log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length() ));
+						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length() ));
 					else {
-						this.log.reset();
-						this.log.ok("Deleted.");
+						log.reset();
+						log.ok("Deleted.");
 					}
 				}
 				else if (fileFinal.length() == 0) {
 
-					this.log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
+					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
 					try {
 						this.delete(this.outputPath);
 					} catch (IOException e) {
-						//this.log.error(String.format("Failed in deleting: %s ", this.outputPath));
-						this.log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting: %s ", this.outputPath));
-						this.log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
+						//log.error(String.format("Failed in deleting: %s ", this.outputPath));
+						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting: %s ", this.outputPath));
+						log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 					}
 
 				}
 				else {
 
 					this.result = this.outputPath;
-					this.log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
+					log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
 
 					// "Post processing"
 					if (this.instructions.isSet(Instructions.SHORTCUT)){
@@ -830,9 +896,9 @@ public class ProductServer { //extends Cache {
 							log.ok(String.format("Copied: %s", path));
 							// System.out.println("Copy "+path);
 						} catch (IOException e) {
-							this.log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Copying failed: %s", path));
-							this.log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
-							//this.log.error(String.format("Copying failed: %s", path));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Copying failed: %s", path));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
+							//log.error(String.format("Copying failed: %s", path));
 						}
 					}
 
@@ -841,8 +907,8 @@ public class ProductServer { //extends Cache {
 							this.link(this.outputPath, path, false); // Paths.get(path)
 							log.ok(String.format("Linked: %s", path));
 						} catch (IOException e) {
-							this.log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking failed: %s", path));
-							this.log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking failed: %s", path));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 						}
 					}
 
@@ -850,35 +916,35 @@ public class ProductServer { //extends Cache {
 						try {
 							this.move(this.outputPath, this.instructions.move);
 							this.result = this.instructions.move;
-							this.log.log(HttpLog.HttpStatus.MOVED_PERMANENTLY, String.format("Moved: %s", this.instructions.move));
+							log.log(HttpLog.HttpStatus.MOVED_PERMANENTLY, String.format("Moved: %s", this.instructions.move));
 						} catch (IOException e) {
-							this.log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Moving failed: %s", this.instructions.move));
-							this.log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Moving failed: %s", this.instructions.move));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 						}
 					}
 
 					try {
 						if (this.outputDirTmp.toFile().exists()) {
-							this.log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
+							log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
 							Files.delete(this.outputDirTmp);
 						}
 					} catch (IOException e) {
-						this.log.warn(e.getMessage());
-						this.log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Failed in removing tmp dir %s", this.outputDirTmp));
+						log.warn(e.getMessage());
+						log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Failed in removing tmp dir %s", this.outputDirTmp));
 					}
 
 				}
 			}
 			else {
 				if (this.result != null) // Object?
-					this.log.info("Result: " + this.result.toString());
-				this.log.note("Task completed: instructions=" + this.instructions);
+					log.info("Result: " + this.result.toString());
+				log.note("Task completed: instructions=" + this.instructions);
 				// status page?
 
 			}
 
 			if (instructions.isSet(Instructions.RUN)){
-				ShellExec.OutputReader reader = new ShellExec.OutputReader(this.log.getPrintStream());
+				ShellExec.OutputReader reader = new ShellExec.OutputReader(log.getPrintStream());
 				//ShellExec shellExec = new ShellExec(Paths.get("run.sh"), this.productDir);
 				ShellExec.exec("./run.sh", null, productRoot.resolve(productDir), reader);
 
@@ -914,7 +980,7 @@ public class ProductServer { //extends Cache {
 					case 0:
 						break;
 					default:
-						this.log.log(HttpLog.HttpStatus.NOT_MODIFIED, String.format("Odd timestamp '%s' length (%d)",  this.info.TIMESTAMP, this.info.TIMESTAMP.length()));
+						log.log(HttpLog.HttpStatus.NOT_MODIFIED, String.format("Odd timestamp '%s' length (%d)",  this.info.TIMESTAMP, this.info.TIMESTAMP.length()));
 				}
 			}
 
@@ -1047,12 +1113,10 @@ public class ProductServer { //extends Cache {
 				//HttpLog subLog = (count==1) ? log.child(key) : null;
 				//HttpLog subLog = new HttpLog(key, log);
 				// log.debug(String.format("# Still here: %s = %s", key, value));
-				// System.out.println(String.format("# Still there: %s = %s", key, value));
 
 				Task task = new Task(value, instructions.value, log);
-				//System.out.println(String.format("# NOTTTTTTTTTT here: %s = %s", key, value));
 
-				log.debug(String.format("Still life: %s = %s", key, value));
+				//log.debug(String.format("Check: %s = %s", key, value));
 				task.info.setDirectives(directives);
 				task.instructions.addCopies(instructions.copies);
 				task.instructions.addLinks(instructions.links);
@@ -1067,7 +1131,7 @@ public class ProductServer { //extends Cache {
 				task.log.setVerbosity(log.getVerbosity());
 				task.log.COLOURS = log.COLOURS;
 				if (task.log.logFile != null){
-					log.info(String.format("See separate log: %s",  task.log.logFile));
+					log.note(String.format("See separate log: %s",  task.log.logFile));
 				}
 
 				tasks.put(key, task);
@@ -1119,14 +1183,14 @@ public class ProductServer { //extends Cache {
 				Task task = entry.getValue();
 				try {
 					task.join();
-					log.debug(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+					log.debug(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 				}
 				catch (InterruptedException e) {
-					log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getId()));
+					log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 					log.warn(String.format("Pending file? : ", task.outputPathTmp));
 				}
-				log.special(String.format("Final status: %s", task.log.indexedException));
-				log.log("test");
+				log.info(String.format("Final status: %s", task.log.indexedException));
+				//log.log("test");
 			}
 
 		}
@@ -1391,15 +1455,6 @@ public class ProductServer { //extends Cache {
 						continue; // Note
 					}
 
-					/*
-					if (opt.equals("clearCache")) {
-						log.warn("Clearing cache");
-						server.clearCache(true);
-						continue; // Note
-					}
-
-					 */
-
 					// Now, read conf file if not read this far.
 					if (confFile == null){
 						server.readConfig(confFile = "nutshell.cnf");
@@ -1455,23 +1510,10 @@ public class ProductServer { //extends Cache {
 					}
 					else if (opt.equals("directives")) {
 						MapUtils.setEntries( args[++i],"\\|", "true", directives);
-						/*
-						for (String d : args[++i].split("\\|")) { // Note: regexp
-							log.info("Adding directive: " + d);
-							int j = d.indexOf('=');
-							if (j > 1) {
-								directives.put(d.substring(0, j), d.substring(j + 1));
-							} else {
-								directives.put(d, "true");
-							}
-						}
-
-						 */
 					}
 					else if (opt.equals("path")) {
 						server.cmdPath = args[++i]; // overríde!
 						server.setup.put("cmdPath", server.cmdPath);
-						//products.put("product", args[++i]);
 					}
 					else {
 						// Actions
@@ -1495,7 +1537,7 @@ public class ProductServer { //extends Cache {
 								}
 
 								if (! handled){
-									log.info("Adding instruction:" + opt);
+									log.info("Adding instruction: " + opt);
 									Instructions.class.getField(opt); // ensure field exists
 									instructions.add(opt);
 								}
@@ -1539,7 +1581,7 @@ public class ProductServer { //extends Cache {
 
 		int result = 0;
 
-		log.note("Actions: " + instructions);
+		log.note("Instructions: " + instructions);
 
 		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
 			log.warn("Clearing cache");
@@ -1578,7 +1620,7 @@ public class ProductServer { //extends Cache {
 		// System.err.println(log.getStatus());
 		if (log.getStatus() <= Log.Status.ERROR.level){
 
-			//log.warn("Oh no, eror: %d " + log.getStatus());
+			log.warn("Oh no, eror: %d " + log.getStatus());
 			++result;
 		}
 
@@ -1586,8 +1628,8 @@ public class ProductServer { //extends Cache {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedException.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
-				//log.note(String.format("exception: %s", task.log.indexedException.getMessage()));
-				log.log(task.log.indexedException);
+				log.warn(String.format("Exception occurred: %s", task.log.indexedException.getMessage()));
+				//log.debug(task.log.indexedException);
 				if (result < 20)
 					++result;
 			}
@@ -1611,6 +1653,18 @@ public class ProductServer { //extends Cache {
 				for (Map.Entry<String,String> ec: task.inputs.entrySet()) {
 					System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
 				}
+
+				try {
+					String dotFileName = task.info.getFilename("") + ".dot";
+					log.special(String.format("writing %s", dotFileName));
+					FileOutputStream fw = new FileOutputStream(dotFileName);
+					//this.debug(String.format("Continuing log in file: %s", this.logFile));
+					PrintStream printStream = new PrintStream(fw);
+					server.dumpStatisticsDot(printStream);
+					printStream.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
 			}
 
 			task.log.close();
@@ -1624,7 +1678,7 @@ public class ProductServer { //extends Cache {
 	}
 
 	final
-	public List<Integer> version = Arrays.asList(1, 5);
+	public List<Integer> version = Arrays.asList(1, 6);
 
 	public String getVersionString() {
 		//Arrays.
