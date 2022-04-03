@@ -89,7 +89,12 @@ public class ProductServer { //extends Cache {
 	public final Map<String,Object> setup = new HashMap<>();
 
 	/// Experimental log of products and their inputs(s)
+	public boolean collectStatistics = false;
 	public final Map<String,Map<String,String>> statistics = new HashMap<>();
+
+	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
+	// TODO: consider general query depth (for inputs etc)
+	public int defaultCacheClearanceDepth = 0;
 
 	// TODO: add to config, set in constructor
 	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
@@ -214,11 +219,15 @@ public class ProductServer { //extends Cache {
 
 		stream.println("digraph P");
 		stream.println('{');
+		// nodesep=.05;
+		// stream.println("  rankdir=LR");
+		stream.println("  node [shape=record]"); // ,width=.1,height=.1
 		for (Map.Entry<String,Map<String,String>> entry: statistics.entrySet()) {
 			String source = entry.getKey();
 			String srcKey = source.replace('.','_');
 			Map<String,String> targets = entry.getValue();
-			stream.println(String.format(" %s [label=\"%s\", color=\"blue\"];", srcKey, source));
+			//stream.println(String.format(" %s [label=\"{%s | {Key|value}}\", color=\"blue\"];", srcKey, source));
+			stream.println(String.format(" %s [label=\"%s\", style=filled, color=\"lightblue\"];", srcKey, source));
 			for (Entry<String,String> dst: targets.entrySet()) {
 
 				String dstID = dst.getValue();
@@ -226,7 +235,8 @@ public class ProductServer { //extends Cache {
 				//String dst = inputEntry.getValue();
 				//stream.println(String.format(" %s [label=\"%s\", style=filled, color=\"green\"];", dstKey, dstID));
 				//String dstKey = dst.replace('.','_');
-				stream.println(String.format("  %s -> %s [label=\"%s\"];", srcKey, dstKey, dst.getKey()));
+				// stream.println(String.format("  %s -> %s [label=\"%s\"];", srcKey, dstKey, dst.getKey()));
+				stream.println(String.format("  %s -> %s [label=\"%s\"];", dstKey, srcKey, dst.getKey()));
 			}
 		}
 		stream.println('}');
@@ -323,6 +333,8 @@ public class ProductServer { //extends Cache {
 
 		final public Instructions instructions = new Instructions();
 
+		public int cacheClearanceDepth = 0;
+
 		public Path timeStampDir;
 		public Path productDir;
 
@@ -362,6 +374,9 @@ public class ProductServer { //extends Cache {
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
+
+			this.cacheClearanceDepth = defaultCacheClearanceDepth;
+
 
 			// Relative
 			this.productDir   = getProductDir(this.info.PRODUCT_ID);
@@ -523,13 +538,13 @@ public class ProductServer { //extends Cache {
 			// Logical corrections
 
 			if (! instructions.copies.isEmpty())
-				instructions.add(Instructions.MAKE | ResultType.FILE);
+				instructions.add(ActionType.MAKE | ResultType.FILE);
 
 			if (! instructions.links.isEmpty())
-				instructions.add(Instructions.MAKE | ResultType.FILE);
+				instructions.add(ActionType.MAKE | ResultType.FILE);
 
 			if (instructions.move != null)
-				instructions.add(Instructions.MAKE | ResultType.FILE);
+				instructions.add(ActionType.MAKE | ResultType.FILE);
 
 			// Rest default result type
 			// if (this.instructions.involves(Actions.MAKE | Actions.DELETE)) { }
@@ -538,6 +553,12 @@ public class ProductServer { //extends Cache {
 				log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
 				instructions.add(ResultType.FILE);
 			}
+
+			if (instructions.involves(Instructions.MAKE) && (cacheClearanceDepth > 0)){
+				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", cacheClearanceDepth));
+				instructions.add(ActionType.GENERATE);
+			}
+
 
 			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
 			log.log(String.format("Starting: %s ", getStatus())); //  this.toString()
@@ -733,15 +754,25 @@ public class ProductServer { //extends Cache {
 				for (Entry<String,Task> entry : inputTasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
+					if (cacheClearanceDepth > 0){
+						inputTask.cacheClearanceDepth = cacheClearanceDepth-1;
+						log.experimental(String.format("Input cache clearance: %s", inputTask.cacheClearanceDepth));
+						//instructions.add(ActionType.GENERATE);
+					}
+					else {
+						inputTask.cacheClearanceDepth = 0;
+					}
+
 					if (inputTask.result != null){
 						String r = inputTask.result.toString();
 						log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
 						// Stats
 						inputStats.put(key, inputTask.info.getID());
-						if (!statistics.containsKey(inputTask.info.getID()))
-							statistics.put(inputTask.info.getID(), new HashMap<>()); // Marker
-						//statistics.put(info.getID(), inputTask.info.getID())
+						if (collectStatistics){
+							if (!statistics.containsKey(inputTask.info.getID()))
+								statistics.put(inputTask.info.getID(), new HashMap<>()); // Marker
+						}
 						if (inputTask.log.indexedException.index > 300){
 							log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
 						}
@@ -753,7 +784,10 @@ public class ProductServer { //extends Cache {
 					}
 					inputTask.log.close(); // close PrintStream
 				}
-				statistics.put(info.getID(), inputStats);
+
+				if (collectStatistics) {
+					statistics.put(info.getID(), inputStats);
+				}
 
 				/// MAIN
 				log.note("Running Generator: " + info.PRODUCT_ID);
@@ -1279,7 +1313,6 @@ public class ProductServer { //extends Cache {
 	/// System side setting.
 	//  public String pythonScriptGenerator = "generate.py";
 
-
 	/// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
 	public int timeOut = 30;
 
@@ -1496,6 +1529,17 @@ public class ProductServer { //extends Cache {
 							return;
 						}
 					}
+					else if (opt.equals("depth")) {
+						int d = Integer.parseInt(args[++i]);
+						if (d < 0){
+							log.warn(String.format("Negative cache clearance depth %d, setting to zerp.", d));
+							d = 0;
+						}
+						server.defaultCacheClearanceDepth = d;
+					}
+					else if (opt.equals("statistics")) { // Debugging
+						server.collectStatistics = true;
+					}
 					else if (opt.equals("status")) { // Debugging
 						System.out.println(server.toString());
 					}
@@ -1654,6 +1698,9 @@ public class ProductServer { //extends Cache {
 					System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
 				}
 
+			}
+
+			if (server.collectStatistics){
 				try {
 					String dotFileName = task.info.getFilename("") + ".dot";
 					log.special(String.format("writing %s", dotFileName));
