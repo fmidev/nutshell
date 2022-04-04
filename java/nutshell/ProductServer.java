@@ -554,7 +554,7 @@ public class ProductServer { //extends Cache {
 				instructions.add(ResultType.FILE);
 			}
 
-			if (instructions.involves(Instructions.MAKE) && (cacheClearanceDepth > 0)){
+			if (instructions.involves(ActionType.MAKE) && (cacheClearanceDepth > 0)){
 				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", cacheClearanceDepth));
 				instructions.add(ActionType.GENERATE);
 			}
@@ -565,7 +565,7 @@ public class ProductServer { //extends Cache {
 
 
 			/// Main DELETE operation
-			if (instructions.involves(Instructions.DELETE)){
+			if (instructions.involves(ActionType.DELETE)){
 
 				if (instructions.isSet(ResultType.FILE) ) {
 					try {
@@ -580,7 +580,7 @@ public class ProductServer { //extends Cache {
 					//log.log(HttpLog.HttpStatus.MULTIPLE_CHOICES, String.format("Mutually contradicting instructions: %s ", this.instructions));
 					log.experimental(String.format("Mutually contradicting instructions: %s ", instructions));
 					// TODO: fix, still doesn't work
-					instructions.remove(Instructions.DELETE);
+					instructions.remove(ActionType.DELETE);
 					instructions.add(Instructions.GENERATE); // | Instructions.INPUTLIST);
 					log.experimental(String.format("Adjusted instructions: %s ", instructions));
 				}
@@ -634,7 +634,7 @@ public class ProductServer { //extends Cache {
 				else { // if (this.instructions.isSet(Actions.EXIST)){
 					//log.warn(String.format("File does not exist: %s", this.outputPath));
 					// TODO: ERROR is a contradiction, unless file strictly required?
-					if (this.instructions.isSet(Instructions.MAKE)) {
+					if (this.instructions.isSet(ActionType.MAKE)) {
 						this.instructions.add(Instructions.GENERATE);
 						log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", this.outputPath));
 					} else {
@@ -673,7 +673,7 @@ public class ProductServer { //extends Cache {
 
 			}
 
-			if (instructions.isSet(Instructions.DELETE) && ! instructions.involves(Instructions.MAKE)) {
+			if (instructions.isSet(ActionType.DELETE) && ! instructions.involves(ActionType.MAKE)) {
 
 				if (fileFinal.exists()) {
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting: %s ", this.outputPath));
@@ -743,7 +743,7 @@ public class ProductServer { //extends Cache {
 				//final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
 				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
 				//inputInstructions.add(Instructions.GENERATE);
-				inputInstructions.add(Instructions.MAKE);
+				inputInstructions.add(ActionType.MAKE);
 				log.special(String.format("Input instructions: %s", inputInstructions));
 				//Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, log);
 				// Consider forwarding directives?
@@ -1523,7 +1523,7 @@ public class ProductServer { //extends Cache {
 								System.err.println("Several products defined, using last");
 							}
 							if (instructions.isEmpty())
-								instructions.add(Instructions.MAKE);
+								instructions.add(ActionType.MAKE);
 							Task product = server.new Task(p[p.length-1], 0, log);
 							System.out.println(String.format("instructions=%s&product=%s", instructions, product));
 							return;
@@ -1620,7 +1620,7 @@ public class ProductServer { //extends Cache {
 		}
 
 		if (instructions.isEmpty()){
-			instructions.set(Instructions.MAKE);
+			instructions.set(ActionType.MAKE);
 		}
 
 		int result = 0;
