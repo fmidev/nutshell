@@ -95,7 +95,7 @@ public class ProductServer { //extends Cache {
 
 	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
 	// TODO: consider general query depth (for inputs etc)
-	public int defaultCacheClearanceDepth = 0;
+	public int defaultRemakeDepth = 0;
 
 	// TODO: add to config, set in constructor
 	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
@@ -334,7 +334,7 @@ public class ProductServer { //extends Cache {
 
 		final public Instructions instructions = new Instructions();
 
-		public int cacheClearanceDepth = 0;
+		public int remakeDepth = 0;
 
 		public Path timeStampDir;
 		public Path productDir;
@@ -376,7 +376,7 @@ public class ProductServer { //extends Cache {
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
 
-			this.cacheClearanceDepth = defaultCacheClearanceDepth;
+			this.remakeDepth = defaultRemakeDepth;
 
 
 			// Relative
@@ -555,8 +555,8 @@ public class ProductServer { //extends Cache {
 				instructions.add(ResultType.FILE);
 			}
 
-			if (instructions.involves(ActionType.MAKE) && (cacheClearanceDepth > 0)){
-				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", cacheClearanceDepth));
+			if (instructions.involves(ActionType.MAKE) && (remakeDepth > 0)){
+				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", remakeDepth));
 				instructions.add(ActionType.GENERATE);
 			}
 
@@ -759,13 +759,13 @@ public class ProductServer { //extends Cache {
 				for (Entry<String,Task> entry : inputTasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
-					if (cacheClearanceDepth > 0){
-						inputTask.cacheClearanceDepth = cacheClearanceDepth-1;
-						log.experimental(String.format("Input cache clearance: %s", inputTask.cacheClearanceDepth));
+					if (remakeDepth > 0){
+						inputTask.remakeDepth = remakeDepth -1;
+						log.experimental(String.format("Input cache clearance: %s", inputTask.remakeDepth));
 						//instructions.add(ActionType.GENERATE);
 					}
 					else {
-						inputTask.cacheClearanceDepth = 0;
+						inputTask.remakeDepth = 0;
 					}
 
 
@@ -1552,13 +1552,13 @@ public class ProductServer { //extends Cache {
 							return;
 						}
 					}
-					else if (opt.equals("depth")) {
+					else if (opt.equals("remake")) {
 						int d = Integer.parseInt(args[++i]);
 						if (d < 0){
 							log.warn(String.format("Negative cache clearance depth %d, setting to zerp.", d));
 							d = 0;
 						}
-						server.defaultCacheClearanceDepth = d;
+						server.defaultRemakeDepth = d;
 					}
 					else if (opt.equals("statistics")) { // Debugging
 						server.collectStatistics = true;
