@@ -279,7 +279,7 @@ public class ProductServer { //extends Cache {
 			}
 			catch (IOException e){
 				serverLog.warn(e.toString());
-				serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
+				serverLog.warn(String.format("Could not se unix:gid '%d'",  fileGroupID) );
 			}
 
 		}
@@ -796,8 +796,11 @@ public class ProductServer { //extends Cache {
 
 				try {
 					generator.generate(this);
+					serverLog.ok(info.getFilename());
 				}
 				catch (IndexedException e) {
+
+					serverLog.warn(info.getFilename());
 
 					log.log(e);
 

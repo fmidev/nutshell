@@ -65,7 +65,7 @@ public class MapUtils {
 
 	/** Parses and stores an expression containing a command or variable assignment 
 	 * 
-	 * @param line
+	 * @param lines
 	 * @param map
 	 */
 	static public <V> void parse(String[] lines, Map<String,V> map){
