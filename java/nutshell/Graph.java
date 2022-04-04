@@ -167,6 +167,7 @@ public class Graph extends Entity {
         Link link = graph.addLink(node1, node2);
         link.attributes.put("style", "dotted");
 
+        
         graph.toStream(System.out);
 
     }
