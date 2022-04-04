@@ -37,7 +37,8 @@ public class Log implements AutoCloseable {
 		LOG(9, VT100.Highlights.DIM),     /// Sometimes informative messages.
 		DEBUG(10, VT100.compound(VT100.Colours.DEFAULT, VT100.Highlights.DIM.bitvalue)), // VT100.Highlights.RESET),      /// Technical information about the process
 		// Extensions
-		FAIL(WARNING.level, VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.ITALIC.bitvalue)), 	/// Action completed unsuccessfully. // ?
+		FAIL(WARNING.level, VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.DIM.bitvalue)), 	/// Action completed unsuccessfully. // ?
+		SUCCESS(WARNING.level, VT100.compound(VT100.Colours.GREEN,  VT100.Highlights.DIM.bitvalue)), 	/// Action completed unsuccessfully. // ?
 		WAIT(NOTE.level, VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.ITALIC.bitvalue)),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
 		OK(NOTE.level,    VT100.Colours.GREEN),      /// Action completed successfully.
 		SPECIAL(NOTE.level, VT100.Colours.MAGENTA),
@@ -172,8 +173,8 @@ public class Log implements AutoCloseable {
 		return log(Status.WARNING, message);
 	}
 
-	public Log fail(){
-		return log(Status.FAIL, null);
+	public Log fail(String message){
+		return log(Status.FAIL, message);
 	}
 
 	public Log note(String message){
@@ -208,12 +209,18 @@ public class Log implements AutoCloseable {
 		return log(Status.EXPERIMENTAL, msg);
 	}
 
+	public Log success(String msg){
+		return log(Status.SUCCESS, msg);
+	}
+
+	/*
 	public Log success(boolean isTrue){
 		if (isTrue)
 			return log(Status.OK, null);
 		else
 			return log(Status.FAIL, null);
 	}
+	 */
 
 
 

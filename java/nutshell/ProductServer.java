@@ -90,6 +90,7 @@ public class ProductServer { //extends Cache {
 
 	/// Experimental log of products and their inputs(s)
 	public boolean collectStatistics = false;
+	public Graph graph = new Graph("ProductServer");
 	public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
 	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
@@ -750,7 +751,11 @@ public class ProductServer { //extends Cache {
 				Map<String,Task> inputTasks = executeMany(this.inputs, inputInstructions, null, log);
 
 				Map<String,String> inputStats = new HashMap<>();
+
 				// Collect results
+				// Statistics
+				Graph.Node node = graph.getNode(info.getID());
+
 				for (Entry<String,Task> entry : inputTasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
@@ -763,21 +768,32 @@ public class ProductServer { //extends Cache {
 						inputTask.cacheClearanceDepth = 0;
 					}
 
+
+					Graph.Node inputNode = graph.getNode(inputTask.info.getID());
+					Graph.Link link = graph.addLink(node, inputNode);
+					link.attributes.put("label", key);
+
 					if (inputTask.result != null){
 						String r = inputTask.result.toString();
 						log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
 						// Stats
 						inputStats.put(key, inputTask.info.getID());
-						if (collectStatistics){
+						if (collectStatistics) {
 							if (!statistics.containsKey(inputTask.info.getID()))
 								statistics.put(inputTask.info.getID(), new HashMap<>()); // Marker
+
 						}
+						link.attributes.put("color", "green");
 						if (inputTask.log.indexedException.index > 300){
+							link.attributes.put("style", "dashed");
 							log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
 						}
 					}
 					else {
+						link.attributes.put("color", "red");
+						inputNode.attributes.put("color", "red");
+						inputNode.attributes.put("style", "dotted");
 						log.warn(inputTask.log.indexedException.getMessage());
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 						log.reset(); // Forget that anyway...
@@ -796,11 +812,13 @@ public class ProductServer { //extends Cache {
 
 				try {
 					generator.generate(this);
-					serverLog.ok(info.getFilename());
+
 				}
 				catch (IndexedException e) {
 
-					serverLog.warn(info.getFilename());
+					// NOTE: possibly the file has been generated, but with some less significant errors.
+					// serverLog.warn(info.getFilename() + ": " + e);
+					// serverLog.warn(info.getFilename());
 
 					log.log(e);
 
@@ -822,6 +840,7 @@ public class ProductServer { //extends Cache {
 					/// Override
 					log.setStatus(Log.Status.OK);
 					log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
+					serverLog.success(info.getFilename());
 
 					// Let's take this slowly...
 					try {
@@ -849,6 +868,7 @@ public class ProductServer { //extends Cache {
 				}
 				else {
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
+					serverLog.fail(info.getFilename());
 					// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
 					try {
 						this.delete(this.outputPathTmp);
@@ -1710,7 +1730,8 @@ public class ProductServer { //extends Cache {
 					FileOutputStream fw = new FileOutputStream(dotFileName);
 					//this.debug(String.format("Continuing log in file: %s", this.logFile));
 					PrintStream printStream = new PrintStream(fw);
-					server.dumpStatisticsDot(printStream);
+					server.graph.toStream(printStream);
+					//server.dumpStatisticsDot(printStream);
 					printStream.close();
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();

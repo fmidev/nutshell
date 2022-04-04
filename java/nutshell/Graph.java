@@ -6,19 +6,22 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 class Entity {
 
-    String id = null;
+    String id = "?";
 
     String setId(String name){
         id = name.replaceAll("\\W", " ").trim().replaceAll("\\s+", "_");
         return id;
     }
 
-    String name = null;
+    String getId(){
+        return id;
+    }
+
+    String name = "?";
 
     public String getName() {
         return name;
@@ -28,7 +31,7 @@ class Entity {
         this.name = name;
         setId(name);
         if (!id.equals(name))
-            attributes.put("title", name);
+            attributes.put("label", name);
     }
 
     public Map<String, Object> attributes = new HashMap<>();
@@ -84,18 +87,8 @@ public class Graph extends Entity {
             setName(name);
         }
 
-
-        /*
-        final public List<Node> children = new LinkedList<>();
-        public Node addNode(String name){
-            Node node = new Node(name);
-            children.add(node);
-            return node;
-        }
-         */
-
         void toStream(PrintStream stream){
-            stream.append(" ").append(name).append(' ');
+            stream.append(" ").append(getId()).append(' ');
             attributesToStream(stream);
             stream.append(';');
             stream.println();
@@ -114,7 +107,7 @@ public class Graph extends Entity {
         final Node node2;
 
         void toStream(PrintStream stream){
-            stream.append(" ").append(node1.getName()).append(" -> ").append(node2.getName()).append(' ');
+            stream.append("  ").append(node1.getId()).append(" -> ").append(node2.getId()).append(' ');
             attributesToStream(stream);
             stream.append(';');
             stream.println();
@@ -126,11 +119,43 @@ public class Graph extends Entity {
     final public List<Node> nodes = new LinkedList<>();
     final public List<Link> links = new LinkedList<>();
 
+    synchronized
     public Node addNode(String name){
         Node node = new Node(name);
         nodes.add(node);
         return node;
     }
+
+    /** Returns a node, if exists, or creates one.
+     *
+     * @param name
+     * @return
+     */
+    synchronized
+    public Node getNode(String name){
+        for (Node node: nodes) {
+            if (node.getName().equals(name))
+                return node;
+        }
+        return addNode(name);
+    }
+
+    public boolean hasNode(String name){
+        for (Node node: nodes) {
+            if (node.getName().equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean hasLink(String name){
+        for (Link link: links) {
+            if (link.getName().equals(name))
+                return true;
+        }
+        return false;
+    }
+
 
     public Link addLink(Node node1, Node node2){
         Link link = new Link(node1, node2);
@@ -167,7 +192,8 @@ public class Graph extends Entity {
         Link link = graph.addLink(node1, node2);
         link.attributes.put("style", "dotted");
 
-        
+
+
         graph.toStream(System.out);
 
     }
