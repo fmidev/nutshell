@@ -1598,7 +1598,7 @@ public class ProductServer { //extends Cache {
 								boolean handled = false;
 								if (Log.statusCodesByName.containsKey(opt)){
 									log.setVerbosity(Log.statusCodesByName.get(opt).level);
-									System.out.println("Testing:" + log.getVerbosity() + "/" + opt);
+									// System.out.println("Testing:" + log.getVerbosity() + "/" + opt);
 									handled = true;
 									//break;
 								}
