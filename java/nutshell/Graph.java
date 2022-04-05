@@ -1,7 +1,9 @@
 package nutshell;
 
 
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,6 +75,68 @@ public class Graph extends Entity {
         stream.println();
 
         stream.println("}");
+    }
+
+    void dotToFile(String outfile){ /// todo: IOException
+
+        int i = outfile.lastIndexOf('.');
+        if (i > 0){
+            dotToFile(outfile, outfile.substring(i+1).toLowerCase()) ;
+        }
+
+    }
+
+    void dotToFile(String outfile, String format){ /// todo: IOException
+
+        String cmd = String.format("dot -T%s -o %s", format, outfile);
+        String dir = ".";
+
+        System.err.println(String.format("cmd: '%s'", cmd));
+        //ShellExec.OutputReader reader = new ShellExec.OutputReader(System.err);
+
+        final Process process;
+        try {
+            process = Runtime.getRuntime().exec(cmd, null, Paths.get(dir).toFile());
+            OutputStream outputStream = process.getOutputStream();
+            PrintStream printStream = new PrintStream(outputStream);
+            toStream(printStream);
+            // TODO: handler error stream
+            //printStream.println("digraph MIKA { A->B }");
+            /*
+            DataInputStream in = new DataInputStream(process.getInputStream());
+            //DataInputStream in = new DataInputStream(process.getErrorStream());
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String line;
+            while ((line = br.readLine()) != null) {
+            	System.err.println(line);
+            }
+            in.close();
+            br.close();
+            */
+            printStream.close();
+            outputStream.close();
+            //System.err.println("Chiuso");
+		}
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        //process.
+
+
+        // final String logname = ShellExec.class.getSimpleName() + ".log";
+        // System.out.println("Writing log :" + logname);
+        //File logFile = new File(logname);
+        /*
+        System.out.println(String.format("Executing: %s (dir=", cmd, dir));
+        try {
+            //logFile.createNewFile();
+            // FileOutputStream fw = new FileOutputStream(logFile);
+            ShellExec.exec(cmd, null, Paths.get(dir), reader);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+         */
     }
 
 
@@ -167,20 +231,14 @@ public class Graph extends Entity {
     public static void main(String[] args) {
 
 
+        Graph graph = new Graph("example");
+
         if (args.length == 0){
             System.err.println();
             System.err.println("Example:");
             System.err.println("'My super, test!' node1 ");
             System.exit(1);
         }
-
-
-        //String name = args[0].replaceAll("\\W", " ").trim().replaceAll("\\s+", "_");
-        //System.err.println(name);
-
-        Graph graph = new Graph(args[0]);
-
-        //Node illegal = graph.new Node();
 
         Node node1 = graph.addNode("A");
         node1.attributes.put("color", "blue");
@@ -192,9 +250,12 @@ public class Graph extends Entity {
         Link link = graph.addLink(node1, node2);
         link.attributes.put("style", "dotted");
 
+        Node node3 = graph.addNode("C");
+        Link link2 = graph.addLink(node1, node3);
+        link2.attributes.put("label", "reijo");
 
-
-        graph.toStream(System.out);
+        // graph.toStream(System.out);
+        graph.dotToFile(args[0]);
 
     }
 

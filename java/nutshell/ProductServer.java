@@ -1413,6 +1413,11 @@ public class ProductServer { //extends Cache {
 
 	}
 
+	public enum OutputFormat {
+		TEXT,
+		VT100,
+		HTML;
+	}
 
 
 
@@ -1423,16 +1428,24 @@ public class ProductServer { //extends Cache {
 		System.err.println();
 		System.err.println("Options: ");
 		System.err.println("    --help: this help dump");
-		System.err.println("    --log_level <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
-		System.err.println("    --verbose : same as --log_level INFO");
-		System.err.println("    --debug : same as --log_level DEBUG");
 		System.err.println("    --conf <file> : read configuration file");
+		System.err.println();
+		System.err.println("    Product generation:");
 		System.err.println("    --instructions <string> : main operation: " + String.join(",", Flags.getKeys(Instructions.class)));
-		System.err.println("      (all the instructions can be also supplied invidually: --make --delete --generate ... )");
+		System.err.println("      or shorthands: --make --delete --generate ... )");
+		System.err.println("    --directives <key>=<value>|<key>=<value>|... : instructions for product generator");
+		System.err.println();
+		System.err.println("    Additional actions:");
 		System.err.println("    --copy <target>: copy file to target (repeatable)");
 		System.err.println("    --link <target>: link file to target (repeatable)");
 		System.err.println("    --move <target>: move file to target");
-		System.err.println("    --directives <key>=<value>|<key>=<value>|... : instructions (pipe-separated) for product generator");
+		System.err.println();
+		System.err.println("    Logging:");
+		System.err.println("    --log_level <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
+		System.err.println("      or shorthands --debug / --info --note --warn --error");
+		System.err.println("    --log_style <style>: " + Arrays.toString(OutputFormat.values()));
+		//System.err.println("    --statistics: analyze,collect/diagnose product generation");
+		System.err.println("    --analyse: collect/diagnose product generation");
 		System.err.println();
 		System.err.println("Examples: ");
 		System.err.println("    java -cp $NUTLET_PATH 201012161615_test.ppmforge_DIMENSION=2.5.png");
@@ -1522,6 +1535,22 @@ public class ProductServer { //extends Cache {
 					if (opt.equals("version")) {
 						System.out.println(server.getVersionString());
 					}
+					if (opt.equals("log_style")) {
+						//String arg = args[++i];
+						OutputFormat f = OutputFormat.valueOf(args[++i]);
+						switch (f){
+							case TEXT:
+								log.COLOURS = false;
+								break;
+							case VT100:
+								log.COLOURS = true;
+								break;
+							case HTML:
+							default:
+								log.warn("Not implemented:" + f);
+						}
+
+					}
 					else if (opt.equals("product")) {
 						products.put("product", args[++i]);
 					}
@@ -1560,7 +1589,7 @@ public class ProductServer { //extends Cache {
 						}
 						server.defaultRemakeDepth = d;
 					}
-					else if (opt.equals("statistics")) { // Debugging
+					else if (opt.equals("analyze")) { // Debugging
 						server.collectStatistics = true;
 					}
 					else if (opt.equals("status")) { // Debugging
@@ -1686,8 +1715,7 @@ public class ProductServer { //extends Cache {
 		////System.err.println(log);
 		// System.err.println(log.getStatus());
 		if (log.getStatus() <= Log.Status.ERROR.level){
-
-			log.warn("Oh no, eror: %d " + log.getStatus());
+			log.warn("Errors: %d " + log.getStatus());
 			++result;
 		}
 
@@ -1724,22 +1752,14 @@ public class ProductServer { //extends Cache {
 			}
 
 			if (server.collectStatistics){
-				try {
-					String dotFileName = task.info.getFilename("") + ".dot";
-					log.special(String.format("writing %s", dotFileName));
-					FileOutputStream fw = new FileOutputStream(dotFileName);
-					//this.debug(String.format("Continuing log in file: %s", this.logFile));
-					PrintStream printStream = new PrintStream(fw);
-					server.graph.toStream(printStream);
-					//server.dumpStatisticsDot(printStream);
-					printStream.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
+				String dotFileName = task.info.getFilename("") + ".dot.png";
+				log.special(String.format("writing %s", dotFileName));
+				server.graph.dotToFile("dotFileName.png");
 			}
 
 			task.log.close();
 		}
+
 
 		// System.err.println("Eksit");
 		log.info("Exiting..");
