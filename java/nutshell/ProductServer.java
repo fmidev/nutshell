@@ -1589,7 +1589,7 @@ public class ProductServer { //extends Cache {
 						}
 						server.defaultRemakeDepth = d;
 					}
-					else if (opt.equals("analyze")) { // Debugging
+					else if (opt.equals("analyse")) { // Debugging
 						server.collectStatistics = true;
 					}
 					else if (opt.equals("status")) { // Debugging
