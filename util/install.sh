@@ -94,7 +94,10 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     mkdir -v --parents $HTTP_ROOT
     #mkdir -v --parents $HTTP_ROOT/template # OBSOLETE!
     mkdir -v --parents $HTTP_ROOT/nutweb
-    for i in html/nutweb/*.[a-z]*; do
+    for i in html/*.{css,js}; do
+	cp -v $i $HTTP_ROOT/
+    done
+    for i in html/nutweb/*.html; do
 	if [ ${i##*/} == 'template.html' ]; then
 	    cp -v $i $HTTP_ROOT/nutweb/
 	else
