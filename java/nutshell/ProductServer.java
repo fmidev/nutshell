@@ -1324,6 +1324,7 @@ public class ProductServer { //extends Cache {
 				//this.delete(this.outputPath);
 			}
 			catch (IOException e) {
+				// TODO: redesign (check if delete needed at all)
 				this.serverLog.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
 			}
 
