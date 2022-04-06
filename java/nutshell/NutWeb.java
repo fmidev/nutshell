@@ -161,7 +161,7 @@ public class NutWeb extends HttpServlet {
 	protected SimpleHtml getHtmlPage(){ // throws IOException, SAXException, ParserConfigurationException {
 
 		//Path path = Paths.get(httpRoot,"template", "main.html");
-		Path path = Paths.get(httpRoot,htmlTemplate);
+		Path path = Paths.get(httpRoot, htmlTemplate);
 
 		SimpleHtml html = null;
 		try {
@@ -196,7 +196,18 @@ public class NutWeb extends HttpServlet {
 	 */
 	protected SimpleHtml includeHtml(String filename, SimpleHtml html){
 		try {
-			//NodeList list = SimpleHtml.readBody(Paths.get(httpRoot, "template", filename).toString());
+
+			NodeList head = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
+			for (int i=0; i< head.getLength(); ++i) {
+				html.head.appendChild(html.document.importNode(head.item(i), true));
+			}
+
+			/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
+			NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");
+			for (int i=0; i< body.getLength(); ++i) {
+				html.main.appendChild(html.document.importNode(body.item(i), true));
+			}
+			/*
 			NodeList list = SimpleHtml.readBody(Paths.get(httpRoot, filename));
 			for (int i=0; i< list.getLength(); ++i) {
 				Node node = list.item(i);
@@ -204,6 +215,7 @@ public class NutWeb extends HttpServlet {
 				node = html.document.importNode(node, true);
 				html.main.appendChild(node);
 			}
+			 */
 		}
 		catch (Exception e){
 			html.appendElement(SimpleHtml.H2, "Failed in reading file: " + filename);

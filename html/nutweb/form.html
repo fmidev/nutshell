@@ -2,18 +2,19 @@
 <html>
   <head>
     <meta charset="utf-8"/>
+    <script src="nutshell-form.js" type="text/javascript"/>
   </head>
-  <body>
+  <body style="plain">
     <form id="form" method="GET" target="product" action="/nutshell/NutShell">
       <table>
         <tr>
           <th class="LEAD" colspan="2">Request</th>
         </tr>
         <tr>
-          <td class="LEAD">Product</td>
+          <td class="LEAD">Product </td>
           <td>
             <input id="product" name="product" list="prods" type="text" size="80" value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png"/>
-            <select id="product_presets" onchange="this.form.product.value = this[selectedIndex].value">
+            <select id="product_examples" onchange="this.form.product.value = this[selectedIndex].value">
               <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
               <option value="demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png">Image Pattern (error: too large)</option>
               <option value="demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png">Image Pattern (error: illegal parameter values)</option>
@@ -29,8 +30,6 @@
               <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default.png">Radar Composite (color)</option>
               <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default_TRANSP2=0.1,0.8.png">Radar Composite (color, transp)</option>
               <option value="201708121600_radar.rack.doppler.vis_SITE=fikor_COORD=C_STEP=20__COLORS=white,blue,dark-blue:0_SCALE=2_LINEWIDTH=1_BGCOLOR=white.png">Doppler</option>
-              <option value=""/>
-              <option value=""/>
             </select>
           </td>
         </tr>

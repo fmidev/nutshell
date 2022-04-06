@@ -259,6 +259,8 @@ public class SimpleHtml extends SimpleXML{
 	}
 
 	public static NodeList readBody(Path path) throws ParserConfigurationException, IOException, SAXException {
+		return readNodes(path, "body");
+		/*
 		Document comp = SimpleXML.readDocument(path);
 		NodeList body = comp.getElementsByTagName("body");
 		final int nodes = body.getLength();
@@ -270,6 +272,31 @@ public class SimpleHtml extends SimpleXML{
 			//System.err.println("File contains several 'body' elements");
 		}
 		return body.item(0).getChildNodes();
+
+		 */
+	}
+
+	/** Retrieves the nodes (elements) of the first tag of given name
+	 *
+	 * @param path
+	 * @param tagName
+	 * @return
+	 * @throws ParserConfigurationException
+	 * @throws IOException
+	 * @throws SAXException
+	 */
+	public static NodeList readNodes(Path path, String tagName) throws ParserConfigurationException, IOException, SAXException {
+		Document comp = SimpleXML.readDocument(path);
+		NodeList nodeList = comp.getElementsByTagName(tagName);
+		final int nodes = nodeList.getLength();
+		if (nodes == 0){
+			// Consider reading <HTML> contents?
+			throw new NullPointerException(String.format("File contained no '%s' element", tagName));
+		}
+		else if (nodes > 1){
+			//System.err.println("File contains several 'body' elements");
+		}
+		return nodeList.item(0).getChildNodes();
 	}
 
 	public static void main(String[] args) {

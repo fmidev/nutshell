@@ -166,7 +166,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			Element elem = html.getUniqueElement(SimpleHtml.SPAN, "pageName");
-			elem.setTextContent(String.format(" Page: %s",pageName ));
+			elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, pageName ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
 			response.setStatus(HttpServletResponse.SC_OK); // tes
