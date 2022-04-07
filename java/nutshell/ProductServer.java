@@ -755,6 +755,7 @@ public class ProductServer { //extends Cache {
 				// Collect results
 				// Statistics
 				Graph.Node node = graph.getNode(info.getID());
+				node.attributes.put("href", "http://www.fmi.fi");
 
 				for (Entry<String,Task> entry : inputTasks.entrySet()){
 					String key = entry.getKey();
@@ -1753,9 +1754,10 @@ public class ProductServer { //extends Cache {
 			}
 
 			if (server.collectStatistics){
-				String dotFileName = task.info.getFilename("") + ".dot.png";
+				//String dotFileName = task.info.getFilename("") + ".dot.png";
+				String dotFileName = task.info.getFilename("") + ".svg";
 				log.special(String.format("writing %s", dotFileName));
-				server.graph.dotToFile("dotFileName.png");
+				server.graph.dotToFile(dotFileName);
 			}
 
 			task.log.close();
