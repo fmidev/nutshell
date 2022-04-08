@@ -335,6 +335,7 @@ public class ProductServer { //extends Cache {
 		final public Instructions instructions = new Instructions();
 
 		public int remakeDepth = 0;
+		//public boolean parallel = true;
 
 		public Path timeStampDir;
 		public Path productDir;
@@ -482,6 +483,13 @@ public class ProductServer { //extends Cache {
 		 */
 		@Override
 		public void run(){
+
+			/*
+			if (!parallel){
+				log.error("Ouch this was not meant to be parallel!");
+			}
+			 */
+
 			try {
 				Signal.handle(new Signal("INT"), this::handleInterrupt);
 				execute();
@@ -502,11 +510,13 @@ public class ProductServer { //extends Cache {
 			 */
 		}
 
-		/** Method called upon SIGINT signal handler set in {@link #run()}
-		 *  Deletes files that were under construction.
-		 *
-		 * @param signal - unused
-		 */
+
+
+			/** Method called upon SIGINT signal handler set in {@link #run()}
+             *  Deletes files that were under construction.
+             *
+             * @param signal - unused
+             */
 		private void handleInterrupt(Signal signal){
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
 			// System.out.println("Interrupted by Ctrl+C: " + this.outputPath.getFileName());
@@ -522,7 +532,10 @@ public class ProductServer { //extends Cache {
 		}
 
 
-		/** Execute this task: delete, load, generate and/or send a product.
+		/** Execute this task: delete, load, generate a product, for example.
+		 *
+		 *  Processing is done inside the parent thread  – by default the main thread.
+		 *  To invoke this function as a separate thread, use #run().
 		 *
 		 * @see #run()
 		 *
@@ -742,11 +755,13 @@ public class ProductServer { //extends Cache {
 				// Assume Generator uses input similar to output (File or Object)
 				//final int inputActions = this.instructions.value & (ResultType.MEMORY | ResultType.FILE);
 				//final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
-				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
+
+				// Input generation uses parallel threads only if this product uses.
+				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE | ActionType.PARALLEL));
 				//inputInstructions.add(Instructions.GENERATE);
 				inputInstructions.add(ActionType.MAKE);
 				log.special(String.format("Input instructions: %s", inputInstructions));
-				//Map<String,Task> tasks = executeMany(this.inputs, new Actions(inputActions), null, log);
+
 				// Consider forwarding directives?
 				Map<String,Task> inputTasks = executeMany(this.inputs, inputInstructions, null, log);
 
@@ -1183,7 +1198,7 @@ public class ProductServer { //extends Cache {
 				if ((directives != null) && !directives.isEmpty())
 					log.note(String.format("Directives: %s = %s", key, directives));
 
-				log.info(String.format("Prepared TASK: %s = %s", key, task));
+				log.info(String.format("Prepared TASK: %s = %s [%s]", key, task, task.instructions));
 
 
 				task.log.setVerbosity(log.getVerbosity());
@@ -1220,16 +1235,19 @@ public class ProductServer { //extends Cache {
 
 			log.note(String.format("Starting (%d) tasks", tasks.size()));
 
+			/// Start as threads, if requested
 			for (Entry<String,Task> entry : tasks.entrySet()){
 				String key = entry.getKey();
 				Task task = entry.getValue();
-
-				try {
-					log.debug(String.format("Starting thread %s: %s", key, task));
-					task.start();
-				}
-				catch (IllegalStateException e){
-					log.error("Already running? " + e.toString());
+				if (task.instructions.isSet(ActionType.PARALLEL)) {
+					try {
+						// serverLog.special
+						log.info(String.format("Starting task[%d] '%s': %s as a thread", task.getTaskId(), key, task));
+						// log.debug(String.format("Starting thread '%s': %s", key, task));
+						task.start();
+					} catch (IllegalStateException e) {
+						log.error("Already running? " + e.toString());
+					}
 				}
 			}
 
@@ -1240,11 +1258,18 @@ public class ProductServer { //extends Cache {
 				String key = entry.getKey();
 				Task task = entry.getValue();
 				try {
-					task.join();
-					log.debug(String.format("Finished thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
-				}
-				catch (InterruptedException e) {
-					log.warn(String.format("Interrupted thread: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
+					if (task.instructions.involves(ActionType.PARALLEL)) {
+						task.join();
+					}
+					else {
+						// serverLog.special
+						log.info(String.format("Starting task '%s': %s (in main thread)", key, task));
+						task.execute();
+					}
+					log.info(String.format("Finished task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
+					//serverLog.special(String.format("Finished task: %s", task));
+				} catch (InterruptedException e) {
+					log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 					log.warn(String.format("Pending file? : ", task.outputPathTmp));
 				}
 				log.info(String.format("Final status: %s", task.log.indexedException));
@@ -1765,7 +1790,7 @@ public class ProductServer { //extends Cache {
 
 
 		// System.err.println("Eksit");
-		log.info("Exiting..");
+		log.debug("Exiting..");
 		log.close();
 		System.exit(result);
 

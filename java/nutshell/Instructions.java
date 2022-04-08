@@ -97,6 +97,8 @@ interface ActionType {
      */
     int DEBUG = 4096; // | INPUTLIST; // "OUTPUT=INFO"
 
+    int PARALLEL = 8192; // use threads
+
     /// Computation intensive products are computed in the background; return a notification receipt in HTML format.
     //  public static final int BATCH = 4096;
     int CLEAR_CACHE = 16384;
