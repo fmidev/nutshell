@@ -56,21 +56,21 @@ public class SimpleXML {
 		return document.createElement(tag.toString());
 	}
 
-	public Element createElement(String tag, String text){
-		Element element = document.createElement(tag);
+	public <T> Element createElement(T tag, String text){
+		Element element = document.createElement(tag.toString());
 		if (text != null)
 			element.setTextContent(text);
 		return element;
 	}
 
 
-	public Element appendElement(Element parent, String tag, String text){
-		Element element = createElement(tag, text);
+	public <T> Element appendElement(Element parent, T tag, String text){
+		Element element = createElement(tag.toString(), text);
 		parent.appendChild(element);
 		return element;
 	}
 
-	public Element appendElement(Element parent, String tag){
+	public <T> Element appendElement(Element parent, T tag){
 		return appendElement(parent, tag, null);
 	}
 

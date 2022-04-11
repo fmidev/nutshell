@@ -138,11 +138,11 @@ public class NutWeb extends HttpServlet {
 
 		SimpleHtml html = includeHtml(pageName); // what if fail?
 
-		Element base = html.getUniqueElement(SimpleHtml.BASE);
+		Element base = html.getUniqueElement(SimpleHtml.Tag.BASE);
 		base.setAttribute("href", request.getContextPath()+ '/'); // NEW 2022!
 
 		// debug
-		// html.appendElement(SimpleHtml.PRE, request.getContextPath());
+		// html.appendElement(SimpleHtml.Tag.PRE, request.getContextPath());
 
 		response.setStatus(HttpServletResponse.SC_OK); // tes
 		sendToStream(html.document, response);
@@ -168,17 +168,17 @@ public class NutWeb extends HttpServlet {
 			html = new SimpleHtml(path);
 		} catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
 			html = new SimpleHtml(this.getClass().getCanonicalName() + " Exception");
-			Element elem = html.getUniqueElement(SimpleHtml.PRE, "errorMsg");
+			Element elem = html.getUniqueElement(SimpleHtml.Tag.PRE, "errorMsg");
 			elem.setTextContent(e.getMessage());
 
-			Element elem2 = html.getUniqueElement(SimpleHtml.PRE, "fileName");
+			Element elem2 = html.getUniqueElement(SimpleHtml.Tag.PRE, "fileName");
 			elem2.setTextContent(path.toString());
 		}
 		// DOES NOT WORK: html.document.getElementById("main");
 		// https://docs.oracle.com/javase/6/docs/api/org/w3c/dom/Document.html#getElementById%28java.lang.String%29
-		html.main = html.getUniqueElement(SimpleHtml.SPAN, "main"); // html.createElement(SimpleHtml.SPAN)	;
+		html.main = html.getUniqueElement(SimpleHtml.Tag.SPAN, "main"); // html.createElement(SimpleHtml.Tag.SPAN)	;
 
-		Element elem = html.getUniqueElement(SimpleHtml.SPAN, "version");
+		Element elem = html.getUniqueElement(SimpleHtml.Tag.SPAN, "version");
 		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), httpRoot, htmlTemplate));
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " ?version? " +  ") built " + getServletConfig().getInitParameter("buildDate") + httpRoot);
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") installed " + getServletConfig().getInitParameter("installDate"));
@@ -218,8 +218,8 @@ public class NutWeb extends HttpServlet {
 			 */
 		}
 		catch (Exception e){
-			html.appendElement(SimpleHtml.H2, "Failed in reading file: " + filename);
-			html.appendElement(SimpleHtml.PRE, e.toString());
+			html.appendTag(SimpleHtml.Tag.H2, "Failed in reading file: " + filename);
+			html.appendTag(SimpleHtml.Tag.PRE, e.toString());
 		}
 		return html;
 	}
@@ -238,22 +238,22 @@ public class NutWeb extends HttpServlet {
 		response.setContentType("text/html");
 
 		SimpleHtml html = getHtmlPage();
-		html.appendElement(SimpleHtml.H1, statusStr);
-		html.appendElement(SimpleHtml.TT, "HttpResponse: " );
-		html.appendElement(SimpleHtml.CODE, status + " " + MapUtils.getConstantFieldName(HttpServletResponse.class, status));
+		html.appendTag(SimpleHtml.Tag.H1, statusStr);
+		html.appendTag(SimpleHtml.Tag.TT, "HttpResponse: " );
+		html.appendTag(SimpleHtml.Tag.CODE, status + " " + MapUtils.getConstantFieldName(HttpServletResponse.class, status));
 		if (description instanceof Exception){
-			html.appendElement(SimpleHtml.H2, ((Exception)description).getMessage());
+			html.appendTag(SimpleHtml.Tag.H2, ((Exception)description).getMessage());
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			((Exception)description).printStackTrace(pw);
-			html.appendElement(SimpleHtml.PRE, sw.toString());
+			html.appendTag(SimpleHtml.Tag.PRE, sw.toString());
 		}
 		else if (description instanceof Map){
 			html.appendTable((Map) description, "Diagnostics");
 		}
 		else {
-			//html.appendElement(SimpleHtml.H2, "Error"); (only if error...)
-			html.appendElement(SimpleHtml.PRE, description.toString());
+			//html.appendTag(SimpleHtml.Tag.H2, "Error"); (only if error...)
+			html.appendTag(SimpleHtml.Tag.PRE, description.toString());
 		}
 
 
@@ -270,19 +270,19 @@ public class NutWeb extends HttpServlet {
 
 	protected void addServerStatus(SimpleHtml html) throws IOException{
 
-		html.appendElement(SimpleHtml.H1, "Nutlet setup");
+		html.appendTag(SimpleHtml.Tag.H1, "Nutlet setup");
 		html.appendTable(setup, null);
 
-		html.appendElement(SimpleHtml.H1, "Environment variables");
+		html.appendTag(SimpleHtml.Tag.H1, "Environment variables");
 		html.appendTable(System.getenv(), null);
 
 	}
 
 	protected void addRequestStatus(SimpleHtml html, HttpServletRequest request) {
 		if (request != null) {
-			html.appendElement(SimpleHtml.H1, "Query string");
+			html.appendTag(SimpleHtml.Tag.H1, "Query string");
 			html.appendTable(request.getParameterMap(), null);
-			html.appendElement(SimpleHtml.H1, "HttpServletRequest");
+			html.appendTag(SimpleHtml.Tag.H1, "HttpServletRequest");
 			//html.appendTable(getConf(request), null);
 			html.appendTable(MapUtils.getMethods(request), null);
 		}

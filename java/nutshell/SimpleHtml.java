@@ -27,13 +27,38 @@ import java.util.Map;
 public class SimpleHtml extends SimpleXML{
 
 	enum Tag {
+		HTML,
+		HEAD,
+		TITLE,
+		META,
+		BASE,
+		BODY,
+		H1,
+		H2,
+		H3,
+		H4,
+		H5,
 		EMBED,
 		IMG,
-		PRE;
+		TABLE,
+		TR,
+		TH,
+		TD,
+		LI,
+		P,
+		PRE,
+		CODE,
+		TT,
+		A,
+		STYLE,
+		SPAN,
+		DIV,
+		LINK;
 	}
 
 	/** Html starying tag.
 	 */
+	/*
 	public static final String HTML  = "html";
 	public static final String HEAD  = "head";
 	public static final String TITLE = "title";
@@ -55,7 +80,7 @@ public class SimpleHtml extends SimpleXML{
 	public static final String PRE   = "pre";
 	public static final String CODE  = "code";
 	public static final String TT    = "tt";
-
+	*/
 	/** Html anchor (link) tag.
 	 */
 	public static final String A     = "a";
@@ -90,18 +115,18 @@ public class SimpleHtml extends SimpleXML{
 		this.root = this.document.createElementNS("http://www.w3.org/1999/xhtml", "html");
 		this.document.appendChild(this.root);
 
-		this.head = this.appendElement(this.root, HEAD);
+		this.head = this.appendElement(this.root, Tag.HEAD);
 
 		// <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		this.encoding = this.appendElement(this.head, META);
+		this.encoding = this.appendElement(this.head, Tag.META);
 		this.encoding.setAttribute("http-equiv", "Content-Type");
 		this.encoding.setAttribute("content", "text/html; charset=UTF-8");
 
-		this.title = this.appendElement(this.head, TITLE);
+		this.title = this.appendElement(this.head, Tag.TITLE);
 		if (title != null)
 			this.title.setTextContent(title.toString());
 
-		this.body = this.appendElement(this.root, BODY);
+		this.body = this.appendElement(this.root, Tag.BODY);
 		this.main = this.body;
 	}
 
@@ -116,19 +141,19 @@ public class SimpleHtml extends SimpleXML{
 		this.root = document.getDocumentElement();
 
 		// Search for HEAD element (should be unique)
-		this.head = getUniqueElement("head");
+		this.head = getUniqueElement(Tag.HEAD);
 		// Override...
-		this.encoding = this.appendElement(this.head, META);
+		this.encoding = this.appendElement(this.head, Tag.META);
 		this.encoding.setAttribute("http-equiv", "Content-Type");
 		this.encoding.setAttribute("content", "text/html; charset=UTF-8");
 
-		this.title = getUniqueElement("title");
+		this.title = getUniqueElement(Tag.TITLE);
 		if (this.title.getParentNode() == null){
 			this.head.appendChild(this.title);
 		}
 
 		// Search for BODY element (should be unique)
-		this.body = getUniqueElement("body");
+		this.body = getUniqueElement(Tag.BODY);
 		this.main = this.body;
 	}
 
@@ -137,10 +162,10 @@ public class SimpleHtml extends SimpleXML{
 	 * @param tag - HTML tag, like "TITLE"
 	 * @return
 	 */
-	protected Element getUniqueElement(String tag) {
-		NodeList nodes = this.document.getElementsByTagName(tag);
+	protected Element getUniqueElement(Tag tag) {
+		NodeList nodes = this.document.getElementsByTagName(tag.toString());
 		if (nodes.getLength() == 0){
-			return this.appendElement(tag);
+			return this.appendTag(tag);
 		}
 		else {
 			// Could throw exception if more than 1 elements?
@@ -154,9 +179,9 @@ public class SimpleHtml extends SimpleXML{
 	 * @param id - standard HTML attribute "id"
 	 * @return Desired element
 	 */
-	protected Element getUniqueElement(String tag, String id){
+	protected Element getUniqueElement(Tag tag, String id){
 
-		NodeList nodes = this.document.getElementsByTagName(tag);
+		NodeList nodes = this.document.getElementsByTagName(tag.toString());
 		final int N = nodes.getLength();
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node node = nodes.item(i);
@@ -167,7 +192,7 @@ public class SimpleHtml extends SimpleXML{
 					return elem;
 			}
 		}
-		Element elem = this.appendElement(tag);
+		Element elem = this.appendTag(tag);
 		elem.setAttribute("id", id);
 		return elem;
 	}
@@ -175,12 +200,12 @@ public class SimpleHtml extends SimpleXML{
 
 
 
-	public Element appendElement(String tag, String text){
-		return appendElement(this.main, tag, text);
+	public Element appendTag(Tag tag, String text){
+		return super.appendElement(this.main, tag.toString(), text);
 	}
 
-	public Element appendElement(String tag){
-		return appendElement(this.main, tag);
+	public Element appendTag(Tag tag){
+		return super.appendElement(this.main, tag.toString());
 	}
 
 	public Element appendElement(Element elem){
@@ -225,11 +250,11 @@ public class SimpleHtml extends SimpleXML{
 
 	public <K,V> Element appendTable(Map<K,V> map, String title){ //} throws IOException {
 
-		Element table = this.appendElement(TABLE);
+		Element table = this.appendTag(Tag.TABLE);
 
 		if (title != null){
-			Element tr = this.appendElement(table, TR);
-			Element th = this.appendElement(tr, TH);
+			Element tr = this.appendElement(table, Tag.TR);
+			Element th = this.appendElement(tr, Tag.TH);
 			th.setAttribute("colspan", "2");
 			th.setAttribute("class", "LEAD");
 			th.setTextContent(title);
@@ -237,11 +262,11 @@ public class SimpleHtml extends SimpleXML{
 		}
 
 		for (Map.Entry<K, V> entry : map.entrySet()){
-			Element tr = this.appendElement(table, TR);
-			Element tdKey = this.appendElement(tr, TD);
+			Element tr = this.appendElement(table, Tag.TR);
+			Element tdKey = this.appendElement(tr, Tag.TD);
 			tdKey.setAttribute("class", "KEY");
 			tdKey.setTextContent(entry.getKey().toString());
-			Element tdVal = this.appendElement(tr, TD);
+			Element tdVal = this.appendElement(tr, Tag.TD);
 			tdVal.setAttribute("class", "value");
 			V value = entry.getValue();
 			if (value != null) {
@@ -347,7 +372,7 @@ public class SimpleHtml extends SimpleXML{
 			catch (Exception e){
 				String msg = e.getMessage();
 				//System.err.println(msg);
-				Element li = html.appendElement(PRE);
+				Element li = html.appendTag(Tag.PRE);
 				li.setTextContent(msg);
 				//html.title.setTextContent(msg);
 			}
@@ -355,7 +380,7 @@ public class SimpleHtml extends SimpleXML{
 		}
 		else {
 			for (String arg : args) {
-				Element li = html.appendElement(LI);
+				Element li = html.appendTag(Tag.LI);
 				li.setTextContent(arg);
 				//html.title.setTextContent(arg); //?
 			}

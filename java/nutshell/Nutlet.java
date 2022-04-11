@@ -165,7 +165,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				html.appendTable(request.getParameterMap(), "Several parameters");
 			}
 
-			Element elem = html.getUniqueElement(SimpleHtml.SPAN, "pageName");
+			Element elem = html.getUniqueElement(SimpleHtml.Tag.SPAN, "pageName");
 			elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, pageName ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
@@ -338,21 +338,21 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			SimpleHtml html = getHtmlPage(); // slows production?
 
-			html.appendElement(SimpleHtml.H1, "Product: " + task.info.PRODUCT_ID);
-			//html.createElement(SimpleHtml.P, "No ST REAM or REDIRECT were requested, so this page appears.");
+			html.appendTag(SimpleHtml.Tag.H1, "Product: " + task.info.PRODUCT_ID);
+			//html.createElement(SimpleHtml.Tag.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
-			Element elem = html.createElement(SimpleHtml.PRE, task.log.indexedException.getMessage());
+			Element elem = html.createElement(SimpleHtml.Tag.PRE, task.log.indexedException.getMessage());
 
 			switch (task.log.indexedException.index){
 				case HttpServletResponse.SC_PRECONDITION_FAILED:
-					html.appendElement(SimpleHtml.H2, "Input problem(s)");
-					html.appendElement(SimpleHtml.P, "See input list further below");
+					html.appendTag(SimpleHtml.Tag.H2, "Input problem(s)");
+					html.appendTag(SimpleHtml.Tag.P, "See input list further below");
 					elem.setAttribute("class", "error");
 					break;
 				default:
 					// General, section-wise handling
 					if (task.log.indexedException.index > 400) {
-						html.appendElement(SimpleHtml.H2, "Product generator error");
+						html.appendTag(SimpleHtml.Tag.H2, "Product generator error");
 						elem.setAttribute("class", "error");
 					}
 					else if (task.log.indexedException.index < 200)
@@ -391,6 +391,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						graphElem.setAttribute("type", "image/svg+xml");
 						//graphElem.setAttribute("border", "1");
 						graphElem.setAttribute("title", relativeGraphPath.toString());
+						graphElem.setAttribute("id", "graph");
 						html.appendElement(graphElem);
 						// <embed id="viewMain" src="" type="image/svg+xml"></embed>
 					}
@@ -430,9 +431,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				html.appendTable(task.getParamEnv(), "Product generator environment");
 			}
 
-			html.appendElement(SimpleHtml.H2, "Log");
+			html.appendTag(SimpleHtml.Tag.H2, "Log");
 			if ((task.log.logFile!=null) && task.log.logFile.exists()){
-				html.appendElement(SimpleHtml.H3, "Task log");
+				html.appendTag(SimpleHtml.Tag.H3, "Task log");
 				StringBuilder builder = new StringBuilder();
 				BufferedReader reader = new BufferedReader(new FileReader(task.log.logFile));
 				String line = null;
@@ -442,26 +443,26 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					// builder.append("<b>x</b>").append(line).append('\n');
 					builder.append(line).append('\n');
 				}
-				html.appendElement(SimpleHtml.PRE, builder.toString()).setAttribute("class", "code");
+				html.appendTag(SimpleHtml.Tag.PRE, builder.toString()).setAttribute("class", "code");
 
 			}
 
-			// html.appendElement(SimpleHtml.H3, "NutLet log");
-			//html.appendElement(SimpleHtml.PRE, os.toString("UTF-8")).setAttribute("class", "code");
+			// html.appendTag(SimpleHtml.Tag.H3, "NutLet log");
+			//html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF-8")).setAttribute("class", "code");
 			// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
 
 			/*
-			html.appendElement(SimpleHtml.H3, "ProductServer log");
-			html.appendElement(SimpleHtml.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
-			html.appendElement(SimpleHtml.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
+			html.appendTag(SimpleHtml.Tag.H3, "ProductServer log");
+			html.appendTag(SimpleHtml.Tag.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
+			html.appendTag(SimpleHtml.Tag.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
 			 */
-			html.appendElement(SimpleHtml.H3, "Corresponding command lines:");
+			html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
 			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
 			String name = productServer.getClass().getCanonicalName();
-			html.appendElement(SimpleHtml.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
+			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
 
 			String cmdLine2 = "nutshell --verbose --conf %s --instructions ";
-			html.appendElement(SimpleHtml.PRE, String.format(cmdLine2, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
+			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
 
 			html.appendTable(task.info.getParamEnv(null), "Product parameters");
 
@@ -489,7 +490,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	@Override
 	protected void addServerStatus(SimpleHtml html) throws IOException{
 
-		html.appendElement(SimpleHtml.H1, "Product Server setup");
+		html.appendTag(SimpleHtml.Tag.H1, "Product Server setup");
 		html.appendTable(productServer.setup, null);
 
 		super.addServerStatus(html);

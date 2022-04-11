@@ -784,6 +784,7 @@ public class ProductServer { //extends Cache {
 				if (graph != null){
 					node = graph.getNode(info.getID());
 					node.attributes.put("href", "?product=" + info.getFilename());
+					node.attributes.put("class", "clickable");
 				}
 				//node.attributes.put("href", "http://www.fmi.fi");
 
@@ -805,9 +806,9 @@ public class ProductServer { //extends Cache {
 
 					if (graph != null) {
 						inputNode = graph.getNode(inputTask.info.getID());
+						inputNode.attributes.put("class", "clickable");
 						link = graph.addLink(node, inputNode);
 						link.attributes.put("label", key);
-						link.attributes.put("class", "clickable");
 						// TODO: BaseURL and  ENCODE
 						//inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s&instructions=GENERATE,DEBUG", inputTask.info.getFilename()));
 						inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", inputTask.info.getFilename()));
