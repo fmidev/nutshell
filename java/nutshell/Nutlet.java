@@ -12,9 +12,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import nutshell.ProductServer.Task;
+import org.w3c.dom.Node;
 
 
 public class Nutlet extends NutWeb { //HttpServlet {
@@ -165,7 +167,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				html.appendTable(request.getParameterMap(), "Several parameters");
 			}
 
-			Element elem = html.getUniqueElement(SimpleHtml.Tag.SPAN, "pageName");
+			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
 			elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, pageName ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
@@ -382,15 +384,20 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					if ((task.relativeGraphPath!=null)){
 						Path dotFile = productServer.cacheRoot.resolve(task.relativeGraphPath);
 						task.log.special(String.format("Writing graph file %s", dotFile));
+						task.graph.dotToFile(dotFile.toString()+".dot", "nutshell.css");
 						task.graph.dotToFile(dotFile.toString(), "nutshell.css");
+
 						Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
 						map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
 						//Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
 						Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
-						graphElem.setAttribute("src", relativeGraphPath.toString());
+						// graphElem.setAttribute("src", relativeGraphPath.toString());
 						graphElem.setAttribute("type", "image/svg+xml");
 						//graphElem.setAttribute("border", "1");
-						graphElem.setAttribute("title", relativeGraphPath.toString());
+						Document graphSvg = SimpleXML.readDocument(dotFile);
+						Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
+						graphElem.appendChild(node);
+						graphElem.setAttribute("title", task.info.PRODUCT_ID);
 						graphElem.setAttribute("id", "graph");
 						html.appendElement(graphElem);
 						// <embed id="viewMain" src="" type="image/svg+xml"></embed>

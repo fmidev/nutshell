@@ -91,6 +91,16 @@ public class Graph extends Entity {
 
     void dotToFile(String outfile, String format, String styleSheet){ /// todo: IOException
 
+        if (format.equals("dot")){
+            try {
+                PrintStream printStream = new PrintStream(new FileOutputStream(outfile));
+                toStream(printStream);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
         String cmd = String.format("dot -T%s -o %s", format, outfile);
         // TODO: add error output read
         // String cmd = String.format("dot -T%s -stylesheet='%s' -o %s", format, styleSheet, outfile);

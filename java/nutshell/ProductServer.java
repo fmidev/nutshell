@@ -218,6 +218,7 @@ public class ProductServer { //extends Cache {
 	protected void dumpStatisticsDot(PrintStream stream){
 		//PrintStream stream = System.out;
 
+		/*
 		stream.println("digraph P");
 		stream.println('{');
 		// nodesep=.05;
@@ -241,6 +242,8 @@ public class ProductServer { //extends Cache {
 			}
 		}
 		stream.println('}');
+
+		 */
 	}
 
 	Path getProductDir(String productID){
@@ -383,7 +386,15 @@ public class ProductServer { //extends Cache {
 			this.instructions.set(instructions);
 			if (this.instructions.isSet(ActionType.INFO)){
 				this.graph = new Graph(this.info.PRODUCT_ID);
+				/*
+				Graph.Node nodeDef = graph.addNode("node");
+				nodeDef.attributes.put("shape", "ellipse");
+				nodeDef.attributes.put("style", "filled");
+				nodeDef.attributes.put("class", "clickable");
+				*/
+				// TODO: fix Graph process write problem!
 			}
+
 			this.regenerateDepth = defaultRemakeDepth;
 
 
@@ -782,9 +793,17 @@ public class ProductServer { //extends Cache {
 
 				//if (instructions.involves(ActionType.DEBUG)){
 				if (graph != null){
-					node = graph.getNode(info.getID());
-					node.attributes.put("href", "?product=" + info.getFilename());
-					node.attributes.put("class", "clickable");
+					if (graph.hasNode(info.getID())){
+						node = graph.getNode(info.getID());
+					}
+					else {
+						node = graph.getNode(info.getID());
+						node.attributes.put("label", String.format("%s\n(%s)", node.getName(), info.FORMAT));
+						node.attributes.put("href", "?product=" + info.getFilename());
+						// node.attributes.put("class", "clickable");
+						// node.attributes.put("style", "filled");
+						node.attributes.put("fillcolor", "lightblue");
+					}
 				}
 				//node.attributes.put("href", "http://www.fmi.fi");
 
@@ -806,9 +825,15 @@ public class ProductServer { //extends Cache {
 
 					if (graph != null) {
 						inputNode = graph.getNode(inputTask.info.getID());
-						inputNode.attributes.put("class", "clickable");
+						//inputTask.info.getParamEnv();
+						//List<String> attribs = new ArrayList<>();
+						//Map<String, Object> p = inputTask.info.getParamEnv(null);
+						//attribs.add(p.getOrDefault("Format", ""))
+						inputNode.attributes.put("label", String.format("%s\n(%s)", inputNode.getName(),inputTask.info.FORMAT));
+						// inputNode.attributes.put("class", "clickable");
 						link = graph.addLink(node, inputNode);
-						link.attributes.put("label", key);
+						// link.attributes.put("label", key);
+						link.attributes.put("title", "$"+key); // SVG only
 						// TODO: BaseURL and  ENCODE
 						//inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s&instructions=GENERATE,DEBUG", inputTask.info.getFilename()));
 						inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", inputTask.info.getFilename()));
@@ -830,8 +855,8 @@ public class ProductServer { //extends Cache {
 						}
 						 */
 						if (link != null) {
-							inputNode.attributes.put("color", "green");
-							inputNode.attributes.put("style", "filled");
+							//inputNode.attributes.put("color", "lightgreen");
+							//inputNode.attributes.put("style", "filled");
 							inputNode.attributes.put("fillcolor", "lightgreen");
 							if (inputTask.log.indexedException.index > 300) {
 								link.attributes.put("style", "dashed");
@@ -850,6 +875,7 @@ public class ProductServer { //extends Cache {
 							inputNode.attributes.put("style", "dotted");
 							inputNode.attributes.put("fillcolor", "pink");
 							link.attributes.put("color", "red");
+
 						}
 					}
 					inputTask.log.close(); // close PrintStream

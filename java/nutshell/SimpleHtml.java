@@ -44,6 +44,8 @@ public class SimpleHtml extends SimpleXML{
 		TR,
 		TH,
 		TD,
+		UL,
+		OL,
 		LI,
 		P,
 		PRE,
@@ -54,6 +56,11 @@ public class SimpleHtml extends SimpleXML{
 		SPAN,
 		DIV,
 		LINK;
+
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase();
+		}
 	}
 
 	/** Html starying tag.
@@ -83,12 +90,13 @@ public class SimpleHtml extends SimpleXML{
 	*/
 	/** Html anchor (link) tag.
 	 */
+	/*
 	public static final String A     = "a";
 	public static final String STYLE = "style";
 	public static final String SPAN = "span";
 	public static final String DIV   = "div";
 	public static final String LINK  = "link";
-
+	*/
 
 	final public Element root;
 	final public Element head;
@@ -141,31 +149,36 @@ public class SimpleHtml extends SimpleXML{
 		this.root = document.getDocumentElement();
 
 		// Search for HEAD element (should be unique)
-		this.head = getUniqueElement(Tag.HEAD);
+		this.head = getUniqueElement(this.root, Tag.HEAD);
 		// Override...
 		this.encoding = this.appendElement(this.head, Tag.META);
 		this.encoding.setAttribute("http-equiv", "Content-Type");
 		this.encoding.setAttribute("content", "text/html; charset=UTF-8");
 
-		this.title = getUniqueElement(Tag.TITLE);
-		if (this.title.getParentNode() == null){
-			this.head.appendChild(this.title);
+		this.title = getUniqueElement(this.head, Tag.TITLE);
+		if (this.title.getParentNode() == null){ // ???
+			this.head.appendChild(this.title); // REMOVE!
 		}
 
 		// Search for BODY element (should be unique)
-		this.body = getUniqueElement(Tag.BODY);
+		this.body = getUniqueElement(this.root, Tag.BODY);
 		this.main = this.body;
 	}
 
 	/** Returns an element, or creates it if missing.
 	 *
+	 *  If an element is
+	 *
 	 * @param tag - HTML tag, like "TITLE"
 	 * @return
 	 */
-	protected Element getUniqueElement(Tag tag) {
-		NodeList nodes = this.document.getElementsByTagName(tag.toString());
+	protected Element getUniqueElement(Element scope, Tag tag) {
+
+		NodeList nodes = scope.getElementsByTagName(tag.toString());
 		if (nodes.getLength() == 0){
-			return this.appendTag(tag);
+			Element elem = this.createElement(tag);
+			scope.appendChild(elem);
+			return elem;
 		}
 		else {
 			// Could throw exception if more than 1 elements?
@@ -179,21 +192,21 @@ public class SimpleHtml extends SimpleXML{
 	 * @param id - standard HTML attribute "id"
 	 * @return Desired element
 	 */
-	protected Element getUniqueElement(Tag tag, String id){
+	protected Element getUniqueElement(Element scope, Tag tag, String id){
 
-		NodeList nodes = this.document.getElementsByTagName(tag.toString());
+		NodeList nodes = scope.getElementsByTagName(tag.toString());
 		final int N = nodes.getLength();
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node node = nodes.item(i);
 			if (node.hasAttributes()){
 				Element elem = (Element) node;
-				//if (elem.hasAttribute("id"))
 				if (elem.getAttribute("id").equals(id))
 					return elem;
 			}
 		}
-		Element elem = this.appendTag(tag);
+		Element elem = this.createElement(tag);
 		elem.setAttribute("id", id);
+		scope.appendChild(elem);
 		return elem;
 	}
 
@@ -216,14 +229,14 @@ public class SimpleHtml extends SimpleXML{
 
 	public Element appendStyleLink(String link){
 		//<link href="/directory/css/style.css" rel="stylesheet">
-		Element element = appendElement(this.head, SimpleHtml.LINK);
+		Element element = appendElement(this.head, Tag.LINK);
 		element.setAttribute("href", link);
 		element.setAttribute("rel", "stylesheet");
 		return element;
 	}
 
 	public Element appendStyleElement(String style){
-		Element element = appendElement(this.head, SimpleHtml.STYLE, style);
+		Element element = appendElement(this.head, Tag.STYLE, style);
 		element.setAttribute("type", "text/css");
 		element.setTextContent(style);
 		return element;
@@ -232,7 +245,7 @@ public class SimpleHtml extends SimpleXML{
 	public Element createAnchor(Object url, Object text) {
 		if (text == null)
 			text = url;
-		Element elem = createElement(SimpleHtml.A, text.toString());
+		Element elem = createElement(Tag.A, text.toString());
 		elem.setAttribute("href",  url.toString());
 		elem.setAttribute("target", "_new");
 		return elem;

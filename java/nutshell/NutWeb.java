@@ -138,7 +138,7 @@ public class NutWeb extends HttpServlet {
 
 		SimpleHtml html = includeHtml(pageName); // what if fail?
 
-		Element base = html.getUniqueElement(SimpleHtml.Tag.BASE);
+		Element base = html.getUniqueElement(html.head, SimpleHtml.Tag.BASE);
 		base.setAttribute("href", request.getContextPath()+ '/'); // NEW 2022!
 
 		// debug
@@ -168,17 +168,37 @@ public class NutWeb extends HttpServlet {
 			html = new SimpleHtml(path);
 		} catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
 			html = new SimpleHtml(this.getClass().getCanonicalName() + " Exception");
-			Element elem = html.getUniqueElement(SimpleHtml.Tag.PRE, "errorMsg");
-			elem.setTextContent(e.getMessage());
 
-			Element elem2 = html.getUniqueElement(SimpleHtml.Tag.PRE, "fileName");
-			elem2.setTextContent(path.toString());
+			Element ul = html.getUniqueElement(html.body, SimpleHtml.Tag.UL, "list");
+			html.appendElement(ul, SimpleHtml.Tag.LI, httpRoot);
+			html.appendElement(ul, SimpleHtml.Tag.LI, htmlTemplate);
+			html.appendElement(ul, SimpleHtml.Tag.LI, e.getMessage());
+			html.appendElement(ul, SimpleHtml.Tag.LI, e.toString());
+			for (StackTraceElement stackTraceElement: e.getStackTrace()) {
+				html.appendTag(SimpleHtml.Tag.LI, stackTraceElement.toString());
+			}
+
+			/*
+			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.PRE, "error");
+			elem.setTextContent(e.toString()); //.getMessage());
+
+			Element elem2 = html.getUniqueElement(html.body, SimpleHtml.Tag.PRE, "errorMsg");
+			elem2.setTextContent(e.getMessage()); //.getMessage());
+
+			Element elem3 = html.getUniqueElement(html.body, SimpleHtml.Tag.PRE, "fileName");
+			elem3.setTextContent(path.toString());
+
+			 */
 		}
 		// DOES NOT WORK: html.document.getElementById("main");
 		// https://docs.oracle.com/javase/6/docs/api/org/w3c/dom/Document.html#getElementById%28java.lang.String%29
-		html.main = html.getUniqueElement(SimpleHtml.Tag.SPAN, "main"); // html.createElement(SimpleHtml.Tag.SPAN)	;
+		html.main = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "main"); // html.createElement(SimpleHtml.Tag.SPAN)	;
 
-		Element elem = html.getUniqueElement(SimpleHtml.Tag.SPAN, "version");
+		if (html.main == null){
+			html.appendTag(SimpleHtml.Tag.PRE, "Error: could not set 'main' element");
+		}
+
+		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
 		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), httpRoot, htmlTemplate));
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " ?version? " +  ") built " + getServletConfig().getInitParameter("buildDate") + httpRoot);
 		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") installed " + getServletConfig().getInitParameter("installDate"));

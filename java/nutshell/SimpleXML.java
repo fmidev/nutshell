@@ -65,7 +65,7 @@ public class SimpleXML {
 
 
 	public <T> Element appendElement(Element parent, T tag, String text){
-		Element element = createElement(tag.toString(), text);
+		Element element = createElement(tag, text);
 		parent.appendChild(element);
 		return element;
 	}
