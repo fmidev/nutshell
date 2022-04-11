@@ -4,6 +4,10 @@ package nutshell;
 import java.lang.reflect.Field;
 import java.util.*;
 
+
+/**
+ *
+ */
 public class Flags {
 
     public Flags(){
@@ -171,40 +175,50 @@ public class Flags {
     */
     enum Liput {
         MIKA,
-        MÄKI
+        MÄKI;
+
+        int bit(){
+            return 1 << ordinal();
+        }
     }
 
-    protected static int count;
-
-    static int mika = 0;
+    protected static int counter;
 
     static {
-        count = 1;
+        counter = 0;
     }
+
+    public static int getBit(){
+      return 1 << ++counter;
+    };
+
 
     public static void main(String[] args) {
 
         //class Lipat extends Liput {
         //}
 
-        //Liput liput;
-        System.out.println(Liput.MIKA.ordinal());
-        System.out.println(Liput.MÄKI.ordinal());
-        System.out.println(String.format(" %d ", Liput.MÄKI));
+        Liput liput1 = Liput.MIKA;
+        Liput liput2 = Liput.MÄKI;
+        System.out.println(Liput.MIKA.bit() | Liput.MÄKI.bit());
+        // System.out.println(Liput.MIKA.ordinal());
+        // System.out.println(Liput.MÄKI.ordinal());
+        System.out.println(String.format(" %d ", Liput.MÄKI.ordinal()));
+        System.out.println(String.format(" %s ", Liput.MÄKI));
         //Liput.MIKA.ordinal();
 
         // class Access { // extends Flags implements AccessFlags {
         // class Access extends Flags implements AccessFlags {
         class Access extends Flags { // implements AccessFlags {
-            static public final int READ  = 1;
-            static public final int WRITE = 2;
-            static public final int EXEC  = 4;
+            public final int READ  = Flags.getBit();
+            public final int WRITE = Flags.getBit();
+            public final int EXEC  = Flags.getBit();
         }
 
         Access access2 = new Access();
 
         Access access = new Access(){
-            final public int STREAM = 16;
+            final public int STREAM = Flags.getBit();
             final public int SUDO = WRITE|READ;
         };
 

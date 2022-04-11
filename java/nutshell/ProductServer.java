@@ -90,7 +90,7 @@ public class ProductServer { //extends Cache {
 
 	/// Experimental log of products and their inputs(s)
 	public boolean collectStatistics = false;
-	public Graph graph = new Graph("ProductServer");
+	//public Graph graph = new Graph("ProductServer");
 	public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
 	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
@@ -334,7 +334,7 @@ public class ProductServer { //extends Cache {
 
 		final public Instructions instructions = new Instructions();
 
-		public int remakeDepth = 0;
+		public int regenerateDepth = 0;
 		//public boolean parallel = true;
 
 		public Path timeStampDir;
@@ -344,7 +344,9 @@ public class ProductServer { //extends Cache {
 		public Path relativeOutputDirTmp;
 		public Path relativeOutputPath;
 
+		// Logging & diagnostics
 		public Path relativeLogPath;
+		public Path relativeGraphPath;
 
 		public Path outputDir;
 		public Path outputDirTmp;
@@ -355,6 +357,9 @@ public class ProductServer { //extends Cache {
 		//public final Map<String,String> directives = new HashMap<>();
 		public final Map<String,String> inputs = new HashMap<>();
 		public final Map<String,Object> retrievedInputs = new HashMap<>();
+
+		public Graph graph = null;
+
 
 		/** Product generation task defining a product instance and operations on it.
 		 *
@@ -376,8 +381,10 @@ public class ProductServer { //extends Cache {
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
-
-			this.remakeDepth = defaultRemakeDepth;
+			if (this.instructions.isSet(ActionType.INFO)){
+				this.graph = new Graph(this.info.PRODUCT_ID);
+			}
+			this.regenerateDepth = defaultRemakeDepth;
 
 
 			// Relative
@@ -389,6 +396,7 @@ public class ProductServer { //extends Cache {
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			this.relativeLogPath    = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
+			this.relativeGraphPath  = relativeOutputDir.resolve(filename + "." + getTaskId() + ".svg");
 
 			// Absolute
 			this.outputDir     = cacheRoot.resolve(this.relativeOutputDir);
@@ -531,6 +539,7 @@ public class ProductServer { //extends Cache {
 			}
 		}
 
+		public Object result;
 
 		/** Execute this task: delete, load, generate a product, for example.
 		 *
@@ -568,8 +577,8 @@ public class ProductServer { //extends Cache {
 				instructions.add(ResultType.FILE);
 			}
 
-			if (instructions.involves(ActionType.MAKE) && (remakeDepth > 0)){
-				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", remakeDepth));
+			if (instructions.involves(ActionType.MAKE) && (regenerateDepth > 0)){
+				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", regenerateDepth));
 				instructions.add(ActionType.GENERATE);
 			}
 
@@ -660,7 +669,7 @@ public class ProductServer { //extends Cache {
 
 
 			// Retrieve Geneator, if needed
-			if (instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.DEBUG)){
+			if (instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.INFO)){
 
 				log.log(HttpLog.HttpStatus.OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
 				try {
@@ -682,7 +691,7 @@ public class ProductServer { //extends Cache {
 					log.log(e);
 					instructions.remove(Instructions.GENERATE);
 					instructions.remove(Instructions.INPUTLIST);
-					instructions.remove(Instructions.DEBUG);
+					instructions.remove(Instructions.INFO);
 				}
 
 			}
@@ -769,57 +778,87 @@ public class ProductServer { //extends Cache {
 
 				// Collect results
 				// Statistics
-				Graph.Node node = graph.getNode(info.getID());
-				node.attributes.put("href", "http://www.fmi.fi");
+				Graph.Node node = null;
 
-				for (Entry<String,Task> entry : inputTasks.entrySet()){
+				//if (instructions.involves(ActionType.DEBUG)){
+				if (graph != null){
+					node = graph.getNode(info.getID());
+					node.attributes.put("href", "?product=" + info.getFilename());
+				}
+				//node.attributes.put("href", "http://www.fmi.fi");
+
+				for (Entry<String,Task> entry : inputTasks.entrySet()) {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
-					if (remakeDepth > 0){
-						inputTask.remakeDepth = remakeDepth -1;
-						log.experimental(String.format("Input cache clearance: %s", inputTask.remakeDepth));
+
+					if (regenerateDepth > 0) {
+						inputTask.regenerateDepth = regenerateDepth - 1;
+						log.experimental(String.format("Input cache clearance: %s", inputTask.regenerateDepth));
 						//instructions.add(ActionType.GENERATE);
+					} else {
+						inputTask.regenerateDepth = 0;
 					}
-					else {
-						inputTask.remakeDepth = 0;
+
+					Graph.Node inputNode = null;
+					Graph.Link link = null;
+
+
+					if (graph != null) {
+						inputNode = graph.getNode(inputTask.info.getID());
+						link = graph.addLink(node, inputNode);
+						link.attributes.put("label", key);
+						link.attributes.put("class", "clickable");
+						// TODO: BaseURL and  ENCODE
+						//inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s&instructions=GENERATE,DEBUG", inputTask.info.getFilename()));
+						inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", inputTask.info.getFilename()));
 					}
 
 
-					Graph.Node inputNode = graph.getNode(inputTask.info.getID());
-					Graph.Link link = graph.addLink(node, inputNode);
-					link.attributes.put("label", key);
 
-					if (inputTask.result != null){
+					if (inputTask.result != null) {
 						String r = inputTask.result.toString();
 						log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
 						// Stats
 						inputStats.put(key, inputTask.info.getID());
+						/*
 						if (collectStatistics) {
 							if (!statistics.containsKey(inputTask.info.getID()))
 								statistics.put(inputTask.info.getID(), new HashMap<>()); // Marker
 
 						}
-						link.attributes.put("color", "green");
-						if (inputTask.log.indexedException.index > 300){
-							link.attributes.put("style", "dashed");
+						 */
+						if (link != null) {
+							inputNode.attributes.put("color", "green");
+							inputNode.attributes.put("style", "filled");
+							inputNode.attributes.put("fillcolor", "lightgreen");
+							if (inputTask.log.indexedException.index > 300) {
+								link.attributes.put("style", "dashed");
+							}
+						}
+						if (inputTask.log.indexedException.index > 300) {
 							log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
 						}
 					}
 					else {
-						link.attributes.put("color", "red");
-						inputNode.attributes.put("color", "red");
-						inputNode.attributes.put("style", "dotted");
 						log.warn(inputTask.log.indexedException.getMessage());
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 						log.reset(); // Forget that anyway...
+						if (link != null) {
+							inputNode.attributes.put("color", "red");
+							inputNode.attributes.put("style", "dotted");
+							inputNode.attributes.put("fillcolor", "pink");
+							link.attributes.put("color", "red");
+						}
 					}
 					inputTask.log.close(); // close PrintStream
 				}
 
+				/*
 				if (collectStatistics) {
 					statistics.put(info.getID(), inputStats);
 				}
+				 */
 
 				/// MAIN
 				log.note("Running Generator: " + info.PRODUCT_ID);
@@ -1026,12 +1065,13 @@ public class ProductServer { //extends Cache {
 			// return true; // SEMANTICS?
 		}
 
+
 		/** Declaration of environment variables for external (shell) generators.
 		 *
 		 *
 		 * @return - variables defining a product, its inputs, and output dir and file.
 		 */
-		public Map<String,Object> getParamEnv() {
+		public Map<String,Object> getParamEnv(){
 
 			// BASE
 			Map<String,Object> env =  new TreeMap<String, Object>();
@@ -1088,7 +1128,6 @@ public class ProductServer { //extends Cache {
 
 		//final long creationTime;
 		
-		public Object result;
 
 
 	}  // Task
@@ -1195,6 +1234,7 @@ public class ProductServer { //extends Cache {
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
 
+
 				if ((directives != null) && !directives.isEmpty())
 					log.note(String.format("Directives: %s = %s", key, directives));
 
@@ -1267,6 +1307,11 @@ public class ProductServer { //extends Cache {
 						task.execute();
 					}
 					log.info(String.format("Finished task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
+					Path dotFile = cacheRoot.resolve(task.relativeGraphPath);
+					if (task.instructions.isSet(ActionType.INFO)){
+						log.special(String.format("Writing graph to file: %s", dotFile));
+						task.graph.dotToFile(dotFile.toString(), "nutshell.css");
+					}
 					//serverLog.special(String.format("Finished task: %s", task));
 				} catch (InterruptedException e) {
 					log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
@@ -1447,8 +1492,7 @@ public class ProductServer { //extends Cache {
 	}
 
 
-
-	public static void help(){
+	public void help(){
 
 		System.err.println("Usage:   java -cp $NUTLET_PATH nutshell.ProductServer  [<options>] <products>");
 		System.err.println("    - $NUTLET_PATH: directory of nutshell class files or path up to Nutlet.jar");
@@ -1478,21 +1522,54 @@ public class ProductServer { //extends Cache {
 		System.err.println("    java -cp $NUTLET_PATH 201012161615_test.ppmforge_DIMENSION=2.5.png");
 
 		//System.err.println(HttpLog.messages);
+		Option option = new ProgramOption("FORMAT,TILESIZE"){
+			public String FORMAT = "png";
+			public int TILESIZE = 256;
+		};
+
+		try {
+			option.setParams("gif,234");
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+
+		Option serverOption = new ProgramOption("timeOut", this){
+		};
+
+		System.err.println(Arrays.toString(option.getValues()));
+		System.err.println(Arrays.toString(serverOption.getValues()));
 
 	}
 
+	final
+	public List<Integer> version = Arrays.asList(1, 6);
+
+	public String getVersionString() {
+		//Arrays.
+		//
+		//version.stream().toArray();
+		return version.toString();
+		//return version.stream().forEach(System.err::println);
+		//collect(Collectors.joining(",")).toString();
+		//return String.join(",", version.toArray(null));
+		//return Arrays.toString(version.toArray());
+	}
 
 	/// Command-line interface for 
 	public static void main(String[] args) {
 		
-		if (args.length == 0){
-			help();
-			return;
-		}
 
 		final ProductServer server = new ProductServer();
 		server.serverLog.setVerbosity(Log.Status.DEBUG);
 		server.timeOut = 20;
+
+		if (args.length == 0){
+			server.help();  // An instance, yes. Default values may habve been changed.
+			return;
+		}
 
 		HttpLog log = server.serverLog; //.child("CmdLine");
 		log.COLOURS = true;
@@ -1523,7 +1600,7 @@ public class ProductServer { //extends Cache {
 						System.err.println(String.format("version: %s", server.getVersionString()));
 						System.err.println(String.format("confFile: %s", server.confFile));
 						System.err.println();
-						help();
+						server.help();
 						return;
 					}
 
@@ -1608,7 +1685,7 @@ public class ProductServer { //extends Cache {
 							return;
 						}
 					}
-					else if (opt.equals("remake")) {
+					else if (opt.equals("regenerate")) {
 						int d = Integer.parseInt(args[++i]);
 						if (d < 0){
 							log.warn(String.format("Negative cache clearance depth %d, setting to zerp.", d));
@@ -1778,12 +1855,13 @@ public class ProductServer { //extends Cache {
 
 			}
 
+			/*
 			if (server.collectStatistics){
-				//String dotFileName = task.info.getFilename("") + ".dot.png";
-				String dotFileName = task.info.getFilename("") + ".svg";
-				log.special(String.format("writing %s", dotFileName));
-				server.graph.dotToFile(dotFileName);
+				Path dotFile = server.cacheRoot.resolve(task.relativeGraphPath);
+				log.special(String.format("writing %s", dotFile));
+				server.graph.dotToFile(dotFile.toString(), "");
 			}
+			 */
 
 			task.log.close();
 		}
@@ -1796,19 +1874,6 @@ public class ProductServer { //extends Cache {
 
 	}
 
-	final
-	public List<Integer> version = Arrays.asList(1, 6);
-
-	public String getVersionString() {
-		//Arrays.
-		//
-		//version.stream().toArray();
-		return version.toString();
-		//return version.stream().forEach(System.err::println);
-		//collect(Collectors.joining(",")).toString();
-		//return String.join(",", version.toArray(null));
-		//return Arrays.toString(version.toArray());
-	}
 
 
 }

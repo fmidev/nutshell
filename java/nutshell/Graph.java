@@ -36,6 +36,7 @@ class Entity {
             attributes.put("label", name);
     }
 
+
     public Map<String, Object> attributes = new HashMap<>();
 
     void attributesToStream(PrintStream stream){
@@ -58,6 +59,8 @@ public class Graph extends Entity {
         setName(name);
     }
 
+    //String styleSheet = "";
+
     void toStream(PrintStream stream){
 
         stream.append("digraph ").append(id);
@@ -77,18 +80,20 @@ public class Graph extends Entity {
         stream.println("}");
     }
 
-    void dotToFile(String outfile){ /// todo: IOException
+    void dotToFile(String outfile, String styleSheet){ /// todo: IOException
 
         int i = outfile.lastIndexOf('.');
         if (i > 0){
-            dotToFile(outfile, outfile.substring(i+1).toLowerCase()) ;
+            dotToFile(outfile, outfile.substring(i+1).toLowerCase(), styleSheet) ;
         }
 
     }
 
-    void dotToFile(String outfile, String format){ /// todo: IOException
+    void dotToFile(String outfile, String format, String styleSheet){ /// todo: IOException
 
         String cmd = String.format("dot -T%s -o %s", format, outfile);
+        // TODO: add error output read
+        // String cmd = String.format("dot -T%s -stylesheet='%s' -o %s", format, styleSheet, outfile);
         String dir = ".";
 
         System.err.println(String.format("cmd: '%s'", cmd));
@@ -255,7 +260,7 @@ public class Graph extends Entity {
         link2.attributes.put("label", "reijo");
 
         // graph.toStream(System.out);
-        graph.dotToFile(args[0]);
+        graph.dotToFile(args[0], "");
 
     }
 

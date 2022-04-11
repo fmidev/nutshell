@@ -26,6 +26,12 @@ import java.util.Map;
  */
 public class SimpleHtml extends SimpleXML{
 
+	enum Tag {
+		EMBED,
+		IMG,
+		PRE;
+	}
+
 	/** Html starying tag.
 	 */
 	public static final String HTML  = "html";
@@ -39,6 +45,7 @@ public class SimpleHtml extends SimpleXML{
 	public static final String H3    = "h3";
 	public static final String H4    = "h4";
 	public static final String H5    = "h5";
+	public static final String IMG   = "img";
 	public static final String TABLE = "table";
 	public static final String TR    = "tr";
 	public static final String TH    = "th";

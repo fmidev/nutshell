@@ -301,7 +301,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						return;
 					}
 					catch (Exception e){
-						task.instructions.add(Instructions.DEBUG);
+						task.instructions.add(Instructions.INFO);
 					}
 				}
 				else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
@@ -320,7 +320,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				else {
 					ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-					if (!task.instructions.isSet(Instructions.DEBUG)) {
+					if (!task.instructions.isSet(Instructions.INFO)) {
 						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 								os.toString("UTF8"), request, response);
 						return;
@@ -331,8 +331,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 			catch (IndexedException e) {
 				response.setStatus(e.index);
-				task.instructions.add(Instructions.DEBUG);
-				task.instructions.add(Instructions.DEBUG); // ?
+				task.instructions.add(Instructions.INFO);
+				task.instructions.add(Instructions.INFO); // ?
 				task.instructions.add(Instructions.INPUTLIST);
 			}
 
@@ -362,7 +362,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendElement(elem);
 
 
-			if (task.instructions.isSet(Instructions.DEBUG)) {
+			if (task.instructions.isSet(Instructions.INFO)) {
 
 				Map<String,Object> map = new LinkedHashMap<>();
 
@@ -378,6 +378,23 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
 						map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
 					}
+
+					if ((task.relativeGraphPath!=null)){
+						Path dotFile = productServer.cacheRoot.resolve(task.relativeGraphPath);
+						task.log.special(String.format("Writing graph file %s", dotFile));
+						task.graph.dotToFile(dotFile.toString(), "nutshell.css");
+						Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
+						map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
+						//Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
+						Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
+						graphElem.setAttribute("src", relativeGraphPath.toString());
+						graphElem.setAttribute("type", "image/svg+xml");
+						//graphElem.setAttribute("border", "1");
+						graphElem.setAttribute("title", relativeGraphPath.toString());
+						html.appendElement(graphElem);
+						// <embed id="viewMain" src="" type="image/svg+xml"></embed>
+					}
+
 
 					map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
 				}

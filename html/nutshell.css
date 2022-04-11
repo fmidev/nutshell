@@ -45,6 +45,14 @@ a:hover {
     /* text-decoration: underline;*/
 }
 
+/* SVG */
+.clickable:hover {
+    /* background-color: lightgray; */
+    border: 3px solid black;
+    opacity: 0.5;
+    /* text-decoration: underline;*/
+}
+
 fieldset {
 }
 

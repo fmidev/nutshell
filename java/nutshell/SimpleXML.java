@@ -51,6 +51,11 @@ public class SimpleXML {
 
 	}
 
+	public <T> Element createElement(T tag){
+		// Element element = document.createElement(tag);
+		return document.createElement(tag.toString());
+	}
+
 	public Element createElement(String tag, String text){
 		Element element = document.createElement(tag);
 		if (text != null)
