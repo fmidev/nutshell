@@ -251,7 +251,7 @@ public class SimpleHtml extends SimpleXML{
 		return elem;
 	}
 
-	public Element appendAnchor(String url, String text) {
+	public Element appendAnchor(Object url, String text) {
 		Element elem = createAnchor(url, text);
 		this.main.appendChild(elem);
 		return elem;

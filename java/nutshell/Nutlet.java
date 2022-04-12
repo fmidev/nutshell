@@ -343,7 +343,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendTag(SimpleHtml.Tag.H1, "Product: " + task.info.PRODUCT_ID);
 			//html.createElement(SimpleHtml.Tag.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
-			Element elem = html.createElement(SimpleHtml.Tag.PRE, task.log.indexedException.getMessage());
+			Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedException.getMessage());
 
 			switch (task.log.indexedException.index){
 				case HttpServletResponse.SC_PRECONDITION_FAILED:
@@ -390,16 +390,22 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
 						map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
 						//Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
-						Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
-						// graphElem.setAttribute("src", relativeGraphPath.toString());
-						graphElem.setAttribute("type", "image/svg+xml");
-						//graphElem.setAttribute("border", "1");
-						Document graphSvg = SimpleXML.readDocument(dotFile);
-						Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
-						graphElem.appendChild(node);
-						graphElem.setAttribute("title", task.info.PRODUCT_ID);
-						graphElem.setAttribute("id", "graph");
-						html.appendElement(graphElem);
+						try {
+							Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
+							// graphElem.setAttribute("src", relativeGraphPath.toString());
+							graphElem.setAttribute("type", "image/svg+xml");
+							//graphElem.setAttribute("border", "1");
+							Document graphSvg = SimpleXML.readDocument(dotFile);
+							Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
+							graphElem.appendChild(node);
+							graphElem.setAttribute("title", task.info.PRODUCT_ID);
+							graphElem.setAttribute("id", "graph");
+							html.appendElement(graphElem);
+						}
+						catch (Exception e){
+							html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating graph:");
+							html.appendAnchor(relativeGraphPath, task.relativeGraphPath.getFileName().toString());
+						}
 						// <embed id="viewMain" src="" type="image/svg+xml"></embed>
 					}
 

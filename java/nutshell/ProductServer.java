@@ -386,12 +386,12 @@ public class ProductServer { //extends Cache {
 			this.instructions.set(instructions);
 			if (this.instructions.isSet(ActionType.INFO)){
 				this.graph = new Graph(this.info.PRODUCT_ID);
-				/*
+
 				Graph.Node nodeDef = graph.addNode("node");
 				nodeDef.attributes.put("shape", "ellipse");
 				nodeDef.attributes.put("style", "filled");
 				nodeDef.attributes.put("class", "clickable");
-				*/
+				
 				// TODO: fix Graph process write problem!
 			}
 
