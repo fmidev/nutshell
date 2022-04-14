@@ -47,16 +47,12 @@ import static java.nio.file.Files.*;
  */
 public class ProductServer extends ProductServerBase { //extends Cache {
 
-
 	ProductServer(){
 		//serverLog = new HttpLog(getClass().getSimpleName());
 	}
 
-
 	/// Experimental log of products and their inputs(s)
-	public boolean collectStatistics = false;
-	//public Graph graph = new Graph("ProductServer");
-	public final Map<String,Map<String,String>> statistics = new HashMap<>();
+	//public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
 	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
 	// TODO: consider general query depth (for inputs etc)
@@ -71,8 +67,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	public String toString() {
 		return MapUtils.getMap(this).toString() + "\n" + setup.toString();
 	}
-
-
 
 	/**
 	 *   A "tray" containing both the product query info and the resulting object if successfully queried.
@@ -94,7 +88,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		final public Instructions instructions = new Instructions();
 
-		public int regenerateDepth = 0;
+		//public int regenerateDepth = 0;
 		//public boolean parallel = true;
 
 		public Path timeStampDir;
@@ -148,11 +142,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				nodeDef.attributes.put("shape", "ellipse");
 				nodeDef.attributes.put("style", "filled");
 				nodeDef.attributes.put("class", "clickable");
-
 				// TODO: fix Graph process write problem!
+
 			}
 
-			this.regenerateDepth = defaultRemakeDepth;
+			this.instructions.regenerateDepth = defaultRemakeDepth;
 
 
 			// Relative
@@ -193,7 +187,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
 		}
 
-
+		// Consider moving these to @ProductServerBase, with Log param.
 		public Path move(Path src, Path dst) throws IOException {
 			log.note(String.format("Move: from: %s ", src));
 			log.note(String.format("        to: %s ", dst));
@@ -335,8 +329,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				instructions.add(ResultType.FILE);
 			}
 
-			if (instructions.involves(ActionType.MAKE) && (regenerateDepth > 0)){
-				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", regenerateDepth));
+			if (instructions.involves(ActionType.MAKE) && (instructions.regenerateDepth > 0)){
+				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", instructions.regenerateDepth));
 				instructions.add(ActionType.GENERATE);
 			}
 
@@ -558,12 +552,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 
-					if (regenerateDepth > 0) {
-						inputTask.regenerateDepth = regenerateDepth - 1;
-						log.experimental(String.format("Input cache clearance: %s", inputTask.regenerateDepth));
+					if (instructions.regenerateDepth > 0) {
+						inputTask.instructions.regenerateDepth = instructions.regenerateDepth - 1;
+						log.experimental(String.format("Input cache clearance: %s", inputTask.instructions.regenerateDepth));
 						//instructions.add(ActionType.GENERATE);
 					} else {
-						inputTask.regenerateDepth = 0;
+						inputTask.instructions.regenerateDepth = 0;
 					}
 
 					Graph.Node inputNode = null;
@@ -1220,6 +1214,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	}
 
+	static
+	class TaskTray { // consider extended server tray + nutLet without linking
+
+		Instructions instructions = new Instructions(); // Task
+		Map<String ,String> directives = new TreeMap<>(); // not in Task
+
+
+	}
+
 
 	/// Command-line interface for 
 	public static void main(String[] args) {
@@ -1237,7 +1240,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		HttpLog log = server.serverLog; //.child("CmdLine");
 		log.COLOURS = true;
 
-		String confFile = null;
 
 		Map<String,String> products = new TreeMap<>();
 		Instructions instructions = new Instructions();
@@ -1246,24 +1248,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		// NEW
 		ProgramRegistry registry = new ProgramRegistry();
 
-		registry.add(new ProgramUtils.Version<>(server));
-
+		registry.add(new ProgramUtils.Help(registry));
 		registry.add(new ProgramUtils.LogLevel(log));
 		registry.add(new ProgramUtils.LogLevel.Debug(log));
 		registry.add(new ProgramUtils.LogLevel.Verbose(log));
+		registry.add(new ProgramUtils.Version<>(server));
 
 		registry.add(new Parameter.Simple<String>("conf","Read configuration", "filename") {
 			/// It is recommended to give --conf among the first options, unless default used.
 			@Override
-			public void exec() {
-				server.readConfig(value);
-			}
+			public void exec() { server.readConfig(value);}
 		 });
 
 		registry.add(new Parameter.Simple<String>("log_style","Set formatting",
 				OutputFormat.TEXT.toString()){
-
-			// public String format = OutputFormat.TEXT.toString();
 
 			@Override
 			public void exec() {
@@ -1292,7 +1290,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				super("instructions", "Set actions and properties: " +
 						String.join(",", Flags.getKeys(Instructions.class)),
 						instructions.toString());
-
 			}
 
 			InstructionParameter(String fieldName){
@@ -1301,9 +1298,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						fieldName);
 				setReference(this, "");
 				value = fieldName;
-				System.err.print("Added: ");
-				//System.err.println(value);
-				System.err.println(this);
+				//System.err.print("Added: ");
+				// System.err.println(this);
 			}
 
 			@Override
@@ -1319,7 +1315,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						instructions.set(value);
 					}
 					else {
-						// --intruction A,B,C sets
+						// --instruction A,B,C sets
 						instructions.add(value);
 					}
 				} catch (NoSuchFieldException e) {
@@ -1345,6 +1341,124 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
+		registry.add(new Parameter.Simple<String>("product","Set product filename (repeatable)",
+				""){
+			@Override
+			public void exec() {
+				products.put("product", value);
+			}
+		});
+
+		registry.add(new Parameter.Single("parse",
+				"Debugging (cmd line only): parse product.", "filename"){
+
+			public String filename = "";
+
+			@Override
+			public void exec() {
+				try {
+					Task product = server.new Task(filename, 0, log);
+					Map<String,Object> map = product.getParamEnv();
+					String[] array = MapUtils.toArray(map);
+					for (String s : array) {
+						System.out.println(s);
+					}
+				} catch (ParseException e) {
+					log.fail(e.getMessage());
+				}
+			}
+
+		});
+
+
+		registry.add(new Parameter("http_params","Debugging/testing: compose HTTP GET params."){
+
+			@Override
+			public void exec() {
+				String[] p = products.values().toArray(new String[0]);
+				if (products.isEmpty()){
+					log.error("Product not defined yet, try: [--product] <FILE>"  + this.getName());
+				}
+				else {
+
+					if (instructions.isEmpty())
+						instructions.add(ActionType.MAKE);
+
+					if (products.size() > 1){
+						log.warn("Several products defined, using last");
+					}
+
+					for (Map.Entry entry: products.entrySet()) {
+						try {
+							Task task = server.new Task(entry.getValue().toString(), 0, log);
+							System.out.println(String.format("instructions=%s&product=%s", instructions, task.info.getFilename()));
+						} catch (ParseException e) {
+							log.warn(entry.getValue().toString());
+							log.error(e.getMessage());
+						}
+					}
+				}
+			}
+		});
+
+
+		registry.add(new Parameter.Simple<Integer>("regenerate",
+				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
+				0){
+			@Override
+			public void exec() {
+				if (value < 0){
+					log.warn(String.format("Negative cache clearance depth %d, setting to zerp.", value));
+					value = 0;
+				}
+				instructions.regenerateDepth = value;
+				//server.defaultRemakeDepth = value;
+			}
+		});
+
+
+		/// Command line only
+		registry.add(new Parameter.Simple<String>("copy",
+				"Copy generated product(s) to file (dir). Repeatable.",
+				""){
+			@Override
+			public void exec() {
+				instructions.addCopy(value);
+			}
+		});
+
+		registry.add(new Parameter.Simple<String>("link",
+				"Copy generated product/products to file/dir. Repeatable.",
+				""){
+			@Override
+			public void exec() {
+				instructions.addLink(value);
+			}
+		});
+
+		registry.add(new Parameter.Simple<String>("move",
+				"Move generated product/products to file/dir. Repeatable",
+				""){
+			@Override
+			public void exec() {
+				instructions.addMove(value);
+			}
+		});
+
+		registry.add(new Parameter.Simple<String>("path","Extend PATH variable for product generation",
+				""){
+			public void exec() {
+				server.cmdPath = value;
+				server.setup.put("cmdPath", server.cmdPath); // consider PARASITER...
+			}
+		});
+
+
+		/*
+		registry.add(new Parameter.Simple<String>("product","Set product filename (repeatable)",
+				""){
+		});
+		*/
 
 
 		//Field[] instructionFields = Instructions.class.getFields();
@@ -1357,208 +1471,36 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				if (arg.charAt(0) == '-') {
 
-					if (arg.charAt(1) != '-') {
-						throw new IllegalArgumentException("Short options (-x) not suppported");
+					if (arg.equals("-h")){
+						arg = "--help";
+					}
+					else if (arg.charAt(1) != '-') {
+						throw new IllegalArgumentException("Short options (-x) not supported in this Java version");
 					}
 
 					String opt = arg.substring(2);
 
-					if (opt.equals("help")) {
-						//System.err.println(String.format("version: %s", server.getVersionString()));
-						System.err.println(String.format("confFile: %s", server.confFile));
-						System.err.println();
-						server.help();
-						System.err.println();
-						registry.help(System.err);
-						return;
-					}
-
-					//
 					if (registry.has(opt)){
 						Program.Parameter param = registry.get(opt);
-						log.special(String.format("Handling: %s <- %s %b", opt, param, param.hasParams()));
+						log.special(String.format("Handling: '%s' -> %s hasParams:%b", opt, param, param.hasParams()));
 						if (param.hasParams()){
-							if (i < (args.length-1))
+							if (i < (args.length-1)) {
+								log.special(String.format("%s has argument '%s'", param.getName(), args[i+1]));
 								param.setParams(args[++i]);
+							}
 							else
-								param.setParams(""); // Support premature" end of cmd line, esp. with --help
+								param.setParams(""); // Support "premature" end of cmd line, esp. with --help
 						}
 						param.exec();
 						log.special(String.format("Handled: %s", param));
 						//log.special(param.toString());
 						continue;
 					}
-
-					/*
-					if (opt.equals("verbose")) {
-						log.setVerbosity(Log.Status.LOG);
-						continue;
-					}
-
-					if (opt.equals("log_level")) {
-						arg = args[++i];
-						log.setVerbosity(arg);
-						continue;
-					}
-
-					 */
-
-
-					/*
-					/// It is recommended to give --config among the first options, unless default used.
-					if (opt.equals("conf")) {
-						if (confFile != null){
-							log.warn("Reading second conf file (already read: " + confFile + ")");
-						}
-						confFile = args[++i];
-						server.readConfig(confFile);
-						//log.note(String.format("Server log %s", p));
-						//System.err.println(String.format("Server log %s", p));
-						continue; // Note
-					}
-
-					 */
-
-					// Now, read conf file if not read this far.
-					if (confFile == null){
-						server.readConfig(confFile = "nutshell.cnf");
-						//Path p = server.setLogFile(System.getenv("USER"));
-						//log.note(String.format("Server log: %s", p));
-					}
-
-					/*
-					if (opt.equals("version")) {
-						//System.out.println(server.getVersionString());
-					}
-
-					 */
-
-					/*
-					if (opt.equals("log_style")) {
-						//String arg = args[++i];
-						OutputFormat f = OutputFormat.valueOf(args[++i]);
-						switch (f){
-							case TEXT:
-								log.COLOURS = false;
-								break;
-							case VT100:
-								log.COLOURS = true;
-								break;
-							case HTML:
-							default:
-								log.warn("Not implemented:" + f);
-						}
-
-					}
-					else
-					 */
-					if (opt.equals("product")) {
-						products.put("product", args[++i]);
-					}
-					else if (opt.equals("parse")) { // Debugging
-						Task product = server.new Task(args[++i], 0, log);
-						Map<String,Object> map = product.getParamEnv();
-						String[] array = MapUtils.toArray(map);
-						for (String s : array) {
-							System.out.println(s);
-						}
-						return;
-					}
-					else if (opt.equals("http_params")) { // HTTP Get Params
-						String[] p = products.values().toArray(new String[0]);
-						if (p.length == 0){
-							log.warn("give --product <FILE>");
-							System.err.println("Product not defined yet?");
-							System.exit(1);
-						}
-						else {
-							if (p.length > 1){
-								System.err.println("Several products defined, using last");
-							}
-							if (instructions.isEmpty())
-								instructions.add(ActionType.MAKE);
-							Task product = server.new Task(p[p.length-1], 0, log);
-							System.out.println(String.format("instructions=%s&product=%s", instructions, product));
-							return;
-						}
-					}
-					else if (opt.equals("regenerate")) {
-						int d = Integer.parseInt(args[++i]);
-						if (d < 0){
-							log.warn(String.format("Negative cache clearance depth %d, setting to zerp.", d));
-							d = 0;
-						}
-						server.defaultRemakeDepth = d;
-					}
-					else if (opt.equals("analyse")) { // Debugging
-						server.collectStatistics = true;
-					}
-					else if (opt.equals("status")) { // Debugging
-						System.out.println(server.toString());
-					}
-					else if (opt.equals("copy")) {
-						instructions.addCopy(args[++i]);
-					}
-					else if (opt.equals("link")) {
-						instructions.addLink(args[++i]);
-					}
-					else if (opt.equals("move")) {
-						instructions.addMove(args[++i]);
-					}
-					else if (opt.equals("directives")) {
-						MapUtils.setEntries( args[++i],"\\|", "true", directives);
-					}
-					else if (opt.equals("path")) {
-						server.cmdPath = args[++i]; // overríde!
-						server.setup.put("cmdPath", server.cmdPath);
-					}
 					else {
-						// Actions
-						try {
-							if (opt.equals("instructions")) {
-								opt = args[++i];
-								log.info("Adding instructions: " + opt);
-								instructions.set(opt);
-							}
-							else {
-								// Set instructions from invidual args: --make --delete --generate
-								// TODO: longName => LONG_NAME
-								opt = opt.toUpperCase();
-
-								boolean handled = false;
-								if (Log.statusCodesByName.containsKey(opt)){
-									log.setVerbosity(Log.statusCodesByName.get(opt).level);
-									// System.out.println("Testing:" + log.getVerbosity() + "/" + opt);
-									handled = true;
-									//break;
-								}
-
-								if (! handled){
-									log.info("Adding instruction: " + opt);
-									Instructions.class.getField(opt); // ensure field exists
-									instructions.add(opt);
-								}
-
-							}
-						}
-						catch (NoSuchFieldException|IllegalAccessException e) {
-							log.note("Use following instruction codes: ");
-							for (Field field : Instructions.class.getFields()) {
-								String name = field.getName();
-								if (name.equals(name.toUpperCase())) {
-									try {
-										log.note("  " + name + "=" + field.getInt(null));
-									} catch (IllegalAccessException e1) {
-										//illegalAccessException.printStackTrace();
-									}
-								}
-							}
-							//log.log(HttpLog.HttpStatus.METHOD_NOT_ALLOWED, String.format("No such instruction code: %s", opt));
-							log.error(String.format("No such instruction code: %s", opt));
-							System.exit(2);
-						}
-
+						log.error(String.format("Unknown argument: %s", arg));
+						System.exit(-1);
 					}
+
 				}
 				else {  // Argument does not start with "--"
 					products.put("product" + (products.size()+1), arg);

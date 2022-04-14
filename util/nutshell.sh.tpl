@@ -40,7 +40,8 @@ if [ $# != 0 ]; then
     # --log_level DEBUG
     # Notice: PYTHON and JAVA have different labels
     # Common ones: ERROR,WARNING,INFO,DEBUG
-    ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell.cnf $*
+    # Double quotes are needed to keep excplicit empty '' agruments.
+    ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell.cnf "$@"  # $*
     RESULT=$?
     if [ $RESULT != 0 ]; then
 	#echo !!

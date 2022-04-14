@@ -126,6 +126,8 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
         this.value = a;
     }
 
+    public int regenerateDepth = 0;
+
     public boolean isEmpty() {
         return (value == 0);
     }
