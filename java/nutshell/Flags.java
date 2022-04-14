@@ -26,6 +26,15 @@ public class Flags {
         return getValue(this, flags.split(","));
     }
 
+    /**
+     *  Supports mixed integers and string labels
+     *
+     * @param obj
+     * @param flags
+     * @return
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
     static public int getValue(Object obj, String[] flags) throws NoSuchFieldException, IllegalAccessException {
 
         int result = 0;
@@ -37,8 +46,16 @@ public class Flags {
             String[] subFlags = s.split(",");
             if (subFlags.length > 1)
                  result = result | getValue(obj, subFlags);
-            else
-                result = result  | c.getField(s).getInt(obj);
+            else {
+                try {
+                    // Flexible: supports mixed intergers and string labels
+                    int i = Integer.parseInt(s);
+                    result = result | i;
+                }
+                catch (NumberFormatException e){
+                    result = result | c.getField(s).getInt(obj);
+                }
+            }
         }
 
         return result;
@@ -107,17 +124,6 @@ public class Flags {
 
     public void set(String[] s) throws NoSuchFieldException, IllegalAccessException {
         value = getValue(s);
-        /*
-        try {
-            //value = Flags.getValue(AccessFlags.class, s);
-            value = getValue(s);
-            return true;
-        }
-        catch (NoSuchFieldException | IllegalAccessException e) {
-            return false;
-        }
-
-         */
     }
 
     public void add(int i) {

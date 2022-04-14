@@ -6,15 +6,11 @@ import sun.misc.Signal;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.*;
-import java.nio.file.attribute.*;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.*;
 
 //import javax.servlet.http.HttpServletResponse;
@@ -49,44 +45,13 @@ import static java.nio.file.Files.*;
  * 
  *  @author Markus Peura fmi.fi Jan 26, 2011
  */
-public class ProductServer { //extends Cache {
+public class ProductServer extends ProductServerBase { //extends Cache {
 
-	final public HttpLog serverLog; // = new HttpLog(getClass().getSimpleName());
-	static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 	ProductServer(){
-		serverLog = new HttpLog(getClass().getSimpleName());
+		//serverLog = new HttpLog(getClass().getSimpleName());
 	}
 
-	/**
-	 *
-	 * @param pathFormat - absolute path of a filename, optionally containing '%s' expanded as timestamp.
-	 * @return
-	 */
-	public Path setLogFile(String pathFormat) {
-		if (pathFormat == null)
-			pathFormat = "/tmp/nutshell-%s.log";
-		try {
-			Path p = Paths.get(String.format(pathFormat,
-					logFilenameTimeFormat.format(System.currentTimeMillis())));
-			//ensureFile(p.getParent(), p.getFileName());
-			serverLog.setLogFile(p);
-			serverLog.debug(setup.toString());
-			try {
-				Files.setPosixFilePermissions(p, filePerms);
-			}
-			catch (IOException e){
-				serverLog.error(String.format("Could not set permissions: %s", filePerms));
-			}
-			return p;
-		} catch (Exception e) {
-			serverLog.setLogFile(null);
-			return null;
-		}
-
-	}
-
-	public final Map<String,Object> setup = new HashMap<>();
 
 	/// Experimental log of products and their inputs(s)
 	public boolean collectStatistics = false;
@@ -97,224 +62,16 @@ public class ProductServer { //extends Cache {
 	// TODO: consider general query depth (for inputs etc)
 	public int defaultRemakeDepth = 0;
 
-	// TODO: add to config, set in constructor
-	public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
-	public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
-	public int fileGroupID = 100;
 	//public GroupPrincipal fileGroupID;
 			//Files.readAttributes(originalFile.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
 
 	/// System side settings.
-	public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
-	public Path cacheRoot   = Paths.get(".");
-	//public Path storageRoot   = Paths.get(".");
-	public Path productRoot = Paths.get(".");
-	//protected Path storageRoot = Paths.get(".");
-	protected Path storageRoot = Paths.get(".");
-	// Consider
-	final protected List<StringMapper> storagePaths = new LinkedList<>();
-
-	static final public Path cachePrefix = Paths.get("cache");
-
-	/// System side setting.// TODO: conf
-	public String inputCmd = "./input.sh";  // NOTE: executed in CWD
-	
-	/// System side setting. // TODO: conf
-	public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
-
-	//final DateFormat timeStampFormat    = new SimpleDateFormat("yyyyMMddHHmm");
-	final DateFormat timeStampDirFormat = 
-			new SimpleDateFormat("yyyy"+File.separatorChar+"MM"+File.separatorChar+"dd");
-
-	//protected final List<Path> configFiles = new LinkedList<>();
-
-
-	static public int counter = 0;
-
-	static public int getProcessId(){
-		return  ++counter;
-	};
-
-	/** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
-	 *
-	 */
-	protected String cmdPath = System.getenv("PATH");
-
-	protected void readConfig(){
-		readConfig(confFile);
-	}
-
-	protected void readConfig(String path) {
-		readConfig(Paths.get(path));
-	}
-
-	protected void readConfig(Path path){
-
-		try {
-			if (path != null) {
-				serverLog.debug("Reading setup: " + path.toString());
-				MapUtils.read(path.toFile(), setup);
-			}
-			this.confFile = path; //Paths.get(path);
-			setup.put("confFile", path);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			setup.put("confFileError", e.getLocalizedMessage());
-		}
-
-		//log.debug(setup.toString());
-
-		this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
-		this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
-		this.storageRoot = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
-
-		this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
-		this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rwxrwxr--").toString());
-		setup.put("dirPerms", dirPerms);
-		setup.put("filePerms", filePerms);
-
-		// this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
-		try {
-			// this.fileGroupID = Files.readAttributes(cacheRoot, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
-			fileGroupID = Integer.parseInt(getAttribute(cacheRoot, "unix:gid").toString());
-		} catch (IOException e) {
-			serverLog.error(String.format("Could not read group of cache dir: %s", cacheRoot));
-		}
-		setup.put("fileGroupID", fileGroupID);
-
-		Object logPathFormat = setup.get("LOGFILE");
-		if (logPathFormat != null) {
-			Path p = setLogFile(logPathFormat.toString());
-			//System.err.println(String.format("Log file: ", p);
-		}
-		//logPathFormat = "./nutshell-" + System.getenv("USER")+"-%s.log";
-		// Path p = setLogFile(logPathFormat.toString());
-		//
-		if (setup.containsKey("PATH_EXT"))
-			this.cmdPath += ":" + setup.get("PATH_EXT").toString();
-		setup.put("cmdPath", this.cmdPath);
-		// this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
-		// this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
-	}
 
 	@Override
 	public String toString() {
 		return MapUtils.getMap(this).toString() + "\n" + setup.toString();
 	}
 
-	/** Genarate dot graph
-	 *
-	 *  Can be converted with:  dot file.dot -Tpng -o dot.png
-	 *
-	 *  TODO: Generalize, with DotWrapper.getFields() to distinguish variations of the same product(ID)
-	 *  | my.product.abc [RAVAKE,PNG] |
-	 *  | CONF   | RAVAKE             |
-	 *  | FORMAT | PNG                |
-	 *
-	 * @param stream – output stream (file).
-	 *
-	 */
-	protected void dumpStatisticsDot(PrintStream stream){
-		//PrintStream stream = System.out;
-
-		/*
-		stream.println("digraph P");
-		stream.println('{');
-		// nodesep=.05;
-		// stream.println("  rankdir=LR");
-		stream.println("  node [shape=record]"); // ,width=.1,height=.1
-		for (Map.Entry<String,Map<String,String>> entry: statistics.entrySet()) {
-			String source = entry.getKey();
-			String srcKey = source.replace('.','_');
-			Map<String,String> targets = entry.getValue();
-			//stream.println(String.format(" %s [label=\"{%s | {Key|value}}\", color=\"blue\"];", srcKey, source));
-			stream.println(String.format(" %s [label=\"%s\", style=filled, color=\"lightblue\"];", srcKey, source));
-			for (Entry<String,String> dst: targets.entrySet()) {
-
-				String dstID = dst.getValue();
-				String dstKey = dstID.replace('.','_');
-				//String dst = inputEntry.getValue();
-				//stream.println(String.format(" %s [label=\"%s\", style=filled, color=\"green\"];", dstKey, dstID));
-				//String dstKey = dst.replace('.','_');
-				// stream.println(String.format("  %s -> %s [label=\"%s\"];", srcKey, dstKey, dst.getKey()));
-				stream.println(String.format("  %s -> %s [label=\"%s\"];", dstKey, srcKey, dst.getKey()));
-			}
-		}
-		stream.println('}');
-
-		 */
-	}
-
-	Path getProductDir(String productID){
-		return Paths.get(productID.replace(".", File.separator));
-	}
-	
-	Path getTimestampDir(long time){ // consider DAY or HOUR dirs?
-		if (time > 0)
-			return Paths.get(timeStampDirFormat.format(time));	
-		else
-			return Paths.get("");
-	}
-
-
-	//public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
-	public Path ensureDir(Path root, Path relativePath) throws IOException {
-
-		if (relativePath==null)
-			return root;
-
-		if (relativePath.getNameCount() == 0)
-			return root;
-
-		Path path = root.resolve(relativePath);
-		//log.warn(String.format("Checking: %s/./%s",  root, relativePath));
-
-		if (!exists(path)) {
-			//Files.createDirectories(path, PosixFilePermissions.asFileAttribute(dirPerms));
-			ensureDir(root, relativePath.getParent());
-			serverLog.debug("creating dir: " + path);
-			Files.createDirectory(path); //, PosixFilePermissions.asFileAttribute(dirPerms));
-			Files.setPosixFilePermissions(path, dirPerms);
-
-			//Files.setOwner(path, fileGroupID);
-			try {
-				Files.setAttribute(path, "unix:gid", fileGroupID);
-			}
-			catch (IOException e){
-				serverLog.warn(e.toString());
-				serverLog.warn(String.format("Could not se unix:gid '%d'",  fileGroupID) );
-			}
-
-		}
-
-		return path;
-	}
-
-	//public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
-	public Path ensureFile(Path root, Path relativePath) throws IOException {
-
-		Path path = root.resolve(relativePath);
-
-		if (!exists(path)) {
-			ensureDir(root, relativePath.getParent());
-			serverLog.debug("creating file: " + path);
-			Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
-			//Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
-			//Files.setPosixFilePermissions(path, filePerms);
-		}
-
-		try {
-			Files.setAttribute(path, "unix:gid", fileGroupID);
-		}
-		catch (IOException e){
-			serverLog.warn(e.toString());
-			serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
-		}
-
-		return path;
-
-	}
 
 
 	/**
@@ -384,14 +141,14 @@ public class ProductServer { //extends Cache {
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
-			if (this.instructions.isSet(ActionType.INFO)){
+			if (this.instructions.isSet(ActionType.STATUS)){
 				this.graph = new Graph(this.info.PRODUCT_ID);
 
 				Graph.Node nodeDef = graph.addNode("node");
 				nodeDef.attributes.put("shape", "ellipse");
 				nodeDef.attributes.put("style", "filled");
 				nodeDef.attributes.put("class", "clickable");
-				
+
 				// TODO: fix Graph process write problem!
 			}
 
@@ -437,7 +194,6 @@ public class ProductServer { //extends Cache {
 		}
 
 
-		//public boolean move(File src, File dst){
 		public Path move(Path src, Path dst) throws IOException {
 			log.note(String.format("Move: from: %s ", src));
 			log.note(String.format("        to: %s ", dst));
@@ -503,12 +259,6 @@ public class ProductServer { //extends Cache {
 		@Override
 		public void run(){
 
-			/*
-			if (!parallel){
-				log.error("Ouch this was not meant to be parallel!");
-			}
-			 */
-
 			try {
 				Signal.handle(new Signal("INT"), this::handleInterrupt);
 				execute();
@@ -519,14 +269,7 @@ public class ProductServer { //extends Cache {
 				log.warn("Interrupted");
 				//e.printStackTrace(log.printStream);
 			}
-			/*
-			catch (IndexedException e) {
-				log.warn("NutShell indexed exception --->");
-				//log.error(e.getMessage());
-				log.log(e);
-				log.warn("NutShell indexed exception <---");
-			}
-			 */
+
 		}
 
 
@@ -551,6 +294,10 @@ public class ProductServer { //extends Cache {
 		}
 
 		public Object result;
+
+
+
+		// " MAIN "
 
 		/** Execute this task: delete, load, generate a product, for example.
 		 *
@@ -680,7 +427,7 @@ public class ProductServer { //extends Cache {
 
 
 			// Retrieve Geneator, if needed
-			if (instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.INFO)){
+			if (instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.STATUS)){
 
 				log.log(HttpLog.HttpStatus.OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
 				try {
@@ -702,7 +449,7 @@ public class ProductServer { //extends Cache {
 					log.log(e);
 					instructions.remove(Instructions.GENERATE);
 					instructions.remove(Instructions.INPUTLIST);
-					instructions.remove(Instructions.INFO);
+					instructions.remove(Instructions.STATUS);
 				}
 
 			}
@@ -785,7 +532,7 @@ public class ProductServer { //extends Cache {
 				// Consider forwarding directives?
 				Map<String,Task> inputTasks = executeMany(this.inputs, inputInstructions, null, log);
 
-				Map<String,String> inputStats = new HashMap<>();
+				//Map<String,String> inputStats = new HashMap<>();
 
 				// Collect results
 				// Statistics
@@ -833,7 +580,8 @@ public class ProductServer { //extends Cache {
 						// inputNode.attributes.put("class", "clickable");
 						link = graph.addLink(node, inputNode);
 						// link.attributes.put("label", key);
-						link.attributes.put("title", "$"+key); // SVG only
+						//link.attributes.put("title", "$"+key); // SVG only
+						link.attributes.put("title", key); // SVG only
 						// TODO: BaseURL and  ENCODE
 						//inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s&instructions=GENERATE,DEBUG", inputTask.info.getFilename()));
 						inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", inputTask.info.getFilename()));
@@ -846,14 +594,8 @@ public class ProductServer { //extends Cache {
 						log.note(String.format("Retrieved: %s = %s", key, r));
 						this.retrievedInputs.put(key, r);
 						// Stats
-						inputStats.put(key, inputTask.info.getID());
-						/*
-						if (collectStatistics) {
-							if (!statistics.containsKey(inputTask.info.getID()))
-								statistics.put(inputTask.info.getID(), new HashMap<>()); // Marker
+						// inputStats.put(key, inputTask.info.getID());
 
-						}
-						 */
 						if (link != null) {
 							//inputNode.attributes.put("color", "lightgreen");
 							//inputNode.attributes.put("style", "filled");
@@ -894,7 +636,6 @@ public class ProductServer { //extends Cache {
 
 				try {
 					generator.generate(this);
-
 				}
 				catch (IndexedException e) {
 
@@ -936,6 +677,7 @@ public class ProductServer { //extends Cache {
 
 
 					try {
+						// Todo: skip this if already ok...
 						Files.setPosixFilePermissions(this.outputPath, filePerms);
 					} catch (IOException e) {
 						log.warn(e.toString());
@@ -1180,6 +922,17 @@ public class ProductServer { //extends Cache {
 
 	}
 
+	/** Searches for shell side (and later, Java) generators
+	 *
+	 * @param productID
+	 * @return
+	 */
+	public Generator getGenerator(String productID) throws IndexedException {
+		Path dir = productRoot.resolve(getProductDir(productID));
+		Generator generator = new ExternalGenerator(productID, dir.toString());
+		return generator;
+	};
+
 	/** Run a set of tasks in parallel.
 	 *
 	 * This function is called by
@@ -1335,7 +1088,7 @@ public class ProductServer { //extends Cache {
 					}
 					log.info(String.format("Finished task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 					Path dotFile = cacheRoot.resolve(task.relativeGraphPath);
-					if (task.instructions.isSet(ActionType.INFO)){
+					if (task.instructions.isSet(ActionType.STATUS)){
 						log.special(String.format("Writing graph to file: %s", dotFile));
 						task.graph.dotToFile(dotFile.toString(), "nutshell.css");
 					}
@@ -1353,16 +1106,6 @@ public class ProductServer { //extends Cache {
 		return tasks;
 	}
 
-	/** Searches for shell side (and later, Java) generators
-	 *
-	 * @param productID
-	 * @return
-	 */
-	public Generator getGenerator(String productID) throws IndexedException {
-		Path dir = productRoot.resolve(getProductDir(productID));
-		Generator generator = new ExternalGenerator(productID, dir.toString());
-		return generator;
-	};
 
 	/// Checks if a file exists in cache or storage, wait for completion if needed.
 	/**
@@ -1438,79 +1181,6 @@ public class ProductServer { //extends Cache {
 	/// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
 	public int timeOut = 30;
 
-	public class DeleteFiles extends SimpleFileVisitor<Path> {
-
-		// Print information about
-		// each type of file.
-		@Override
-		public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
-			if (attr.isRegularFile() || attr.isSymbolicLink()) {
-				try {
-					serverLog.note(String.format("Deleting file: %s", file));
-					Files.delete(file);
-				} catch (IOException e) {
-					serverLog.warn(e.toString());
-				}
-			}
-			return CONTINUE;
-		}
-
-		// Print each directory visited.
-		@Override
-		public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-
-			// Prevent removing cacheRoot
-			// Todo: fix clearCache
-			if (dir.endsWith("cache"))
-				return CONTINUE;
-
-			try {
-				serverLog.debug(String.format("Delete dir: %s", dir));
-				Files.delete(dir);
-			} catch (IOException e) {
-				serverLog.warn(e.toString());
-			}
-			return CONTINUE;
-		}
-
-		// If there is some error accessing
-		@Override
-		public FileVisitResult visitFileFailed(Path file, IOException e) {
-			serverLog.warn(e.getMessage());
-			return CONTINUE;
-		}
-	}
-
-	public void clearCache(boolean confirm) throws IOException {
-
-		if (!this.cacheRoot.endsWith("cache")){
-			serverLog.error("Cache root does not end with 'cache' : " + this.cacheRoot);
-			return;
-		}
-
-		Path p = this.cacheRoot.toRealPath();
-		if (!p.endsWith("cache")){
-			serverLog.error("Cache root does not end with 'cache' : " + p);
-			return;
-		}
-
-		if (confirm){
-			System.err.println(String.format("Delete files in %s ? ", p ));
-			Scanner kbd = new Scanner(System.in);
-			String line = kbd.nextLine();
-			if (line.isEmpty() || (line.toLowerCase().charAt(0) != 'y')){
-				System.err.println("Cancelled");
-				return;
-			}
-		}
-
-		serverLog.note("Clearing cache: " + p);
-		Files.walkFileTree(p, new DeleteFiles());
-
-		serverLog.note("Clearing cache completed");
-		//Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
-
-	}
 
 	public enum OutputFormat {
 		TEXT,
@@ -1548,42 +1218,8 @@ public class ProductServer { //extends Cache {
 		System.err.println("Examples: ");
 		System.err.println("    java -cp $NUTLET_PATH 201012161615_test.ppmforge_DIMENSION=2.5.png");
 
-		//System.err.println(HttpLog.messages);
-		Option option = new ProgramOption("FORMAT,TILESIZE"){
-			public String FORMAT = "png";
-			public int TILESIZE = 256;
-		};
-
-		try {
-			option.setParams("gif,234");
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-
-		Option serverOption = new ProgramOption("timeOut", this){
-		};
-
-		System.err.println(Arrays.toString(option.getValues()));
-		System.err.println(Arrays.toString(serverOption.getValues()));
-
 	}
 
-	final
-	public List<Integer> version = Arrays.asList(1, 6);
-
-	public String getVersionString() {
-		//Arrays.
-		//
-		//version.stream().toArray();
-		return version.toString();
-		//return version.stream().forEach(System.err::println);
-		//collect(Collectors.joining(",")).toString();
-		//return String.join(",", version.toArray(null));
-		//return Arrays.toString(version.toArray());
-	}
 
 	/// Command-line interface for 
 	public static void main(String[] args) {
@@ -1607,6 +1243,110 @@ public class ProductServer { //extends Cache {
 		Instructions instructions = new Instructions();
 		Map<String ,String> directives = new TreeMap<>();
 
+		// NEW
+		ProgramRegistry registry = new ProgramRegistry();
+
+		registry.add(new ProgramUtils.Version<>(server));
+
+		registry.add(new ProgramUtils.LogLevel(log));
+		registry.add(new ProgramUtils.LogLevel.Debug(log));
+		registry.add(new ProgramUtils.LogLevel.Verbose(log));
+
+		registry.add(new Parameter.Simple<String>("conf","Read configuration", "filename") {
+			/// It is recommended to give --conf among the first options, unless default used.
+			@Override
+			public void exec() {
+				server.readConfig(value);
+			}
+		 });
+
+		registry.add(new Parameter.Simple<String>("log_style","Set formatting",
+				OutputFormat.TEXT.toString()){
+
+			// public String format = OutputFormat.TEXT.toString();
+
+			@Override
+			public void exec() {
+				log.special("Value...");
+				log.warn(value);
+				OutputFormat f = OutputFormat.valueOf(value);
+				log.special(f.toString());
+				switch (f){
+					case TEXT:
+						log.COLOURS = false;
+						break;
+					case VT100:
+						log.COLOURS = true;
+						break;
+					case HTML:
+					default:
+						log.warn("Not implemented:" + f);
+				}
+			}
+		});
+
+
+		class InstructionParameter extends Parameter.Simple<String> {
+
+			InstructionParameter(){
+				super("instructions", "Set actions and properties: " +
+						String.join(",", Flags.getKeys(Instructions.class)),
+						instructions.toString());
+
+			}
+
+			InstructionParameter(String fieldName){
+				super(fieldName.toLowerCase(),
+						String.format("Same as --instructions %s", fieldName),
+						fieldName);
+				setReference(this, "");
+				value = fieldName;
+				System.err.print("Added: ");
+				//System.err.println(value);
+				System.err.println(this);
+			}
+
+			@Override
+			public void exec() {
+				try {
+					/*
+					System.err.print("exec: '");
+					System.err.print(value);
+					System.err.println("'");
+					 */
+					if (hasParams()){
+						// Simple keys like --generate only add
+						instructions.set(value);
+					}
+					else {
+						// --intruction A,B,C sets
+						instructions.add(value);
+					}
+				} catch (NoSuchFieldException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		registry.add(new InstructionParameter());
+		for (String instr: Flags.getKeys(Instructions.class)){
+			registry.add(new InstructionParameter(instr));
+		}
+
+
+		registry.add(new Parameter.Simple<String>("directives","Set application properties",
+				""){
+			@Override
+			public void exec() {
+				// System.err.print(String.format("Type: %s %s", value.getClass(), value));
+				MapUtils.setEntries(value,"\\|", "true", directives);
+			}
+		});
+
+
+
 		//Field[] instructionFields = Instructions.class.getFields();
 
 		try {
@@ -1624,13 +1364,32 @@ public class ProductServer { //extends Cache {
 					String opt = arg.substring(2);
 
 					if (opt.equals("help")) {
-						System.err.println(String.format("version: %s", server.getVersionString()));
+						//System.err.println(String.format("version: %s", server.getVersionString()));
 						System.err.println(String.format("confFile: %s", server.confFile));
 						System.err.println();
 						server.help();
+						System.err.println();
+						registry.help(System.err);
 						return;
 					}
 
+					//
+					if (registry.has(opt)){
+						Program.Parameter param = registry.get(opt);
+						log.special(String.format("Handling: %s <- %s %b", opt, param, param.hasParams()));
+						if (param.hasParams()){
+							if (i < (args.length-1))
+								param.setParams(args[++i]);
+							else
+								param.setParams(""); // Support premature" end of cmd line, esp. with --help
+						}
+						param.exec();
+						log.special(String.format("Handled: %s", param));
+						//log.special(param.toString());
+						continue;
+					}
+
+					/*
 					if (opt.equals("verbose")) {
 						log.setVerbosity(Log.Status.LOG);
 						continue;
@@ -1642,7 +1401,10 @@ public class ProductServer { //extends Cache {
 						continue;
 					}
 
+					 */
 
+
+					/*
 					/// It is recommended to give --config among the first options, unless default used.
 					if (opt.equals("conf")) {
 						if (confFile != null){
@@ -1655,6 +1417,8 @@ public class ProductServer { //extends Cache {
 						continue; // Note
 					}
 
+					 */
+
 					// Now, read conf file if not read this far.
 					if (confFile == null){
 						server.readConfig(confFile = "nutshell.cnf");
@@ -1662,10 +1426,14 @@ public class ProductServer { //extends Cache {
 						//log.note(String.format("Server log: %s", p));
 					}
 
-
+					/*
 					if (opt.equals("version")) {
-						System.out.println(server.getVersionString());
+						//System.out.println(server.getVersionString());
 					}
+
+					 */
+
+					/*
 					if (opt.equals("log_style")) {
 						//String arg = args[++i];
 						OutputFormat f = OutputFormat.valueOf(args[++i]);
@@ -1682,7 +1450,9 @@ public class ProductServer { //extends Cache {
 						}
 
 					}
-					else if (opt.equals("product")) {
+					else
+					 */
+					if (opt.equals("product")) {
 						products.put("product", args[++i]);
 					}
 					else if (opt.equals("parse")) { // Debugging

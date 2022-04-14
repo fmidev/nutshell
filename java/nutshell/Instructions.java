@@ -105,7 +105,8 @@ interface ActionType {
 
     /** Go through product request handler checking existence of product generator, memory cache and output directory.
      */
-    int INFO = Counter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
+    // int INFO = Counter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
+    int STATUS = Counter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
 
     int PARALLEL = Counter.getBit(); // 8192; // use threads
 

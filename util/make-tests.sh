@@ -417,10 +417,12 @@ for i in ${LOOP//,/ } ; do
 
     
     secho title3 "Link the resulting file to SHORTCUT (non-timestamped) directory"
+    rm $OUTDIR_SHORT/$FILE
     $cmd --shortcut $FILE
     check 0 -L $OUTDIR_SHORT/$FILE
     
     secho title3 "Link the resulting file, as LATEST one"
+    rm $OUTDIR_SHORT/$LATEST_FILE
     $cmd --latest $FILE
     check 0 -L $OUTDIR_SHORT/$LATEST_FILE 
 

@@ -303,7 +303,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						return;
 					}
 					catch (Exception e){
-						task.instructions.add(Instructions.INFO);
+						task.instructions.add(Instructions.STATUS);
 					}
 				}
 				else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
@@ -322,7 +322,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				else {
 					ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-					if (!task.instructions.isSet(Instructions.INFO)) {
+					if (!task.instructions.isSet(Instructions.STATUS)) {
 						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 								os.toString("UTF8"), request, response);
 						return;
@@ -333,8 +333,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 			catch (IndexedException e) {
 				response.setStatus(e.index);
-				task.instructions.add(Instructions.INFO);
-				task.instructions.add(Instructions.INFO); // ?
+				task.instructions.add(Instructions.STATUS);
+				task.instructions.add(Instructions.STATUS); // ?
 				task.instructions.add(Instructions.INPUTLIST);
 			}
 
@@ -364,7 +364,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendElement(elem);
 
 
-			if (task.instructions.isSet(Instructions.INFO)) {
+			if (task.instructions.isSet(Instructions.STATUS)) {
 
 				Map<String,Object> map = new LinkedHashMap<>();
 
