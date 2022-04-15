@@ -211,6 +211,9 @@ public class SimpleHtml extends SimpleXML{
 	}
 
 
+	public Element appendComment(String text){
+		return super.appendElement(this.main, document.createComment(text));
+	}
 
 
 	public Element appendTag(Tag tag, String text){

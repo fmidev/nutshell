@@ -50,6 +50,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 	//// String confDir = "";
 	//// String httpRoot = "";
+	ProgramRegistry registry = null;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -64,18 +65,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		if (!productServer.serverLog.logFileIsSet()){
 			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 		}
-	}
-	
-	/*
-	@Override	
-	public void doPost(HttpServletRequest request,HttpServletResponse response) throws IOException, ServletException {
-		doGet(request, response);
+
+		// Here, for future extension dependen on ServletConfig config
+		registry = new ProgramRegistry();
+
 	}
 
-	 */
-
-
-	/** Main hcdler. Returns a requested product in the HTTP stream or dumps an HTML status page.
+	/** Main handler. Returns a requested product in the HTTP stream or dumps an HTML status page.
 	 *
 	 *  The default *action* is to generate a product and return it through stream.
 	 *
@@ -89,25 +85,75 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 
-		Instructions instructions = new Instructions();
 
-		for (String key: new String[]{"instructions", "actions", "output", "request"}) {  // request and action deprecating!
-			String[] a = request.getParameterValues(key);
-			if (a != null) {
-				try {
-					instructions.add(a);
-				} catch (Exception e) {
-					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parsing 'request' failed:" + Arrays.toString(a), e.getMessage(), response);
-					return;
+		ProductServer.BatchConfig batchConfig = new ProductServer.BatchConfig();
+
+		productServer.populate(batchConfig, registry);
+
+		ProductServer.InstructionParameter instructionParameter = productServer.new InstructionParameter(batchConfig.instructions);
+		registry.add(instructionParameter);
+		registry.add("actions", instructionParameter);
+		registry.add("output", instructionParameter);
+		registry.add("request", instructionParameter); // oldest
+
+		Program.Parameter.Simple<String> page = new Program.Parameter.Simple("page",
+				"HTML page to be viewed", "menu.html");
+		registry.add(page);
+
+		Program.Parameter.Simple<String> product = new Program.Parameter.Simple("product",
+				"Product to be processed", "");
+		registry.add(product);
+
+		// Pre-interpret some idioms
+		if (request.getParameterMap().keySet().size() == 1){
+			String q = request.getQueryString();
+			if (q != null) {
+				switch (q){
+					case "status":
+					case "catalog":
+						page.value = q;
+						break;
+					default:
+						if (q.endsWith(".html")) {
+							// NOTE: perhaps assigns also_
+							// page.value="page=form.html"
+							page.value = q;
+							// ... but overridden just below
+						}
+						else {
+							productServer.serverLog.warn(String.format("Could not parse query: %s", q));
+						}
 				}
 			}
 		}
 
-		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
-			instructions.remove(ActionType.CLEAR_CACHE);
-			if (!instructions.isEmpty()){
-				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", instructions) );
+		// "Main" command handling loop
+		for (Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()){
+			final String key = entry.getKey();
+			if (registry.has(key)){
+				Program.Parameter parameter = registry.get(key);
+				if (parameter.hasParams()){
+					try {
+						parameter.setParams(entry.getValue());
+						parameter.exec(); // Remember! TODO: update()
+					} catch (NoSuchFieldException | IllegalAccessException e) {
+						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
+					}
+				}
 			}
+		}
+
+		// Debug
+		//batchConfig.instructions.add(Instructions.STATUS);
+
+		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
+
+			/*
+			batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
+			if (!batchConfig.instructions.isEmpty()){
+				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", batchConfig.instructions) );
+			}
+			 */
 
 			try {
 				productServer.clearCache(false);
@@ -120,55 +166,78 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 
-		String productStr = request.getParameter("product");
+		//if (request.getParameterMap().values().isEmpty()){
+		/*
+		for (String key: request.getParameterMap().keySet()){
+			if (key.endsWith(".html")) {
+				page.value = key;
+			}
+			break;
+		}
+
+		 */
+		if (page.value.equals("status")){
+			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
+					"NutShell server is running since " + setup.get("startTime"), request, response);
+			return;
+		}
+
+		if (product.value.equals("resolve")){
+			/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
+
+			product.value = "";
+
+			final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
+
+			if (requestUri == null){
+				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product redirection error",
+						"No request_uri for resolving a product", response);
+				return;
+			}
+
+			Path path = Paths.get(requestUri.toString());
+			for (int i = 0; i < path.getNameCount(); i++) {
+				if (path.getName(i).toString().equals("cache")){
+					product.value = path.getFileName().toString();
+					batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
+					break;
+				}
+			}
+
+			if (product.value.isEmpty()){
+				Map p = new HashMap();
+				p.put("path", path);
+				p.put("Parent", path.getParent());
+				p.put("FileName", path.getFileName());
+				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,
+						String.format("Not-found-404 failed: %s: %s -> %s", requestUri, path.getName(1), path.getFileName()),
+						p, response);
+				return;
+			}
+
+		}
 
 		/// Respond with an HTML page, if query contains no product request
-		if ((productStr == null) || productStr.isEmpty()){
+		//if ((productStr == null) || productStr.isEmpty()){
+		if (product.value.isEmpty()){ // redesign ?
+
+			if (page.value.isEmpty()){
+				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
+								String.format("Query: %s", request.getQueryString()), request, response);
+						return;
+			}
 
 			/**  TODO: rename main.html to sth like layout.html or template.html
 			 *   Note: main.html is also utilied as index.html -> template/main.html (ie. linked)
 			 */
-			String pageName = null; //"menu.html";
+			SimpleHtml html = includeHtml(page.value); // fail?
 
-			Map<String, String[]> parameterMap = request.getParameterMap();
-			if (!parameterMap.isEmpty()){
-
-				pageName = request.getParameter("page");
-
-				if (pageName == null) {
-
-					String queryString = request.getQueryString();
-
-					if (queryString.endsWith(".html")) {
-						pageName = queryString;
-					}
-					else if (queryString.equals("status")) {
-						sendStatusPage(HttpServletResponse.SC_OK, "Status page",
-								"NutShell server is running since " + setup.get("startTime"), request, response);
-						return;
-					}
-					else {
-						sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
-								String.format("Query: %s", queryString), request, response);
-						return;
-					}
-				}
-			}
-
-			if ((pageName == null) || pageName.isEmpty()){
-				pageName = "menu.html";
-			}
-
-
-
-			SimpleHtml html = includeHtml(pageName); // fail?
-
-			if (parameterMap.size() > 1){
+			if (request.getParameterMap().size() > 1){
 				html.appendTable(request.getParameterMap(), "Several parameters");
 			}
 
 			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
-			elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, pageName ));
+			elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, page.value ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
 			response.setStatus(HttpServletResponse.SC_OK); // tes
@@ -178,85 +247,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 
-
-		// Default
-		if (instructions.value == 0)
-			instructions.set(Instructions.MAKE | Instructions.STREAM);
-
-
-		/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
-		if (productStr.equals("resolve")){
-
-			final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
-
-			if (requestUri == null){
-				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "No request_uri for resolving a product", null, response);
-				return;
-			}
-
-			Path path = Paths.get(requestUri.toString());
-			productStr = "";
-			for (int i = 0; i < path.getNameCount(); i++) {
-				if (path.getName(i).toString().equals("cache")){
-					productStr = path.getFileName().toString();
-					instructions.set(Instructions.MAKE | Instructions.STREAM);
-					break;
-				}
-			}
-
-			if (productStr.isEmpty()){
-
-				/*
-				Flags f = new Flags(123);
-				f.set(2);
-				*/
-				Map p = new HashMap();
-				p.put("path", path);
-				//p.put("Name", path.getName(0));
-				p.put("Parent", path.getParent());
-				// p.put("Root", path.getRoot());
-				p.put("FileName", path.getFileName());
-
-				/*
-				StringBuffer sb = new StringBuffer();
-				sb.append(requestUri);
-				sb.append(": ").append(path.getName(1));
-				sb.append(" -> ").append(path.getFileName());
-				 */
-				//MapUtils.getMap(path);
-				//path.getFileName()
-				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,
-						//"Could not resolve not found (404) request.",
-						String.format("Not-found-404 failed: %s: %s -> %s", requestUri, path.getName(1), path.getFileName()),
-						//MapUtils.getMap(path, Modifier.PUBLIC),
-						//MapUtils.getMethods(path),
-						p, //MapUtils.getMethods(f),
-						response);
-
-				/*
-				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,
-						"Could not resolve not found (404) request.",
-						String.format("%s: %s -> %s", requestUri, path.getName(1), path.getFileName()),
-						response);
-				 */
-				return;
-			}
-
-		}
-
-
-
 		try {
 
-			// Debug log? OS
-			//ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-			final String filename = productStr;
+			// Default
+			if (batchConfig.instructions.value == 0)
+				batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
 
 			// problem: parameter ordering may cause  filename != productStr
 			// TODO: -> _link_ equivalent files?
 
-			Task task = productServer.new Task(filename, instructions.value,null);
+			Task task = productServer.new Task(product.value, batchConfig.instructions.value,null);
 
 			if (task.instructions.isSet(Instructions.LATEST)){
 				task.log.note("Action 'LATEST' not allowed in HTTP interface, discarding it");
@@ -334,7 +334,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			catch (IndexedException e) {
 				response.setStatus(e.index);
 				task.instructions.add(Instructions.STATUS);
-				task.instructions.add(Instructions.STATUS); // ?
+				//task.instructions.add(Instructions.STATUS); // ?
 				task.instructions.add(Instructions.INPUTLIST);
 			}
 
@@ -368,6 +368,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 				Map<String,Object> map = new LinkedHashMap<>();
 
+				map.put("instr", batchConfig.instructions);
+				map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
+				//map.putAll(registry.map);
+
+
 				//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
 				if (task.relativeOutputDir != null) {
 
@@ -384,27 +389,51 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					if ((task.relativeGraphPath!=null)){
 						Path dotFile = productServer.cacheRoot.resolve(task.relativeGraphPath);
 						task.log.special(String.format("Writing graph file %s", dotFile));
-						task.graph.dotToFile(dotFile.toString()+".dot", "nutshell.css");
-						task.graph.dotToFile(dotFile.toString(), "nutshell.css");
+						task.graph.dotToFile(dotFile.toString()+".dot"); // , "nutshell.css");
+						task.graph.dotToFile(dotFile.toString()); //, "nutshell.css");
 
 						Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
 						map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
 						//Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
 						try {
 							Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
-							// graphElem.setAttribute("src", relativeGraphPath.toString());
 							graphElem.setAttribute("type", "image/svg+xml");
-							//graphElem.setAttribute("border", "1");
+							graphElem.setAttribute("border", "1");
+							// graphElem.setAttribute("src", relativeGraphPath.toString());
 							Document graphSvg = SimpleXML.readDocument(dotFile);
 							Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
 							graphElem.appendChild(node);
+							//graphElem.appendChild(graphSvg.getDocumentElement());
 							graphElem.setAttribute("title", task.info.PRODUCT_ID);
 							graphElem.setAttribute("id", "graph");
 							html.appendElement(graphElem);
 						}
 						catch (Exception e){
-							html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating graph:");
+
+							//Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
+							Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
+							graphElem.setAttribute("type", "image/svg+xml");
+							graphElem.setAttribute("border", "1");
+							graphElem.setAttribute("src", relativeGraphPath.toString());
+							html.appendElement(graphElem);
+
+							Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
 							html.appendAnchor(relativeGraphPath, task.relativeGraphPath.getFileName().toString());
+							html.appendTag(SimpleHtml.Tag.H2, String.format("%s Exists=%b",
+									task.relativeGraphPath, dotFile.toFile().exists()));
+
+							html.appendTag(SimpleHtml.Tag.H2, e.getMessage()).setAttribute("class", "error");
+							// Comments! Consider tail?
+							ByteArrayOutputStream os = new ByteArrayOutputStream();
+							PrintStream printStream = new PrintStream(os);
+							task.graph.toStream(printStream);
+							printStream.append("--------------");
+							e.printStackTrace(printStream);
+							// html.appendComment(os.toString("UTF8")); ILLEGALS
+							html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
+							printStream.close();
+							os.close();
+
 						}
 						// <embed id="viewMain" src="" type="image/svg+xml"></embed>
 					}
@@ -420,15 +449,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
 				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
-				map.put("actions", instructions);
+				map.put("actions", batchConfig.instructions);
 				map.put("directives", task.info.directives);
+
 
 				html.appendTable(map, "Product generator");
 
-
 				// INPUTS
 				if (!task.inputs.isEmpty()) {
-					Map<String, Element> linkMap = new HashMap<>();
+					Map<String, Element> linkMap = new TreeMap<>();
 					for (Map.Entry<String, String> e : task.inputs.entrySet()) {
 						String inputFilename = e.getValue();
 						//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
@@ -472,12 +501,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
 			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
 			String name = productServer.getClass().getCanonicalName();
-			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
+			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
-			String cmdLine2 = "nutshell --verbose --conf %s --instructions ";
-			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, instructions, task.info)).setAttribute("class", "code");
+			String cmdLine2 = "nutshell --verbose --conf %s --instructions %s %s ";
+			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
 			html.appendTable(task.info.getParamEnv(null), "Product parameters");
+
+			html.appendTable(registry.map, "Command set");
 
 			//log.warn("Nyt jotain");
 

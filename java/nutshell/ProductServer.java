@@ -4,7 +4,6 @@ import sun.misc.Signal;
 
 //import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.nio.file.*;
 import java.text.ParseException;
 import java.util.*;
@@ -539,7 +538,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 					else {
 						node = graph.getNode(info.getID());
-						node.attributes.put("label", String.format("%s\n(%s)", node.getName(), info.FORMAT));
+						node.attributes.put("label", String.format("%s (%s)", node.getName(), info.FORMAT));
 						node.attributes.put("href", "?product=" + info.getFilename());
 						// node.attributes.put("class", "clickable");
 						// node.attributes.put("style", "filled");
@@ -570,7 +569,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						//List<String> attribs = new ArrayList<>();
 						//Map<String, Object> p = inputTask.info.getParamEnv(null);
 						//attribs.add(p.getOrDefault("Format", ""))
-						inputNode.attributes.put("label", String.format("%s\n(%s)", inputNode.getName(),inputTask.info.FORMAT));
+						inputNode.attributes.put("label", String.format("%s (%s)", inputNode.getName(),inputTask.info.FORMAT));
 						// inputNode.attributes.put("class", "clickable");
 						link = graph.addLink(node, inputNode);
 						// link.attributes.put("label", key);
@@ -578,7 +577,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						link.attributes.put("title", key); // SVG only
 						// TODO: BaseURL and  ENCODE
 						//inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s&instructions=GENERATE,DEBUG", inputTask.info.getFilename()));
-						inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", inputTask.info.getFilename()));
+						// inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", inputTask.info.getFilename()));
+						inputNode.attributes.put("href", String.format("/nutshell/NutShell?product=%s", //&actions=%s",
+							inputTask.info.getFilename(),inputTask.instructions));
 					}
 
 
@@ -735,8 +736,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					this.result = this.outputPath;
 					log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length() ));
 
-					// "Post processing"
-					if (this.instructions.isSet(Instructions.SHORTCUT)){
+					if (this.instructions.isSet(PostProcessing.SHORTCUT)){
 						if (this.info.isDynamic()) {
 							try {
 								Path dir = ensureDir(cacheRoot,productDir); //, dirPerms);
@@ -749,17 +749,38 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							log.debug("Static product (no TIMESTAMP), skipped shortcut");
 					}
 
-					if (this.instructions.isSet(Instructions.LATEST)){
+					if (this.instructions.isSet(PostProcessing.LATEST)){
 						if (this.info.isDynamic()) {
 							try {
 								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")), true);
+								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 							}
 						}
 						else
 							log.debug("Static product (no TIMESTAMP), skipped shortcut");
+					}
+
+					if (this.instructions.isSet(PostProcessing.STORE)){
+						// Todo: traverse storage paths.
+						Path file = storageRoot.resolve(relativeOutputDir).resolve(this.info.getFilename());
+						if (file.toFile().exists()){
+							log.experimental(String.format("Store: file exists already: %s", file));
+						}
+						else {
+							try {
+								ensureDir(storageRoot, relativeOutputDir);
+								this.copy(this.outputPath, file);
+								log.experimental(String.format("Stored in: %s", file));
+							}
+							catch (IOException e) {
+								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
+								log.reset();
+								log.fail(String.format("Store: %s", file));
+							}
+						}
 					}
 
 
@@ -946,14 +967,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	 */
 
-	/** Run a set of tasks in parallel.
-	 *
-	 * @param taskRequests
-	 * @param instructions
-	 * @param directives
-	 * @param log
-	 * @return
-	 */
+
+	public Map<String,Task> executeMany(BatchConfig batchConfig, HttpLog log){
+		return executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
+	}
+
+
+		/** Run a set of tasks in parallel.
+         *
+         * @param taskRequests
+         * @param instructions
+         * @param directives
+         * @param log
+         * @return
+         */
 	public Map<String,Task> executeMany(Map<String,String> taskRequests, Instructions instructions, Map directives, HttpLog log){
 
 		Map<String,Task> tasks = new HashMap<>();
@@ -1084,7 +1111,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					Path dotFile = cacheRoot.resolve(task.relativeGraphPath);
 					if (task.instructions.isSet(ActionType.STATUS)){
 						log.special(String.format("Writing graph to file: %s", dotFile));
-						task.graph.dotToFile(dotFile.toString(), "nutshell.css");
+						try {
+							task.graph.dotToFile(dotFile.toString(), "nutshell.css");
+						} catch (IOException e) {
+							log.warn(e.getMessage());
+							task.graph.toStream(log.getPrintStream());
+							log.fail(String.format("Failed in writing graph to file: %s", dotFile));
+						}
 					}
 					//serverLog.special(String.format("Finished task: %s", task));
 				} catch (InterruptedException e) {
@@ -1182,7 +1215,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		HTML;
 	}
 
-
+	/*
 	public void help(){
 
 		System.err.println("Usage:   java -cp $NUTLET_PATH nutshell.ProductServer  [<options>] <products>");
@@ -1212,123 +1245,109 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		System.err.println("Examples: ");
 		System.err.println("    java -cp $NUTLET_PATH 201012161615_test.ppmforge_DIMENSION=2.5.png");
 
+		System.err.println("Options: ");
+		System.err.println();
+
+	}
+
+	 */
+
+	class InstructionParameter extends Parameter.Simple<String> {
+
+		InstructionParameter(Instructions instructions){
+			super("instructions", "Set actions and properties: " +
+							String.join(",", Flags.getKeys(Instructions.class)),
+					instructions.toString());
+			myInstructions = instructions;
+		}
+
+		Instructions myInstructions = null;
+
+		InstructionParameter(Instructions instructions, String fieldName){
+			super(fieldName.toLowerCase(),
+					String.format("Same as --instructions %s", fieldName),
+					fieldName.toUpperCase());
+			setReference(this, "");
+			//value = fieldName.toUpperCase();
+			myInstructions = instructions;
+			//System.err.print("Added: ");
+			// System.err.println(this);
+		}
+
+		@Override
+		public void exec() {
+			try {
+				myInstructions.add(value);
+				/*
+				if (hasParams()){
+					// Definite?  "--instructions A,B,C"
+					myInstructions.set(value);
+				}
+				else {
+					// Simple keys like "--generate"
+					myInstructions.add(value);
+				}
+				 */
+			} catch (NoSuchFieldException e) {
+				serverLog.error(e.getMessage());
+				//e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				serverLog.error(e.getMessage());
+				//e.printStackTrace();
+			}
+		}
 	}
 
 	static
-	class TaskTray { // consider extended server tray + nutLet without linking
+	class BatchConfig {
 
-		Instructions instructions = new Instructions(); // Task
-		Map<String ,String> directives = new TreeMap<>(); // not in Task
-
+		public Map<String,String> products = new TreeMap<>();
+		public Instructions instructions = new Instructions();
+		public Map<String ,String> directives = new TreeMap<>();
 
 	}
 
-
-	/// Command-line interface for 
-	public static void main(String[] args) {
-		
-
-		final ProductServer server = new ProductServer();
-		server.serverLog.setVerbosity(Log.Status.DEBUG);
-		server.timeOut = 20;
-
-		if (args.length == 0){
-			server.help();  // An instance, yes. Default values may habve been changed.
-			return;
-		}
-
-		HttpLog log = server.serverLog; //.child("CmdLine");
-		log.COLOURS = true;
-
-
-		Map<String,String> products = new TreeMap<>();
-		Instructions instructions = new Instructions();
-		Map<String ,String> directives = new TreeMap<>();
-
-		// NEW
-		ProgramRegistry registry = new ProgramRegistry();
+	public void populate(BatchConfig batchConfig, ProgramRegistry registry){
 
 		registry.add(new ProgramUtils.Help(registry));
-		registry.add(new ProgramUtils.LogLevel(log));
-		registry.add(new ProgramUtils.LogLevel.Debug(log));
-		registry.add(new ProgramUtils.LogLevel.Verbose(log));
-		registry.add(new ProgramUtils.Version<>(server));
+		registry.add(new ProgramUtils.LogLevel(serverLog));
+		registry.add(new ProgramUtils.LogLevel.Debug(serverLog));
+		registry.add(new ProgramUtils.LogLevel.Verbose(serverLog));
 
-		registry.add(new Parameter.Simple<String>("conf","Read configuration", "filename") {
+
+		registry.add(new Parameter.Simple<String>("conf","Read configuration", "") {
 			/// It is recommended to give --conf among the first options, unless default used.
 			@Override
-			public void exec() { server.readConfig(value);}
-		 });
+			public void exec() { readConfig(value);}
+		});
 
 		registry.add(new Parameter.Simple<String>("log_style","Set formatting",
 				OutputFormat.TEXT.toString()){
 
 			@Override
 			public void exec() {
-				log.special("Value...");
-				log.warn(value);
+				//serverLog.special("Value...");
+				//serverLog.warn(value);
 				OutputFormat f = OutputFormat.valueOf(value);
-				log.special(f.toString());
+				serverLog.special(f.toString());
 				switch (f){
 					case TEXT:
-						log.COLOURS = false;
+						serverLog.COLOURS = false;
 						break;
 					case VT100:
-						log.COLOURS = true;
+						serverLog.COLOURS = true;
 						break;
 					case HTML:
 					default:
-						log.warn("Not implemented:" + f);
+						serverLog.warn(String.format("%s: Not implemented: %s", this.getName(), f));
 				}
 			}
 		});
 
 
-		class InstructionParameter extends Parameter.Simple<String> {
-
-			InstructionParameter(){
-				super("instructions", "Set actions and properties: " +
-						String.join(",", Flags.getKeys(Instructions.class)),
-						instructions.toString());
-			}
-
-			InstructionParameter(String fieldName){
-				super(fieldName.toLowerCase(),
-						String.format("Same as --instructions %s", fieldName),
-						fieldName);
-				setReference(this, "");
-				value = fieldName;
-				//System.err.print("Added: ");
-				// System.err.println(this);
-			}
-
-			@Override
-			public void exec() {
-				try {
-					/*
-					System.err.print("exec: '");
-					System.err.print(value);
-					System.err.println("'");
-					 */
-					if (hasParams()){
-						// Simple keys like --generate only add
-						instructions.set(value);
-					}
-					else {
-						// --instruction A,B,C sets
-						instructions.add(value);
-					}
-				} catch (NoSuchFieldException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		registry.add(new InstructionParameter());
-		for (String instr: Flags.getKeys(Instructions.class)){
-			registry.add(new InstructionParameter(instr));
+		registry.add(new InstructionParameter(batchConfig.instructions));
+		for (String instr: Flags.getKeys(Instructions.class)){ // consider instant .getClass()
+			registry.add(instr.toLowerCase(), new InstructionParameter(batchConfig.instructions, instr));
 		}
 
 
@@ -1337,7 +1356,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				// System.err.print(String.format("Type: %s %s", value.getClass(), value));
-				MapUtils.setEntries(value,"\\|", "true", directives);
+				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
 			}
 		});
 
@@ -1345,9 +1364,59 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				products.put("product", value);
+				batchConfig.products.put("product", value);
 			}
 		});
+
+		registry.add(new Parameter.Simple<Integer>("regenerate",
+				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
+				0){
+			@Override
+			public void exec() {
+				if (value < 0){
+					serverLog.warn(String.format("Negative cache clearance depth %d, setting to zerp.", value));
+					value = 0;
+				}
+				batchConfig.instructions.regenerateDepth = value;
+				//server.defaultRemakeDepth = value;
+			}
+		});
+
+
+
+	}
+
+	/// Command-line interface for 
+	public static void main(String[] args) {
+
+		final ProductServer server = new ProductServer();
+		server.serverLog.setVerbosity(Log.Status.DEBUG);
+		server.timeOut = 20;
+
+		/*
+		if (args.length == 0){
+			server.help();  // An instance, yes. Default values may habve been changed.
+			return;
+		}
+
+		 */
+
+		HttpLog log = server.serverLog; //.child("CmdLine");
+		log.COLOURS = true;
+
+		/*
+		Map<String,String> context_products = new TreeMap<>();
+		Instructions context_instructions = new Instructions();
+		Map<String ,String> context_directives = new TreeMap<>();
+		*/
+
+		// NEW
+		ProgramRegistry registry = new ProgramRegistry();
+
+		BatchConfig batchConfig = new BatchConfig();
+		server.populate(batchConfig, registry);
+
+		registry.add(new ProgramUtils.Version<>(server));
 
 		registry.add(new Parameter.Single("parse",
 				"Debugging (cmd line only): parse product.", "filename"){
@@ -1375,23 +1444,23 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			@Override
 			public void exec() {
-				String[] p = products.values().toArray(new String[0]);
-				if (products.isEmpty()){
+				String[] p = batchConfig.products.values().toArray(new String[0]);
+				if (batchConfig.products.isEmpty()){
 					log.error("Product not defined yet, try: [--product] <FILE>"  + this.getName());
 				}
 				else {
 
-					if (instructions.isEmpty())
-						instructions.add(ActionType.MAKE);
+					if (batchConfig.instructions.isEmpty())
+						batchConfig.instructions.add(ActionType.MAKE);
 
-					if (products.size() > 1){
+					if (batchConfig.products.size() > 1){
 						log.warn("Several products defined, using last");
 					}
 
-					for (Map.Entry entry: products.entrySet()) {
+					for (Map.Entry entry: batchConfig.products.entrySet()) {
 						try {
 							Task task = server.new Task(entry.getValue().toString(), 0, log);
-							System.out.println(String.format("instructions=%s&product=%s", instructions, task.info.getFilename()));
+							System.out.println(String.format("instructions=%s&product=%s", batchConfig.instructions, task.info.getFilename()));
 						} catch (ParseException e) {
 							log.warn(entry.getValue().toString());
 							log.error(e.getMessage());
@@ -1402,19 +1471,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		});
 
 
-		registry.add(new Parameter.Simple<Integer>("regenerate",
-				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
-				0){
-			@Override
-			public void exec() {
-				if (value < 0){
-					log.warn(String.format("Negative cache clearance depth %d, setting to zerp.", value));
-					value = 0;
-				}
-				instructions.regenerateDepth = value;
-				//server.defaultRemakeDepth = value;
-			}
-		});
 
 
 		/// Command line only
@@ -1423,7 +1479,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				instructions.addCopy(value);
+				batchConfig.instructions.addCopy(value);
 			}
 		});
 
@@ -1432,7 +1488,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				instructions.addLink(value);
+				batchConfig.instructions.addLink(value);
 			}
 		});
 
@@ -1441,7 +1497,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				instructions.addMove(value);
+				batchConfig.instructions.addMove(value);
 			}
 		});
 
@@ -1454,14 +1510,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		});
 
 
-		/*
-		registry.add(new Parameter.Simple<String>("product","Set product filename (repeatable)",
-				""){
-		});
-		*/
-
-
 		//Field[] instructionFields = Instructions.class.getFields();
+		if (args.length == 0){
+			args = new String[]{"--help"};
+		}
+
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1503,7 +1556,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				}
 				else {  // Argument does not start with "--"
-					products.put("product" + (products.size()+1), arg);
+					batchConfig.products.put("product" + (batchConfig.products.size()+1), arg);
 				}
 
 			}
@@ -1514,19 +1567,19 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			System.exit(1);
 		}
 
-		if (instructions.isEmpty()){
-			instructions.set(ActionType.MAKE);
+		if (batchConfig.instructions.isEmpty()){
+			batchConfig.instructions.set(ActionType.MAKE);
 		}
 
 		int result = 0;
 
-		log.note("Instructions: " + instructions);
+		log.note("Instructions: " + batchConfig.instructions);
 
-		if (instructions.isSet(ActionType.CLEAR_CACHE)) {
+		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
 			log.warn("Clearing cache");
-			if (instructions.value != ActionType.CLEAR_CACHE){
-				instructions.remove(ActionType.CLEAR_CACHE);
-				log.warn(String.format("Discarding remaining instructions: %s", instructions) );
+			if (batchConfig.instructions.value != ActionType.CLEAR_CACHE){
+				batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
+				log.warn(String.format("Discarding remaining context.instructions: %s", batchConfig.instructions) );
 			}
 
 			try {
@@ -1538,20 +1591,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			System.exit(result);
 		}
 
-		if (!instructions.copies.isEmpty())
-			log.note(String.format("   COPY(%d):\t %s", instructions.copies.size(), instructions.copies));
-		if (!instructions.links.isEmpty())
-			log.note(String.format("   LINK(%d):\t %s", instructions.links.size(),  instructions.links));
-		if (instructions.move != null)
-			log.note(String.format("   MOVE: \t %s", instructions.move));
+		// Turhia/väärässä paikassa (tässä)
+		if (!batchConfig.instructions.copies.isEmpty())
+			log.note(String.format("   COPY(%d):\t %s", batchConfig.instructions.copies.size(), batchConfig.instructions.copies));
+		if (!batchConfig.instructions.links.isEmpty())
+			log.note(String.format("   LINK(%d):\t %s", batchConfig.instructions.links.size(),  batchConfig.instructions.links));
+		if (batchConfig.instructions.move != null)
+			log.note(String.format("   MOVE: \t %s", batchConfig.instructions.move));
 
-		if (!directives.isEmpty())
-			log.note("Directives: " + directives);
+		if (!batchConfig.directives.isEmpty())
+			log.note("Directives: " + batchConfig.directives);
 
 		/// "MAIN"
-		//log.warn("Starting..");
-
-		Map<String,ProductServer.Task> tasks = server.executeMany(products, instructions, directives, log);
+		//Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
+		Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig, log);
 		//log.note(String.format("Waiting for (%d) tasks to complete... ", tasks.size()));
 
 		//System.err.println(log.indexedException);

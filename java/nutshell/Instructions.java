@@ -5,6 +5,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+
+// TODO: redesign such that a that a static instance is used:
+// static final Counter<MyApp> counter = new Counter<>();
+
+/**
+ *
+ * @param <T>
+ */
 class Counter {
 
     static protected int counter;
@@ -22,25 +30,22 @@ class Counter {
  */
 interface ResultType {
 
-    /** The product is in memory cache
-     */
-    int MEMORY = Counter.getBit(); // 1 "RESULT=MEMORY"
 
-    /** Product should be saved on disk. System side generator may save it anyway.
-     *   – return immediately in success
+    // static final Counter<ResultType> counter = new Counter<>();
+
+    /**
+     * The product is in memory cache
+     */
+    int MEMORY = Counter.getBit(); //Counter.getBit(); // 1 "RESULT=MEMORY"
+
+    /**
+     * Product should be saved on disk. System side generator may save it anyway.
+     * – return immediately in success
      */
     int FILE = Counter.getBit(); // 2; // "RESULT=FILE"
 
-    /** Link file to short directory
-     *
-     */
-    int SHORTCUT = Counter.getBit() | FILE; // 4 | FILE; // "POSTOP=LINK_SHORTCUT"
-
-    /** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
-     */
-    int LATEST = Counter.getBit() | FILE; //8 | FILE;  // "POSTOP=LINK_LATEST"
-
 }
+
 
 /** Specifies, what will be done after product has been generated (or checked).
  *
@@ -96,8 +101,6 @@ interface ActionType {
     // A "hidden" flag? actually unclear, should be either RESULT=FILE or RESULT=MEMORY (but not RESULT=null);
     // Also, acts like "make both MEMORY and FILE objects".
 
-    /// Check if product is in cache memory or disk, but do not generate it if missing.
-    // public static final int QUERY = MEMORY|FILE;
 
     /** Run script "run.sh" in the product directory (after)
      */
@@ -116,8 +119,24 @@ interface ActionType {
 
 }
 
+interface PostProcessing {
 
-public class Instructions extends Flags implements ActionType, ResultType, OutputType {
+    /** Link file to short directory
+     *
+     */
+    int SHORTCUT = Counter.getBit() | ResultType.FILE; // 4 | FILE; // "POSTOP=LINK_SHORTCUT"
+
+    /** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
+     */
+    int LATEST = Counter.getBit() | ResultType.FILE; //8 | FILE;  // "POSTOP=LINK_LATEST"
+
+    /// Try to store the resulting file.
+    int STORE = Counter.getBit();
+
+}
+
+
+public class Instructions extends Flags implements ActionType, ResultType, OutputType, PostProcessing {
 
     public Instructions(){
     }
@@ -126,6 +145,8 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
         this.value = a;
     }
 
+    /**  When generating a product, @regenerateDepth determines how deeply also inputs will be regenerated.
+     */
     public int regenerateDepth = 0;
 
     public boolean isEmpty() {

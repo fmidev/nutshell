@@ -61,99 +61,6 @@ public class Graph extends Entity {
 
     //String styleSheet = "";
 
-    void toStream(PrintStream stream){
-
-        stream.append("digraph ").append(id);
-        stream.println(" {");
-        stream.println();
-
-        for (Node n: nodes) {
-            n.toStream(stream);
-        }
-        stream.println();
-
-        for (Link l: links) {
-            l.toStream(stream);
-        }
-        stream.println();
-
-        stream.println("}");
-    }
-
-    void dotToFile(String outfile, String styleSheet){ /// todo: IOException
-
-        int i = outfile.lastIndexOf('.');
-        if (i > 0){
-            dotToFile(outfile, outfile.substring(i+1).toLowerCase(), styleSheet) ;
-        }
-
-    }
-
-    void dotToFile(String outfile, String format, String styleSheet){ /// todo: IOException
-
-        if (format.equals("dot")){
-            try {
-                PrintStream printStream = new PrintStream(new FileOutputStream(outfile));
-                toStream(printStream);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            return;
-        }
-
-        String cmd = String.format("dot -T%s -o %s", format, outfile);
-        // TODO: add error output read
-        // String cmd = String.format("dot -T%s -stylesheet='%s' -o %s", format, styleSheet, outfile);
-        String dir = ".";
-
-        System.err.println(String.format("cmd: '%s'", cmd));
-        //ShellExec.OutputReader reader = new ShellExec.OutputReader(System.err);
-
-        final Process process;
-        try {
-            process = Runtime.getRuntime().exec(cmd, null, Paths.get(dir).toFile());
-            OutputStream outputStream = process.getOutputStream();
-            PrintStream printStream = new PrintStream(outputStream);
-            toStream(printStream);
-            // TODO: handler error stream
-            //printStream.println("digraph MIKA { A->B }");
-            /*
-            DataInputStream in = new DataInputStream(process.getInputStream());
-            //DataInputStream in = new DataInputStream(process.getErrorStream());
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = br.readLine()) != null) {
-            	System.err.println(line);
-            }
-            in.close();
-            br.close();
-            */
-            printStream.close();
-            outputStream.close();
-            //System.err.println("Chiuso");
-		}
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        //process.
-
-
-        // final String logname = ShellExec.class.getSimpleName() + ".log";
-        // System.out.println("Writing log :" + logname);
-        //File logFile = new File(logname);
-        /*
-        System.out.println(String.format("Executing: %s (dir=", cmd, dir));
-        try {
-            //logFile.createNewFile();
-            // FileOutputStream fw = new FileOutputStream(logFile);
-            ShellExec.exec(cmd, null, Paths.get(dir), reader);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-         */
-    }
-
 
     public class Node extends Entity {
 
@@ -243,6 +150,87 @@ public class Graph extends Entity {
     }
 
 
+    void toStream(PrintStream stream){
+
+        stream.append("digraph ").append(id);
+        stream.println(" {");
+        stream.println();
+
+        for (Node n: nodes) {
+            n.toStream(stream);
+        }
+        stream.println();
+
+        for (Link l: links) {
+            l.toStream(stream);
+        }
+        stream.println();
+
+        stream.println("}");
+    }
+
+    void dotToFile(String outfile) throws IOException { // }, String styleSheet){ /// todo: IOException
+        int i = outfile.lastIndexOf('.');
+        if (i > 0){
+            dotToFile(outfile, outfile.substring(i+1).toLowerCase()); //, styleSheet) ;
+        }
+    }
+
+    void dotToFile(String outfile, String format) throws IOException { //, String styleSheet){ /// todo: IOException
+
+        if (format.equals("dot")){
+            PrintStream printStream = new PrintStream(new FileOutputStream(outfile));
+            toStream(printStream);
+            printStream.close();
+
+            /*
+            catch (FileNotFoundException e) {
+                try {
+                    PrintStream printStream = new PrintStream(new FileOutputStream(outfile+".loki"));
+                    e.printStackTrace(printStream);
+                    printStream.close();
+                }
+                catch (FileNotFoundException e2) {
+                    e2.printStackTrace();
+                }
+            }
+             */
+            return;
+        }
+
+        String cmd = String.format("dot -T%s -o %s", format, outfile);
+        // TODO: add error output read
+        // String cmd = String.format("dot -T%s -stylesheet='%s' -o %s", format, styleSheet, outfile);
+        String dir = ".";
+
+        System.err.println(String.format("cmd: '%s'", cmd));
+        //ShellExec.OutputReader reader = new ShellExec.OutputReader(System.err);
+
+        final Process process = Runtime.getRuntime().exec(cmd, null, Paths.get(dir).toFile());
+        OutputStream outputStream = process.getOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+        toStream(printStream);
+        // TODO: handler error stream
+        outputStream.close();
+        printStream.close();
+
+
+        // final String logname = ShellExec.class.getSimpleName() + ".log";
+        // System.out.println("Writing log :" + logname);
+        //File logFile = new File(logname);
+        /*
+        System.out.println(String.format("Executing: %s (dir=", cmd, dir));
+        try {
+            //logFile.createNewFile();
+            // FileOutputStream fw = new FileOutputStream(logFile);
+            ShellExec.exec(cmd, null, Paths.get(dir), reader);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+         */
+    }
+
     public static void main(String[] args) {
 
 
@@ -270,7 +258,11 @@ public class Graph extends Entity {
         link2.attributes.put("label", "reijo");
 
         // graph.toStream(System.out);
-        graph.dotToFile(args[0], "");
+        try {
+            graph.dotToFile(args[0], "");
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+        }
 
     }
 
