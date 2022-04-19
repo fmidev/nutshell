@@ -559,7 +559,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (graph != null) {
 						inputNode = inputTask.getGraphNode(graph);
-						inputNode.attributes.put("fillcolor", "lightgreen");
+						inputNode.attributes.put("fillcolor", "#40ff40"); // ""lightgreen");
 						inputNode.attributes.put("href", String.format(
 								"?instructions=GENERATE,STATUS&amp;product=%s",
 								inputTask.info.getFilename()));
@@ -592,7 +592,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						if (link != null) {
 							// inputNode.attributes.put("color", "red");
 							//inputNode.attributes.put("style", "dashed");
-							inputNode.attributes.put("fillcolor", "orange");
+							inputNode.attributes.put("fillcolor", "#ffff40"); // ""orange");
 							link.attributes.put("color", "red");
 						}
 					}
