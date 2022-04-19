@@ -1,6 +1,7 @@
 
-
-
+/**
+   Markus Peura @fmi.fi
+*/
 function readFile(filename, callback, params){
 
     /// Thanks to: http://stackoverflow.com/questions/14446447/javascript-read-local-text-file
@@ -29,15 +30,16 @@ function readFile(filename, callback, params){
 }
 
 function populateSelect(text, params){
-    console.debug(text)
+
+    //console.debug(text)
     var json = JSON.parse(text)
-    console.info(json)
-    console.warn(params)
+    // console.info(json)
+    //console.warn(params)
     console.info("Adding products in menu")
 
     const ARRAY = Array.isArray(json)
     for (var i in json){
-	console.info(i + typeof(i) + ' = ' + json[i])
+	//console.info(i + typeof(i) + ' = ' + json[i])
 	var elem = document.createElement("option")
 	elem.setAttribute("value", json[i])
 	if (!ARRAY){
@@ -45,12 +47,14 @@ function populateSelect(text, params){
 	    elem.setAttribute("title", i)
 	    elem.textContent = i
 	}
-	console.info(elem)
+	// console.info(elem)
 	product_examples.add(elem)
     }
 }
 
 
 function nutshell_body(){
-    readFile("product-examples.json", populateSelect, ["a", 11, "b", 2 ] )
+    const filename = "product-examples.json"
+    console.info("Reading " + filename)
+    readFile(filename+'?'+Date.now(), populateSelect, ["test", 1, "test2", 2 ] )
 }

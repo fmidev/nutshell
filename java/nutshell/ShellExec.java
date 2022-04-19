@@ -3,14 +3,9 @@ package nutshell;
  *  @author Markus.Peura@fmi.fi
  */
 
-import org.omg.Messaging.SyncScopeHelper;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.*;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
 
 /**
  *

@@ -38,6 +38,8 @@ public class SimpleHtml extends SimpleXML{
 		H3,
 		H4,
 		H5,
+		B,
+		I,
 		EMBED,
 		IMG,
 		TABLE,

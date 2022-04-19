@@ -54,9 +54,9 @@ a:hover {
 
 .clickable {
     background-color: cyan;
-    border: 3px solid black;
-    opacity: 0.5;
-    text-decoration: underline;
+    border: 3px solid forestgreen;
+    /* opacity: 0.5; */
+    text-decoration: bold;
 }
 
 
@@ -80,6 +80,10 @@ legend {
     border-width: 3px;
     border-radius: 10px;
    
+}
+
+embed {
+    border-width: 2px;
 }
 
 .error {

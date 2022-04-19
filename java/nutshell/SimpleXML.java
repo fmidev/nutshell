@@ -166,24 +166,21 @@ public class SimpleXML {
 
 	static public Document readDocument(File file) throws ParserConfigurationException, IOException, SAXException {
 
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		//an instance of builder to parse the specified xml file
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+		// https://stackoverflow.com/questions/6204827/xml-parsing-too-slow
+		factory.setNamespaceAware(false);
+		factory.setValidating(false);
+		factory.setFeature("http://xml.org/sax/features/namespaces", false);
+		factory.setFeature("http://xml.org/sax/features/validation", false);
+		factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+		factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+		DocumentBuilder docBuilder = factory.newDocumentBuilder();
 		Document document = docBuilder.parse(file);
+
 		return document;
 
-		/*
-		try {
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document document = docBuilder.parse(file);
-			return document;
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException | IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-		 */
 	}
 
 	public static void main(String[] args){

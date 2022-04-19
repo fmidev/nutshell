@@ -135,7 +135,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				if (parameter.hasParams()){
 					try {
 						parameter.setParams(entry.getValue());
-						parameter.exec(); // Remember! TODO: update()
+						parameter.exec(); // Remember! And TODO: update()
 					} catch (NoSuchFieldException | IllegalAccessException e) {
 						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
 					}
@@ -263,7 +263,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				task.instructions.remove(Instructions.LATEST);
 			}
 
-			//String[] directives = request.getParameterValues("directives");
+			if (task.instructions.isSet(Instructions.STATUS)){
+				task.addGraph("ProductServer.Task" + task.getTaskId());
+			}
+
+				//String[] directives = request.getParameterValues("directives");
 			task.info.setDirectives(request.getParameterMap());
 			//task.log.setVerbosity(log.verbosity);
 
@@ -357,6 +361,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						html.appendTag(SimpleHtml.Tag.H2, "Product generator error");
 						elem.setAttribute("class", "error");
 					}
+					else if (task.log.indexedException.index > 300) {
+						html.appendTag(SimpleHtml.Tag.B, "Warnings:");
+						elem.setAttribute("class", "error");
+					}
 					else if (task.log.indexedException.index < 200)
 						elem.setAttribute("class", "note");
 			}
@@ -386,56 +394,73 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
 					}
 
-					if ((task.relativeGraphPath!=null)){
-						Path dotFile = productServer.cacheRoot.resolve(task.relativeGraphPath);
-						task.log.special(String.format("Writing graph file %s", dotFile));
-						task.graph.dotToFile(dotFile.toString()+".dot"); // , "nutshell.css");
-						task.graph.dotToFile(dotFile.toString()); //, "nutshell.css");
+					if ((task.relativeGraphPath != null) && (task.graph != null)){
 
-						Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
-						map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
-						//Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
+						task.log.debug("Writing graph to SVG file");
+						Path graphPath = task.writeGraph();
+						//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
+						//		task.relativeGraphPath, graphPath.toFile().exists()));
+
+
 						try {
+
+							task.log.debug("Creating graph as EMBED element containing SVG data");
+
 							Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
 							graphElem.setAttribute("type", "image/svg+xml");
 							graphElem.setAttribute("border", "1");
+							//graphElem.setAttribute("onclick", "alert('Not implemented')");
+							graphElem.setAttribute("title", task.relativeGraphPath.getFileName().toString());
+							//html.appendTag(SimpleHtml.Tag.PRE, graphPath.toString());
+
 							// graphElem.setAttribute("src", relativeGraphPath.toString());
-							Document graphSvg = SimpleXML.readDocument(dotFile);
+
+							task.log.debug(String.format("Reading SVG file %s", graphPath));
+							Document graphSvg = SimpleXML.readDocument(graphPath);
+
+							//SimpleXML.createDocument().
+							task.log.debug("Importing and appending XML elem");
 							Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
+							//task.log.warn("Appending XML (SVG) node to EMBED elem");
 							graphElem.appendChild(node);
 							//graphElem.appendChild(graphSvg.getDocumentElement());
 							graphElem.setAttribute("title", task.info.PRODUCT_ID);
 							graphElem.setAttribute("id", "graph");
+							// task.log.warn("Appending SVG element");
 							html.appendElement(graphElem);
 						}
 						catch (Exception e){
+
+
+
+							Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
+							html.appendAnchor("cache/"+task.relativeGraphPath, task.relativeGraphPath.getFileName().toString());
+
+							html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
+							// Comments! Consider tail?
+							try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+								PrintStream printStream = new PrintStream(os);
+								task.graph.toStream(printStream);
+								printStream.append("--------------");
+								e.printStackTrace(printStream);
+								// html.appendComment(os.toString("UTF8")); ILLEGALS
+								html.appendComment(" TEST ");
+								html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
+								printStream.close();
+								//os.close();
+							}
 
 							//Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
 							Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
 							graphElem.setAttribute("type", "image/svg+xml");
 							graphElem.setAttribute("border", "1");
-							graphElem.setAttribute("src", relativeGraphPath.toString());
+							graphElem.setAttribute("src", "cache/"+task.relativeGraphPath.toString());
 							html.appendElement(graphElem);
 
-							Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
-							html.appendAnchor(relativeGraphPath, task.relativeGraphPath.getFileName().toString());
-							html.appendTag(SimpleHtml.Tag.H2, String.format("%s Exists=%b",
-									task.relativeGraphPath, dotFile.toFile().exists()));
-
-							html.appendTag(SimpleHtml.Tag.H2, e.getMessage()).setAttribute("class", "error");
-							// Comments! Consider tail?
-							ByteArrayOutputStream os = new ByteArrayOutputStream();
-							PrintStream printStream = new PrintStream(os);
-							task.graph.toStream(printStream);
-							printStream.append("--------------");
-							e.printStackTrace(printStream);
-							// html.appendComment(os.toString("UTF8")); ILLEGALS
-							html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
-							printStream.close();
-							os.close();
-
 						}
-						// <embed id="viewMain" src="" type="image/svg+xml"></embed>
+						map.put("Graph", html.createAnchor(task.relativeGraphPath, task.relativeGraphPath.getFileName()));
+
+						/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 					}
 
 

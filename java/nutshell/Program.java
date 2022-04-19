@@ -31,6 +31,13 @@ public class Program {
 
         }*/
 
+        /**
+         *
+         * @param name - Command name appearing in command line options.
+         * @param description - Short explanation of the command.
+         * @param reference - Object. members of which are to be accessed (directly)
+         * @param paramKeys - Comma separated names of the members
+         */
         Parameter(String name, String description, T reference, String paramKeys) {
             this.name = name;
             this.description = description;
@@ -76,7 +83,7 @@ public class Program {
            }
 
            private void assign(String args) throws NoSuchFieldException, IllegalAccessException {
-               System.err.println(String.format("assign: %s='%s'", paramKey, args));
+               // System.err.println(String.format("assign: %s='%s'", paramKey, args));
                setParam(paramKey, args);
                /*
                String[] keyWordArg = args.split("=", 2);

@@ -1,6 +1,8 @@
 package nutshell;
 
 
+import com.sun.istack.internal.NotNull;
+
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +31,7 @@ class Entity {
         return name;
     }
 
+    @NotNull
     public void setName(String name) {
         this.name = name;
         setId(name);
@@ -53,7 +56,6 @@ class Entity {
 }
 
 public class Graph extends Entity {
-
 
     Graph(String name){
         setName(name);
@@ -169,66 +171,63 @@ public class Graph extends Entity {
         stream.println("}");
     }
 
-    void dotToFile(String outfile) throws IOException { // }, String styleSheet){ /// todo: IOException
+    void dotToFile(String outfile) throws IOException, InterruptedException { // }, String styleSheet){ /// todo: IOException
         int i = outfile.lastIndexOf('.');
         if (i > 0){
             dotToFile(outfile, outfile.substring(i+1).toLowerCase()); //, styleSheet) ;
         }
     }
 
-    void dotToFile(String outfile, String format) throws IOException { //, String styleSheet){ /// todo: IOException
+    void dotToFile(String outfile, String format) throws IOException, InterruptedException { //, String styleSheet){ /// todo: IOException
+
+        //Log log = new Log("DOT");
+        //log.experimental("Format:" + format);
 
         if (format.equals("dot")){
             PrintStream printStream = new PrintStream(new FileOutputStream(outfile));
             toStream(printStream);
             printStream.close();
-
-            /*
-            catch (FileNotFoundException e) {
-                try {
-                    PrintStream printStream = new PrintStream(new FileOutputStream(outfile+".loki"));
-                    e.printStackTrace(printStream);
-                    printStream.close();
-                }
-                catch (FileNotFoundException e2) {
-                    e2.printStackTrace();
-                }
-            }
-             */
             return;
         }
 
         String cmd = String.format("dot -T%s -o %s", format, outfile);
         // TODO: add error output read
         // String cmd = String.format("dot -T%s -stylesheet='%s' -o %s", format, styleSheet, outfile);
-        String dir = ".";
+        //String dir = ".";
 
-        System.err.println(String.format("cmd: '%s'", cmd));
-        //ShellExec.OutputReader reader = new ShellExec.OutputReader(System.err);
+        // System.err.println(String.format("cmd: '%s'", cmd));
 
-        final Process process = Runtime.getRuntime().exec(cmd, null, Paths.get(dir).toFile());
+        Path filePath = Paths.get(outfile);
+        File file = filePath.toFile();
+
+        //log.warn("Creating process");
+        final Process process = Runtime.getRuntime().exec(cmd, null, filePath.getParent().toFile());
         OutputStream outputStream = process.getOutputStream();
         PrintStream printStream = new PrintStream(outputStream);
+
+        // log.warn("Sending graph to the process");
         toStream(printStream);
+        //process.waitFor();
+        // log.warn("Closing streams");
         // TODO: handler error stream
-        outputStream.close();
         printStream.close();
-
-
-        // final String logname = ShellExec.class.getSimpleName() + ".log";
-        // System.out.println("Writing log :" + logname);
-        //File logFile = new File(logname);
-        /*
-        System.out.println(String.format("Executing: %s (dir=", cmd, dir));
-        try {
-            //logFile.createNewFile();
-            // FileOutputStream fw = new FileOutputStream(logFile);
-            ShellExec.exec(cmd, null, Paths.get(dir), reader);
-        } catch (Exception e) {
-            e.printStackTrace();
+        outputStream.close();
+        // log.warn("Waiting...");
+        process.waitFor();
+        // log.warn("Checking file:");
+        //process.wait(3000); // milliseconds
+        if (file.exists()) {
+            //System.err.println(String.format("DOT %d", file.lastModified()));
+            //System.err.println("DOT compare with: find "+file.getParent()+" -name "+file.getName()+" -printf '%AT\\n' ");
+        }
+        else {
+            // log.warn("File does not exist");
+            // System.err.println("DOT WHAT! file does not (yet) exist?\"");
+            throw new IOException("DOT graph creation error: file does not (yet) exist?");
         }
 
-         */
+        // log.warn("Completed");
+
     }
 
     public static void main(String[] args) {
@@ -260,7 +259,7 @@ public class Graph extends Entity {
         // graph.toStream(System.out);
         try {
             graph.dotToFile(args[0], "");
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace(System.err);
         }
 
