@@ -895,6 +895,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.special(String.format("Writing graph to file: %s", dotFile));
 			try {
 				ensureDir(cacheRoot, relativeSystemDir);
+				ensureFile(cacheRoot, relativeGraphPath);
 				graph.dotToFile(dotFile.toString());
 			} catch (IOException | InterruptedException e) {
 				log.warn(e.getMessage());
