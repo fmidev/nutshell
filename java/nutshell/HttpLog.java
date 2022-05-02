@@ -93,8 +93,8 @@ public class HttpLog extends Log {
             s = msg.toString();
 
         if (handleHttpMsg(status.status, s)) {
-            if (status.status > this.indexedException.index)
-                this.indexedException = new IndexedException(status, s);
+            if (status.status > this.indexedState.index)
+                this.indexedState = new IndexedState(status, s);
         } else {
             super.error("Something went wrong with: " + status + ", msg:" + s);
         }
@@ -114,8 +114,8 @@ public class HttpLog extends Log {
             s = msg.toString();
 
         if (handleHttpMsg(status, s)) {
-            if (status > this.indexedException.index)
-                this.indexedException = new IndexedException(status, s);
+            if (status > this.indexedState.index)
+                this.indexedState = new IndexedState(status, s);
         } else {
             handleStandardMsg(status, s);
         }
@@ -125,23 +125,23 @@ public class HttpLog extends Log {
     }
 
     //static final IndexedException defaultException = new IndexedException(HttpServletResponse.SC_CONTINUE, "Ok");
-    static final IndexedException defaultException = new IndexedException(HttpStatus.CONTINUE, "Ok");
+    static final IndexedState defaultException = new IndexedState(HttpStatus.CONTINUE, "Ok");
 
     void reset() {
-        this.indexedException = defaultException;
+        this.indexedState = defaultException;
     }
 
     /**
-     * Set status according to predefined {@link IndexedException}
+     * Set status according to predefined {@link IndexedState}
      *
      * @param e
      */
-    void log(IndexedException e) {
+    void log(IndexedState e) {
 
         // primarily, handle as HTTP exception
         if (handleHttpMsg(e.index, e.getMessage())) {
-            if (e.index > this.indexedException.index)
-                this.indexedException = e;
+            if (e.index > this.indexedState.index)
+                this.indexedState = e;
         }
         else {
             handleStandardMsg(e.index, e.getMessage());
@@ -174,7 +174,7 @@ public class HttpLog extends Log {
     /// index is HTTP code (100...5xx) so handle it.
     /// TODO: add SortedMap of exceptions?
     //SortedMap m = new TreeMap();
-    public IndexedException indexedException = new IndexedException(HttpStatus.CONTINUE, "Ok");
+    public IndexedState indexedState = new IndexedState(HttpStatus.CONTINUE, "Ok");
 
     protected boolean handleHttpMsg(int i, String msg){
 

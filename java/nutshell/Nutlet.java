@@ -285,10 +285,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				task.execute();
 				//task.log.ok("-------- see separate log <---");
 
-				if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
+				if (task.log.indexedState.index >= HttpServletResponse.SC_BAD_REQUEST){
 					//task.log.log();
-					task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedException.index, task.toString()));
-					throw task.log.indexedException;
+					task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedState.index, task.toString()));
+					throw task.log.indexedState;
 				}
 				else {
 					task.log.ok(String.format("Completed task: %s", task.toString()));
@@ -335,7 +335,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 				response.setStatus(HttpServletResponse.SC_OK); // tes
 			}
-			catch (IndexedException e) {
+			catch (IndexedState e) {
 				response.setStatus(e.index);
 				task.instructions.add(Instructions.STATUS);
 				//task.instructions.add(Instructions.STATUS); // ?
@@ -347,9 +347,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendTag(SimpleHtml.Tag.H1, "Product: " + task.info.PRODUCT_ID);
 			//html.createElement(SimpleHtml.Tag.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
-			Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedException.getMessage());
+			Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedState.getMessage());
 
-			switch (task.log.indexedException.index){
+			switch (task.log.indexedState.index){
 				case HttpServletResponse.SC_PRECONDITION_FAILED:
 					html.appendTag(SimpleHtml.Tag.H2, "Input problem(s)");
 					html.appendTag(SimpleHtml.Tag.P, "See input list further below");
@@ -357,15 +357,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					break;
 				default:
 					// General, section-wise handling
-					if (task.log.indexedException.index > 400) {
+					if (task.log.indexedState.index > 400) {
 						html.appendTag(SimpleHtml.Tag.H2, "Product generator error");
 						elem.setAttribute("class", "error");
 					}
-					else if (task.log.indexedException.index > 300) {
+					else if (task.log.indexedState.index > 300) {
 						html.appendTag(SimpleHtml.Tag.B, "Warnings:");
 						elem.setAttribute("class", "error");
 					}
-					else if (task.log.indexedException.index < 200)
+					else if (task.log.indexedState.index < 200)
 						elem.setAttribute("class", "note");
 			}
 

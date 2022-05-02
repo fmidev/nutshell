@@ -81,16 +81,16 @@ public class ShellExec {
 	 * @param reader
 	 * @return
 	 */
-	protected IndexedException extractErrorMsg(int exitValue, OutputReader reader){
+	protected IndexedState extractErrorMsg(int exitValue, OutputReader reader){
 
-		String[] msgErr = IndexedException.split(reader.lastLineErr);
+		String[] msgErr = IndexedState.split(reader.lastLineErr);
 
 		String code = msgErr[0];
 		String text = msgErr[1];
 
 		// System.err.println(String.format("%s = %s", code, text));
 		if (code.isEmpty() || text.isEmpty()){
-			String[] msgOut = IndexedException.split(reader.lastLineOut);
+			String[] msgOut = IndexedState.split(reader.lastLineOut);
 			if (code.isEmpty()) {
 				if (!msgOut[0].isEmpty()) {
 					code = msgOut[0];
@@ -116,7 +116,7 @@ public class ShellExec {
 		catch (NumberFormatException e){
 			i = 501;
 		}
-		return new IndexedException(i, String.format("%s (exit value=%d)", text, exitValue));
+		return new IndexedState(i, String.format("%s (exit value=%d)", text, exitValue));
 		//System.err.println(String.format("%s $ %s", code, text));
 
 	}

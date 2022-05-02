@@ -438,7 +438,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							instructions.add(ResultType.MEMORY);
 					}
 
-				} catch (IndexedException e) {
+				} catch (IndexedState e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, "Generator does not exist");
 					log.log(e);
 					instructions.remove(Instructions.GENERATE);
@@ -578,15 +578,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						// inputStats.put(key, inputTask.info.getID());
 
 						if (link != null) {
-							if (inputTask.log.indexedException.index > 300) {
+							if (inputTask.log.indexedState.index > 300) {
 								link.attributes.put("style", "dashed");
 							}
 						}
-						if (inputTask.log.indexedException.index > 300) {
-							log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
+						if (inputTask.log.indexedState.index > 300) {
+							log.warn("Errors in input generation: " + inputTask.log.indexedState.getMessage());
 						}
 					} else {
-						log.warn(inputTask.log.indexedException.getMessage());
+						log.warn(inputTask.log.indexedState.getMessage());
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 						log.reset(); // Forget that anyway...
 						if (link != null) {
@@ -614,7 +614,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				try {
 					generator.generate(this);
-				} catch (IndexedException e) {
+				} catch (IndexedState e) {
 
 					// NOTE: possibly the file has been generated, but with some less significant errors.
 					// serverLog.warn(info.getFilename() + ": " + e);
@@ -917,7 +917,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		/**
 		 *
 		 */
-		void generate(Task task) throws IndexedException; // throws IOException, InterruptedException ;
+		void generate(Task task) throws IndexedState; // throws IOException, InterruptedException ;
 
 		// Semantics? (List or retrieved objects)
 		// boolean hasInputs();
@@ -928,7 +928,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param task
 		 * @return
 		 */
-		Map<String, String> getInputList(Task task) throws IndexedException;
+		Map<String, String> getInputList(Task task) throws IndexedState;
 
 	}
 
@@ -937,7 +937,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 * @param productID
 	 * @return
 	 */
-	public Generator getGenerator(String productID) throws IndexedException {
+	public Generator getGenerator(String productID) throws IndexedState {
 		Path dir = productRoot.resolve(getProductDir(productID));
 		Generator generator = new ExternalGenerator(productID, dir.toString());
 		return generator;
@@ -1122,7 +1122,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 				log.warn(String.format("Pending file? : ", task.outputPathTmp));
 			}
-			log.info(String.format("Final status: %s", task.log.indexedException));
+			log.info(String.format("Final status: %s", task.log.indexedState));
 			//log.log("test");
 		}
 
@@ -1654,14 +1654,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			String key = entry.getKey();
 			Task  task = entry.getValue();
-			if (task.log.indexedException.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
-				log.warn(String.format("Exception occurred: %s", task.log.indexedException.getMessage()));
+			if (task.log.indexedState.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
+				log.warn(String.format("Exception occurred: %s", task.log.indexedState.getMessage()));
 				//log.debug(task.log.indexedException);
 				if (result < 20)
 					++result;
 			}
 			else {
-				log.info(String.format("Status:\t%s", task.log.indexedException.getMessage()));
+				log.info(String.format("Status:\t%s", task.log.indexedState.getMessage()));
 			}
 
 			/*
