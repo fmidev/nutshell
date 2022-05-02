@@ -592,8 +592,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						if (link != null) {
 							// inputNode.attributes.put("color", "red");
 							//inputNode.attributes.put("style", "dashed");
-							inputNode.attributes.put("fillcolor", "#ffff40"); // ""orange");
-							link.attributes.put("color", "red");
+							//inputNode.attributes.put("fillcolor", "#ffb080"); // ""orange");"#ffb080"
+							inputNode.attributes.put("fillcolor", "#ffc090"); // ""orange");"#ffb080"
+							link.attributes.put("color", "#800000");
+							link.attributes.put("style", "dashed");
 						}
 					}
 					inputTask.log.close(); // close PrintStream
