@@ -86,7 +86,7 @@ public class FileUtils {
         }
 
          if (!Files.isWritable(path)){
-            throw new IOException(String.format("Failed to create writable file %s (%s)", path, filePerms));
+            throw new IOException(String.format("Failed in creating writable file %s (%s)", path, filePerms));
         }
 
     }

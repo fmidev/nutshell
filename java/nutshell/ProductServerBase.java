@@ -237,6 +237,40 @@ public class ProductServerBase extends Program {
 
 
     // For clearing CACHE
+    static
+    public class TrackGenerators extends SimpleFileVisitor<Path> {
+
+        //Map<String,Path> generators = new HashMap<>();
+        Set<String> generators = new HashSet<>();
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
+            System.out.println(String.format("DIR:  %s", dir));
+            return CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+            System.out.println(String.format("FILE: %s", path.getFileName()));
+            if (path.endsWith("bin")){
+                System.out.println(String.format(" BIN: %s", path));
+            }
+
+            if (path.getFileName().toString().equals("generator.sh")){
+                System.out.println(String.format(" ADD: %s", path));
+                generators.add(path.subpath(2,4).toString());
+            }
+            return CONTINUE;
+        }
+
+        // If there is some error accessing
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException e) {
+            //serverLog.warn(e.getMessage());
+            return CONTINUE;
+        }
+    }
+
 
     public class DeleteFiles extends SimpleFileVisitor<Path> {
 
@@ -312,5 +346,28 @@ public class ProductServerBase extends Program {
 
     }
 
+    public static void main(String[] args) {
+
+        //Set<String> set = new HashSet<>();
+
+        if (args.length != 1){
+            System.out.println("Generator tracker: <dir>");
+            System.out.println("Params: <dir>");
+            System.exit(1);
+        }
+
+        TrackGenerators tracker = new TrackGenerators();
+
+        Path path = Paths.get(args[0]);
+
+        try {
+            Files.walkFileTree(path, tracker);
+            System.out.println(tracker.generators);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
