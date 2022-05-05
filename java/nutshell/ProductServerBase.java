@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getAttribute;
 
 /** Infrastructure for the actual ProductServer
@@ -42,10 +41,11 @@ public class ProductServerBase extends Program {
     static final public Path cachePrefix = Paths.get("cache");
 
     /// System side setting.// TODO: conf
-    public String inputCmd = "./input.sh";  // NOTE: executed in CWD
+    //public String inputCmd = "./input.sh";  // -> ExternalGenerator NOTE: executed in CWD
 
     /// System side setting. // TODO: conf
-    public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
+    //public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
+    //public String generatorCmd = "generate.sh"; // -> ExternalGenerator   // NOTE: executed in CWD
 
     //final DateFormat timeStampFormat    = new SimpleDateFormat("yyyyMMddHHmm");
     final DateFormat timeStampDirFormat =
@@ -237,28 +237,50 @@ public class ProductServerBase extends Program {
 
 
     // For clearing CACHE
-    static
-    public class TrackGenerators extends SimpleFileVisitor<Path> {
+    public class GeneratorTracker extends SimpleFileVisitor<Path> {
+
+        GeneratorTracker(){
+            this.startDir = productRoot;
+        }
+
+        GeneratorTracker(Path startDir){
+            this.startDir = startDir;
+        }
+
+        Path startDir = null;
+
+        void run() throws IOException {
+            Files.walkFileTree(startDir, this);
+        }
 
         //Map<String,Path> generators = new HashMap<>();
         Set<String> generators = new HashSet<>();
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
-            System.out.println(String.format("DIR:  %s", dir));
+            System.out.println(String.format("DIR:    %s", dir));
+            if (dir.getFileName().startsWith(".")){
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            if (dir.endsWith("bin")){
+                System.out.println(String.format(" BIN: %s", dir));
+            }
             return CONTINUE;
         }
 
         @Override
         public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-            System.out.println(String.format("FILE: %s", path.getFileName()));
-            if (path.endsWith("bin")){
-                System.out.println(String.format(" BIN: %s", path));
-            }
 
-            if (path.getFileName().toString().equals("generator.sh")){
-                System.out.println(String.format(" ADD: %s", path));
-                generators.add(path.subpath(2,4).toString());
+            System.out.printf("  FILE: '%s'%n", path.getFileName().toString());
+
+            if (path.getFileName().toString().equals(ExternalGenerator.scriptName)){  // generatorCmd contains "./"
+                Path dir = path.getParent();
+                //path.relativize(productRoot);
+                System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
+                dir = productRoot.relativize(dir);
+                generators.add(dir.toString());
+                System.out.printf(" add: %s%n", dir);
+
             }
             return CONTINUE;
         }
@@ -350,20 +372,25 @@ public class ProductServerBase extends Program {
 
         //Set<String> set = new HashSet<>();
 
-        if (args.length != 1){
-            System.out.println("Generator tracker: <dir>");
+        if (args.length == 0){
+            System.out.println("Generator tracker: <productRoot> (dir ?)");
             System.out.println("Params: <dir>");
             System.exit(1);
         }
 
-        TrackGenerators tracker = new TrackGenerators();
 
-        Path path = Paths.get(args[0]);
+        ProductServerBase serverBase = new ProductServerBase();
+        serverBase.productRoot = Paths.get(args[0]);
+
+        Path startDir = serverBase.productRoot;
+        if (args.length >= 2)
+            startDir = Paths.get(args[1]);
+
+        GeneratorTracker tracker = serverBase.new GeneratorTracker(startDir);
 
         try {
-            Files.walkFileTree(path, tracker);
+            tracker.run();
             System.out.println(tracker.generators);
-
         } catch (IOException e) {
             e.printStackTrace();
         }

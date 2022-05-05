@@ -472,7 +472,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				}
 
 				// NOTE: these assume ExternalGenerator?
-				Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
+				Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
 				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
 				map.put("actions", batchConfig.instructions);
