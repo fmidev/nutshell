@@ -30,7 +30,7 @@ public class ProductServerBase extends Program {
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
     public int fileGroupID = 100;
 
-    public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
+    public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
     public Path cacheRoot   = Paths.get(".");
     //public Path storageRoot   = Paths.get(".");
     public Path productRoot = Paths.get(".");
@@ -170,7 +170,9 @@ public class ProductServerBase extends Program {
     }
 
 
+
     //public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
+    /*
     public Path ensureDir(Path root, Path relativePath) throws IOException {
 
         if (relativePath==null)
@@ -202,14 +204,17 @@ public class ProductServerBase extends Program {
 
         return path;
     }
+     */
 
     //public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
+    /*
     public Path ensureFile(Path root, Path relativePath) throws IOException {
 
         Path path = root.resolve(relativePath);
 
         if (!exists(path)) {
-            ensureDir(root, relativePath.getParent());
+            //ensureDir(root, relativePath.getParent());
+            FileUtils.ensureWritableDir(path.getParent(), fileGroupID, dirPerms);
             serverLog.debug("creating file: " + path);
             Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
             //Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
@@ -227,6 +232,8 @@ public class ProductServerBase extends Program {
         return path;
 
     }
+   
+     */
 
 
     // For clearing CACHE

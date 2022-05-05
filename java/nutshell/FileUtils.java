@@ -10,9 +10,86 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
 import static java.nio.file.FileVisitResult.*;
+import static java.nio.file.Files.exists;
 
 public class FileUtils {
 
+
+    /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
+     *
+     * @param path
+     * @param groupId
+     * @param permissions
+     * @throws IOException
+     */
+    static
+    public void ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
+
+        if ((path == null) || (path.getNameCount()==0)){
+            return;
+        }
+
+        // Consider constructing error string (of GID and perms)
+        if (!Files.exists(path)){
+            ensureWritableDir(path.getParent(), groupId, permissions);
+            Files.createDirectory(path); // potentially throws IOException
+            try {
+                Files.setAttribute(path, "unix:gid", groupId);
+            }
+            catch (Exception e){
+            }
+        }
+        else if (Files.isWritable(path)){
+            return;
+        }
+
+        try {
+            Files.setPosixFilePermissions(path, permissions);
+        }
+        catch (Exception e){
+        }
+
+        if (!Files.isWritable(path)){
+            throw new IOException(String.format("Failed to create dir %s", path, permissions));
+        }
+
+
+    }
+
+    static
+    public void ensureWritableFile(Path path, int groupId, Set<PosixFilePermission> filePerms, Set<PosixFilePermission> dirPerms) throws IOException {
+
+        if (!exists(path)) {
+            if (dirPerms == null){
+                // FIX: this may add execution rights unintentionally?
+                dirPerms = filePerms;
+            }
+            FileUtils.ensureWritableDir(path.getParent(), groupId, dirPerms);
+            // serverLog.debug("creating file: " + path);
+            // Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
+            Files.createFile(path); // potentially throws IOException
+            // Files.setPosixFilePermissions(path, filePerms);
+        }
+
+        try {
+            Files.setAttribute(path, "unix:gid", groupId);
+        }
+        catch (IOException e){
+            // May be group writable, just altering forbidden?
+        }
+
+        try {
+            Files.setPosixFilePermissions(path, filePerms);
+        }
+        catch (IOException e){
+            // May be group writable, just altering forbidden?
+        }
+
+         if (!Files.isWritable(path)){
+            throw new IOException(String.format("Failed to create writable file %s (%s)", path, filePerms));
+        }
+
+    }
 
     /*
     public Set<PosixFilePermission> dirPerms = PosixFilePermissions.fromString("rwxrwxr-x");

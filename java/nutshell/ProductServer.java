@@ -161,8 +161,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 			try {
-				ensureFile(cacheRoot, this.relativeLogPath);
-				log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
+				Path logPath = cacheRoot.resolve(relativeLogPath);
+				//ensureFile(cacheRoot, this.relativeLogPath);
+				FileUtils.ensureWritableFile(logPath, fileGroupID, filePerms, dirPerms);
+				log.setLogFile(logPath);
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
 				//log.setLogFile(null);
@@ -387,7 +389,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.log(HttpLog.HttpStatus.OK, String.format("Stored file exists: %s", this.storagePath));
 
 					try {
-						ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
+						FileUtils.ensureWritableDir(outputDir, fileGroupID, dirPerms);
+						// ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					} catch (IOException e) {
 						log.warn(e.getMessage());
 						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in creating dir (with permissions): %s", this.outputDir));
@@ -438,7 +441,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							instructions.add(ResultType.MEMORY);
 					}
 
-				} catch (IndexedState e) {
+				}
+				catch (IndexedState e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, "Generator does not exist");
 					log.log(e);
 					instructions.remove(Instructions.GENERATE);
@@ -491,18 +495,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.isSet(Instructions.GENERATE)) {
 
 				log.reset(); // Forget old sins
-
-				log.info("Generate!");
-				// log.info("No generation request, returning.");
-				// return;
+				log.debug("Ok, generate.");
 
 				// Mark this task being processed (empty file)
 				// if (this.instructions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
-					ensureDir(cacheRoot, relativeOutputDirTmp); //, dirPerms);
-					ensureDir(cacheRoot, relativeOutputDir); //,    dirPerms);
-					ensureFile(cacheRoot, relativeOutputPath); //, dirPerms, filePerms); // this could be enough?
-					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
+					FileUtils.ensureWritableDir(outputDirTmp, fileGroupID, dirPerms);
+					FileUtils.ensureWritableDir(outputDir, fileGroupID, dirPerms);
+					//ensureDir(cacheRoot, relativeOutputDirTmp);
+					//ensureDir(cacheRoot, relativeOutputDir);
+					FileUtils.ensureWritableFile(outputPath, fileGroupID, filePerms, dirPerms);
+					// ensureFile(cacheRoot, relativeOutputPath);
+					// Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
 					return;
@@ -718,7 +722,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					if (this.instructions.isSet(PostProcessing.SHORTCUT)) {
 						if (this.info.isDynamic()) {
 							try {
-								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
+								//Path dir = ensureDir(cacheRoot, productDir);
+								Path dir = cacheRoot.resolve(productDir);
+								FileUtils.ensureWritableDir(dir, fileGroupID, dirPerms);
 								this.link(this.outputPath, dir, true);
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
@@ -730,7 +736,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					if (this.instructions.isSet(PostProcessing.LATEST)) {
 						if (this.info.isDynamic()) {
 							try {
-								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
+								//Path dir = ensureDir(cacheRoot, productDir);
+								Path dir = cacheRoot.resolve(productDir);
+								FileUtils.ensureWritableDir(dir, fileGroupID, dirPerms);
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")), true);
 								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
@@ -742,18 +750,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (this.instructions.isSet(PostProcessing.STORE)) {
 						// Todo: traverse storage paths.
-						Path file = storageRoot.resolve(relativeOutputDir).resolve(this.info.getFilename());
-						if (file.toFile().exists()) {
-							log.experimental(String.format("Store: file exists already: %s", file));
+						Path storageDir = storageRoot.resolve(relativeOutputDir);
+						Path storedFile = storageDir.resolve(this.info.getFilename());
+						if (Files.exists(storedFile)) {
+							log.experimental(String.format("Store: file exists already: %s", storedFile));
 						} else {
 							try {
-								ensureDir(storageRoot, relativeOutputDir);
-								this.copy(this.outputPath, file);
-								log.experimental(String.format("Stored in: %s", file));
+								//ensureDir(storageRoot, relativeOutputDir);
+								FileUtils.ensureWritableDir(storageDir, fileGroupID, dirPerms);
+								this.copy(this.outputPath, storedFile);
+								log.experimental(String.format("Stored in: %s", storedFile));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 								log.reset();
-								log.fail(String.format("Store: %s", file));
+								log.fail(String.format("Store: %s", storedFile));
 							}
 						}
 					}
@@ -896,7 +906,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			Path dotFile = cacheRoot.resolve(relativeGraphPath);
 			log.special(String.format("Writing graph to file: %s", dotFile));
 			try {
-				ensureDir(cacheRoot, relativeSystemDir);
+				Path graphDir = dotFile.getParent();
+				FileUtils.ensureWritableDir(graphDir, fileGroupID, dirPerms);
+				// ensureDir(cacheRoot, relativeSystemDir);
 				// ensureFile(cacheRoot, relativeGraphPath);
 				graph.dotToFile(dotFile.toString());
 				Files.setPosixFilePermissions(dotFile, filePerms);
@@ -1559,17 +1571,17 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (registry.has(opt)){
 						Program.Parameter param = registry.get(opt);
-						log.special(String.format("Handling: '%s' -> %s hasParams:%b", opt, param, param.hasParams()));
+						//log.special(String.format("Handling: '%s' -> %s has params:%b", opt, param, param.hasParams()));
 						if (param.hasParams()){
 							if (i < (args.length-1)) {
-								log.special(String.format("%s has argument '%s'", param.getName(), args[i+1]));
+								//log.special(String.format("%s has argument '%s'", param.getName(), args[i+1]));
 								param.setParams(args[++i]);
 							}
 							else
 								param.setParams(""); // Support "premature" end of cmd line, esp. with --help
 						}
 						param.exec();
-						log.special(String.format("Handled: %s", param));
+						log.debug(String.format("Handled: %s", param));
 						//log.special(param.toString());
 						continue;
 					}
@@ -1655,7 +1667,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedState.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
-				log.warn(String.format("Exception occurred: %s", task.log.indexedState.getMessage()));
+				log.warn(String.format("Generator Exception: %s", task.log.indexedState.getMessage()));
 				//log.debug(task.log.indexedException);
 				if (result < 20)
 					++result;
