@@ -244,26 +244,38 @@ public class ProductServerBase extends Program {
         }
 
         GeneratorTracker(Path startDir){
-            this.startDir = startDir;
+            this.startDir = productRoot.resolve(startDir);
         }
 
         Path startDir = null;
 
         void run() throws IOException {
             Files.walkFileTree(startDir, this);
+            /*
+            Set<FileVisitOption> options = new HashSet<>();
+            options.add(FileVisitOption.FOLLOW_LINKS);
+            Files.walkFileTree(startDir, options, 10,this);
+
+             */
         }
 
         //Map<String,Path> generators = new HashMap<>();
         Set<String> generators = new HashSet<>();
 
+        String debug(String s){
+            return String.format(" '%s': %d", s, s.length());
+        }
+
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
-            System.out.println(String.format("DIR:    %s", dir));
-            if (dir.getFileName().startsWith(".")){
+            // System.out.printf("DIR:    %s -> '%s'", dir, dir.getFileName()); //, debug(dir.getFileName()));
+            String s = dir.getFileName().toString();
+            if (s.startsWith(".")){
+                //System.out.println(" SKIP!");
                 return FileVisitResult.SKIP_SUBTREE;
             }
-            if (dir.endsWith("bin")){
-                System.out.println(String.format(" BIN: %s", dir));
+            else if (s.equals("bak")){
+                return FileVisitResult.SKIP_SUBTREE;
             }
             return CONTINUE;
         }
@@ -271,15 +283,14 @@ public class ProductServerBase extends Program {
         @Override
         public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
 
-            System.out.printf("  FILE: '%s'%n", path.getFileName().toString());
-
+            // System.out.printf("  FILE: '%s'%n", path.getFileName().toString());
             if (path.getFileName().toString().equals(ExternalGenerator.scriptName)){  // generatorCmd contains "./"
-                Path dir = path.getParent();
-                //path.relativize(productRoot);
-                System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
-                dir = productRoot.relativize(dir);
+                Path dir = productRoot.relativize(path.getParent());
+                // path.relativize(productRoot);
+                // System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
+                // dir = productRoot.relativize(dir);
                 generators.add(dir.toString());
-                System.out.printf(" add: %s%n", dir);
+                //System.out.printf(" add: %s%n", dir);
 
             }
             return CONTINUE;

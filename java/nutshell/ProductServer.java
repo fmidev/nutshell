@@ -1545,6 +1545,25 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
+		registry.add(new Parameter.Simple<String>("catalog",
+				"List products found under productRoot",""){
+
+			public void exec() {
+
+				GeneratorTracker tracker = server.new GeneratorTracker(server.productRoot.resolve(value));
+
+				try {
+					System.out.println(String.format("List products (dir=%s)", tracker.startDir));
+					tracker.run();
+					System.out.println(tracker.generators);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+
+
 
 		//Field[] instructionFields = Instructions.class.getFields();
 		if (args.length == 0){
