@@ -260,7 +260,8 @@ public class ProductServerBase extends Program {
         }
 
         //Map<String,Path> generators = new HashMap<>();
-        Set<String> generators = new HashSet<>();
+        //Set<String> generators = new HashSet<>();
+        Set<Path> generators = new HashSet<>();
 
         String debug(String s){
             return String.format(" '%s': %d", s, s.length());
@@ -289,7 +290,8 @@ public class ProductServerBase extends Program {
                 // path.relativize(productRoot);
                 // System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
                 // dir = productRoot.relativize(dir);
-                generators.add(dir.toString());
+                //generators.add(dir.toString());
+                generators.add(dir);
                 //System.out.printf(" add: %s%n", dir);
 
             }

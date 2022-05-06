@@ -115,8 +115,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						break;
 					default:
 						if (q.endsWith(".html")) {
-							// NOTE: perhaps assigns also_
-							// page.value="page=form.html"
+							// NOTE: accepts also files of type: page.value="page=form.html"
 							page.value = q;
 							// ... but overridden just below
 						}
@@ -162,6 +161,36 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			} catch (IOException e) {
 				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), response);
 			}
+			return;
+		}
+
+		if (page.value.equals("catalog")){
+
+			ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
+
+			try {
+				tracker.run();
+				// System.out.println(tracker.generators);
+			} catch (IOException e) {
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Retrieving catalog failed", e.getMessage(), response);
+			}
+
+			SimpleHtml html = getHtmlPage();
+			// html.appendTable(request.getParameterMap(), "Catalog");
+			// Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
+			// elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, page.value ));
+			// html.appendElement(SimpleHtml.H2, "Testi");
+			Map<String, Element> catalogMap = new HashMap<>();
+			for (Path p: tracker.generators) {
+				String productId = p.toString().replace("/",".");
+				String url = String.format("product=%s", productId);
+				catalogMap.put(productId, html.createAnchor(url, p.toString()));
+			}
+			html.appendTable(catalogMap, "Catalog");
+			html.appendTag(SimpleHtml.Tag.PRE, tracker.generators.toString());
+			response.setStatus(HttpServletResponse.SC_OK); // tes
+			sendToStream(html.document, response);
+
 			return;
 		}
 

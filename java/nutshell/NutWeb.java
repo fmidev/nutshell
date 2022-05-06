@@ -239,7 +239,9 @@ public class NutWeb extends HttpServlet {
 		}
 		catch (Exception e){
 			html.appendTag(SimpleHtml.Tag.H2, "Failed in reading file: " + filename);
-			html.appendTag(SimpleHtml.Tag.PRE, e.toString());
+			Element elem = html.appendTag(SimpleHtml.Tag.PRE, e.toString());
+			elem.setAttribute("class", "error");
+			//elem.
 		}
 		return html;
 	}
