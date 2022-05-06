@@ -166,7 +166,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		if (page.value.equals("catalog")){
 
-			ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
+			// ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
+			ProductServerBase.GeneratorTracker tracker =
+					productServer.new GeneratorTracker(productServer.productRoot);
 
 			try {
 				tracker.run();

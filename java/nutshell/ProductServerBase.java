@@ -1,5 +1,9 @@
 package nutshell;
 
+import jdk.nashorn.internal.parser.JSONParser;
+// import com.google.gson.Gson;
+
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -12,6 +16,9 @@ import java.util.*;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.getAttribute;
+
+//import org.json.simple.parser.JSONParser;
+
 
 /** Infrastructure for the actual ProductServer
  *
@@ -244,13 +251,34 @@ public class ProductServerBase extends Program {
         }
 
         GeneratorTracker(Path startDir){
-            this.startDir = productRoot.resolve(startDir);
+            if (startDir == null)
+                this.startDir = productRoot;
+            else
+                this.startDir = productRoot.resolve(startDir);
         }
 
         Path startDir = null;
 
+
+
+        protected void walkSubdir(Path path){
+            //File file = path.toFile();
+
+            if (path.toFile().isDirectory()) {
+                try {
+                    Files.walkFileTree(path, this);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //System.out.println("Directory: " + file.getAbsolutePath());
+            }
+        }
+
         void run() throws IOException {
-            Files.walkFileTree(startDir, this);
+
+            Files.walk(startDir, 1, FileVisitOption.FOLLOW_LINKS).forEach(path -> walkSubdir(path));
+
+
             /*
             Set<FileVisitOption> options = new HashSet<>();
             options.add(FileVisitOption.FOLLOW_LINKS);
@@ -281,19 +309,24 @@ public class ProductServerBase extends Program {
             return CONTINUE;
         }
 
+
         @Override
         public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
 
             // System.out.printf("  FILE: '%s'%n", path.getFileName().toString());
             if (path.getFileName().toString().equals(ExternalGenerator.scriptName)){  // generatorCmd contains "./"
-                Path dir = productRoot.relativize(path.getParent());
-                // path.relativize(productRoot);
+                Path parentDir = path.getParent();
+
+                File jsonFile = parentDir.resolve("conf.json").toFile();
+                if (jsonFile.exists()){
+                    //JSONParser parser = new JSONParser(jsonFile);
+                    // JSONParser jsonParser = new JSONParser();
+                    System.out.printf(" Found: %s -> JSON %s %n", parentDir, jsonFile);
+                }
                 // System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
-                // dir = productRoot.relativize(dir);
-                //generators.add(dir.toString());
+                Path dir = productRoot.relativize(parentDir);
                 generators.add(dir);
                 //System.out.printf(" add: %s%n", dir);
-
             }
             return CONTINUE;
         }
