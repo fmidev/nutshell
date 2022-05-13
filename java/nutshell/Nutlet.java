@@ -298,7 +298,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				task.addGraph("ProductServer.Task" + task.getTaskId());
 			}
 
-				//String[] directives = request.getParameterValues("directives");
+			//String[] directives = request.getParameterValues("directives");
 			task.info.setDirectives(request.getParameterMap());
 			//task.log.setVerbosity(log.verbosity);
 
@@ -431,6 +431,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						Path graphPath = task.writeGraph();
 						//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
 						//		task.relativeGraphPath, graphPath.toFile().exists()));
+						if (ProductServer.serverGraph != null){
+							ProductServer.serverGraph.dotToFile(
+									// TODO logDir
+									productServer.serverLog.logFile.getParent()+"/NutShell.svg"
+							);
+									// graphPath.getParent().resolve("productServer.svg").toString());
+						}
 
 
 						try {

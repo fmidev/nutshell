@@ -67,6 +67,8 @@ public class ProductServerBase extends Program {
         return  ++counter;
     };
 
+    static public Graph serverGraph = new Graph("Product Server");
+
     /** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
      *
      */

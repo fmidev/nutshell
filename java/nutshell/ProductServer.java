@@ -114,6 +114,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		public Graph graph = null;
 
+		public void setGraph(Graph graph) {
+			this.graph = graph;
+		}
 
 		/**
 		 * Product generation task defining a product instance and operations on it.
@@ -242,7 +245,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 *
 		 * @see #execute()
 		 */
-		@Override
+		@Override // Thread
 		public void run() {
 
 			try {
@@ -287,7 +290,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				Graph.Node node = graph.getNode(info.getID());
 				node.attributes.put("label", String.format("%s\\n(%s)", node.getName(), info.FORMAT));
 				node.attributes.put("fillcolor", "lightblue");
-				//node.attributes.put("href", String.format(
+				// node.attributes.put("href", String.format(
 				//		"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
 				return node;
 			}
@@ -538,16 +541,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 
 				// Consider forwarding directives?
-				//Map<String,Task> inputTasks = executeBatch(this.inputs, inputInstructions, null, log);
-
-				Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, null, log);
+				// Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, null, log);
+				Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
 
 				// Statistics
 				Graph.Node node = null;
 				if (graph != null) {
 					node = getGraphNode(graph);
-					for (Entry<String, Task> entry : inputTasks.entrySet()) {
-						entry.getValue().graph = graph;
+					for (Entry<String,Task> entry : inputTasks.entrySet()) {
+						entry.getValue().setGraph(graph);
 					}
 					//node.attributes.put("fillcolor", "lightblue");
 				}
@@ -559,7 +561,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					Task inputTask = entry.getValue();
 
 					Graph.Node inputNode = null;
-					Graph.Link link = null;
+					Graph.Node.Link link = null;
 
 					if (graph != null) {
 						inputNode = inputTask.getGraphNode(graph);
@@ -569,7 +571,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								inputTask.info.getFilename()));
 						inputNode.attributes.put("class", "clickable");
 
-						link = graph.addLink(node, inputNode);
+						link = node.addLink(inputNode);
+						//graph.addLink(node, inputNode);
 						// link.attributes.put("label", key);
 						// link.attributes.put("title", "avain_"+key); // SVG only
 					}
@@ -828,6 +831,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 
+			if (graph != null) {
+				serverGraph.importGraph(graph);
+			}
 			// return true; // SEMANTICS?
 		}
 
@@ -887,9 +893,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		@Override
 		public String toString() {
 			if (this.info.directives.isEmpty())
-				return String.format("%s", this.filename);
+				return String.format("%s # %s", this.filename, instructions);
 			else
-				return String.format("%s?%s", this.filename, this.info.directives.toString());
+				return String.format("%s?%s # %s", this.filename, info.directives, instructions);
 		}
 
 		//final long creationTime;
@@ -903,21 +909,22 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		public Path writeGraph() {
-			Path dotFile = cacheRoot.resolve(relativeGraphPath);
-			log.special(String.format("Writing graph to file: %s", dotFile));
+			Path graphFile = cacheRoot.resolve(relativeGraphPath);
+			log.special(String.format("Writing graph to file: %s", graphFile));
 			try {
-				Path graphDir = dotFile.getParent();
+				Path graphDir = graphFile.getParent();
 				FileUtils.ensureWritableDir(graphDir, fileGroupID, dirPerms);
 				// ensureDir(cacheRoot, relativeSystemDir);
 				// ensureFile(cacheRoot, relativeGraphPath);
-				graph.dotToFile(dotFile.toString());
-				Files.setPosixFilePermissions(dotFile, filePerms);
+				graph.dotToFile(graphFile.toString());
+				graph.dotToFile(graphFile.toString()+".dot"); // debugging
+				Files.setPosixFilePermissions(graphFile, filePerms);
 			} catch (IOException | InterruptedException e) {
 				log.warn(e.getMessage());
 				graph.toStream(log.getPrintStream());
-				log.fail(String.format("Failed in writing graph to file: %s", dotFile));
+				log.fail(String.format("Failed in writing graph to file: %s", graphFile));
 			}
-			return dotFile;
+			return graphFile;
 		}
 
 
@@ -999,7 +1006,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return prepareTasks(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
 	}
 
-	public Map<String,Task> prepareTasks(Map<String,String> productRequests, Instructions instructions, Map directives, HttpLog log) {
+	public Map<String,Task> prepareTasks(Map<String,String> productRequests, Instructions instructions, Map<String,String> directives, HttpLog log) {
 
 		Map<String, Task> tasks = new HashMap<>();
 
@@ -1010,11 +1017,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return tasks;
 		}
 
-		log.info(String.format("Inits (%d) tasks: (%s)", count, productRequests.keySet()));
+		log.info(String.format("Preparing %d tasks: %s", count, productRequests.keySet()));
 
-		//log.info(String.format("Inits (%s) tasks ", productRequests.entrySet()));
-		log.info(String.format("Instructions: %s , regenerateDepth: %d ",
-				instructions, instructions.regenerateDepth));
+		/*
+		log.info(String.format("Instructions: %s (depth: %d), Directives: %s ",
+				instructions, instructions.regenerateDepth, directives));
+		 */
 
 		/// Check COPY & LINK targets (must be directories, if several tasks)
 		if (count > 1) {
@@ -1045,7 +1053,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				Task task = new Task(value, instructions.value, log);
 
 				//log.debug(String.format("Check: %s = %s", key, value));
+				/*
+				if ((directives != null) && !directives.isEmpty())
+					log.special(String.format("Directives: %s = %s [%s]",
+							key, directives, directives.getClass()));
+				 */
+
 				task.info.setDirectives(directives);
+
 				task.instructions.addCopies(instructions.copies);
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
@@ -1057,6 +1072,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.info(String.format("Prepared task: '%s' = %s [%s]", key, task, task.instructions));
 				if ((directives != null) && !directives.isEmpty())
 					log.info(String.format("Directives: %s = %s", key, directives));
+
+				log.info(task.toString());
 
 				task.log.setVerbosity(log.getVerbosity());
 				task.log.COLOURS = log.COLOURS;
@@ -1364,7 +1381,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				// System.err.print(String.format("Type: %s %s", value.getClass(), value));
+				System.err.print(String.format("Type: %s %s", value.getClass(), value));
 				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
 			}
 		});
@@ -1440,11 +1457,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		HttpLog log = server.serverLog; //.child("CmdLine");
 		log.COLOURS = true;
 
-		/*
-		Map<String,String> context_products = new TreeMap<>();
-		Instructions context_instructions = new Instructions();
-		Map<String ,String> context_directives = new TreeMap<>();
-		*/
 
 		// NEW
 		ProgramRegistry registry = new ProgramRegistry();
@@ -1654,12 +1666,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		if (batchConfig.instructions.move != null)
 			log.note(String.format("   MOVE: \t %s", batchConfig.instructions.move));
 
+		/*
 		if (!batchConfig.directives.isEmpty())
-			log.note("Directives: " + batchConfig.directives);
+			log.debug("Directives: " + batchConfig.directives);
+		 */
 
 		/// "MAIN"
-		//Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
-		// Map<String,ProductServer.Task> tasks = server.executeBatch(batchConfig, log);
+		//  Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
+		//  Map<String,ProductServer.Task> tasks = server.executeBatch(batchConfig, log);
 
 		Map<String, Task> tasks = server.prepareTasks(batchConfig, log);
 
