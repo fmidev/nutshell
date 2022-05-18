@@ -6,18 +6,15 @@ import com.sun.istack.internal.NotNull;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 class Entity {
 
-    String id = "?";
+    final String id; // = "?";
 
     String setId(String name){
-        id = name.replaceAll("\\W", " ").trim().replaceAll("\\s+", "_");
+        id = name.replaceAll("\\W", " ").trim().replaceAll("\\s+", "_").intern();
         return id;
     }
 
@@ -25,19 +22,33 @@ class Entity {
         return id;
     }
 
-    String name = "?";
+    /*
+    public boolean equals(Entity entity) {
+        return entity.id == this.id;
+    }
+     */
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    // Uses String.intern, so accessible only with setter and getter.
+    private String name = "?";
+
+    @NotNull
+    public void setName(String name) {
+        this.name = name.intern();
+        // TODO: setID only ig unset?
+        setId(name);
+        if (!id.equals(name))
+            attributes.put("label", name);
+    }
 
     public String getName() {
         return name;
     }
 
-    @NotNull
-    public void setName(String name) {
-        this.name = name;
-        setId(name);
-        if (!id.equals(name))
-            attributes.put("label", name);
-    }
 
 
     public Map<String, Object> attributes = new HashMap<>();
@@ -63,79 +74,118 @@ public class Graph extends Entity {
 
     //String styleSheet = "";
 
-
     public class Node extends Entity {
 
         // consider protected
-        protected Node(){
-            setName("");
-        }
+        /*
+            protected Node(){
+                setName("");
+            }
+        */
 
         protected Node(String name){
             setName(name);
         }
 
         void toStream(PrintStream stream){
-            stream.append(" ").append(getId()).append(' ');
+            stream.append("  ").append(getId()).append(' ');
             attributesToStream(stream);
             stream.append(';');
             stream.println();
         }
+
+        public class Link extends Entity {
+
+            protected Link(Node node1, Node node2){
+                this.source = node1;
+                this.target = node2;
+            }
+
+            void toStream(PrintStream stream){
+                stream.append("    ").append(source.getId()).append(" -> ").append(target.getId()).append(' ');
+                attributesToStream(stream);
+                stream.append(';');
+                stream.println();
+            }
+
+            Node source = null;
+            Node target = null;
+
+        }
+
+        Link addLink(Node target){
+            Link link = new Link(this, target);
+            //links.add(link);
+            links.put(target.getId(), link);
+            return link;
+        }
+
+        //final public Set<Link> links = new HashSet<>();
+        final public Map<String,Link> links = new HashMap<>();
 
     };
 
-    public class Link extends Entity {
 
-        public Link(Node node1, Node node2){
-            this.node1 = node1;
-            this.node2 = node2;
-        }
+    // final public Set<Node> nodes = new HashSet<>();
+    final public Map<String,Node> nodes = new HashMap<>();
 
-        final Node node1;
-        final Node node2;
-
-        void toStream(PrintStream stream){
-            stream.append("  ").append(node1.getId()).append(" -> ").append(node2.getId()).append(' ');
-            attributesToStream(stream);
-            stream.append(';');
-            stream.println();
-        }
-
-    }
-    //final public Node root = new Node();
-
-    final public List<Node> nodes = new LinkedList<>();
-    final public List<Link> links = new LinkedList<>();
-
-    synchronized
-    public Node addNode(String name){
-        Node node = new Node(name);
-        nodes.add(node);
-        return node;
-    }
-
-    /** Returns a node, if exists, or creates one.
+    /** Adds a node, using its ID as a key.
+     *
+     *  The ID is converted from the name.
      *
      * @param name
      * @return
      */
     synchronized
-    public Node getNode(String name){
-        for (Node node: nodes) {
-            if (node.getName().equals(name))
-                return node;
-        }
-        return addNode(name);
+    public Node addNode(String name){
+        return addNode(new Node(name));
     }
 
-    public boolean hasNode(String name){
+    /** Adds a node, using its ID as a key.
+     *
+     * @param node
+     * @return
+     */
+    synchronized
+    public Node addNode(Node node){
+        //nodes.add(node);
+        nodes.put(node.getId(), node);
+        return node;
+    }
+
+    /** Returns a node, if exists, or creates one.
+     *
+     * @param id
+     * @return
+     */
+    synchronized
+    public Node getNode(String id){
+        Node node = nodes.getOrDefault(id, null);
+        if (node != null){
+            return node;
+        }
+        return addNode(id);
+        /*
+        for (Map.Entry<String,Node> entry: nodes.entrySet()) {
+          if (entry.getValue().getId().equals(id))
+            return node;
+        }
+        */
+    }
+
+    public boolean hasNode(String id){
+        return nodes.containsKey(id);
+        /*
         for (Node node: nodes) {
             if (node.getName().equals(name))
                 return true;
         }
         return false;
+
+         */
     }
 
+    /*
     public boolean hasLink(String name){
         for (Link link: links) {
             if (link.getName().equals(name))
@@ -144,11 +194,71 @@ public class Graph extends Entity {
         return false;
     }
 
+     */
 
-    public Link addLink(Node node1, Node node2){
-        Link link = new Link(node1, node2);
-        links.add(link);
-        return link;
+
+    public Node.Link addLink(Node node1, Node node2){
+        //Link link = new Link(node1, node2);
+        //links.add(link);
+        return node1.addLink(node2);
+    }
+
+    /** Add node or copy links to already existing node.
+     *
+     * @param node
+     */
+    public void importNode(Node node){
+        //String name = node.getName();
+        String key = node.getId();
+        Node n = nodes.getOrDefault(key, null);
+        if (n == null) {
+            addNode(node);
+        }
+        else {
+            n.links.putAll(node.links);
+        }
+        /*
+        if (nodes.containsKey(key)){
+            Node n = nodes.get(key);
+            //for (Node.Link link: node.links){
+                if (n.links.contains(link.id)){
+
+                }
+            }
+            return;
+        }
+        else {
+            addNode(node);
+        }
+        */
+        /*
+        for (Node n: nodes) {
+            if (n.getName().equals(name)){
+                // n.links.addAll(node.links);
+                for (Node.Link link: node.links){
+
+                }
+                return;
+            }
+        }*/
+    }
+
+    /** Combines nodes, appending links of already existing nodes.
+     *
+     *  Does not override existing nodes buts appens links of already existing nodes.
+     *
+     * @param src
+     */
+    public void importGraph(Graph src){
+        for (Map.Entry<String,Node> entry: src.nodes.entrySet()){
+            importNode(entry.getValue());
+        }
+        /*
+        for (Node node: src.nodes) {
+            importNode(node);
+        }
+
+         */
     }
 
 
@@ -158,18 +268,55 @@ public class Graph extends Entity {
         stream.println(" {");
         stream.println();
 
+        for (Map.Entry<String,Node> entry: nodes.entrySet()){
+            Node n = entry.getValue();
+            n.toStream(stream);
+            for (Map.Entry<String, Node.Link> l: n.links.entrySet()) {
+                l.getValue().toStream(stream);
+            }
+            stream.println();
+        }
+        /*
         for (Node n: nodes) {
             n.toStream(stream);
+            for (Node.Link l: n.links) {
+                l.toStream(stream);
+            }
+            stream.println();
         }
+         */
         stream.println();
 
+        /*
         for (Link l: links) {
             l.toStream(stream);
         }
-        stream.println();
+        */
 
         stream.println("}");
     }
+
+    /*
+    public class Link extends Entity {
+
+        public Link(Node node1, Node node2){
+            this.node1 = node1;
+            this.target = node2;
+        }
+
+        final Node node1;
+        final Node target;
+
+        void toStream(PrintStream stream){
+            stream.append("  ").append(node1.getId()).append(" -> ").append(target.getId()).append(' ');
+            attributesToStream(stream);
+            stream.append(';');
+            stream.println();
+        }
+
+    }
+    */
+    //final public Node root = new Node();
 
     void dotToFile(String outfile) throws IOException, InterruptedException { // }, String styleSheet){ /// todo: IOException
         int i = outfile.lastIndexOf('.');
@@ -249,11 +396,13 @@ public class Graph extends Entity {
         node2.attributes.put("style", "dotted");
         node2.attributes.put("fill", "lighblue");
 
-        Link link = graph.addLink(node1, node2);
+        // Alternative 1
+        Node.Link link = graph.addLink(node1, node2);
         link.attributes.put("style", "dotted");
 
         Node node3 = graph.addNode("C");
-        Link link2 = graph.addLink(node1, node3);
+        // Alternative 2
+        Node.Link link2 = node1.addLink(node3);
         link2.attributes.put("label", "reijo");
 
         // graph.toStream(System.out);

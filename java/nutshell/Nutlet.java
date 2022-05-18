@@ -115,8 +115,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						break;
 					default:
 						if (q.endsWith(".html")) {
-							// NOTE: perhaps assigns also_
-							// page.value="page=form.html"
+							// NOTE: accepts also files of type: page.value="page=form.html"
 							page.value = q;
 							// ... but overridden just below
 						}
@@ -162,6 +161,38 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			} catch (IOException e) {
 				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), response);
 			}
+			return;
+		}
+
+		if (page.value.equals("catalog")){
+
+			// ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
+			ProductServerBase.GeneratorTracker tracker =
+					productServer.new GeneratorTracker(productServer.productRoot);
+
+			try {
+				tracker.run();
+				// System.out.println(tracker.generators);
+			} catch (IOException e) {
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Retrieving catalog failed", e.getMessage(), response);
+			}
+
+			SimpleHtml html = getHtmlPage();
+			// html.appendTable(request.getParameterMap(), "Catalog");
+			// Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
+			// elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, page.value ));
+			// html.appendElement(SimpleHtml.H2, "Testi");
+			Map<String, Element> catalogMap = new HashMap<>();
+			for (Path p: tracker.generators) {
+				String productId = p.toString().replace("/",".");
+				String url = String.format("product=%s", productId);
+				catalogMap.put(productId, html.createAnchor(url, p.toString()));
+			}
+			html.appendTable(catalogMap, "Catalog");
+			html.appendTag(SimpleHtml.Tag.PRE, tracker.generators.toString());
+			response.setStatus(HttpServletResponse.SC_OK); // tes
+			sendToStream(html.document, response);
+
 			return;
 		}
 
@@ -267,7 +298,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				task.addGraph("ProductServer.Task" + task.getTaskId());
 			}
 
-				//String[] directives = request.getParameterValues("directives");
+			//String[] directives = request.getParameterValues("directives");
 			task.info.setDirectives(request.getParameterMap());
 			//task.log.setVerbosity(log.verbosity);
 
@@ -285,10 +316,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				task.execute();
 				//task.log.ok("-------- see separate log <---");
 
-				if (task.log.indexedException.index >= HttpServletResponse.SC_BAD_REQUEST){
+				if (task.log.indexedState.index >= HttpServletResponse.SC_BAD_REQUEST){
 					//task.log.log();
-					task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedException.index, task.toString()));
-					throw task.log.indexedException;
+					task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedState.index, task.toString()));
+					throw task.log.indexedState;
 				}
 				else {
 					task.log.ok(String.format("Completed task: %s", task.toString()));
@@ -335,7 +366,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 				response.setStatus(HttpServletResponse.SC_OK); // tes
 			}
-			catch (IndexedException e) {
+			catch (IndexedState e) {
 				response.setStatus(e.index);
 				task.instructions.add(Instructions.STATUS);
 				//task.instructions.add(Instructions.STATUS); // ?
@@ -347,9 +378,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			html.appendTag(SimpleHtml.Tag.H1, "Product: " + task.info.PRODUCT_ID);
 			//html.createElement(SimpleHtml.Tag.P, "No ST REAM or REDIRECT were requested, so this page appears.");
 
-			Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedException.getMessage());
+			Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedState.getMessage());
 
-			switch (task.log.indexedException.index){
+			switch (task.log.indexedState.index){
 				case HttpServletResponse.SC_PRECONDITION_FAILED:
 					html.appendTag(SimpleHtml.Tag.H2, "Input problem(s)");
 					html.appendTag(SimpleHtml.Tag.P, "See input list further below");
@@ -357,15 +388,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					break;
 				default:
 					// General, section-wise handling
-					if (task.log.indexedException.index > 400) {
+					if (task.log.indexedState.index > 400) {
 						html.appendTag(SimpleHtml.Tag.H2, "Product generator error");
 						elem.setAttribute("class", "error");
 					}
-					else if (task.log.indexedException.index > 300) {
+					else if (task.log.indexedState.index > 300) {
 						html.appendTag(SimpleHtml.Tag.B, "Warnings:");
 						elem.setAttribute("class", "error");
 					}
-					else if (task.log.indexedException.index < 200)
+					else if (task.log.indexedState.index < 200)
 						elem.setAttribute("class", "note");
 			}
 
@@ -400,6 +431,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						Path graphPath = task.writeGraph();
 						//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
 						//		task.relativeGraphPath, graphPath.toFile().exists()));
+						if (ProductServer.serverGraph != null){
+							ProductServer.serverGraph.dotToFile(
+									// TODO logDir
+									productServer.serverLog.logFile.getParent()+"/NutShell.svg"
+							);
+									// graphPath.getParent().resolve("productServer.svg").toString());
+						}
 
 
 						try {
@@ -472,7 +510,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				}
 
 				// NOTE: these assume ExternalGenerator?
-				Path gen = Paths.get("products", task.productDir.toString(), productServer.generatorCmd);
+				Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
 				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
 				map.put("actions", batchConfig.instructions);

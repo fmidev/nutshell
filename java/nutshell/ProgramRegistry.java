@@ -18,48 +18,61 @@ class ProgramRegistry {
         map.put(key, param);
     }
 
+    String plainKey(String key){
+        if (key.startsWith("--"))
+            return key.substring(2);
+        else
+            return key;
+    }
+
     boolean has(String key){
-        if (key.startsWith("--")){
-            key = key.substring(2);
-        }
-        return map.containsKey(key);
+        return map.containsKey(plainKey(key));
     }
 
     Program.Parameter get(String key){
-        if (key.startsWith("--")){
-            key = key.substring(2);
-        }
-        return map.get(key);
+        return map.get(plainKey(key));
     }
 
+    public void help(PrintStream stream, String key) {
+        key = plainKey(key);
+        if (has(key)){
+            help(stream, key, get(key));
+        }
+        else {
+            stream.println(String.format("Option '%s' not found", key));
+        }
+    }
 
-    public void help(PrintStream stream) {
+    public void help(PrintStream stream, String key, Program.Parameter param) {
 
-        for (Map.Entry<String, Program.Parameter> entry : map.entrySet()) {
-            Program.Parameter param = entry.getValue();
-            //System.err.println("--" + entry.getKey() + ": " + entry.getValue().getDescription());
-            stream.print("--" + entry.getKey());
-            if (param.hasParams()) {
-                stream.print(" " + Arrays.toString(param.getParamKeys()));
-            }
-            stream.println();
-            //stream.println("--" + entry.getKey() + " " + Arrays.toString(param.getParamKeys()) + "");
-            stream.println("  " + entry.getValue().getDescription());
-            if (param.hasParams()) {
-                // stream.println("  Arguments");
+        stream.print("--" + key);
+        if (param.hasParams()) {
+            stream.print(" " + Arrays.toString(param.getParamKeys()));
+        }
+        stream.println();
+        //stream.println("--" + entry.getKey() + " " + Arrays.toString(param.getParamKeys()) + "");
+        stream.println("  " + param.getDescription());
+        if (param.hasParams()) {
+            // stream.println("  Arguments");
                 /*
                 for (Object item : param.getParams().entrySet()) {
                     //stream.println(String.format("\t %s [%s]", item.toString()));
                     stream.println(String.format("\t %s", item.toString()));
                 }
                  */
-                Map<String,Object> m = param.getParams();
-                for (Map.Entry item : m.entrySet()) {
-                    stream.println(String.format("\t %s [%s]", item.getKey(), item.getValue()));
-                }
+            Map<String,Object> m = param.getParams();
+            for (Map.Entry item : m.entrySet()) {
+                stream.println(String.format("\t %s [%s]", item.getKey(), item.getValue()));
             }
-            stream.println();
-            //stream.println("\t" + entry.getValue().getParams());
+        }
+        stream.println();
+    }
+
+
+    public void help(PrintStream stream) {
+
+        for (Map.Entry<String, Program.Parameter> entry : map.entrySet()) {
+            help(stream, entry.getKey(), entry.getValue());
         }
 
     }

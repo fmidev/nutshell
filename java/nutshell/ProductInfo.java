@@ -51,6 +51,7 @@ class ProductInfo extends ProductParameters {
 	 *
 	 * @param map
 	 */
+	/*
 	public Map<String,String> setDirectives(Map<String,String[]> map){
 
 		if (map != null) {
@@ -66,6 +67,37 @@ class ProductInfo extends ProductParameters {
 
 		return directives;
 	}
+	*/
+
+	/** Imports map to directives map, converting array values to comma-separated strings.
+	 *
+	 * @param map
+	 */
+	public <T> Map<String,String> setDirectives(Map<String,T> map){
+
+		if (map != null) {
+			for (Map.Entry<String, T> entry : map.entrySet()) { //parameters.entrySet()) {
+				String key = entry.getKey();
+				if (key.equals(key.toUpperCase())) {
+					Object value = entry.getValue();
+					if (value != null){
+						if (value instanceof String[]) {
+							String[] values = (String[])value;
+							directives.put(key, String.join(",", values));
+						}
+						else {
+							directives.put(key, value.toString());
+						}
+
+					}
+
+				}
+			}
+		}
+
+		return directives;
+	}
+
 
 
 	public ProductInfo(String productStr) throws ParseException { //,Log log){

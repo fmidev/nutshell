@@ -223,6 +223,20 @@ function check(){
 	if [ $s != $r ] ; then
 	    vt100cmd yellow cat $LOG
  	    echo_error "return value: $STATUS"
+	    if [ "$cmd" == 'run_http' ]; then
+		echo_error "WGET error code: "
+		fgrep $STATUS <<EOF
+       0   No problems occurred.
+       1   Generic error code.
+       2   Parse error---for instance, when parsing command-line options, the .wgetrc or .netrc...
+       3   File I/O error.
+       4   Network failure.
+       5   SSL verification failure.
+       6   Username/password authentication failure.
+       7   Protocol errors.
+       8   Server issued an error response.
+EOF
+	    fi
 	    exit 1
 	fi
 

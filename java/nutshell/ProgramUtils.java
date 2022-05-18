@@ -96,15 +96,22 @@ public class ProgramUtils {
 
 
     static
-    public class Help extends Program.Parameter<ProgramRegistry> {
+    public class Help extends Program.Parameter.Simple<String> {
+        //public class Help extends Program.Parameter<ProgramRegistry> {
 
         Help(ProgramRegistry program) {
-            super("help", "Display help", program, "");
+            super("help", "Display help", "");
+            this.program = program;
         }
+
+        ProgramRegistry program = null;
 
         @Override
         public void exec() {
-            reference.help(System.out);
+            if ((this.value == null) || (this.value.isEmpty()))
+                program.help(System.out);
+            else
+                program.help(System.out, this.value);
             //System.out.println(Arrays.toString(reference.version));
         }
     }

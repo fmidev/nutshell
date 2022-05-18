@@ -114,6 +114,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		public Graph graph = null;
 
+		public void setGraph(Graph graph) {
+			this.graph = graph;
+		}
 
 		/**
 		 * Product generation task defining a product instance and operations on it.
@@ -161,8 +164,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 			try {
-				ensureFile(cacheRoot, this.relativeLogPath);
-				log.setLogFile(cacheRoot.resolve(this.relativeLogPath));
+				Path logPath = cacheRoot.resolve(relativeLogPath);
+				//ensureFile(cacheRoot, this.relativeLogPath);
+				FileUtils.ensureWritableFile(logPath, fileGroupID, filePerms, dirPerms);
+				log.setLogFile(logPath);
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
 				//log.setLogFile(null);
@@ -240,7 +245,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 *
 		 * @see #execute()
 		 */
-		@Override
+		@Override // Thread
 		public void run() {
 
 			try {
@@ -285,7 +290,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				Graph.Node node = graph.getNode(info.getID());
 				node.attributes.put("label", String.format("%s\\n(%s)", node.getName(), info.FORMAT));
 				node.attributes.put("fillcolor", "lightblue");
-				//node.attributes.put("href", String.format(
+				// node.attributes.put("href", String.format(
 				//		"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
 				return node;
 			}
@@ -387,7 +392,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.log(HttpLog.HttpStatus.OK, String.format("Stored file exists: %s", this.storagePath));
 
 					try {
-						ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
+						FileUtils.ensureWritableDir(outputDir, fileGroupID, dirPerms);
+						// ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					} catch (IOException e) {
 						log.warn(e.getMessage());
 						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in creating dir (with permissions): %s", this.outputDir));
@@ -438,7 +444,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							instructions.add(ResultType.MEMORY);
 					}
 
-				} catch (IndexedException e) {
+				}
+				catch (IndexedState e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, "Generator does not exist");
 					log.log(e);
 					instructions.remove(Instructions.GENERATE);
@@ -491,18 +498,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.isSet(Instructions.GENERATE)) {
 
 				log.reset(); // Forget old sins
-
-				log.info("Generate!");
-				// log.info("No generation request, returning.");
-				// return;
+				log.debug("Ok, generate.");
 
 				// Mark this task being processed (empty file)
 				// if (this.instructions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
-					ensureDir(cacheRoot, relativeOutputDirTmp); //, dirPerms);
-					ensureDir(cacheRoot, relativeOutputDir); //,    dirPerms);
-					ensureFile(cacheRoot, relativeOutputPath); //, dirPerms, filePerms); // this could be enough?
-					//Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
+					FileUtils.ensureWritableDir(outputDirTmp, fileGroupID, dirPerms);
+					FileUtils.ensureWritableDir(outputDir, fileGroupID, dirPerms);
+					//ensureDir(cacheRoot, relativeOutputDirTmp);
+					//ensureDir(cacheRoot, relativeOutputDir);
+					FileUtils.ensureWritableFile(outputPath, fileGroupID, filePerms, dirPerms);
+					// ensureFile(cacheRoot, relativeOutputPath);
+					// Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
 					return;
@@ -534,16 +541,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 
 				// Consider forwarding directives?
-				//Map<String,Task> inputTasks = executeBatch(this.inputs, inputInstructions, null, log);
-
-				Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, null, log);
+				// Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, null, log);
+				Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
 
 				// Statistics
 				Graph.Node node = null;
 				if (graph != null) {
 					node = getGraphNode(graph);
-					for (Entry<String, Task> entry : inputTasks.entrySet()) {
-						entry.getValue().graph = graph;
+					for (Entry<String,Task> entry : inputTasks.entrySet()) {
+						entry.getValue().setGraph(graph);
 					}
 					//node.attributes.put("fillcolor", "lightblue");
 				}
@@ -555,7 +561,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					Task inputTask = entry.getValue();
 
 					Graph.Node inputNode = null;
-					Graph.Link link = null;
+					Graph.Node.Link link = null;
 
 					if (graph != null) {
 						inputNode = inputTask.getGraphNode(graph);
@@ -565,7 +571,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								inputTask.info.getFilename()));
 						inputNode.attributes.put("class", "clickable");
 
-						link = graph.addLink(node, inputNode);
+						link = node.addLink(inputNode);
+						//graph.addLink(node, inputNode);
 						// link.attributes.put("label", key);
 						// link.attributes.put("title", "avain_"+key); // SVG only
 					}
@@ -578,22 +585,24 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						// inputStats.put(key, inputTask.info.getID());
 
 						if (link != null) {
-							if (inputTask.log.indexedException.index > 300) {
+							if (inputTask.log.indexedState.index > 300) {
 								link.attributes.put("style", "dashed");
 							}
 						}
-						if (inputTask.log.indexedException.index > 300) {
-							log.warn("Errors in input generation: " + inputTask.log.indexedException.getMessage());
+						if (inputTask.log.indexedState.index > 300) {
+							log.warn("Errors in input generation: " + inputTask.log.indexedState.getMessage());
 						}
 					} else {
-						log.warn(inputTask.log.indexedException.getMessage());
+						log.warn(inputTask.log.indexedState.getMessage());
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 						log.reset(); // Forget that anyway...
 						if (link != null) {
 							// inputNode.attributes.put("color", "red");
 							//inputNode.attributes.put("style", "dashed");
-							inputNode.attributes.put("fillcolor", "#ffff40"); // ""orange");
-							link.attributes.put("color", "red");
+							//inputNode.attributes.put("fillcolor", "#ffb080"); // ""orange");"#ffb080"
+							inputNode.attributes.put("fillcolor", "#ffc090"); // ""orange");"#ffb080"
+							link.attributes.put("color", "#800000");
+							link.attributes.put("style", "dashed");
 						}
 					}
 					inputTask.log.close(); // close PrintStream
@@ -612,7 +621,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				try {
 					generator.generate(this);
-				} catch (IndexedException e) {
+				} catch (IndexedState e) {
 
 					// NOTE: possibly the file has been generated, but with some less significant errors.
 					// serverLog.warn(info.getFilename() + ": " + e);
@@ -716,7 +725,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					if (this.instructions.isSet(PostProcessing.SHORTCUT)) {
 						if (this.info.isDynamic()) {
 							try {
-								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
+								//Path dir = ensureDir(cacheRoot, productDir);
+								Path dir = cacheRoot.resolve(productDir);
+								FileUtils.ensureWritableDir(dir, fileGroupID, dirPerms);
 								this.link(this.outputPath, dir, true);
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
@@ -728,7 +739,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					if (this.instructions.isSet(PostProcessing.LATEST)) {
 						if (this.info.isDynamic()) {
 							try {
-								Path dir = ensureDir(cacheRoot, productDir); //, dirPerms);
+								//Path dir = ensureDir(cacheRoot, productDir);
+								Path dir = cacheRoot.resolve(productDir);
+								FileUtils.ensureWritableDir(dir, fileGroupID, dirPerms);
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")), true);
 								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
@@ -740,18 +753,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (this.instructions.isSet(PostProcessing.STORE)) {
 						// Todo: traverse storage paths.
-						Path file = storageRoot.resolve(relativeOutputDir).resolve(this.info.getFilename());
-						if (file.toFile().exists()) {
-							log.experimental(String.format("Store: file exists already: %s", file));
+						Path storageDir = storageRoot.resolve(relativeOutputDir);
+						Path storedFile = storageDir.resolve(this.info.getFilename());
+						if (Files.exists(storedFile)) {
+							log.experimental(String.format("Store: file exists already: %s", storedFile));
 						} else {
 							try {
-								ensureDir(storageRoot, relativeOutputDir);
-								this.copy(this.outputPath, file);
-								log.experimental(String.format("Stored in: %s", file));
+								//ensureDir(storageRoot, relativeOutputDir);
+								FileUtils.ensureWritableDir(storageDir, fileGroupID, dirPerms);
+								this.copy(this.outputPath, storedFile);
+								log.experimental(String.format("Stored in: %s", storedFile));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 								log.reset();
-								log.fail(String.format("Store: %s", file));
+								log.fail(String.format("Store: %s", storedFile));
 							}
 						}
 					}
@@ -816,6 +831,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 
+			if (graph != null) {
+				serverGraph.importGraph(graph);
+			}
 			// return true; // SEMANTICS?
 		}
 
@@ -875,9 +893,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		@Override
 		public String toString() {
 			if (this.info.directives.isEmpty())
-				return String.format("%s", this.filename);
+				return String.format("%s # %s", this.filename, instructions);
 			else
-				return String.format("%s?%s", this.filename, this.info.directives.toString());
+				return String.format("%s?%s # %s", this.filename, info.directives, instructions);
 		}
 
 		//final long creationTime;
@@ -891,19 +909,22 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		public Path writeGraph() {
-			Path dotFile = cacheRoot.resolve(relativeGraphPath);
-			log.special(String.format("Writing graph to file: %s", dotFile));
+			Path graphFile = cacheRoot.resolve(relativeGraphPath);
+			log.special(String.format("Writing graph to file: %s", graphFile));
 			try {
-				ensureDir(cacheRoot, relativeSystemDir);
+				Path graphDir = graphFile.getParent();
+				FileUtils.ensureWritableDir(graphDir, fileGroupID, dirPerms);
+				// ensureDir(cacheRoot, relativeSystemDir);
 				// ensureFile(cacheRoot, relativeGraphPath);
-				graph.dotToFile(dotFile.toString());
-				Files.setPosixFilePermissions(dotFile, filePerms);
+				graph.dotToFile(graphFile.toString());
+				graph.dotToFile(graphFile.toString()+".dot"); // debugging
+				Files.setPosixFilePermissions(graphFile, filePerms);
 			} catch (IOException | InterruptedException e) {
 				log.warn(e.getMessage());
 				graph.toStream(log.getPrintStream());
-				log.fail(String.format("Failed in writing graph to file: %s", dotFile));
+				log.fail(String.format("Failed in writing graph to file: %s", graphFile));
 			}
-			return dotFile;
+			return graphFile;
 		}
 
 
@@ -915,7 +936,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		/**
 		 *
 		 */
-		void generate(Task task) throws IndexedException; // throws IOException, InterruptedException ;
+		void generate(Task task) throws IndexedState; // throws IOException, InterruptedException ;
 
 		// Semantics? (List or retrieved objects)
 		// boolean hasInputs();
@@ -926,7 +947,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param task
 		 * @return
 		 */
-		Map<String, String> getInputList(Task task) throws IndexedException;
+		Map<String, String> getInputList(Task task) throws IndexedState;
 
 	}
 
@@ -935,7 +956,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 * @param productID
 	 * @return
 	 */
-	public Generator getGenerator(String productID) throws IndexedException {
+	public Generator getGenerator(String productID) throws IndexedState {
 		Path dir = productRoot.resolve(getProductDir(productID));
 		Generator generator = new ExternalGenerator(productID, dir.toString());
 		return generator;
@@ -985,7 +1006,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return prepareTasks(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
 	}
 
-	public Map<String,Task> prepareTasks(Map<String,String> productRequests, Instructions instructions, Map directives, HttpLog log) {
+	public Map<String,Task> prepareTasks(Map<String,String> productRequests, Instructions instructions, Map<String,String> directives, HttpLog log) {
 
 		Map<String, Task> tasks = new HashMap<>();
 
@@ -996,11 +1017,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return tasks;
 		}
 
-		log.info(String.format("Inits (%d) tasks: (%s)", count, productRequests.keySet()));
+		log.info(String.format("Preparing %d tasks: %s", count, productRequests.keySet()));
 
-		//log.info(String.format("Inits (%s) tasks ", productRequests.entrySet()));
-		log.info(String.format("Instructions: %s , regenerateDepth: %d ",
-				instructions, instructions.regenerateDepth));
+		/*
+		log.info(String.format("Instructions: %s (depth: %d), Directives: %s ",
+				instructions, instructions.regenerateDepth, directives));
+		 */
 
 		/// Check COPY & LINK targets (must be directories, if several tasks)
 		if (count > 1) {
@@ -1031,7 +1053,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				Task task = new Task(value, instructions.value, log);
 
 				//log.debug(String.format("Check: %s = %s", key, value));
+				/*
+				if ((directives != null) && !directives.isEmpty())
+					log.special(String.format("Directives: %s = %s [%s]",
+							key, directives, directives.getClass()));
+				 */
+
 				task.info.setDirectives(directives);
+
 				task.instructions.addCopies(instructions.copies);
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
@@ -1043,6 +1072,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.info(String.format("Prepared task: '%s' = %s [%s]", key, task, task.instructions));
 				if ((directives != null) && !directives.isEmpty())
 					log.info(String.format("Directives: %s = %s", key, directives));
+
+				log.info(task.toString());
 
 				task.log.setVerbosity(log.getVerbosity());
 				task.log.COLOURS = log.COLOURS;
@@ -1120,7 +1151,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 				log.warn(String.format("Pending file? : ", task.outputPathTmp));
 			}
-			log.info(String.format("Final status: %s", task.log.indexedException));
+			log.info(String.format("Final status: %s", task.log.indexedState));
 			//log.log("test");
 		}
 
@@ -1350,7 +1381,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				// System.err.print(String.format("Type: %s %s", value.getClass(), value));
+				System.err.print(String.format("Type: %s %s", value.getClass(), value));
 				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
 			}
 		});
@@ -1426,11 +1457,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		HttpLog log = server.serverLog; //.child("CmdLine");
 		log.COLOURS = true;
 
-		/*
-		Map<String,String> context_products = new TreeMap<>();
-		Instructions context_instructions = new Instructions();
-		Map<String ,String> context_directives = new TreeMap<>();
-		*/
 
 		// NEW
 		ProgramRegistry registry = new ProgramRegistry();
@@ -1531,6 +1557,25 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
+		registry.add(new Parameter.Simple<String>("catalog",
+				"List products found under productRoot",""){
+
+			public void exec() {
+
+				GeneratorTracker tracker = server.new GeneratorTracker(server.productRoot.resolve(value));
+
+				try {
+					System.out.println(String.format("List products (dir=%s)", tracker.startDir));
+					tracker.run();
+					System.out.println(tracker.generators);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+
+
 
 		//Field[] instructionFields = Instructions.class.getFields();
 		if (args.length == 0){
@@ -1557,17 +1602,17 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (registry.has(opt)){
 						Program.Parameter param = registry.get(opt);
-						log.special(String.format("Handling: '%s' -> %s hasParams:%b", opt, param, param.hasParams()));
+						//log.special(String.format("Handling: '%s' -> %s has params:%b", opt, param, param.hasParams()));
 						if (param.hasParams()){
 							if (i < (args.length-1)) {
-								log.special(String.format("%s has argument '%s'", param.getName(), args[i+1]));
+								//log.special(String.format("%s has argument '%s'", param.getName(), args[i+1]));
 								param.setParams(args[++i]);
 							}
 							else
 								param.setParams(""); // Support "premature" end of cmd line, esp. with --help
 						}
 						param.exec();
-						log.special(String.format("Handled: %s", param));
+						log.debug(String.format("Handled: %s", param));
 						//log.special(param.toString());
 						continue;
 					}
@@ -1621,12 +1666,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		if (batchConfig.instructions.move != null)
 			log.note(String.format("   MOVE: \t %s", batchConfig.instructions.move));
 
+		/*
 		if (!batchConfig.directives.isEmpty())
-			log.note("Directives: " + batchConfig.directives);
+			log.debug("Directives: " + batchConfig.directives);
+		 */
 
 		/// "MAIN"
-		//Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
-		// Map<String,ProductServer.Task> tasks = server.executeBatch(batchConfig, log);
+		//  Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
+		//  Map<String,ProductServer.Task> tasks = server.executeBatch(batchConfig, log);
 
 		Map<String, Task> tasks = server.prepareTasks(batchConfig, log);
 
@@ -1652,14 +1699,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			String key = entry.getKey();
 			Task  task = entry.getValue();
-			if (task.log.indexedException.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
-				log.warn(String.format("Exception occurred: %s", task.log.indexedException.getMessage()));
+			if (task.log.indexedState.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
+				log.warn(String.format("Generator Exception: %s", task.log.indexedState.getMessage()));
 				//log.debug(task.log.indexedException);
 				if (result < 20)
 					++result;
 			}
 			else {
-				log.info(String.format("Status:\t%s", task.log.indexedException.getMessage()));
+				log.info(String.format("Status:\t%s", task.log.indexedState.getMessage()));
 			}
 
 			/*

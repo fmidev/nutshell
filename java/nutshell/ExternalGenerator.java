@@ -25,15 +25,15 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	//final protected File cmd;
 	final protected File inputDeclarationCmd;
 
-	public ExternalGenerator(String id, String dir) throws IndexedException {
+	public ExternalGenerator(String id, String dir) throws IndexedState {
 		super(scriptName, dir);
 		this.id = id;
 		//this.dir = Paths.get(dir); //new File(dir);
 		// this.cmd = this.dir.resolve(scriptName).toFile().getAbsoluteFile();
 		if (!this.cmd.exists())
-			throw new IndexedException(HttpServletResponse.SC_NOT_IMPLEMENTED, String.format("Script %s not found", this.cmd));
+			throw new IndexedState(HttpServletResponse.SC_NOT_IMPLEMENTED, String.format("Script %s not found", this.cmd));
 		if (!this.cmd.canRead())
-			throw new IndexedException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("Script %s unreadable", this.cmd));
+			throw new IndexedState(HttpServletResponse.SC_METHOD_NOT_ALLOWED, String.format("Script %s unreadable", this.cmd));
 
 		this.inputDeclarationCmd = this.dir.resolve(inputDeclarationScript).toFile();
 	}
@@ -61,12 +61,12 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 	// MAIN
 	@Override
-	public void generate(ProductServer.Task task) throws IndexedException {
+	public void generate(ProductServer.Task task) throws IndexedState {
 		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 	}
 
 
-	public void generateFile(String[] envArray, PrintStream log) throws IndexedException {
+	public void generateFile(String[] envArray, PrintStream log) throws IndexedState {
 
 		//ShellUtils.ProcessReader
 		OutputReader reader = new OutputReader(log);
@@ -86,14 +86,14 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	}
 	 */
 	@Override
-	public Map<String,String> getInputList(ProductServer.Task task) throws IndexedException {
+	public Map<String,String> getInputList(ProductServer.Task task) throws IndexedState {
 		//return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 		return getInputList(MapUtils.toArray(task.getParamEnv()), task.log);
 	}
 
 	// public Map<String,String> getInputList(String[] env, final PrintStream errorLog) { //throws InterruptedException {
 	//public Map<String,String> getInputList(String[] env, PrintStream errorLog) throws IndexedException {
-	public Map<String,String> getInputList(String[] env, Log errorLog) throws IndexedException {
+	public Map<String,String> getInputList(String[] env, Log errorLog) throws IndexedState {
 		//public Map<String,String> getInputList(ProductServer.Task task) { //throws InterruptedException {
 		final Map<String, String> result = new HashMap<>();
 
@@ -152,7 +152,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		try {
 			generator = new ExternalGenerator("test", dir);
-		} catch (IndexedException e) {
+		} catch (IndexedState e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -176,7 +176,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 				System.out.println(String.format("\t%s=%s", entry.getKey(), entry.getValue()));
 			}
 		}
-		catch (IndexedException e){
+		catch (IndexedState e){
 			e.printStackTrace();
 			return;
 		}
@@ -190,7 +190,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 			FileOutputStream fw = new FileOutputStream(logFile);
 			generator.generateFile(env, new PrintStream(fw));
 			System.out.println(String.format("Success! (See log and %s", generator.dir));
-		} catch (IOException | IndexedException e) {
+		} catch (IOException | IndexedState e) {
 			e.printStackTrace();
 			return;
 		}

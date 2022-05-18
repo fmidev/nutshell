@@ -119,41 +119,7 @@ public class Program {
 
             public T value;
 
-            /*
-               Simple(String name, String description){
-               super(name, description);
-               setReference(this, "value"); // needed? required!?
-               value = null;
-               }
 
-               Simple(String name, String description, String key){
-                   super(name, description);
-                   setReference(this, key); // needed? required!?
-                   // value = initValue;
-               }
-
-               Simple(String name, String description, String key, T initValue){
-                   super(name, description);
-                   setReference(this, key); // needed? required!?
-                   value = initValue;
-            }
-
-           @Override
-           public void setParams(String args) throws NoSuchFieldException, IllegalAccessException {
-               setField(this, getClass().getField("value"), args);
-           }
-
-           @Override
-           public void setParams(String[] args) throws NoSuchFieldException, IllegalAccessException {
-               setField(this, getClass().getField("value"), args);
-           }
-
-            @Override
-            public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
-                super.setParam("value", value);
-            }
-
-             */
 
         }
 

@@ -1,5 +1,9 @@
 package nutshell;
 
+import jdk.nashorn.internal.parser.JSONParser;
+// import com.google.gson.Gson;
+
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -11,8 +15,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getAttribute;
+
+//import org.json.simple.parser.JSONParser;
+
 
 /** Infrastructure for the actual ProductServer
  *
@@ -30,7 +36,7 @@ public class ProductServerBase extends Program {
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
     public int fileGroupID = 100;
 
-    public Path confFile    = Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
+    public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
     public Path cacheRoot   = Paths.get(".");
     //public Path storageRoot   = Paths.get(".");
     public Path productRoot = Paths.get(".");
@@ -42,10 +48,11 @@ public class ProductServerBase extends Program {
     static final public Path cachePrefix = Paths.get("cache");
 
     /// System side setting.// TODO: conf
-    public String inputCmd = "./input.sh";  // NOTE: executed in CWD
+    //public String inputCmd = "./input.sh";  // -> ExternalGenerator NOTE: executed in CWD
 
     /// System side setting. // TODO: conf
-    public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
+    //public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
+    //public String generatorCmd = "generate.sh"; // -> ExternalGenerator   // NOTE: executed in CWD
 
     //final DateFormat timeStampFormat    = new SimpleDateFormat("yyyyMMddHHmm");
     final DateFormat timeStampDirFormat =
@@ -59,6 +66,8 @@ public class ProductServerBase extends Program {
     static public int getProcessId(){
         return  ++counter;
     };
+
+    static public Graph serverGraph = new Graph("Product Server");
 
     /** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
      *
@@ -170,7 +179,9 @@ public class ProductServerBase extends Program {
     }
 
 
+
     //public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
+    /*
     public Path ensureDir(Path root, Path relativePath) throws IOException {
 
         if (relativePath==null)
@@ -202,14 +213,17 @@ public class ProductServerBase extends Program {
 
         return path;
     }
+     */
 
     //public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
+    /*
     public Path ensureFile(Path root, Path relativePath) throws IOException {
 
         Path path = root.resolve(relativePath);
 
         if (!exists(path)) {
-            ensureDir(root, relativePath.getParent());
+            //ensureDir(root, relativePath.getParent());
+            FileUtils.ensureWritableDir(path.getParent(), fileGroupID, dirPerms);
             serverLog.debug("creating file: " + path);
             Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
             //Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
@@ -227,9 +241,106 @@ public class ProductServerBase extends Program {
         return path;
 
     }
+   
+     */
 
 
     // For clearing CACHE
+    public class GeneratorTracker extends SimpleFileVisitor<Path> {
+
+        GeneratorTracker(){
+            this.startDir = productRoot;
+        }
+
+        GeneratorTracker(Path startDir){
+            if (startDir == null)
+                this.startDir = productRoot;
+            else
+                this.startDir = productRoot.resolve(startDir);
+        }
+
+        Path startDir = null;
+
+
+
+        protected void walkSubdir(Path path){
+            //File file = path.toFile();
+
+            if (path.toFile().isDirectory()) {
+                try {
+                    Files.walkFileTree(path, this);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //System.out.println("Directory: " + file.getAbsolutePath());
+            }
+        }
+
+        void run() throws IOException {
+
+            Files.walk(startDir, 1, FileVisitOption.FOLLOW_LINKS).forEach(path -> walkSubdir(path));
+
+
+            /*
+            Set<FileVisitOption> options = new HashSet<>();
+            options.add(FileVisitOption.FOLLOW_LINKS);
+            Files.walkFileTree(startDir, options, 10,this);
+
+             */
+        }
+
+        //Map<String,Path> generators = new HashMap<>();
+        //Set<String> generators = new HashSet<>();
+        Set<Path> generators = new HashSet<>();
+
+        String debug(String s){
+            return String.format(" '%s': %d", s, s.length());
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
+            // System.out.printf("DIR:    %s -> '%s'", dir, dir.getFileName()); //, debug(dir.getFileName()));
+            String s = dir.getFileName().toString();
+            if (s.startsWith(".")){
+                //System.out.println(" SKIP!");
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            else if (s.equals("bak")){
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            return CONTINUE;
+        }
+
+
+        @Override
+        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+
+            // System.out.printf("  FILE: '%s'%n", path.getFileName().toString());
+            if (path.getFileName().toString().equals(ExternalGenerator.scriptName)){  // generatorCmd contains "./"
+                Path parentDir = path.getParent();
+
+                File jsonFile = parentDir.resolve("conf.json").toFile();
+                if (jsonFile.exists()){
+                    //JSONParser parser = new JSONParser(jsonFile);
+                    // JSONParser jsonParser = new JSONParser();
+                    System.out.printf(" Found: %s -> JSON %s %n", parentDir, jsonFile);
+                }
+                // System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
+                Path dir = productRoot.relativize(parentDir);
+                generators.add(dir);
+                //System.out.printf(" add: %s%n", dir);
+            }
+            return CONTINUE;
+        }
+
+        // If there is some error accessing
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException e) {
+            //serverLog.warn(e.getMessage());
+            return CONTINUE;
+        }
+    }
+
 
     public class DeleteFiles extends SimpleFileVisitor<Path> {
 
@@ -305,5 +416,33 @@ public class ProductServerBase extends Program {
 
     }
 
+    public static void main(String[] args) {
+
+        //Set<String> set = new HashSet<>();
+
+        if (args.length == 0){
+            System.out.println("Generator tracker: <productRoot> (dir ?)");
+            System.out.println("Params: <dir>");
+            System.exit(1);
+        }
+
+
+        ProductServerBase serverBase = new ProductServerBase();
+        serverBase.productRoot = Paths.get(args[0]);
+
+        Path startDir = serverBase.productRoot;
+        if (args.length >= 2)
+            startDir = Paths.get(args[1]);
+
+        GeneratorTracker tracker = serverBase.new GeneratorTracker(startDir);
+
+        try {
+            tracker.run();
+            System.out.println(tracker.generators);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
