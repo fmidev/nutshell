@@ -41,13 +41,13 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
-from nutshell import nutils
-from nutshell import product 
-from nutshell import request
+#from nutshell import nutils
+#from nutshell import product 
+#from nutshell import request
 
-# from . import nutils
-# from . import product 
-# from . import request
+from . import nutils
+from . import product 
+from . import request
 
 
 
