@@ -18,21 +18,21 @@ tasks. On command line, they can be set invidually or with ``--instructions`` .
 For logical reasons, some of them are mutually exclusive, like ``DELETE`` and ``EXISTS``.
 Some of them, are implicit; for example, ``MAKE`` includes ``EXISTS`` and conditionally sets ``GENERATE``.
 
-============ ================= ============
- Request     Cmd line arg
-============ ================= ============
-``EXISTS``   --exists          Check existence of the product
-``MAKE``     --make, -m        Generate file, if it does not exist (default request)
-``DELETE``   --delete, -d      Delete the product file in cache dir
-``GENERATE`` --generate, -g    Generate file, even if it exists.
---           --copy, -C `file` Copy file 
---           --move, -m `file` Move file 
---           --link, -l `file` Link file 
-``SHORTCUT`` --shortcut        Link file to short directory with original filename
-``LATEST``   --latest, -L      Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
-``INPUTS``   --inputs, -I      Check inputs
-``TEST``     --test            Check existence and permissions of directories and scripts
-============ ================= ============
+============== ================= ============
+ HTTP request   Command line arg
+============== ================= ============
+``EXISTS``     --exists          Check existence of the product
+``MAKE``       --make, -m        Generate file, if it does not exist (default request)
+``DELETE``     --delete, -d      Delete the product file in cache dir
+``GENERATE``   --generate, -g    Generate file, even if it exists.
+--             --copy, -C `file` Copy file 
+--             --move, -m `file` Move file 
+--             --link, -l `file` Link file 
+``SHORTCUT``   --shortcut        Link file to short directory with original filename
+``LATEST``     --latest, -L      Link file to short directory, ``$TIMESTAMP`` replaced with ``'LATEST'``
+``INPUTS``     --inputlist, -I      Check inputs
+``TEST``       --test            Check existence and permissions of directories and scripts
+============== ================= ============
 
 Some requests specify the product type, for example for ``make`` or ``exist`` commands:` 
 

@@ -47,15 +47,13 @@
             
   <div class="section" id="welcome-to-nutshell-s-documentation">
 <h1>Welcome to NutShell’s documentation!<a class="headerlink" href="#welcome-to-nutshell-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>NutShell is software for generating “file products”:
-images, data files and text files.  NutShell suits to generation of
-real time products as well as to regenerating products on-demand from
-archived data.</p>
+<p><strong>NutShell is software for generating “file products”: image, data and text files.
+NutShell suits to generation of real time products as well as to
+regenerating products on-demand from archived data.</strong></p>
 <p>The product generation scheme resembles that of <code class="docutils literal notranslate"><span class="pre">make</span></code> and
-<code class="docutils literal notranslate"><span class="pre">Makefile</span></code>: if a product (or “target”) needs inputs
-(“dependencies”), they are generated first.  The applied <em>product
-generators</em> are organized systematically in a directory tree.  Each
-product has an ID of type <code class="docutils literal notranslate"><span class="pre">my.good.product</span></code> that is associated with
+<code class="docutils literal notranslate"><span class="pre">Makefile</span></code>: if a product needs inputs, they are generated first, recursively.
+The applied <em>product generators</em> are organized systematically in a directory tree.
+Each product has an ID of type <code class="docutils literal notranslate"><span class="pre">my.good.product</span></code> that is associated with
 path component <code class="docutils literal notranslate"><span class="pre">my/good/product/</span></code>.  Hence, a product generator can be
 tracked to – and also identified with – a unique
 subdirectory, which also contains a <em>generator script</em> with a fixed
@@ -150,31 +148,9 @@ but suits to product computation more generally.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nutshell-tests.html">Tests</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#initial-tests">Initial tests</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#java-version">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#python-version">Python version</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#initial-tests">Initial tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#testing-cmd-and-http-interfaces">Testing Cmd and Http interfaces</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id2">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id3">Python version</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#http-version">Http version</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#local-actions-copy-link-and-move">Local actions: copy, link and move</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id4">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id5">Python version</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#cmd-and-http-interplay-test">Cmd and Http interplay test</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id6">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id7">Python version</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="nutshell-tests.html#meteorological">Meteorological…</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id8">Java version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id9">Python version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nutshell-tests.html#id10">Http version</a></li>
 </ul>
 </li>
 </ul>
