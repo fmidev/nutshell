@@ -29,7 +29,8 @@ logging.basicConfig(format='%(levelname)s\t %(name)s: %(message)s')
 #logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s : %(message)s', datefmt='%Y%m%d%H:%M:%S')
 
 #from . import nutils
-from nutshell import nutils
+#from nutshell import nutils
+from . import nutils
 
 
 
@@ -166,7 +167,7 @@ class Info:
         else:
             raise NameError('Value not accepted as product id: {}'.format(product_id))
    
-    def set_timestamp(self, timestamp):
+    def set_timestamp(self, timestamp, literal):
         """
         Set UTC time in numeric format '%Y%m%d%H%M', 'LATEST', or 'TIMESTAMP'
         
@@ -178,7 +179,7 @@ class Info:
         
         Future versions may support for time object, unix seconds and date string parsing.
         """
-        if (timestamp != 'LATEST') and (timestamp != 'TIMESTAMP'):
+        if (timestamp != 'LATEST') and (timestamp != 'TIMESTAMP') and not literal:
             timestamp = re.sub("[^0-9]*", "", timestamp)
         self.TIMESTAMP = timestamp  # re.sub("\W", "", timestamp)
 
