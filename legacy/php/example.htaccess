@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# Redirection of HTML, TXT pages
+RewriteRule ^(.+)\.(html|txt)$ ../deer_web_example.php?url=$1.$2&%{QUERY_STRING}
+
+# Redirection of editing
+RewriteRule   ^(.+)\.(txt|html|xml)/EDIT$   /share/php/deer_edit.php?file=$1.$2&foo=1

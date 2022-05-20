@@ -1,0 +1,10 @@
+# Markus.Peura@fmi.fi
+# This is a template file for both system-level (/fmi/conf/appserver.cnf)
+# product-level settings
+
+
+#
+URLSYNTAX_latest='file:///file/latest/$PRODUCT_DIR/$FILE'
+URLSYNTAX_archive='http://radprod.fmi.fi/products/'{query,cache}'/$TIMESTAMP_DIR/$PRODUCT_DIR/$FILE'
+
+
