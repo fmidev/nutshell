@@ -191,6 +191,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				dst = dst.resolve(src.getFileName());
 			//Files.setPosixFilePermissions(dst, filePerms);
 			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			FileUtils.ensureGroup(dst, fileGroupID, filePerms);
+			//Files.setPosixFilePermissions(dst, filePerms);
 			return dst;
 			//return src.renameTo(dst);
 		}
@@ -508,6 +510,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					//ensureDir(cacheRoot, relativeOutputDirTmp);
 					//ensureDir(cacheRoot, relativeOutputDir);
 					FileUtils.ensureWritableFile(outputPath, fileGroupID, filePerms, dirPerms);
+
 					// ensureFile(cacheRoot, relativeOutputPath);
 					// Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				} catch (IOException e) {
@@ -652,6 +655,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					// Let's take this slowly...
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
+						//this.copy(this.outputPathTmp, this.outputPath);
 					} catch (IOException e) {
 						log.warn(e.toString());
 						//log.warn(String.format("filePerms: %s", filePerms));

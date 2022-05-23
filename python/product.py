@@ -167,7 +167,7 @@ class Info:
         else:
             raise NameError('Value not accepted as product id: {}'.format(product_id))
    
-    def set_timestamp(self, timestamp, literal):
+    def set_timestamp(self, timestamp, literal=False):
         """
         Set UTC time in numeric format '%Y%m%d%H%M', 'LATEST', or 'TIMESTAMP'
         

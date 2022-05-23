@@ -11,7 +11,8 @@ import java.util.*;
 
 class Entity {
 
-    final String id; // = "?";
+    // final
+    String id; // = "?";
 
     String setId(String name){
         id = name.replaceAll("\\W", " ").trim().replaceAll("\\s+", "_").intern();

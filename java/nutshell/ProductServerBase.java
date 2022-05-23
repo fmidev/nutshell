@@ -113,6 +113,7 @@ public class ProductServerBase extends Program {
         setup.put("dirPerms", dirPerms);
         setup.put("filePerms", filePerms);
 
+        // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
         try {
             // this.fileGroupID = Files.readAttributes(cacheRoot, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();

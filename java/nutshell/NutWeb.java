@@ -61,9 +61,20 @@ public class NutWeb extends HttpServlet {
 		super.init(config);
 		httpRoot = config.getInitParameter("htmlRoot");
 		htmlTemplate = config.getInitParameter("htmlTemplate");
+		if (htmlTemplate == null)
+			htmlTemplate = "nutweb/template.html";
 		setup.putAll(getTomcatParameters());
 	}
-	
+
+	/*
+	public String getInitParameter(ServletConfig config, String key, String defaultValue){
+		String s = config.getInitParameter(key);
+		if (s == null){
+			return defaultValue;
+		}
+	}
+	 */
+
 
 	@Override	
 	public void doPost(HttpServletRequest request,HttpServletResponse response) throws IOException, ServletException {
@@ -160,22 +171,23 @@ public class NutWeb extends HttpServlet {
 	 */
 	protected SimpleHtml getHtmlPage(){ // throws IOException, SAXException, ParserConfigurationException {
 
-		//Path path = Paths.get(httpRoot,"template", "main.html");
-		Path path = Paths.get(httpRoot, htmlTemplate);
-
 		SimpleHtml html = null;
 		try {
+			//Path path = Paths.get(httpRoot,"template", "main.html");
+			Path path = Paths.get(httpRoot, htmlTemplate);
 			html = new SimpleHtml(path);
 		} catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
 			html = new SimpleHtml(this.getClass().getCanonicalName() + " Exception");
 
 			Element ul = html.getUniqueElement(html.body, SimpleHtml.Tag.UL, "list");
-			html.appendElement(ul, SimpleHtml.Tag.LI, httpRoot);
-			html.appendElement(ul, SimpleHtml.Tag.LI, htmlTemplate);
-			html.appendElement(ul, SimpleHtml.Tag.LI, e.getMessage());
-			html.appendElement(ul, SimpleHtml.Tag.LI, e.toString());
+			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpRoot: %s", httpRoot) );
+			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpTemplate: %s", htmlTemplate) );
+
+			//html.appendElement(ul, SimpleHtml.Tag.LI, e.getMessage());
+			html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
+			html.appendTag(SimpleHtml.Tag.PRE, e.toString());
 			for (StackTraceElement stackTraceElement: e.getStackTrace()) {
-				html.appendTag(SimpleHtml.Tag.LI, stackTraceElement.toString());
+				html.appendTag(SimpleHtml.Tag.PRE, stackTraceElement.toString());
 			}
 
 			/*
@@ -217,10 +229,16 @@ public class NutWeb extends HttpServlet {
 	protected SimpleHtml includeHtml(String filename, SimpleHtml html){
 		try {
 
-			NodeList head = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
-			for (int i=0; i< head.getLength(); ++i) {
-				html.head.appendChild(html.document.importNode(head.item(i), true));
+			try {
+				NodeList head = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
+				for (int i=0; i< head.getLength(); ++i) {
+					html.head.appendChild(html.document.importNode(head.item(i), true));
+				}
 			}
+			catch (Exception e) {
+				html.appendComment("No HEAD element, ok");
+			}
+
 
 			/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
 			NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");

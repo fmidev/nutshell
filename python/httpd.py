@@ -208,6 +208,8 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         #++NutHandler.counter
         s.log.debug("started")
 
+        #print("starts")
+        
         # Declare request and directives as lists
         querydata = {'request': [],  'directives': []} # 'product': '',
         
@@ -227,6 +229,7 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
             """
             return 
 
+        
         nutshell_path = ''
 
         # Strip HTTP_PREFIX
@@ -235,8 +238,8 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         else:
             s.send_response(HTTPStatus.OK.value)
             s.end_headers()
-            html = '<html><body>Error: path {0} does not start with <a href="{1}">{1}</a></body></html>\n'
-            html = html.format(nutshell_path, product_server.HTTP_PREFIX)
+            html = f'<html><body>Error: path "{nutshell_path}" does not start with <a href="{product_server.HTTP_PREFIX}">"{product_server.HTTP_PREFIX}"</a></body></html>\n'
+            #html = html.format(, )
             s.wfile.write(html.encode())
             s.log.warning("test {0}".format(nutshell_path))
             return  
@@ -258,8 +261,8 @@ class NutHandler(http.server.SimpleHTTPRequestHandler):
         # Directory and file requests are directed to default HTTP handler
         # NOTE: use plus, otherways collapses to root
         #system_path = nutshell.Path(s.directory + nutshell_path)
-        system_path = Path(s.directory + nutshell_path) 
-        s.log.info("system_path: {0}".format(system_path))
+        system_path = Path(s.directory, nutshell_path) 
+        s.log.info(f"system_path: {system_path}")
         if (system_path.exists()):
             # TODO: if empty product, allow generation
             #  503  Service Unavailable x  Busy, come back later

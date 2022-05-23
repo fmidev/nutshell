@@ -1,15 +1,12 @@
 package nutshell;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.*;
 //import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
-import static java.nio.file.FileVisitResult.*;
 import static java.nio.file.Files.exists;
 
 public class FileUtils {
@@ -71,23 +68,53 @@ public class FileUtils {
             // Files.setPosixFilePermissions(path, filePerms);
         }
 
+        /*
         try {
+            //System.err.println(String.format("Trying to set groupID: %d for %s", groupId, path));
             Files.setAttribute(path, "unix:gid", groupId);
         }
         catch (IOException e){
+            //System.err.println(e);
             // May be group writable, just altering forbidden?
         }
 
         try {
+            //System.err.println(String.format("Trying to set filePerms: %s ", filePerms));
             Files.setPosixFilePermissions(path, filePerms);
         }
         catch (IOException e){
+            //System.err.println(e);
             // May be group writable, just altering forbidden?
         }
+        */
 
-         if (!Files.isWritable(path)){
+        try {
+            ensureGroup(path, groupId, filePerms);
+        }
+        catch (IOException e){
+        }
+
+        if (!Files.isWritable(path)){
             throw new IOException(String.format("Failed in creating writable file %s (%s)", path, filePerms));
         }
+
+    }
+
+    static
+    public void ensureGroup(Path path, int groupId, Set<PosixFilePermission> perms) throws IOException {
+
+        /*
+        try {
+            //System.err.println(String.format("Trying to set groupID: %d for %s", groupId, path));
+            Files.setAttribute(path, "unix:gid", groupId);
+        }
+        catch (IOException e){
+            System.err.println(e);
+            // May be group writable, just altering forbidden?
+        }
+        */
+        Files.setAttribute(path, "unix:gid", groupId);
+        Files.setPosixFilePermissions(path, perms);
 
     }
 
