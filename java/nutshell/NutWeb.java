@@ -1,7 +1,6 @@
 package nutshell;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,7 +99,7 @@ public class NutWeb extends HttpServlet {
 
 		/**  TODO: rename main.html to sth like layout.html or template.html
 		 */
-		String pageName = null;
+		String fileName = null;
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
@@ -108,21 +107,37 @@ public class NutWeb extends HttpServlet {
 
 			String uri = request.getRequestURI();
 
-			if (uri.endsWith(".html")) {
-				pageName = uri.replace(request.getContextPath(), "");
+			fileName = uri.replace(request.getContextPath(), "");
+
+			if (fileName.equals("/")){
+				fileName = "index.html"; // could be "/index.html";
 			}
-			else {
+
+			/*
+			else if (fileName.endsWith("/")){
+			}
+			*/
+
+			//Paths.get(httpRoot, fileName),
+			//if (uri.endsWith(".html")) {
+			if (! fileName.endsWith(".html")) {
+				//pageName = uri.replace(request.getContextPath(), "");
+				//}
+				//else {
+				super.doGet(request, response);
+				/*
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutWeb request not understood",
-						String.format("Query: %s", uri), request, response);
+						String.format("requestURI: '%s', fileName: '%s'", uri, fileName), request, response);
+				 */
 				return;
 			}
 
 		}
 		else {
 
-			pageName = request.getParameter("page");
+			fileName = request.getParameter("page");
 
-			if (pageName.equals("resolve")){
+			if (fileName.equals("resolve")){
 
 				final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
 
@@ -131,7 +146,7 @@ public class NutWeb extends HttpServlet {
 					return;
 				}
 				else {
-					pageName = requestUri.toString();
+					fileName = requestUri.toString();
 					// Trunc to filename only
 					// Path path = Paths.get(requestUri.toString());
 					//pageName = path.getFileName().toString();
@@ -140,14 +155,41 @@ public class NutWeb extends HttpServlet {
 				//sendStatusPage(HttpServletResponse.SC_OK, "Yes!", requestUri, response);
 				//return;
 			}
-			else if (pageName.equals("status")){
+			else if (fileName.equals("status")){
 				sendStatusPage(HttpServletResponse.SC_OK, "Yes", "Well done", request, response);
 				return;
 			}
 
 		}
 
-		SimpleHtml html = includeHtml(pageName); // what if fail?
+		SimpleHtml html = includeHtml(fileName); // what if fail?
+
+		//Element headTitle = html.getUniqueElement(html.head, SimpleHtml.Tag.TITLE);
+		//if (headTitle.getAttribute("id").equals("auto")){
+
+			//Element title = html.getUniqueElement(html.body, SimpleHtml.Tag.TITLE, "autoTile");
+		//Element title = html.document.getElementById("autoTile");
+		Element title = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "autoTile");
+		//html.document.getElementById()
+		if (title != null){
+			//title.setTextContent("MAKI");
+			if (html.title != null){
+				title.setTextContent(html.title.getTextContent());
+			}
+			//html.appendTag(SimpleHtml.Tag.PRE, "Special");
+		}
+
+		/*
+		NodeList nodeList = SimpleHtml.getChildNodes(html.document, SimpleHtml.Tag.BODY);
+		final int N = nodeList.getLength(); // appending will modify :-E
+		for (int i = 0; i<nodeList.getLength(); ++i){
+			Node n =  nodeList.item(i);
+			if (n instanceof Element){
+				Element e = (Element)n;
+				html.appendTag(SimpleHtml.Tag.PRE, String.format("<%s>: %s", n.getNodeName(), e.getAttribute("id")));
+			}
+		}
+		*/
 
 		Element base = html.getUniqueElement(html.head, SimpleHtml.Tag.BASE);
 		base.setAttribute("href", request.getContextPath()+ '/'); // NEW 2022!
@@ -227,13 +269,31 @@ public class NutWeb extends HttpServlet {
 	 * @param filename
 	 */
 	protected SimpleHtml includeHtml(String filename, SimpleHtml html){
+
 		try {
 
+			Document doc = SimpleXML.readDocument(Paths.get(httpRoot, filename));
+
 			try {
-				NodeList head = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
-				for (int i=0; i< head.getLength(); ++i) {
-					html.head.appendChild(html.document.importNode(head.item(i), true));
+				//NodeList headNodes = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
+				NodeList headNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.HEAD);
+				for (int i=0; i< headNodes.getLength(); ++i) {
+					Node node = headNodes.item(i);
+
+					if (node instanceof Element){
+						Element elem = (Element)node;
+						// Generalize for all unique elements?
+						if ((html.title != null) && elem.getTagName().equals(SimpleHtml.Tag.TITLE.toString())){
+							html.title.setTextContent(elem.getTextContent());
+							continue;
+						}
+					}
+
+					html.head.appendChild(html.document.importNode(node, true));
+
 				}
+				//return html;
+
 			}
 			catch (Exception e) {
 				html.appendComment("No HEAD element, ok");
@@ -241,26 +301,61 @@ public class NutWeb extends HttpServlet {
 
 
 			/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
-			NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");
-			for (int i=0; i< body.getLength(); ++i) {
-				html.main.appendChild(html.document.importNode(body.item(i), true));
+			//NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");
+			NodeList bodyNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.BODY);
+			for (int i=0; i< bodyNodes.getLength(); ++i) {
+
+				Node node = bodyNodes.item(i);
+
+				/*
+				if (node instanceof Element) {
+					Element elem = (Element) node;
+					// Copy TITLE
+					if ((html.title != null) && elem.getAttribute("id").equals("autoTile")){
+						elem.setTextContent(html.title.getTextContent());
+					}
+				}
+				*/
+
+				html.main.appendChild(html.document.importNode(bodyNodes.item(i), true));
 			}
-			/*
-			NodeList list = SimpleHtml.readBody(Paths.get(httpRoot, filename));
-			for (int i=0; i< list.getLength(); ++i) {
-				Node node = list.item(i);
-				//System.out.println(node.getNodeName() + ':' + node.getTextContent());
-				node = html.document.importNode(node, true);
-				html.main.appendChild(node);
-			}
-			 */
 		}
 		catch (Exception e){
 			html.appendTag(SimpleHtml.Tag.H2, "Failed in reading file: " + filename);
-			Element elem = html.appendTag(SimpleHtml.Tag.PRE, e.toString());
-			elem.setAttribute("class", "error");
+			html.appendTag(SimpleHtml.Tag.PRE, e.toString()).setAttribute("class", "error");
+			// Element elem = html.appendTag(SimpleHtml.Tag.PRE, e.toString());
+			// elem.setAttribute("class", "error");
+			//html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
 			//elem.
 		}
+		return html;
+	}
+
+	protected SimpleHtml combineHtml(Document doc, SimpleHtml html){
+
+		try {
+			String autoTitle = null;
+			//NodeList headNodes = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
+			NodeList headNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.HEAD);
+			for (int i=0; i< headNodes.getLength(); ++i) {
+				Node node = headNodes.item(i);
+				html.head.appendChild(html.document.importNode(node, true));
+
+			}
+		}
+		catch (Exception e) {
+			html.appendComment("No HEAD element, ok");
+		}
+
+
+		/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
+		//NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");
+		NodeList body = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.BODY);
+		for (int i=0; i< body.getLength(); ++i) {
+			html.main.appendChild(html.document.importNode(body.item(i), true));
+		}
+
+
 		return html;
 	}
 

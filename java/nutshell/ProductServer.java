@@ -205,6 +205,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
+		/** Creates a soft link pointing to a file.
+		 *
+		 * @param src - original, physical file
+		 * @param dst - link to be created
+		 * @param force
+		 * @return
+		 * @throws IOException
+		 */
 		public Path link(Path src, Path dst, boolean force) throws IOException {
 			log.note(String.format("Link: from: %s ", src));
 			log.note(String.format("        to: %s ", dst));

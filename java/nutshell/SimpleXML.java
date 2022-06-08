@@ -166,6 +166,23 @@ public class SimpleXML {
 
 	static public Document readDocument(File file) throws ParserConfigurationException, IOException, SAXException {
 
+		if (!file.exists()){
+			throw new IOException(String.format("File does not exist: '%s'", file));
+		}
+
+		if (!file.canRead()){
+			throw new IOException(String.format("File is unreadable: '%s'", file));
+		}
+
+		if (file.length() == 0){
+			throw new IOException(String.format("File is empty: '%s'", file));
+		}
+
+		if (file.isDirectory()){
+			throw new IOException(String.format("File is a directory: '%s'", file));
+		}
+
+
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 		// https://stackoverflow.com/questions/6204827/xml-parsing-too-slow

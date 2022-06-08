@@ -11,7 +11,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,45 +59,12 @@ public class SimpleHtml extends SimpleXML{
 		LINK;
 
 		@Override
+		/** Returns the tag name in lowercase letters.
+		 */
 		public String toString() {
 			return super.toString().toLowerCase();
 		}
 	}
-
-	/** Html starying tag.
-	 */
-	/*
-	public static final String HTML  = "html";
-	public static final String HEAD  = "head";
-	public static final String TITLE = "title";
-	public static final String META  = "meta";
-	public static final String BASE  = "base";
-	public static final String BODY  = "body";
-	public static final String H1    = "h1";
-	public static final String H2    = "h2";
-	public static final String H3    = "h3";
-	public static final String H4    = "h4";
-	public static final String H5    = "h5";
-	public static final String IMG   = "img";
-	public static final String TABLE = "table";
-	public static final String TR    = "tr";
-	public static final String TH    = "th";
-	public static final String TD    = "td";
-	public static final String LI    = "li";
-	public static final String P     = "p";
-	public static final String PRE   = "pre";
-	public static final String CODE  = "code";
-	public static final String TT    = "tt";
-	*/
-	/** Html anchor (link) tag.
-	 */
-	/*
-	public static final String A     = "a";
-	public static final String STYLE = "style";
-	public static final String SPAN = "span";
-	public static final String DIV   = "div";
-	public static final String LINK  = "link";
-	*/
 
 	final public Element root;
 	final public Element head;
@@ -164,6 +130,8 @@ public class SimpleHtml extends SimpleXML{
 
 		// Search for BODY element (should be unique)
 		this.body = getUniqueElement(this.root, Tag.BODY);
+
+		// Default element to append content with append<ELEMENT>() commands
 		this.main = this.body;
 	}
 
@@ -177,19 +145,20 @@ public class SimpleHtml extends SimpleXML{
 	protected Element getUniqueElement(Element scope, Tag tag) {
 
 		NodeList nodes = scope.getElementsByTagName(tag.toString());
-		if (nodes.getLength() == 0){
+		if (nodes.getLength() > 0){
+			// Could throw exception if more than 1 elements?
+			return (Element) nodes.item(0);
+		}
+		else {
 			Element elem = this.createElement(tag);
 			scope.appendChild(elem);
 			return elem;
-		}
-		else {
-			// Could throw exception if more than 1 elements?
-			return (Element) nodes.item(0);
 		}
 	}
 
 	/** If found, returns the element with given ID, else creates and appends it in doc.
 	 *
+	 * @param scope - element the scope of which will be searched
 	 * @param tag - HTML tag, like "TABLE"
 	 * @param id - standard HTML attribute "id"
 	 * @return Desired element
@@ -197,6 +166,8 @@ public class SimpleHtml extends SimpleXML{
 	protected Element getUniqueElement(Element scope, Tag tag, String id){
 
 		NodeList nodes = scope.getElementsByTagName(tag.toString());
+
+		// Step 1: search
 		final int N = nodes.getLength();
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node node = nodes.item(i);
@@ -206,6 +177,8 @@ public class SimpleHtml extends SimpleXML{
 					return elem;
 			}
 		}
+
+		// Step 2: not found, so create one.
 		Element elem = this.createElement(tag);
 		elem.setAttribute("id", id);
 		scope.appendChild(elem);
@@ -304,29 +277,18 @@ public class SimpleHtml extends SimpleXML{
 	}
 
 	// Todo: variadic str, str2, ...
+	/*
 	public static NodeList readBody(String path) throws ParserConfigurationException, IOException, SAXException {
 		return readBody(Paths.get(path));
 	}
 
 	public static NodeList readBody(Path path) throws ParserConfigurationException, IOException, SAXException {
-		return readNodes(path, "body");
-		/*
-		Document comp = SimpleXML.readDocument(path);
-		NodeList body = comp.getElementsByTagName("body");
-		final int nodes = body.getLength();
-		if (nodes == 0){
-			// Consider reading <HTML> contents?
-			throw new NullPointerException("File contained no 'body' element");
-		}
-		else if (nodes > 1){
-			//System.err.println("File contains several 'body' elements");
-		}
-		return body.item(0).getChildNodes();
-
-		 */
+		return readNodes(path, Tag.BODY);
 	}
 
-	/** Retrieves the nodes (elements) of the first tag of given name
+	 */
+
+	/** Retrieves the child nodes (directly contained elements) of the first tag of given name
 	 *
 	 * @param path
 	 * @param tagName
@@ -335,9 +297,14 @@ public class SimpleHtml extends SimpleXML{
 	 * @throws IOException
 	 * @throws SAXException
 	 */
-	public static NodeList readNodes(Path path, String tagName) throws ParserConfigurationException, IOException, SAXException {
-		Document comp = SimpleXML.readDocument(path);
-		NodeList nodeList = comp.getElementsByTagName(tagName);
+	public static NodeList getChildNodes(Path path, Object tagName) throws ParserConfigurationException, IOException, SAXException {
+		Document doc = SimpleXML.readDocument(path);
+		return getChildNodes(doc, tagName);
+	}
+
+
+	public static NodeList getChildNodes(Document doc, Object tagName) {
+		NodeList nodeList = doc.getElementsByTagName(tagName.toString());
 		final int nodes = nodeList.getLength();
 		if (nodes == 0){
 			// Consider reading <HTML> contents?
@@ -348,6 +315,7 @@ public class SimpleHtml extends SimpleXML{
 		}
 		return nodeList.item(0).getChildNodes();
 	}
+
 
 	public static void main(String[] args) {
 
@@ -370,7 +338,7 @@ public class SimpleHtml extends SimpleXML{
 			html.title.setTextContent(args[0]);
 
 			try {
-				NodeList list = readBody(args[0]);
+				NodeList list = getChildNodes(Paths.get(args[0]), Tag.BODY);
 				//Document comp = SimpleXML.readDocument();
 
 				for (int i=0; i< list.getLength(); ++i) {

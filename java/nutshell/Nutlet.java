@@ -85,15 +85,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 
-
+		// Why not in init() ?
 		ProductServer.BatchConfig batchConfig = new ProductServer.BatchConfig();
-
 		productServer.populate(batchConfig, registry);
 
 		ProductServer.InstructionParameter instructionParameter = productServer.new InstructionParameter(batchConfig.instructions);
 		registry.add(instructionParameter);
 		registry.add("actions", instructionParameter);
-		registry.add("output", instructionParameter);
+		registry.add("output",  instructionParameter);
 		registry.add("request", instructionParameter); // oldest
 
 		Program.Parameter.Simple<String> page = new Program.Parameter.Simple("page",
@@ -105,6 +104,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		registry.add(product);
 
 		// Pre-interpret some idioms
+		//if (request.getParameterMap().size() == 1){
 		if (request.getParameterMap().keySet().size() == 1){
 			String q = request.getQueryString();
 			if (q != null) {
