@@ -482,7 +482,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 								printStream.append("--------------");
 								e.printStackTrace(printStream);
 								// html.appendComment(os.toString("UTF8")); ILLEGALS
-								html.appendComment(" TEST ");
+								//html.appendComment(" TEST ");
 								html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
 								printStream.close();
 								//os.close();

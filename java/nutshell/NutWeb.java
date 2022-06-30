@@ -1,6 +1,7 @@
 package nutshell;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,14 +25,23 @@ import org.w3c.dom.NodeList;
 
 public class NutWeb extends HttpServlet {
 
-	String httpRoot = "";
+	/**  System side directory for this HttpServlet
+	 *   Example:
+	 */
+	public String httpRoot = null; //"";
+
 
 	/** Name of the HTML document in which the other HTML doc will be embedded.
-	 *
-	 *  Uses BODY contents
+	 *  Uses BODY contents.
+	 */
+	public String htmlTemplate = null; //"nutweb/template.html";
+
+	/**  Director for HTML documents to be processed (decorated, populated)
+	 *   Example: /html or /docs
 	 *
 	 */
-	String htmlTemplate = "";
+	public String debug = null; // "";
+
 
 
 	private static final long serialVersionUID;
@@ -58,21 +68,36 @@ public class NutWeb extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+
+		retrieveInitParameter(config, "httpRoot",    "/undefined");
+		retrieveInitParameter(config, "htmlTemplate","nutweb/template.html");
+		// retrieveInitParameter(config, "docDir",      "");
+		retrieveInitParameter(config, "debug",       "false");
+		/*
 		httpRoot = config.getInitParameter("htmlRoot");
+		docDir   = config.getInitParameter("docDir");
 		htmlTemplate = config.getInitParameter("htmlTemplate");
 		if (htmlTemplate == null)
 			htmlTemplate = "nutweb/template.html";
+		 */
 		setup.putAll(getTomcatParameters());
 	}
 
-	/*
-	public String getInitParameter(ServletConfig config, String key, String defaultValue){
+	private void retrieveInitParameter(ServletConfig config, String key, String defaultValue) throws ServletException{
+		//Field field = reference.getClass().getField(key)
 		String s = config.getInitParameter(key);
 		if (s == null){
-			return defaultValue;
+			s = defaultValue;
 		}
+		try {
+			NutWeb.class.getField(key).set(this, s);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			//e.printStackTrace();
+			throw new ServletException(e);
+		}
+
 	}
-	 */
+
 
 
 	@Override	
@@ -113,22 +138,8 @@ public class NutWeb extends HttpServlet {
 				fileName = "index.html"; // could be "/index.html";
 			}
 
-			/*
-			else if (fileName.endsWith("/")){
-			}
-			*/
-
-			//Paths.get(httpRoot, fileName),
-			//if (uri.endsWith(".html")) {
-			if (! fileName.endsWith(".html")) {
-				//pageName = uri.replace(request.getContextPath(), "");
-				//}
-				//else {
+			if (! fileName.endsWith(".html")) {  // TXT, PNG, JPG...
 				super.doGet(request, response);
-				/*
-				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutWeb request not understood",
-						String.format("requestURI: '%s', fileName: '%s'", uri, fileName), request, response);
-				 */
 				return;
 			}
 
@@ -150,6 +161,8 @@ public class NutWeb extends HttpServlet {
 					// Trunc to filename only
 					// Path path = Paths.get(requestUri.toString());
 					//pageName = path.getFileName().toString();
+					sendStatusPage(HttpServletResponse.SC_OK, "Resolving URL: ", fileName, response);
+					return;
 				}
 
 				//sendStatusPage(HttpServletResponse.SC_OK, "Yes!", requestUri, response);
@@ -164,12 +177,7 @@ public class NutWeb extends HttpServlet {
 
 		SimpleHtml html = includeHtml(fileName); // what if fail?
 
-		//Element headTitle = html.getUniqueElement(html.head, SimpleHtml.Tag.TITLE);
-		//if (headTitle.getAttribute("id").equals("auto")){
-
-			//Element title = html.getUniqueElement(html.body, SimpleHtml.Tag.TITLE, "autoTile");
-		//Element title = html.document.getElementById("autoTile");
-		Element title = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "autoTile");
+		Element title = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "autoTitle");
 		//html.document.getElementById()
 		if (title != null){
 			//title.setTextContent("MAKI");
@@ -218,7 +226,9 @@ public class NutWeb extends HttpServlet {
 			//Path path = Paths.get(httpRoot,"template", "main.html");
 			Path path = Paths.get(httpRoot, htmlTemplate);
 			html = new SimpleHtml(path);
-		} catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
+		}
+		catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
+
 			html = new SimpleHtml(this.getClass().getCanonicalName() + " Exception");
 
 			Element ul = html.getUniqueElement(html.body, SimpleHtml.Tag.UL, "list");
@@ -254,8 +264,6 @@ public class NutWeb extends HttpServlet {
 
 		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
 		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), httpRoot, htmlTemplate));
-		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " ?version? " +  ") built " + getServletConfig().getInitParameter("buildDate") + httpRoot);
-		//elem.setTextContent("Java Version (" + getClass().getSimpleName() + " " + version + ") installed " + getServletConfig().getInitParameter("installDate"));
 		return html;
 	}
 
@@ -268,15 +276,80 @@ public class NutWeb extends HttpServlet {
 	 * @param html
 	 * @param filename
 	 */
-	protected SimpleHtml includeHtml(String filename, SimpleHtml html){
+	protected SimpleHtml includeHtml(String filename, SimpleHtml html) {
+
+		// Consider data security?
+		Path path = Paths.get(httpRoot, filename);
+
+		try {
+			Document doc = SimpleXML.readDocument(path);
+			html.head.appendChild(html.document.createComment("Included doc: " + filename));
+			combineHtml(doc, html);
+		}
+		catch (org.xml.sax.SAXParseException e){
+
+			int lineNumber = e.getLineNumber();
+			html.appendTag(SimpleHtml.Tag.H1, "Parse error: " + filename);
+			html.appendTag(SimpleHtml.Tag.LI, String.format("File: %s",  filename));
+			html.appendTag(SimpleHtml.Tag.LI, String.format("Row: %d", lineNumber));
+			html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
+
+			try {
+				BufferedReader input = new BufferedReader(new FileReader(path.toString()));
+				String line = null;
+				int i = 1;
+				try {
+					while ((line = input.readLine()) != null){
+						if (i == lineNumber){
+							html.appendTag(SimpleHtml.Tag.H2, String.format("Line %d: ", i));
+							html.appendTag(SimpleHtml.Tag.PRE, line).setAttribute("class", "error");
+							break;
+						}
+						else {
+							// html.appendTag(SimpleHtml.Tag.PRE, "" + i + line);
+						}
+						++i;
+					}
+				}
+				catch (IOException ioex) {
+					html.appendTag(SimpleHtml.Tag.PRE, ioex.getMessage());
+				}
+				input.close();
+			} catch (Exception e1) {
+				html.appendTag(SimpleHtml.Tag.PRE, e1.getMessage());
+				//fileNotFoundException.printStackTrace();
+			}
+
+			html.appendTag(SimpleHtml.Tag.H2, "Hints ");
+			html.appendTag(SimpleHtml.Tag.LI, "Ensure that all ampersands (&) are written as &amp; .");
+
+		}
+		catch (Exception e){
+			html.appendTag(SimpleHtml.Tag.H2, "Failed in reading file: " + filename);
+			html.appendTag(SimpleHtml.Tag.PRE, e.toString()).setAttribute("class", "error");
+			// Element elem = html.appendTag(SimpleHtml.Tag.PRE, e.toString());
+			// elem.setAttribute("class", "error");
+			//html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
+			//elem.
+		}
+		return html;
+
+	}
+
+	protected SimpleHtml combineHtml(Document doc, SimpleHtml html){
 
 		try {
 
-			Document doc = SimpleXML.readDocument(Paths.get(httpRoot, filename));
+			//html.appendComment("Read doc: " + filename);
 
 			try {
-				//NodeList headNodes = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
+
 				NodeList headNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.HEAD);
+
+				//html.appendComment(String.format("Read HEAD (%d nodes", headNodes.getLength()));
+				//html.appendTag(SimpleHtml.Tag.PRE, String.format("Read HEAD (%d nodes", headNodes.getLength()));
+				html.body.appendChild(html.document.createComment(String.format("Included %d HEAD nodes", headNodes.getLength())));
+
 				for (int i=0; i< headNodes.getLength(); ++i) {
 					Node node = headNodes.item(i);
 
@@ -296,66 +369,35 @@ public class NutWeb extends HttpServlet {
 
 			}
 			catch (Exception e) {
-				html.appendComment("No HEAD element, ok");
+				// html.appendComment("No HEAD element, ok");
+				// html.appendComment("No HEAD element, ok");
+				//html.appendTag(SimpleHtml.Tag.PRE, "No HEAD element, ok");
+				html.head.appendChild(html.document.createComment("No HEAD element, ok"));
 			}
 
 
 			/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
-			//NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");
+			// TODO: lenient. Read HTML contents, if BODY not found.
 			NodeList bodyNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.BODY);
+			// html.appendComment(String.format("Read BODY (%d nodes", bodyNodes.getLength()));
+			//html.appendTag(SimpleHtml.Tag.PRE, String.format("Read BODY ( nodes", bodyNodes.getLength()));
+			html.body.appendChild(html.document.createComment(String.format("Included %d BODY nodes", bodyNodes.getLength())));
+
 			for (int i=0; i< bodyNodes.getLength(); ++i) {
 
 				Node node = bodyNodes.item(i);
-
-				/*
-				if (node instanceof Element) {
-					Element elem = (Element) node;
-					// Copy TITLE
-					if ((html.title != null) && elem.getAttribute("id").equals("autoTile")){
-						elem.setTextContent(html.title.getTextContent());
-					}
-				}
-				*/
 
 				html.main.appendChild(html.document.importNode(bodyNodes.item(i), true));
 			}
 		}
 		catch (Exception e){
-			html.appendTag(SimpleHtml.Tag.H2, "Failed in reading file: " + filename);
+			html.appendTag(SimpleHtml.Tag.H2, "Failed in creating HTML doc ");
 			html.appendTag(SimpleHtml.Tag.PRE, e.toString()).setAttribute("class", "error");
 			// Element elem = html.appendTag(SimpleHtml.Tag.PRE, e.toString());
 			// elem.setAttribute("class", "error");
 			//html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
 			//elem.
 		}
-		return html;
-	}
-
-	protected SimpleHtml combineHtml(Document doc, SimpleHtml html){
-
-		try {
-			String autoTitle = null;
-			//NodeList headNodes = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "head");
-			NodeList headNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.HEAD);
-			for (int i=0; i< headNodes.getLength(); ++i) {
-				Node node = headNodes.item(i);
-				html.head.appendChild(html.document.importNode(node, true));
-
-			}
-		}
-		catch (Exception e) {
-			html.appendComment("No HEAD element, ok");
-		}
-
-
-		/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
-		//NodeList body = SimpleHtml.readNodes(Paths.get(httpRoot, filename), "body");
-		NodeList body = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.BODY);
-		for (int i=0; i< body.getLength(); ++i) {
-			html.main.appendChild(html.document.importNode(body.item(i), true));
-		}
-
-
 		return html;
 	}
 

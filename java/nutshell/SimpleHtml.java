@@ -3,10 +3,7 @@
  */
 package nutshell;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -185,10 +182,13 @@ public class SimpleHtml extends SimpleXML{
 		return elem;
 	}
 
-
-	public Element appendComment(String text){
-		return super.appendElement(this.main, document.createComment(text));
+	/*
+	public Comment appendComment(String text){
+		Comment comment = document.createComment(text);
+		return this.main.appendChild();
+		//return super.appendElement(this.main, document.createComment(text));
 	}
+	*/
 
 
 	public Element appendTag(Tag tag, String text){
@@ -324,6 +324,7 @@ public class SimpleHtml extends SimpleXML{
 
 		// Help
 		if (args.length == 0){
+			System.out.println("Writes SimpleHtml-test.html");
 			System.out.println("Example:");
 			System.out.println("java " + html.getClass().getCanonicalName() + " foo.html  # create doc and dump");
 			System.out.println("java " + html.getClass().getCanonicalName() + " test-body.html  # read body");
@@ -358,6 +359,7 @@ public class SimpleHtml extends SimpleXML{
 			catch (Exception e){
 				String msg = e.getMessage();
 				//System.err.println(msg);
+				html.appendTag(Tag.H1, "A big error!");
 				Element li = html.appendTag(Tag.PRE);
 				li.setTextContent(msg);
 				//html.title.setTextContent(msg);
@@ -372,8 +374,13 @@ public class SimpleHtml extends SimpleXML{
 			}
 		}
 
+		//html.appendComment("ABC");
+		Comment comment = html.document.createComment("ABC");
+		//System.out.println(comment.toString());
+		html.body.appendChild(comment);
 
 		File file = new File("SimpleHtml-test.html");
+		System.out.println(String.format("Writing: %s", file.getAbsolutePath()));
 		writeDocument(html.document, file);
 
 
@@ -383,253 +390,10 @@ public class SimpleHtml extends SimpleXML{
 	}
 
 	/*
-	public static Document createDocument(){
-		
-		// https://stackoverflow.com/questions/4142046/create-xml-file-using-java
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		try {
-
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-			Document doc = docBuilder.newDocument();
-
-			Element rootElement = doc.createElement("company");
-			doc.appendChild(rootElement);
-
-			//staff elements
-			Element staff = doc.createElement("Staff");
-			rootElement.appendChild(staff);
-
-			//set attribute to staff element
-			Attr attr = doc.createAttribute("id");
-			attr.setValue("1");
-			staff.setAttributeNode(attr);
-
-			System.out.println(doc.toString());
-			
-			File file = new File("mika.html");
-			SimpleXML.writeDocumentToFile(doc, file);
-			
-			
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-	*/
-	
-	/*
-	public SimpleHtml(Writer writer) {
-		this.writer = writer;
-	}
-
-	/// Begins a document
-	SimpleHtml begin(String title) throws IOException{
-		return begin(title, null);
-	}
-	
-	/// Begins a document
-	SimpleHtml begin(String title, String styleFile) throws IOException{
-		writer.append("<html>\n");
-		writer.append("<head>\n");
-		writer.append("<meta http-equiv=\"Content-Type\" content=\"text/xhtml;charset=UTF-8\"/ >\n");
-		if (title != null)
-			writer.append("<title>").append(title).append("</title>\n");
-		if (styleFile != null)
-			writer.append("<link href=\"").append(styleFile).append("\" rel=\"stylesheet\" type=\"text/css\">\n");
-		writer.append("</head>\n");
-		writer.append("<body bgcolor=\"white\">\n");
-		return this;
-	}
-	
-	SimpleHtml end() throws IOException{
-		closeTag();
-		writer.append('\n');
-		writer.append("</body>\n");
-		writer.append("</html>\n");
-		writer.flush();
-		return this;
-	}
-
-	SimpleHtml flush() throws IOException{
-		String t = currentTag;
-		boolean n = newLine;
-		closeTag();
-		writer.flush();
-		//openTag(t,n);
-		return this;
-	}
-
-	SimpleHtml style(String s) {
-		style = s;
-		return this;
-	}
-
-	SimpleHtml append(CharSequence s) throws IOException{
-		writer.append(s);
-		return this;
-	}
-
-	SimpleHtml append(char c) throws IOException{
-		writer.append(c);
-		return this;
-	}
-
-	SimpleHtml appendln(CharSequence s) throws IOException{
-		writer.append(s).append('\n');
-		return this;
-	}
-
-	SimpleHtml appendln() throws IOException{
-		writer.append('\n');
-		return this;
-	}
-	
-	SimpleHtml p(String s)  throws IOException{
-		openTag("p",true);
-		writer.append(s);
-		return this;
-	}
-
-	SimpleHtml pre(String s)  throws IOException{
-		openTag("pre",true);
-		writer.append(s);
-		return this;
-	}
-
-	SimpleHtml span(String s)  throws IOException{
-		openTag("span", false);
-		writer.append(s);
-		return this;
-	}
-
-	
-	SimpleHtml a(String link, String s, String target)  throws IOException{
-		if (s == null)
-			s = link;
-		writer.append("<a href=\"").append(link).append("\" target=\"").append(target).append("\">").append(s).append("</a>");
-		return this;
-	}
-	
-	SimpleHtml a(String link, String s)  throws IOException{
-		writer.append("<a href=\"").append(link).append("\">").append(s).append("</a>");
-		return this;
-	}
-
-	SimpleHtml a(String link)  throws IOException{
-		return a(link,link);
-	}
-
-	
-	SimpleHtml h1(String s)  throws IOException{
-		openTag("h1",true);
-		writer.append(s);
-		return this;
-	}
-
-
-	SimpleHtml h2(String s)  throws IOException{
-		openTag("h2",true);
-		writer.append(s);
-		return this;
-	}
-
-	SimpleHtml h3(String s)  throws IOException{
-		openTag("h3",true);
-		writer.append(s);
-		return this;
-	}
-
-	SimpleHtml h4(String s)  throws IOException{
-		openTag("h4",true);
-		writer.append(s);
-		return this;
-	}
-
-	
-	 <K,V> SimpleHtml table(Map<K,V> map, String title) throws IOException {
-		closeTag();
-		
-		writer.append("<table border=\"1\">\n");
-		
-		if (title != null)
-			writer.append("<tr><th colspan=\"2\">").append(title).append("<tr><th>\n");
-		
-		for (Map.Entry<K, V> entry : map.entrySet()) 
-			writer.append("  <tr><td>"+entry.getKey()+"</td><td>"+entry.getValue()+"</td></tr>\n");
-		
-		writer.append("</table>\n");
-		
-		return this;
-	}
-
-	 <K,V> SimpleHtml table(Map<K,V> map) throws IOException {
-		 return table(map, null);
-	 }
-	 
-	protected Writer writer;
-	protected String currentTag = "";
-	protected boolean newLine = false;
-	
-	protected String style = null;
-	
-
-	protected void openTag(String tag, boolean newLine) throws IOException{
-		closeTag();
-		currentTag = tag;
-		this.newLine = newLine;
-		writer.append('<').append(currentTag);
-		if (style != null){
-			writer.append(" style=\"").append(style).append('"');
-			style = null;
-		}
-		writer.append('>');
-		if (newLine){
-			writer.append('\n');
-		}
-	}
-
-	protected void closeTag() throws IOException{
-		if (newLine)
-			writer.append('\n');
-		if (!currentTag.isEmpty()){			
-			writer.append("</").append(currentTag).append('>');
-			if (newLine)
-				writer.append('\n').append('\n');
-		}
-		currentTag = "";
-		newLine = false;
-	}
-	
-	
+	// https://stackoverflow.com/questions/4142046/create-xml-file-using-java
+	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 	*/
 
-	/**
-	 * @param args
-	 */
-	public static void main2(String[] args) {
-		// TODO Auto-generated method stub
-		/*
-		PrintWriter p = new PrintWriter(System.out);
-		SimpleHtml writer = new SimpleHtml(p);
-		try {
-			writer.begin("Keijo");
-			writer.pre("Reijo ");
-			writer.append("vaan jatkuu");
-			p.flush();
-			writer.p("Reijo ");
-			writer.append("vaan jatkuu");
-			writer.pre("Reijo ");
-			writer.append("vaan jatkuu");
-			writer.pre("Reijo ");
-			writer.append("vaan jatkuu");
-			writer.end();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		*/
-	}
 	
 	
 }
