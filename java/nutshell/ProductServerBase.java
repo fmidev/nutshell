@@ -236,7 +236,7 @@ public class ProductServerBase extends Program {
         }
         catch (IOException e){
             serverLog.warn(e.toString());
-            serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
+           // serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
         }
 
         return path;
