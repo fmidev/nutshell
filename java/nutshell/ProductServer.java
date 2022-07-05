@@ -49,7 +49,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	ProductServer() {
 		//serverLog = new HttpLog(getClass().getSimpleName());
 		super.version[0] = 1;
-		super.version[1] = 5;
+		super.version[1] = 6;
 		setup.put("ProductServer-version", version);
 	}
 
