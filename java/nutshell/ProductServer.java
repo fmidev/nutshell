@@ -134,6 +134,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 		public Task(String productStr, int instructions, HttpLog parentLog) throws ParseException {
 
+
 			// final String[] productDef = [productInfo, directives]
 			// in LOG // this.creationTime = System.currentTimeMillis();
 			this.id = getProcessId();
@@ -175,8 +176,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 				Path logPath = cacheRoot.resolve(relativeLogPath);
 				//ensureFile(cacheRoot, this.relativeLogPath);
+				//FileUtils.ensureWritableDir(logPath.getParent(), fileGroupID, dirPerms);
 				FileUtils.ensureWritableFile(logPath, fileGroupID, filePerms, dirPerms);
 				log.setLogFile(logPath);
+				//FileUtils.ensureWritableFile(logPath.getParent().resolve("test"+getTaskId()+".foo"), fileGroupID, filePerms, dirPerms);
+
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
 				//log.setLogFile(null);
@@ -193,10 +197,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.log.close();
 		}
 
+		/*
 		@Override
 		protected void finalize() throws Throwable {
 			this.close();
 		}
+		 */
 
 		public String getStatus() {
 			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
