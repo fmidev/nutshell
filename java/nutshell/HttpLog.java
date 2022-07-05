@@ -81,8 +81,9 @@ public class HttpLog extends Log {
 	 * @param simpleName
 	 * @param mainLog - existing log ("parent" or main log)
 	 */
-	public HttpLog(String simpleName, Log mainLog) {
-        super(simpleName, mainLog);
+	public HttpLog(String name, int verbosity) {
+        //super(simpleName, mainLog);
+        super(name, verbosity);
         reset();
     }
 

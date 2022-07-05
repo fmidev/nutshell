@@ -73,13 +73,7 @@ public class NutWeb extends HttpServlet {
 		retrieveInitParameter(config, "htmlTemplate","nutweb/template.html");
 		// retrieveInitParameter(config, "docDir",      "");
 		retrieveInitParameter(config, "debug",       "false");
-		/*
-		httpRoot = config.getInitParameter("htmlRoot");
-		docDir   = config.getInitParameter("docDir");
-		htmlTemplate = config.getInitParameter("htmlTemplate");
-		if (htmlTemplate == null)
-			htmlTemplate = "nutweb/template.html";
-		 */
+
 		setup.putAll(getTomcatParameters());
 	}
 
@@ -447,7 +441,7 @@ public class NutWeb extends HttpServlet {
 
 	protected void addServerStatus(SimpleHtml html) throws IOException{
 
-		html.appendTag(SimpleHtml.Tag.H1, "Nutlet setup");
+		html.appendTag(SimpleHtml.Tag.H1, "NutWeb setup");
 		html.appendTable(setup, null);
 
 		html.appendTag(SimpleHtml.Tag.H1, "Environment variables");

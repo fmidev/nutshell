@@ -26,7 +26,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static final public String version = "1.4";
+	static final public String version = "1.5";
 
 	String confDir = "";
 
@@ -42,7 +42,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	 *
 	 */
 	public Nutlet() {
-		setup.put("version", version);  // TODO
+		setup.put("Nutlet-version", version);  // TODO
 		productServer = new ProductServer();
 		productServer.serverLog.setVerbosity(Log.Status.DEBUG);
 		productServer.serverLog.note("Nutlet started");
@@ -277,320 +277,339 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 
-
-		try {
+		Task task = null;
 
 			// Default
-			if (batchConfig.instructions.value == 0)
-				batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
+		if (batchConfig.instructions.value == 0)
+			batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
 
 			// problem: parameter ordering may cause  filename != productStr
 			// TODO: -> _link_ equivalent files?
 
-			Task task = productServer.new Task(product.value, batchConfig.instructions.value,null);
-
-			if (task.instructions.isSet(Instructions.LATEST)){
-				task.log.note("Action 'LATEST' not allowed in HTTP interface, discarding it");
-				task.instructions.remove(Instructions.LATEST);
-			}
-
-			if (task.instructions.isSet(Instructions.STATUS)){
-				task.addGraph("ProductServer.Task" + task.getTaskId());
-			}
-
-			//String[] directives = request.getParameterValues("directives");
-			task.info.setDirectives(request.getParameterMap());
-			//task.log.setVerbosity(log.verbosity);
-
-			task.log.note(task.toString());
-
-			// Consider Generator gen =
-
-			try {
-				// track esp. missing inputs
-				//task.log.ok("-------- see separate log --->");
-				productServer.serverLog.info(String.format("Executing... %s", task));
-				productServer.serverLog.debug(String.format("See separate log: %s", task.log.logFile));
-				//log.warn(String.format("Executing... %s", task));
-				task.log.ok("Executing...");
-				task.execute();
-				//task.log.ok("-------- see separate log <---");
-
-				if (task.log.indexedState.index >= HttpServletResponse.SC_BAD_REQUEST){
-					//task.log.log();
-					task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedState.index, task.toString()));
-					throw task.log.indexedState;
-				}
-				else {
-					task.log.ok(String.format("Completed task: %s", task.toString()));
-				}
-
-				//if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
-				final boolean statusOK = (task.log.getStatus() >= Log.Status.NOTE.level);
-				//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
-
-				if (statusOK && task.instructions.isSet(Instructions.STREAM)) {
-					// sendToStream(task, response);
-					//Log.Level.NOTE.ordinal();
-					task.log.debug("sendToStream: " + task.outputPath);
-					try {
-						sendToStream(task.outputPath, response);
-						return;
-					}
-					catch (Exception e){
-						task.instructions.add(Instructions.STATUS);
-					}
-				}
-				else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
-					String url = String.format("%s/cache/%s?redirect=NO", request.getContextPath(), task.relativeOutputPath);
-					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
-					response.sendRedirect(url);
-					return;
-				}
-				// if not STATUS
-					/*
-					 * The page isn’t redirecting properly
-					 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
-					 * This problem can sometimes be caused by disabling or refusing to accept cookies.
-					 */
-				//}
-				else {
-					ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-					if (!task.instructions.isSet(Instructions.STATUS)) {
-						sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
-								os.toString("UTF8"), request, response);
-						return;
-					}
-				}
-
-				response.setStatus(HttpServletResponse.SC_OK); // tes
-			}
-			catch (IndexedState e) {
-				response.setStatus(e.index);
-				task.instructions.add(Instructions.STATUS);
-				//task.instructions.add(Instructions.STATUS); // ?
-				task.instructions.add(Instructions.INPUTLIST);
-			}
-
-			SimpleHtml html = getHtmlPage(); // slows production?
-
-			html.appendTag(SimpleHtml.Tag.H1, "Product: " + task.info.PRODUCT_ID);
-			//html.createElement(SimpleHtml.Tag.P, "No ST REAM or REDIRECT were requested, so this page appears.");
-
-			Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedState.getMessage());
-
-			switch (task.log.indexedState.index){
-				case HttpServletResponse.SC_PRECONDITION_FAILED:
-					html.appendTag(SimpleHtml.Tag.H2, "Input problem(s)");
-					html.appendTag(SimpleHtml.Tag.P, "See input list further below");
-					elem.setAttribute("class", "error");
-					break;
-				default:
-					// General, section-wise handling
-					if (task.log.indexedState.index > 400) {
-						html.appendTag(SimpleHtml.Tag.H2, "Product generator error");
-						elem.setAttribute("class", "error");
-					}
-					else if (task.log.indexedState.index > 300) {
-						html.appendTag(SimpleHtml.Tag.B, "Warnings:");
-						elem.setAttribute("class", "error");
-					}
-					else if (task.log.indexedState.index < 200)
-						elem.setAttribute("class", "note");
-			}
-
-			html.appendElement(elem);
-
-
-			if (task.instructions.isSet(Instructions.STATUS)) {
-
-				Map<String,Object> map = new LinkedHashMap<>();
-
-				map.put("instr", batchConfig.instructions);
-				map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
-				//map.putAll(registry.map);
-
-
-				//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
-				if (task.relativeOutputDir != null) {
-
-					Path relativePath = productServer.cachePrefix.resolve(task.relativeOutputPath);
-					//task.relativeOutputDir.toString(), task.info.getFilename());
-					//elem = html.createAnchor(relativePath, relativePath.getFileName());
-					map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
-					//elem = html.createAnchor(relativePath.getParent(), null);
-					if ((task.log.logFile!=null) && task.log.logFile.exists()){
-						Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
-						map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
-					}
-
-					if ((task.relativeGraphPath != null) && (task.graph != null)){
-
-						task.log.debug("Writing graph to SVG file");
-						Path graphPath = task.writeGraph();
-						//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
-						//		task.relativeGraphPath, graphPath.toFile().exists()));
-						if (ProductServer.serverGraph != null){
-							ProductServer.serverGraph.dotToFile(
-									// TODO logDir
-									productServer.serverLog.logFile.getParent()+"/NutShell.svg"
-							);
-									// graphPath.getParent().resolve("productServer.svg").toString());
-						}
-
-
-						try {
-
-							task.log.debug("Creating graph as EMBED element containing SVG data");
-
-							Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
-							graphElem.setAttribute("type", "image/svg+xml");
-							graphElem.setAttribute("border", "1");
-							//graphElem.setAttribute("onclick", "alert('Not implemented')");
-							graphElem.setAttribute("title", task.relativeGraphPath.getFileName().toString());
-							//html.appendTag(SimpleHtml.Tag.PRE, graphPath.toString());
-
-							// graphElem.setAttribute("src", relativeGraphPath.toString());
-
-							task.log.debug(String.format("Reading SVG file %s", graphPath));
-							Document graphSvg = SimpleXML.readDocument(graphPath);
-
-							//SimpleXML.createDocument().
-							task.log.debug("Importing and appending XML elem");
-							Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
-							//task.log.warn("Appending XML (SVG) node to EMBED elem");
-							graphElem.appendChild(node);
-							//graphElem.appendChild(graphSvg.getDocumentElement());
-							graphElem.setAttribute("title", task.info.PRODUCT_ID);
-							graphElem.setAttribute("id", "graph");
-							// task.log.warn("Appending SVG element");
-							html.appendElement(graphElem);
-						}
-						catch (Exception e){
-
-
-
-							Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
-							html.appendAnchor("cache/"+task.relativeGraphPath, task.relativeGraphPath.getFileName().toString());
-
-							html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
-							// Comments! Consider tail?
-							try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-								PrintStream printStream = new PrintStream(os);
-								task.graph.toStream(printStream);
-								printStream.append("--------------");
-								e.printStackTrace(printStream);
-								// html.appendComment(os.toString("UTF8")); ILLEGALS
-								//html.appendComment(" TEST ");
-								html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
-								printStream.close();
-								//os.close();
-							}
-
-							//Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
-							Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
-							graphElem.setAttribute("type", "image/svg+xml");
-							graphElem.setAttribute("border", "1");
-							graphElem.setAttribute("src", "cache/"+task.relativeGraphPath.toString());
-							html.appendElement(graphElem);
-
-						}
-						Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
-						map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
-
-						/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
-					}
-
-
-					map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
-				}
-				else {
-					map.put("Output file", "???");
-				}
-
-				// NOTE: these assume ExternalGenerator?
-				Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
-				map.put("Generator dir", html.createAnchor(gen.getParent(),null));
-				map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
-				map.put("actions", batchConfig.instructions);
-				map.put("directives", task.info.directives);
-
-
-				html.appendTable(map, "Product generator");
-
-				// INPUTS
-				if (!task.inputs.isEmpty()) {
-					Map<String, Element> linkMap = new TreeMap<>();
-					for (Map.Entry<String, String> e : task.inputs.entrySet()) {
-						String inputFilename = e.getValue();
-						//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
-						String url = String.format("%s%s?actions=DEBUG&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
-						linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
-						//Object inp = task.retrievedInputs.get(e.getKey());
-						//if ()
-						//linkMap.put("", html.createAnchor(task.retrievedInputs, "log"));
-					}
-					html.appendTable(linkMap, "Product inputs");
-				}
-
-				html.appendTable(task.getParamEnv(), "Product generator environment");
-			}
-
-			html.appendTag(SimpleHtml.Tag.H2, "Log");
-			if ((task.log.logFile!=null) && task.log.logFile.exists()){
-				html.appendTag(SimpleHtml.Tag.H3, "Task log");
-				StringBuilder builder = new StringBuilder();
-				BufferedReader reader = new BufferedReader(new FileReader(task.log.logFile));
-				String line = null;
-				while ((line = reader.readLine()) != null){
-					// TODO: detect ERROR, WARNING, # etc and apply colours
-					// Requires separate  lines, so something other than StringBuilder
-					// builder.append("<b>x</b>").append(line).append('\n');
-					builder.append(line).append('\n');
-				}
-				html.appendTag(SimpleHtml.Tag.PRE, builder.toString()).setAttribute("class", "code");
-
-			}
-
-			// html.appendTag(SimpleHtml.Tag.H3, "NutLet log");
-			//html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF-8")).setAttribute("class", "code");
-			// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
-
-			/*
-			html.appendTag(SimpleHtml.Tag.H3, "ProductServer log");
-			html.appendTag(SimpleHtml.Tag.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
-			html.appendTag(SimpleHtml.Tag.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
-			 */
-			html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
-			String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
-			String name = productServer.getClass().getCanonicalName();
-			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
-
-			String cmdLine2 = "nutshell --verbose --conf %s --instructions %s %s ";
-			html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
-
-			html.appendTable(task.info.getParamEnv(null), "Product parameters");
-
-			html.appendTable(registry.map, "Command set");
-
-			//log.warn("Nyt jotain");
-
-			// 2
-			addRequestStatus(html, request);
-			addServerStatus(html);
-			sendToStream(html.document, response);
-
+		try {
+			task = productServer.new Task(product.value, batchConfig.instructions.value, null);
 		}
 		catch (ParseException e) {
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,"Product parse failure",
-					e,	request, response);
+				e,	request, response);
+			return;
 		}
 		catch (Exception e) { // TODO: consider like above, indexedException
 			//e.printStackTrace();
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product generation error",
-						e, request, response);
+				e, request, response);
+			return;
 		}
+
+
+		if (task.instructions.isSet(Instructions.LATEST)){
+			task.log.note("Action 'LATEST' not allowed in HTTP interface, discarding it");
+			task.instructions.remove(Instructions.LATEST);
+		}
+
+		if (task.instructions.isSet(Instructions.STATUS)){
+			task.addGraph("ProductServer.Task" + task.getTaskId());
+		}
+
+		//String[] directives = request.getParameterValues("directives");
+		task.info.setDirectives(request.getParameterMap());
+		//task.log.setVerbosity(log.verbosity);
+
+		task.log.note(task.toString());
+
+		// Consider Generator gen =
+
+		try {
+			// track esp. missing inputs
+			//task.log.ok("-------- see separate log --->");
+			productServer.serverLog.info(String.format("Executing... %s", task));
+			productServer.serverLog.debug(String.format("See separate log: %s", task.log.logFile));
+			//log.warn(String.format("Executing... %s", task));
+			task.log.ok("Executing...");
+
+			try {
+				task.execute();
+			} catch (InterruptedException e) {
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Product request interrupted.",
+				e, request, response);
+				task.close();
+				return;
+			}
+			//task.log.ok("-------- see separate log <---");
+
+			if (task.log.indexedState.index >= HttpServletResponse.SC_BAD_REQUEST){
+				//task.log.log();
+				task.log.warn(String.format("Failed (%d) task: %s", task.log.indexedState.index, task.toString()));
+				throw task.log.indexedState;
+			}
+			else {
+				task.log.ok(String.format("Completed task: %s", task.toString()));
+			}
+
+			//if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
+			final boolean statusOK = (task.log.getStatus() >= Log.Status.NOTE.level);
+			//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
+
+			if (statusOK && task.instructions.isSet(Instructions.STREAM)) {
+				// sendToStream(task, response);
+				//Log.Level.NOTE.ordinal();
+				task.log.debug("sendToStream: " + task.outputPath);
+				try {
+					sendToStream(task.outputPath, response);
+					task.close();
+					return;
+				}
+				catch (Exception e){
+					task.instructions.add(Instructions.STATUS);
+				}
+			}
+			else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
+				String url = String.format("%s/cache/%s?redirect=NO", request.getContextPath(), task.relativeOutputPath);
+				//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
+				response.sendRedirect(url);
+				task.close();
+				return;
+			}
+			// if not STATUS
+				/*
+				 * The page isn’t redirecting properly
+				 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
+				 * This problem can sometimes be caused by disabling or refusing to accept cookies.
+				 */
+			//}
+			else {
+				ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+				if (!task.instructions.isSet(Instructions.STATUS)) {
+					sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
+							os.toString("UTF8"), request, response);
+					task.close();
+					return;
+				}
+			}
+
+			response.setStatus(HttpServletResponse.SC_OK); // tes
+		}
+		catch (IndexedState e) {
+			response.setStatus(e.index);
+			task.instructions.add(Instructions.STATUS);
+			//task.instructions.add(Instructions.STATUS); // ?
+			task.instructions.add(Instructions.INPUTLIST);
+		}
+
+		SimpleHtml html = getHtmlPage(); // slows production?
+
+		html.appendTag(SimpleHtml.Tag.H1, "Product: " + task.info.PRODUCT_ID);
+		//html.createElement(SimpleHtml.Tag.P, "No ST REAM or REDIRECT were requested, so this page appears.");
+
+		Element elem = html.createElement(SimpleHtml.Tag.PRE, "Status: " + task.log.indexedState.getMessage());
+
+		switch (task.log.indexedState.index){
+			case HttpServletResponse.SC_PRECONDITION_FAILED:
+				html.appendTag(SimpleHtml.Tag.H2, "Input problem(s)");
+				html.appendTag(SimpleHtml.Tag.P, "See input list further below");
+				elem.setAttribute("class", "error");
+				break;
+			default:
+				// General, section-wise handling
+				if (task.log.indexedState.index > 400) {
+					html.appendTag(SimpleHtml.Tag.H2, "Product generator error");
+					elem.setAttribute("class", "error");
+				}
+				else if (task.log.indexedState.index > 300) {
+					html.appendTag(SimpleHtml.Tag.B, "Warnings:");
+					elem.setAttribute("class", "error");
+				}
+				else if (task.log.indexedState.index < 200)
+					elem.setAttribute("class", "note");
+		}
+
+		html.appendElement(elem);
+
+
+		if (task.instructions.isSet(Instructions.STATUS)) {
+
+			Map<String,Object> map = new LinkedHashMap<>();
+
+			map.put("instr", batchConfig.instructions);
+			map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
+			//map.putAll(registry.map);
+
+
+			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
+			if (task.relativeOutputDir != null) {
+
+				Path relativePath = productServer.cachePrefix.resolve(task.relativeOutputPath);
+				//task.relativeOutputDir.toString(), task.info.getFilename());
+				//elem = html.createAnchor(relativePath, relativePath.getFileName());
+				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
+				//elem = html.createAnchor(relativePath.getParent(), null);
+				if ((task.log.logFile!=null) && task.log.logFile.exists()){
+					Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
+					map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
+				}
+
+				if ((task.relativeGraphPath != null) && (task.graph != null)){
+
+					task.log.debug("Writing graph to SVG file");
+					Path graphPath = task.writeGraph();
+					//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
+					//		task.relativeGraphPath, graphPath.toFile().exists()));
+					if (ProductServer.serverGraph != null){
+						String graphFileName = productServer.serverLog.logFile.getParent()+"/NutShell.svg";
+						try {
+							// TODO logDir
+							ProductServer.serverGraph.dotToFile(graphFileName);
+						} catch (InterruptedException e) {
+							task.log.warn(e.getMessage());
+							task.log.fail(String.format("Could not write to %s", graphFileName));
+							//e.printStackTrace();
+						}
+						// graphPath.getParent().resolve("productServer.svg").toString());
+					}
+
+
+					try {
+
+						task.log.debug("Creating graph as EMBED element containing SVG data");
+
+						Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
+						graphElem.setAttribute("type", "image/svg+xml");
+						graphElem.setAttribute("border", "1");
+						//graphElem.setAttribute("onclick", "alert('Not implemented')");
+						graphElem.setAttribute("title", task.relativeGraphPath.getFileName().toString());
+						//html.appendTag(SimpleHtml.Tag.PRE, graphPath.toString());
+
+						// graphElem.setAttribute("src", relativeGraphPath.toString());
+
+						task.log.debug(String.format("Reading SVG file %s", graphPath));
+						Document graphSvg = SimpleXML.readDocument(graphPath);
+
+						//SimpleXML.createDocument().
+						task.log.debug("Importing and appending XML elem");
+						Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
+						//task.log.warn("Appending XML (SVG) node to EMBED elem");
+						graphElem.appendChild(node);
+						//graphElem.appendChild(graphSvg.getDocumentElement());
+						graphElem.setAttribute("title", task.info.PRODUCT_ID);
+						graphElem.setAttribute("id", "graph");
+						// task.log.warn("Appending SVG element");
+						html.appendElement(graphElem);
+					}
+					catch (Exception e){
+
+
+
+						Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
+						html.appendAnchor("cache/"+task.relativeGraphPath, task.relativeGraphPath.getFileName().toString());
+
+						html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
+						// Comments! Consider tail?
+						try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+							PrintStream printStream = new PrintStream(os);
+							task.graph.toStream(printStream);
+							printStream.append("--------------");
+							e.printStackTrace(printStream);
+							// html.appendComment(os.toString("UTF8")); ILLEGALS
+							//html.appendComment(" TEST ");
+							html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
+							printStream.close();
+							//os.close();
+						}
+
+						//Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
+						Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
+						graphElem.setAttribute("type", "image/svg+xml");
+						graphElem.setAttribute("border", "1");
+						graphElem.setAttribute("src", "cache/"+task.relativeGraphPath.toString());
+						html.appendElement(graphElem);
+
+					}
+					Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
+					map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
+
+					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
+				}
+
+
+				map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
+			}
+			else {
+				map.put("Output file", "???");
+			}
+
+			// NOTE: these assume ExternalGenerator?
+			Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
+			map.put("Generator dir", html.createAnchor(gen.getParent(),null));
+			map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
+			map.put("actions", batchConfig.instructions);
+			map.put("directives", task.info.directives);
+
+
+			html.appendTable(map, "Product generator");
+
+			// INPUTS
+			if (!task.inputs.isEmpty()) {
+				Map<String, Element> linkMap = new TreeMap<>();
+				for (Map.Entry<String, String> e : task.inputs.entrySet()) {
+					String inputFilename = e.getValue();
+					//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
+					String url = String.format("%s%s?actions=DEBUG&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
+					linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
+					//Object inp = task.retrievedInputs.get(e.getKey());
+					//if ()
+					//linkMap.put("", html.createAnchor(task.retrievedInputs, "log"));
+				}
+				html.appendTable(linkMap, "Product inputs");
+			}
+
+			html.appendTable(task.getParamEnv(), "Product generator environment");
+		}
+
+		html.appendTag(SimpleHtml.Tag.H2, "Log");
+		if ((task.log.logFile!=null) && task.log.logFile.exists()){
+			html.appendTag(SimpleHtml.Tag.H3, "Task log");
+			StringBuilder builder = new StringBuilder();
+			BufferedReader reader = new BufferedReader(new FileReader(task.log.logFile));
+			String line = null;
+			while ((line = reader.readLine()) != null){
+				// TODO: detect ERROR, WARNING, # etc and apply colours
+				// Requires separate  lines, so something other than StringBuilder
+				// builder.append("<b>x</b>").append(line).append('\n');
+				builder.append(line).append('\n');
+			}
+			html.appendTag(SimpleHtml.Tag.PRE, builder.toString()).setAttribute("class", "code");
+
+		}
+
+		// html.appendTag(SimpleHtml.Tag.H3, "NutLet log");
+		//html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF-8")).setAttribute("class", "code");
+		// html.appendTable(productInfo.getParamEnv(null), "Product parameters");
+
+		/*
+		html.appendTag(SimpleHtml.Tag.H3, "ProductServer log");
+		html.appendTag(SimpleHtml.Tag.PRE, String.format("Length=%d", productServer.log.buffer.length())).setAttribute("class", "code");
+		html.appendTag(SimpleHtml.Tag.PRE, productServer.log.buffer.toString()).setAttribute("class", "code");
+		 */
+		html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
+		String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
+		String name = productServer.getClass().getCanonicalName();
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
+
+		String cmdLine2 = "nutshell --verbose --conf %s --instructions %s %s ";
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
+
+		html.appendTable(task.info.getParamEnv(null), "Product parameters");
+
+		html.appendTable(registry.map, "Command set");
+
+		//log.warn("Nyt jotain");
+
+		// 2
+		addRequestStatus(html, request);
+		addServerStatus(html);
+		sendToStream(html.document, response);
+		task.close();
 		// 1
 	}
 

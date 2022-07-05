@@ -145,9 +145,11 @@ public class Log implements AutoCloseable {
 	 * @param localName
 	 * @param mainLog - existing log ("parent" or main log)
 	 */
-	public Log(String localName, Log mainLog) {
-		startTime = System.currentTimeMillis();
+	//public Log(String localName, Log mainLog) {
+	public Log(String localName, int verbosity) {
 
+		startTime = System.currentTimeMillis();
+		/*
 		if (mainLog != null){
 			setName(mainLog.getName() + '.' + localName);
 			setVerbosity(mainLog.getVerbosity());
@@ -158,7 +160,16 @@ public class Log implements AutoCloseable {
 			setVerbosity(Status.LOG);
 			numberFormat.setMinimumIntegerDigits(5);
 		}
+		*/
+		setName(localName);
+		setVerbosity(verbosity);
+		numberFormat.setMinimumIntegerDigits(5);
 		printStream = System.err;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		close();
 	}
 
 	public Log fatal(String message){
@@ -455,19 +466,19 @@ public class Log implements AutoCloseable {
 		// PrintStream oldPrintStream = this.printStream;
 		try {
 			this.logFile = path.toFile();
-			FileOutputStream fw = new FileOutputStream(this.logFile);
+			this.fileOutputStream = new FileOutputStream(this.logFile);
 			this.debug(String.format("Continuing log in file: %s", this.logFile));
-			this.printStream = new PrintStream(fw);
+
+			this.printStream = new PrintStream(this.fileOutputStream);
 			//this.log.printStream = System.err;
-			this.setVerbosity(Status.DEBUG);
+			//this.setVerbosity(Status.DEBUG); //?
 			this.debug(String.format("Started log file: %s", this.logFile));
 		}
 		catch (IOException e) {
 			e.printStackTrace(); //this.log.printStream);
 			//this.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 			//this.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR,
-			this.error(
-					String.format("Failed in creating log file: %s", path));
+			this.error(String.format("Failed in creating log file: %s", path));
 		}
 
 		// oldPrintStream.close();
@@ -482,6 +493,8 @@ public class Log implements AutoCloseable {
 
 	private PrintStream printStream;
 
+	private FileOutputStream fileOutputStream;
+
 	public PrintStream getPrintStream() {
 		return this.printStream;
 	}
@@ -495,17 +508,32 @@ public class Log implements AutoCloseable {
 	 */
 	@Override
 	public void close()  {
+
 		if (logFile != null){
-			info(String.format("Closing log: %s", logFile));
-			this.printStream.close();
+			info(String.format("Closing logFile: %s", logFile));
+			//this.printStream.close(); // By hazard, can be System.err ?
 		}
-		else if (printStream == null) {
-			warn(String.format("Closing log (unknow output stream)"));
+
+		if (this.printStream != null){
+			if ((this.printStream != System.err) && (this.printStream != System.out)){
+				this.printStream.close();
+				this.printStream = null;
+			}
 		}
-		else
-		{
-			// warn("NOT closing log (stdout/stderr): " + this.printStream.toString());
+		else {
+			warn(String.format("Closing log (unknown output PrintStream)"));
 		}
+
+		if (this.fileOutputStream != null){
+			try {
+				this.fileOutputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			this.fileOutputStream = null;
+		}
+
+		logFile = null;
 		//System.out.println("closing " + this.getClass().getCanonicalName());
 	}
 

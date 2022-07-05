@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.getAttribute;
 
 //import org.json.simple.parser.JSONParser;
 
@@ -116,8 +115,7 @@ public class ProductServerBase extends Program {
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
         try {
-            // this.fileGroupID = Files.readAttributes(cacheRoot, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
-            fileGroupID = Integer.parseInt(getAttribute(cacheRoot, "unix:gid").toString());
+            fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
         } catch (IOException e) {
             serverLog.error(String.format("Could not read group of cache dir: %s", cacheRoot));
         }

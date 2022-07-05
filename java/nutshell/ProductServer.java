@@ -48,8 +48,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
 		//serverLog = new HttpLog(getClass().getSimpleName());
+		setup.put("ProductServer-version", version);  
 	}
 
+	static final public String version = "1.5";
 	/// Experimental log of products and their inputs(s)
 	//public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
@@ -135,7 +137,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.id = getProcessId();
 
 			this.info = new ProductInfo(productStr);
-			this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", parentLog);
+			if (parentLog != null){
+				this.log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
+			}
+			else {
+				this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
+			}
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
@@ -178,6 +185,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.result = null;
 		}
 
+
+		protected void close() {
+			System.err.println("CLOSE task: " + toString());
+			this.log.close();
+		}
+
+		@Override
+		protected void finalize() throws Throwable {
+			this.close();
+		}
 
 		public String getStatus() {
 			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
@@ -616,7 +633,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							link.attributes.put("style", "dashed");
 						}
 					}
-					inputTask.log.close(); // close PrintStream
+					//inputTask.log.close(); // close PrintStream
+					inputTask.close();
 				}
 
 				/*
@@ -1165,6 +1183,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			log.info(String.format("Final status: %s", task.log.indexedState));
 			//log.log("test");
+			//task.close(); ?
 		}
 
 		return tasks;
@@ -1760,7 +1779,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			 */
 
-			task.log.close();
+			task.close();
 		}
 
 
