@@ -418,6 +418,8 @@ public class NutWeb extends HttpServlet {
 			PrintWriter pw = new PrintWriter(sw);
 			((Exception)description).printStackTrace(pw);
 			html.appendTag(SimpleHtml.Tag.PRE, sw.toString());
+			pw.close();
+			sw.close();
 		}
 		else if (description instanceof Map){
 			html.appendTable((Map) description, "Diagnostics");

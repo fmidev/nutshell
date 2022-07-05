@@ -208,6 +208,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		 */
 		if (page.value.equals("status")){
+			setup.put("counter", ProductServer.counter);
 			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 					"NutShell server is running since " + setup.get("startTime"), request, response);
 			return;
