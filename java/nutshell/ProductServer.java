@@ -227,7 +227,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.note(String.format("        to: %s ", dst));
 			if (dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
-			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
 		}
 
 		/** Creates a soft link pointing to a file.
@@ -260,11 +260,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 				}
 
+				// Force!
 				// Destination differs, or explicit deletion is requested
 				Files.delete(dst);
 			}
 
-			return createSymbolicLink(dst, src);
+			Path result = Files.createSymbolicLink(dst, src);
+			FileUtils.ensureGroup(result, fileGroupID, filePerms);
+
+			return result;
 			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
 		}
 
@@ -700,6 +704,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					try {
 						// Todo: skip this if already ok...
+						// Check: is needed? this.move contains copy_attributes
 						Files.setPosixFilePermissions(this.outputPath, filePerms);
 					} catch (IOException e) {
 						log.warn(e.toString());
@@ -711,7 +716,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 					// this.result = this.outputPath;
-				} else {
+				}
+				else {
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
 					serverLog.fail(info.getFilename());
 					// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
@@ -844,8 +850,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 
 					try {
-						if (this.outputDirTmp.toFile().exists()) {
+						File dir = this.outputDirTmp.toFile();
+						if (dir.exists()) {
 							log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
+							// NEW! Empty the dir
+							for (File file: dir.listFiles()){
+								if (file.isFile())
+									this.move(file.toPath(), this.outputDir);
+								// Maybe dirs ok as well?
+							}
 							Files.delete(this.outputDirTmp);
 						}
 					} catch (IOException e) {

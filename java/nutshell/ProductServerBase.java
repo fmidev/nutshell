@@ -108,7 +108,7 @@ public class ProductServerBase extends Program {
         this.storageRoot = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
 
         this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
-        this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rwxrwxr--").toString());
+        this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
         setup.put("dirPerms", dirPerms);
         setup.put("filePerms", filePerms);
 
@@ -178,73 +178,10 @@ public class ProductServerBase extends Program {
     }
 
 
-
-    //public Path ensureDir(Path root, Path relativePath, Set<PosixFilePermission> perms) throws IOException {
-    /*
-    public Path ensureDir(Path root, Path relativePath) throws IOException {
-
-        if (relativePath==null)
-            return root;
-
-        if (relativePath.getNameCount() == 0)
-            return root;
-
-        Path path = root.resolve(relativePath);
-        //log.warn(String.format("Checking: %s/./%s",  root, relativePath));
-
-        if (!exists(path)) {
-            //Files.createDirectories(path, PosixFilePermissions.asFileAttribute(dirPerms));
-            ensureDir(root, relativePath.getParent());
-            serverLog.debug("creating dir: " + path);
-            Files.createDirectory(path); //, PosixFilePermissions.asFileAttribute(dirPerms));
-            Files.setPosixFilePermissions(path, dirPerms);
-
-            //Files.setOwner(path, fileGroupID);
-            try {
-                Files.setAttribute(path, "unix:gid", fileGroupID);
-            }
-            catch (IOException e){
-                serverLog.warn(e.toString());
-                serverLog.warn(String.format("Could not se unix:gid '%d'",  fileGroupID) );
-            }
-
-        }
-
-        return path;
-    }
+    /**
+     *   For constructing catalog
+     *
      */
-
-    //public Path ensureFile(Path root, Path relativePath, Set<PosixFilePermission> dirPerms, Set<PosixFilePermission> filePerms) throws IOException {
-    /*
-    public Path ensureFile(Path root, Path relativePath) throws IOException {
-
-        Path path = root.resolve(relativePath);
-
-        if (!exists(path)) {
-            //ensureDir(root, relativePath.getParent());
-            FileUtils.ensureWritableDir(path.getParent(), fileGroupID, dirPerms);
-            serverLog.debug("creating file: " + path);
-            Files.createFile(path, PosixFilePermissions.asFileAttribute(filePerms));
-            //Files.createFile(path); //, PosixFilePermissions.asFileAttribute(filePerms));
-            //Files.setPosixFilePermissions(path, filePerms);
-        }
-
-        try {
-            Files.setAttribute(path, "unix:gid", fileGroupID);
-        }
-        catch (IOException e){
-            serverLog.warn(e.toString());
-           // serverLog.warn(String.format("could not se unix GID: ",  fileGroupID) );
-        }
-
-        return path;
-
-    }
-   
-     */
-
-
-    // For clearing CACHE
     public class GeneratorTracker extends SimpleFileVisitor<Path> {
 
         GeneratorTracker(){
