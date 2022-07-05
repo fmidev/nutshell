@@ -1279,42 +1279,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		HTML;
 	}
 
-	/*
-	public void help(){
 
-		System.err.println("Usage:   java -cp $NUTLET_PATH nutshell.ProductServer  [<options>] <products>");
-		System.err.println("    - $NUTLET_PATH: directory of nutshell class files or path up to Nutlet.jar");
-		System.err.println();
-		System.err.println("Options: ");
-		System.err.println("    --help: this help dump");
-		System.err.println("    --conf <file> : read configuration file");
-		System.err.println();
-		System.err.println("    Product generation:");
-		System.err.println("    --instructions <string> : main operation: " + String.join(",", Flags.getKeys(Instructions.class)));
-		System.err.println("      or shorthands: --make --delete --generate ... )");
-		System.err.println("    --directives <key>=<value>|<key>=<value>|... : instructions for product generator");
-		System.err.println();
-		System.err.println("    Additional actions:");
-		System.err.println("    --copy <target>: copy file to target (repeatable)");
-		System.err.println("    --link <target>: link file to target (repeatable)");
-		System.err.println("    --move <target>: move file to target");
-		System.err.println();
-		System.err.println("    Logging:");
-		System.err.println("    --log_level <level> : set verbosity (DEBUG, INFO, NOTE, WARN, ERROR)");
-		System.err.println("      or shorthands --debug / --info --note --warn --error");
-		System.err.println("    --log_style <style>: " + Arrays.toString(OutputFormat.values()));
-		//System.err.println("    --statistics: analyze,collect/diagnose product generation");
-		System.err.println("    --analyse: collect/diagnose product generation");
-		System.err.println();
-		System.err.println("Examples: ");
-		System.err.println("    java -cp $NUTLET_PATH 201012161615_test.ppmforge_DIMENSION=2.5.png");
-
-		System.err.println("Options: ");
-		System.err.println();
-
-	}
-
-	 */
 
 	class InstructionParameter extends Parameter.Simple<String> {
 
@@ -1362,7 +1327,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 	}
 
-
+	/** A container, a "super task" for generating one or several products.
+	 *
+	 */
 	static
 	class BatchConfig {
 
@@ -1436,6 +1403,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		registry.add(new Parameter<Instructions>("regenerate",
 				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
 				batchConfig.instructions, "regenerateDepth"));
+
+		registry.add(new Parameter<ProductServer>("gid",
+				"Unix file group id (gid) to use.",
+				this, "fileGroupID"));
 
 		registry.add(new Parameter.Single("regenerate2",
 				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
@@ -1680,7 +1651,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		int result = 0;
 
-		log.note("Instructions: " + batchConfig.instructions);
+		if (!batchConfig.instructions.isEmpty())
+			log.info("Instructions: " + batchConfig.instructions);
 
 		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
 			log.warn("Clearing cache");
