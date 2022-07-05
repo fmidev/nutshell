@@ -52,12 +52,6 @@
       <param-value>${NUTSHELL_ROOT}</param-value>
     </init-param>
 
-    <!-- OLD -->
-    <init-param>
-      <param-name>htmlRoot</param-name>
-      <param-value>${NUTSHELL_ROOT}</param-value>
-    </init-param>
-
     <init-param>
       <param-name>htmlTemplate</param-name>
       <param-value>nutweb/template.html</param-value>
