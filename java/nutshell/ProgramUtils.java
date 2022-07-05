@@ -34,6 +34,8 @@ public class ProgramUtils {
 
         @Override
         public void exec() {
+            //"s".join(reference.version);
+            //new StringBuilder().append(reference.version).toString();
             System.out.println(Arrays.toString(reference.version));
         }
     }

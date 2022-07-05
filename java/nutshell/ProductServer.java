@@ -48,10 +48,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
 		//serverLog = new HttpLog(getClass().getSimpleName());
-		setup.put("ProductServer-version", version);  
+		super.version[0] = 1;
+		super.version[1] = 5;
+		setup.put("ProductServer-version", version);
 	}
 
-	static final public String version = "1.5";
+	//static final public String version = "1.5";
 	/// Experimental log of products and their inputs(s)
 	//public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
@@ -1476,6 +1478,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		final ProductServer server = new ProductServer();
 		server.serverLog.setVerbosity(Log.Status.DEBUG);
 		server.timeOut = 20;
+		//server.version
 
 		/*
 		if (args.length == 0){
