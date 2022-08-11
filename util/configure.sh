@@ -107,10 +107,8 @@ check_dir_syntax CACHE_ROOT
 ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache directories created by the system"
 ask_variable FILE_PERMS "rw-rw-r--" "Permissions for cache files created by the system"
 
+
 ask_variable UMASK "" "Defines the file permissions created by a product generator. (optional)"
-
-
-
 
 
 echo
