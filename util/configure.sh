@@ -111,6 +111,7 @@ ask_variable FILE_PERMS "rw-rw-r--" "Permissions for cache files created by the 
 ask_variable UMASK "" "Defines the file permissions created by a product generator. (optional)"
 
 
+
 echo
 vt100echo green "Resulting configuration: "
 echo "---------------------------------"
