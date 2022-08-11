@@ -120,8 +120,11 @@ public class ProductServerBase extends Program {
 
         this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
         this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
+        ExternalGenerator.umask = setup.getOrDefault("UMASK","").toString();
+
         setup.put("dirPerms", dirPerms);
         setup.put("filePerms", filePerms);
+        setup.put("umask", ExternalGenerator.umask);
 
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
