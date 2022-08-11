@@ -73,14 +73,25 @@ public class ProductServerBase extends Program {
      */
     protected String cmdPath = System.getenv("PATH");
 
+    /** Read configuration file. This operation can be repeated (with --conf ).
+     *
     protected void readConfig(){
         readConfig(confFile);
     }
+     */
 
+    /** Read configuration file. This operation can be repeated (with --conf ).
+     *
+     * @param path
+     */
     protected void readConfig(String path) {
         readConfig(Paths.get(path));
     }
 
+    /** Read configuration file. This operation can be repeated (with --conf ).
+     *
+     * @param path
+     */
     protected void readConfig(Path path){
 
         try {
@@ -184,9 +195,11 @@ public class ProductServerBase extends Program {
      */
     public class GeneratorTracker extends SimpleFileVisitor<Path> {
 
+        /*
         GeneratorTracker(){
             this.startDir = productRoot;
         }
+        */
 
         GeneratorTracker(Path startDir){
             if (startDir == null)

@@ -104,11 +104,11 @@ check_dir_syntax STORAGE_ROOT
 ask_variable CACHE_ROOT "$NUTSHELL_ROOT/cache" "Root directory for cache"
 check_dir_syntax CACHE_ROOT
 
-ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache directories"
-ask_variable FILE_PERMS "rw-rw-r--" "Permissions for cache files"
+ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache directories created by the system"
+ask_variable FILE_PERMS "rw-rw-r--" "Permissions for cache files created by the system"
 
-ask_variable CMD_SCRIPT_DIR "$prefix/bin" "Directory for command line wrapper script 'nutshell'"
-check_dir_syntax CMD_SCRIPT_DIR
+ask_variable UMASK "" "Defines the file permissions created by a product generator. (optional)"
+
 
 
 

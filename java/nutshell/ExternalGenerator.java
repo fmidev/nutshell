@@ -5,6 +5,8 @@ package nutshell;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -18,16 +20,22 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	static public final String scriptName = "generate.sh";
 	//static public final String inputDeclarationScript = "./input.sh";
 	static public final String inputDeclarationScript = "input.sh";
-	final String id;
 
-	//final protected File dir;
-	//final protected Path dir;
-	//final protected File cmd;
+	/// Permissions to set on Unix file system
+	static public String umask = "";
+
+	final String id;
+	final Path dir;
+	final File cmd;
+
+
 	final protected File inputDeclarationCmd;
 
 	public ExternalGenerator(String id, String dir) throws IndexedState {
-		super(scriptName, dir);
+		//super(scriptName, dir);
 		this.id = id;
+		this.dir = Paths.get(dir).normalize();
+		this.cmd = this.dir.resolve(scriptName).toFile().getAbsoluteFile();
 		//this.dir = Paths.get(dir); //new File(dir);
 		// this.cmd = this.dir.resolve(scriptName).toFile().getAbsoluteFile();
 		if (!this.cmd.exists())
@@ -65,26 +73,29 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 	}
 
-
+	/// Generates a product and stores it in a file system.
 	public void generateFile(String[] envArray, PrintStream log) throws IndexedState {
 
-		//ShellUtils.ProcessReader
 		OutputReader reader = new OutputReader(log);
 
-		//int exitValue = exec(scriptName, envArray, reader);
-		int exitValue = exec(cmd.toString(), envArray, dir, reader);
+		int exitValue = 0;
+
+		if (umask.isEmpty()){
+			exitValue = exec(cmd.toString(), envArray, dir, reader);
+		}
+		else {
+			final String[] batch = {"bash", "-c", String.format("umask %s; %s", ExternalGenerator.umask, cmd)};
+			exitValue = exec(batch, envArray, dir, reader);
+		}
+
+		//
 		if (exitValue != 0){
 			throw extractErrorMsg(exitValue, reader);
 		}
 
 	}
 
-	/*
-	public Map<String,String> getInputList(Map<String,Object> parameters, PrintStream errorLog) { //throws InterruptedException {
-		String[] env = MapUtils.toArray(parameters); // parameters.entrySet().toArray(new String[0]);
-		return getInputList(env, errorLog);
-	}
-	 */
+
 	@Override
 	public Map<String,String> getInputList(ProductServer.Task task) throws IndexedState {
 		//return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());

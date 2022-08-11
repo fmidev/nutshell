@@ -6,22 +6,19 @@ package nutshell;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.*;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  *
  */
 public class ShellExec {
 	
-
+	/*
 	final Path dir;
 	final File cmd;
-	/*
-	@Override
-	public int generate(Map<String,Object> parameters, PrintStream log) { //throws IOException, InterruptedException {
-		String[] env = MapUtils.toArray(parameters); // parameters.entrySet().toArray(new String[0]);
-		return generate(env,log);
-	}
-	 */
+
 	public ShellExec(Path cmd, Path dir){
 		//throws IndexedException
 		this.dir = dir.normalize(); //new File(dir);
@@ -35,6 +32,8 @@ public class ShellExec {
 		// this.dir = Paths.get(dir).normalize(); //new File(dir);
 		// this.cmd = this.dir.resolve(cmd).toFile().getAbsoluteFile();
 	}
+
+	 */
 
 	@Override
 	public String toString() {
@@ -125,18 +124,25 @@ public class ShellExec {
 
 	/** Utility for generators and input lists retrievals.
 	 *
+	 *  Note: "cancels" the exception by catching it and converting to a number.
+	 *
 	 * @param cmd - shell command like "ls" or "/tmp/script.sh"
 	 * @param env - environment variables as assignment strings ["KEY=VALUE", "KEY2=VALUE2", ... ]
 	 * @param reader - handler for standard and error output of the process
 	 * param errorLog
 	 */
 	static
-	int exec(String cmd, String[] env, Path dir, ShellUtils.ProcessReader reader){ //}, final PrintStream errorLog) {
+	int exec(String cmd, String[] env, Path dir, ShellUtils.ProcessReader reader) { //}, final PrintStream errorLog) {
+		final String[] cmds = {cmd};
+		return exec(cmds, env, dir, reader);
+	}
+
+	static
+	int exec(String[] cmd, String[] env, Path dir, ShellUtils.ProcessReader reader){ //}, final PrintStream errorLog) {
 
 		int exitValue = 0;
 
 		try {
-			//final Process process1 = Runtime.getRuntime().exec(cmd, )
 			final Process process = Runtime.getRuntime().exec(cmd, env, dir.toFile());
 			//process.
 			exitValue = ShellUtils.read(process, reader);
@@ -171,6 +177,7 @@ public class ShellExec {
 				dir = args[1];
 			case 1:
 				cmd = args[0];
+
 				break;
 			case 0:
 				System.err.println(String.format("Wrong number of args: %d", args.length));
@@ -179,35 +186,55 @@ public class ShellExec {
 				System.out.println(String.format("Run shell executable in a given working dir (default: %s)", dir));
 				System.out.println("Usage:   <cmd>  [<dir>] ");
 				System.out.println("Example: ls");
+				System.out.println("Example: ./generate.sh /opt/nutshell/products/test/checkboard");
 			return;
 		}
 
 		// ?? WHy instance
+		/*
 		ShellExec shellExec = null;
 		try {
 			// ??
-			shellExec = new ShellExec(dir, cmd);
+			shellExec = new ShellExec(cmd, dir);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
 		System.out.println(shellExec.toString());
+
+		 */
+
 
 		OutputReader reader = new OutputReader(System.err);
 
 		final String logname = ShellExec.class.getSimpleName() + ".log";
 		System.out.println("Writing log :" + logname);
 		File logFile = new File(logname);
-		System.out.println(String.format("Executing: %s (dir=", shellExec.cmd, shellExec.dir));
+		System.out.println(String.format("Executing: %s (dir=%s)", cmd, dir));
+		int result = 0;
 		try {
 			logFile.createNewFile();
 			FileOutputStream fw = new FileOutputStream(logFile);
-			ShellExec.exec(cmd, null, shellExec.dir, reader);
-		} catch (Exception e) {
+			result = ShellExec.exec(cmd, null, Paths.get(dir), reader);
+			System.out.println("Done");
+		}
+		catch (Exception e) {
+			/*
+			System.err.print("Note: command ");
+			if 	(cmd.startsWith("./")){
+				System.err.print("starts");
+			}
+			else {
+				System.err.print("does not start");
+			}
+			System.err.println(" with './'");
+			*/
 			e.printStackTrace();
 			return;
 		}
+
+
+
 
 
 
