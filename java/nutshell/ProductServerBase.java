@@ -124,7 +124,7 @@ public class ProductServerBase extends Program {
 
         setup.put("dirPerms", dirPerms);
         setup.put("filePerms", filePerms);
-        setup.put("umask", ExternalGenerator.umask);
+        //setup.put("umask", ExternalGenerator.umask);
 
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
