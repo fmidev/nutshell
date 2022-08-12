@@ -1,6 +1,8 @@
 package nutshell;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProgramUtils {
 
@@ -36,7 +38,13 @@ public class ProgramUtils {
         public void exec() {
             //"s".join(reference.version);
             //new StringBuilder().append(reference.version).toString();
-            System.out.println(Arrays.toString(reference.version));
+            //List<Integer> numbers = Array.;
+            //Arrays.stream(reference.version).sum();
+            String commaSeparatedNumbers = reference.version.stream()
+                 .map(i -> i.toString())
+                 .collect( Collectors.joining(",","(",")") );
+            System.out.println(commaSeparatedNumbers);
+            //System.out.println(Arrays.toString(reference.version));
         }
     }
 

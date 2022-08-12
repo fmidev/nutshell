@@ -90,6 +90,17 @@ public class ProductServerBase extends Program {
 
     /** Read configuration file. This operation can be repeated (with --conf ).
      *
+     * Reads the following quantities:
+     * - PRODUCT_ROOT
+     * - CACHE_ROOT
+     * - STORAGE_ROOT
+     * - DIR_PERMS
+     * - FILE_PERMS
+     * - UMASK
+     * - LOGFILE
+     * - PATH_EXT
+     * For explanations, see comments in any nutshell.cnf
+     *
      * @param path
      */
     protected void readConfig(Path path){
@@ -122,18 +133,31 @@ public class ProductServerBase extends Program {
         this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
         ExternalGenerator.umask = setup.getOrDefault("UMASK","").toString();
 
+        /// Objects
         setup.put("dirPerms", dirPerms);
         setup.put("filePerms", filePerms);
-        //setup.put("umask", ExternalGenerator.umask);
+
+        /// "read-only" variables (for debugging)
+        setup.put("user.name", System.getProperty("user.name"));
 
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
+        Object gid = null; //setup.getOrDefault("GROUP_ID", null);
         try {
-            fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
-        } catch (IOException e) {
-            serverLog.error(String.format("Could not read group of cache dir: %s", cacheRoot));
+            // Default: root of the cache dir
+            gid = Files.getAttribute(cacheRoot, "unix:gid");
+            // Override with conf value of GROUP_ID, if set.
+            gid = setup.getOrDefault("GROUP_ID", gid);
+            this.fileGroupID = Integer.parseInt(gid.toString()); // null?
+            // this.fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
         }
-        setup.put("fileGroupID", fileGroupID);
+        catch (IOException e) {
+            serverLog.error(String.format("Could not read group id of cache dir: %s", cacheRoot));
+        }
+        catch (Exception e) {
+            serverLog.error(String.format("Could not derive group id: %s, got %s", cacheRoot, gid));
+        }
+        setup.put("fileGroupID", this.fileGroupID);
 
         Object logPathFormat = setup.get("LOGFILE");
         if (logPathFormat != null) {

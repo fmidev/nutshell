@@ -7,7 +7,8 @@ import java.util.*;
 
 public class Program {
 
-    public int[] version = {1,0};
+    //public int[] version = {1,0};
+    List<Integer> version = Arrays.asList(1, 0);
 
     static class Parameter<T> implements Option { // add Program ?E
 
