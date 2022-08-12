@@ -702,16 +702,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 
 
-					try {
-						// Todo: skip this if already ok...
-						// Check: is needed? this.move contains copy_attributes
-						Files.setPosixFilePermissions(this.outputPath, filePerms);
-					} catch (IOException e) {
-						log.warn(e.toString());
-						log.warn(String.format("Failed in setting perms %s for file: %s", filePerms, this.outputPath));
-						// log.warn(String.format("filePerms: %s", filePerms));
-						// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
-						// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+					if (Files.isSymbolicLink(this.outputPath)) {
+						try {
+							// Todo: skip this if already ok...
+							// Check: is needed? this.move contains copy_attributes
+							Files.setPosixFilePermissions(this.outputPath, filePerms);
+						} catch (IOException e) {
+							log.warn(e.toString());
+							log.warn(String.format("Failed in setting perms %s for file: %s", filePerms, this.outputPath));
+							// log.warn(String.format("filePerms: %s", filePerms));
+							// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
+							// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+						}
 					}
 
 
