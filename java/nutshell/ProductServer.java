@@ -153,7 +153,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.productDir = getProductDir(this.info.PRODUCT_ID);
 			this.timeStampDir = getTimestampDir(this.info.time);
 			this.relativeOutputDir = this.timeStampDir.resolve(this.productDir);
-			this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve("tmp" + getTaskId());
+			//this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve(String.format("tmp-%s-%d", ) + getTaskId());
+			this.relativeOutputDirTmp = this.relativeOutputDir.resolve(String.format("tmp-%s-%d", user, getTaskId()));
 			this.relativeOutputPath = relativeOutputDir.resolve(filename);
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");

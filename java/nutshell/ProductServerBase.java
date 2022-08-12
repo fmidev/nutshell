@@ -30,10 +30,11 @@ public class ProductServerBase extends Program {
 
     public final Map<String,Object> setup = new HashMap<>();
 
-    // TODO: add to config, set in constructor
+    // Read in config, set in constructor
+    public int fileGroupID = 100;  // GROUP_ID
     public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
-    public int fileGroupID = 100;
+    public String user = null;
 
     public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
     public Path cacheRoot   = Paths.get(".");
@@ -138,7 +139,8 @@ public class ProductServerBase extends Program {
         setup.put("filePerms", filePerms);
 
         /// "read-only" variables (for debugging)
-        setup.put("user.name", System.getProperty("user.name"));
+        this.user = System.getProperty("user.name"); // $USER
+        setup.put("user.name", this.user);
 
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
