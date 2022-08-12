@@ -701,8 +701,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 					}
 
-
-					if (Files.isSymbolicLink(this.outputPath)) {
+					if (!Files.isSymbolicLink(this.outputPath)) {
 						try {
 							// Todo: skip this if already ok...
 							// Check: is needed? this.move contains copy_attributes
