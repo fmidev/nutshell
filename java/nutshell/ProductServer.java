@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(1, 7);
+		super.version = Arrays.asList(1, 8);
 		setup.put("ProductServer-version", version);
 	}
 
