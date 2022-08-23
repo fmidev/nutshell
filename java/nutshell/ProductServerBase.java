@@ -1,6 +1,5 @@
 package nutshell;
 
-import jdk.nashorn.internal.parser.JSONParser;
 // import com.google.gson.Gson;
 
 
@@ -68,7 +67,7 @@ public class ProductServerBase extends Program {
     };
 
     /// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
-    public int timeOut = 30;
+    public int timeout = 30;
 
 
     static public Graph serverGraph = new Graph("Product Server");
@@ -134,7 +133,7 @@ public class ProductServerBase extends Program {
         this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
         this.storageRoot = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
 
-        this.timeOut = Integer.parseInt(setup.getOrDefault("TIMEOUT",  30).toString());
+        this.timeout = Integer.parseInt(setup.getOrDefault("TIMEOUT",  30).toString());
 
 
         this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());

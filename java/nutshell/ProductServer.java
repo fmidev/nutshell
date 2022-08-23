@@ -1228,7 +1228,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return false;
 		}
 
-		int remainingSec = this.timeOut;
+		int remainingSec = this.timeout;
 
 		final long fileLength = file.length();
 
@@ -1418,6 +1418,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				"Unix file group id (gid) to use.",
 				this, "fileGroupID"));
 
+		registry.add(new Parameter<ProductServer>("timeout",
+				"Time in seconds to wait.",
+				this, "timeout"));
+
 		registry.add(new Parameter.Single("regenerate2",
 				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
 				"depth"){
@@ -1464,7 +1468,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		final ProductServer server = new ProductServer();
 		server.serverLog.setVerbosity(Log.Status.DEBUG);
-		server.timeOut = 20;
+		server.timeout = 20;
 		//server.version
 
 		/*
