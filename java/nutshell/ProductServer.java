@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(1, 8);
+		super.version = Arrays.asList(1, 9);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -380,8 +380,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", instructions.regenerateDepth));
 				instructions.add(ActionType.GENERATE);
 			}
-			log.warn(instructions.toString());
-
+			log.debug(String.format("Instructions (updated): %s", instructions));
 
 			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
 			log.log(String.format("Starting: %s ", getStatus())); //  this.toString()
@@ -1282,9 +1281,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	/// System side setting.
 	//  public String pythonScriptGenerator = "generate.py";
-
-	/// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
-	public int timeOut = 30;
 
 
 	public enum OutputFormat {
