@@ -5,10 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.nio.CharBuffer;
 
 public class ShellUtils {
 
@@ -53,8 +50,8 @@ public class ShellUtils {
 
 	/** Create a directory in which all the components are writable.
 	 *
-	 * @param root - starting point
-	 * @param subdir - subdirectory
+	 * param root - starting point
+	 * param subdir - subdirectory
 	 * @return - resulting directory (root and path concatenated)
 	 * @throws IOException
 	static public Path makeWritableDir(Path root, Path subdir) throws IOException{
@@ -108,30 +105,49 @@ public class ShellUtils {
 		// Consider two separate processed, if timing is not issue.
 		InputStream inputStream = process.getInputStream();
 		InputStream errorStream = process.getErrorStream();
-		
+
+		/*  NOTE
+
+			Now this works better – ie input streams do not block – but still cuts some input, at least stderr.
+
+		 */
+
 		try {
 
 			BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream));
 			BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
 
-			String inputLine = null;
-			String errorLine = null;
+			String inputLine = "";
+			String errorLine = "";
 
-			while (true){
+			// System.out.println(String.format("START read of: ", process.toString()));
 
-				while ((inputLine = inputReader.readLine()) != null)			
-					reader.handleStdOut(inputLine);
+			while ((inputLine!=null) && (errorLine!=null)) {
 
-				while ((errorLine = errorReader.readLine()) != null)			
-					reader.handleStdErr(errorLine);
+				///if (inputReader.ready()){  EI AUTTANUT!
+				if (inputLine != null) {
+					if ((inputLine = inputReader.readLine()) != null) { // Jumittuu tähän...
+						// Debug
+						// System.out.println(String.format("std[%b]: %s \t...", inputReader.ready(), inputLine));
+						reader.handleStdOut(inputLine); // oma
+					}
+				}
 
-				if ((inputLine == null)	&& (errorLine == null))
-					break;
+				//if (errorReader.ready()){ EI AUTTANUT!
+				if (errorLine != null) {
+					if ((errorLine = errorReader.readLine()) != null) { // .. tai jumittuu tähän
+						// Debug
+						// System.out.println(String.format("err[%b]: %s \t...", errorReader.ready(), errorLine));
+						reader.handleStdErr(errorLine); // oma
+					}
+				}
+
 			}
 			inputReader.close();
 			errorReader.close();
-			
-		} catch (IOException e) {
+
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

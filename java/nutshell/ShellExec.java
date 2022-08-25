@@ -57,12 +57,14 @@ public class ShellExec {
 
 		@Override
 		public void handleStdOut(String line) {
+			//System.out.println(String.format("OUT: %s", line));
 			lastLineOut = line;
 			stream.println(line);
 		}
 
 		@Override
 		public void handleStdErr(String line) {
+			//System.err.println(String.format("ERR: %s", line));
 			lastLineErr = line;
 			stream.println(line);
 		}
@@ -81,6 +83,8 @@ public class ShellExec {
 	 * @return
 	 */
 	protected IndexedState extractErrorMsg(int exitValue, OutputReader reader){
+
+		//System.err.println(String.format("extractErrorMsg: %s", reader.lastLineErr));
 
 		String[] msgErr = IndexedState.split(reader.lastLineErr);
 
@@ -143,9 +147,12 @@ public class ShellExec {
 		int exitValue = 0;
 
 		try {
+			// System.err.println(String.format("Starting %s ...", cmd));
 			final Process process = Runtime.getRuntime().exec(cmd, env, dir.toFile());
 			//process.
+			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
+			// System.err.println(String.format("Exit value: %d", exitValue));
 		}
  		catch (IOException e){
 			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));

@@ -44,6 +44,7 @@ public class ProductServerBase extends Program {
     // Consider
     final protected List<StringMapper> storagePaths = new LinkedList<>();
 
+    // Not configurable at the moment...
     static final public Path cachePrefix = Paths.get("cache");
 
     /// System side setting.// TODO: conf
@@ -53,13 +54,11 @@ public class ProductServerBase extends Program {
     //public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
     //public String generatorCmd = "generate.sh"; // -> ExternalGenerator   // NOTE: executed in CWD
 
-    //final DateFormat timeStampFormat    = new SimpleDateFormat("yyyyMMddHHmm");
     final DateFormat timeStampDirFormat =
             new SimpleDateFormat("yyyy"+ File.separatorChar+"MM"+File.separatorChar+"dd");
+    // = new SimpleDateFormat("yyyyMMddHHmm");
 
     //protected final List<Path> configFiles = new LinkedList<>();
-
-
     static public int counter = 0;
 
     static public int getProcessId(){
@@ -135,7 +134,6 @@ public class ProductServerBase extends Program {
 
         this.timeout = Integer.parseInt(setup.getOrDefault("TIMEOUT",  30).toString());
 
-
         this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
         this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
         ExternalGenerator.umask = setup.getOrDefault("UMASK","").toString();
@@ -150,27 +148,32 @@ public class ProductServerBase extends Program {
 
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
-        Object gid = null; //setup.getOrDefault("GROUP_ID", null);
+        String gid = null; //setup.getOrDefault("GROUP_ID", null);
+        //Path trueCacheRoot = null;
         try {
+            //trueCacheRoot = cacheRoot.toRealPath();
             // Default: root of the cache dir
-            gid = Files.getAttribute(cacheRoot, "unix:gid");
+            //System.err.println(String.format("GID: %s ", gid));
             // Override with conf value of GROUP_ID, if set.
-            gid = setup.getOrDefault("GROUP_ID", gid);
+            gid = setup.getOrDefault("GROUP_ID", "").toString();
+            if (gid.isEmpty())
+                gid = Files.getAttribute(cacheRoot, "unix:gid").toString();
             this.fileGroupID = Integer.parseInt(gid.toString()); // null?
+            //System.err.println(String.format("GID: %s -> %d", gid, fileGroupID));
             // this.fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
         }
-        catch (IOException e) {
-            serverLog.error(String.format("Could not read group id of cache dir: %s", cacheRoot));
-        }
         catch (Exception e) {
-            serverLog.error(String.format("Could not derive group id: %s, got %s", cacheRoot, gid));
+            serverLog.warn(String.format("%s: %s", e.getClass().getCanonicalName(), e.getMessage()));
+            // serverLog.error(String.format("Could not read group id of cache dir: %s, real path: %s, gid='%s'",
+            //        cacheRoot, trueCacheRoot, gid));
+            serverLog.error(String.format("Could not solve group id: '%s', got '%s'", cacheRoot, gid));
         }
         setup.put("fileGroupID", this.fileGroupID);
 
         Object logPathFormat = setup.get("LOGFILE");
         if (logPathFormat != null) {
             Path p = setLogFile(logPathFormat.toString());
-            //System.err.println(String.format("Log file: ", p);
+            //System.err.println(String.format("Log file: %s", p);
         }
         //logPathFormat = "./nutshell-" + System.getenv("USER")+"-%s.log";
         // Path p = setLogFile(logPathFormat.toString());

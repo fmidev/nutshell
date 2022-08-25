@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(1, 9);
+		super.version = Arrays.asList(2, 0);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -192,7 +192,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 		protected void close() {
-			System.err.println("CLOSE task: " + toString());
+			// System.err.println("CLOSE task: " + toString());
 			this.log.close();
 		}
 
