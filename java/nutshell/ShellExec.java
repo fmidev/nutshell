@@ -149,7 +149,7 @@ public class ShellExec {
 		try {
 			// System.err.println(String.format("Starting %s ...", cmd));
 			final Process process = Runtime.getRuntime().exec(cmd, env, dir.toFile());
-			//process.
+			// process.
 			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
 			// System.err.println(String.format("Exit value: %d", exitValue));

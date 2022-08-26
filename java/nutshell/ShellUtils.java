@@ -111,6 +111,8 @@ public class ShellUtils {
 			Now this works better – ie input streams do not block – but still cuts some input, at least stderr.
 
 		 */
+		Log l = new Log();
+		l.COLOURS = true;
 
 		try {
 
@@ -122,7 +124,7 @@ public class ShellUtils {
 
 			// System.out.println(String.format("START read of: ", process.toString()));
 
-			while ((inputLine!=null) && (errorLine!=null)) {
+			while ((inputLine!=null) || (errorLine!=null)) {
 
 				///if (inputReader.ready()){  EI AUTTANUT!
 				if (inputLine != null) {
@@ -142,12 +144,32 @@ public class ShellUtils {
 					}
 				}
 
+				/*
+				if (inputLine == null)
+					l.fail("NULL!");
+				else
+					l.success(inputLine);
+
+				if (!inputReader.ready())
+					l.fail("Not Ready");
+
+
+				if (errorLine == null)
+					l.warn("NULL!");
+				else
+					l.ok(errorLine);
+
+				if (!errorReader.ready())
+					l.warn("Not Ready");
+				*/
 			}
 			inputReader.close();
 			errorReader.close();
+			//l.experimental("Loppui");
 
 		}
 		catch (IOException e) {
+			// l.fatal("Reijo Kämänen");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
