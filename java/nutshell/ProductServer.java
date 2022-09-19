@@ -516,7 +516,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				try {
 					inputs.putAll(generator.getInputList(this));
-					log.debug(this.inputs.toString());
+					for (Entry<String,String> s: this.inputs.entrySet()){
+						log.debug(String.format("%s = '%s'", s.getKey(), s.getValue()));
+					}
 					//statistics.put(info.PRODUCT_ID, inputs.keySet());
 					//System.err.println("## " + this.inputs);
 				} catch (Exception e) {
