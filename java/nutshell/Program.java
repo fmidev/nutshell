@@ -51,6 +51,16 @@ public class Program {
             }
         }
 
+        /**
+         *
+         * @param paramName - Parameter key, also appearing as command name in command line options.
+         * @param description - Short explanation of the command.
+         * @param reference - Object. members of which are to be accessed (directly)
+         */
+        Parameter(String paramName, String description, T reference)  {
+            this(paramName, description, reference, paramName);
+        }
+
         /*
         Parameter(String name, String description, Object reference, String[] paramKeys) {
             this.name = name;

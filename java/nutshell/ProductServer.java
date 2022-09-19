@@ -1422,6 +1422,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				"Time in seconds to wait.",
 				this, "timeout"));
 
+		registry.add(new Parameter<ProductServer>("counter",
+				"Initial value of task counter (id).", this));
+
 		registry.add(new Parameter.Single("regenerate2",
 				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
 				"depth"){
