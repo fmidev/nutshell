@@ -552,7 +552,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					// ensureFile(cacheRoot, relativeOutputPath);
 					// Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				} catch (IOException e) {
-					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating: %s", e.getMessage()));
+					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
+					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s", e.getMessage()));
 					return;
 				}
 
