@@ -215,8 +215,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				dst = dst.resolve(src.getFileName());
 			//Files.setPosixFilePermissions(dst, filePerms);
 			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
-			if (!Files.isSymbolicLink(dst))
-				FileUtils.ensureGroup(dst, fileGroupID, filePerms);
+
+			try {
+				if (!Files.isSymbolicLink(dst))
+					FileUtils.ensureGroup(dst, fileGroupID, filePerms);
+			}
+			catch (IOException e){
+				// Could be logged?
+			}
 			//Files.setPosixFilePermissions(dst, filePerms);
 			return dst;
 			//return src.renameTo(dst);
