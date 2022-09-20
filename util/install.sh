@@ -99,10 +99,11 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 	cp -v $i $HTTP_ROOT/
     done
 
+    vt100echo cyan  "# Copying HTML files"	
     export HTTP_PREFIX  # Others?
     for i in html/nutweb/*.html; do
 	#DIR=$HTTP_ROOT/
-	vt100echo cyan  "# Copying HTML files"	
+	vt100echo cyan  "# ... $i"	
 	if [ ${i##*/} == 'template.html' ]; then
 	    cat $i | envsubst > $HTTP_ROOT/nutweb/${i##*/}
 	    #cp -v $i $HTTP_ROOT/nutweb/
@@ -115,7 +116,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     vt100echo cyan  "# Copying images"	
     cp -v html/favicon.ico $HTTP_ROOT/
     mkdir -v --parents $HTTP_ROOT/img
-    cp -v html/* $HTTP_ROOT/img
+    cp -v html/img/* $HTTP_ROOT/img
     
     #for i in html/nutweb/*.HTML; do	
     #done
