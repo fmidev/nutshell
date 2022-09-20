@@ -357,13 +357,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			// Logical corrections
 
 			if (!instructions.copies.isEmpty())
-				instructions.add(ActionType.MAKE | ResultType.FILE);
+				instructions.add(ActionType.MAKE);
 
 			if (!instructions.links.isEmpty())
-				instructions.add(ActionType.MAKE | ResultType.FILE);
+				instructions.add(ActionType.MAKE);
 
 			if (instructions.move != null)
-				instructions.add(ActionType.MAKE | ResultType.FILE);
+				instructions.add(ActionType.MAKE);
+
+			if (instructions.involves(PostProcessing.LATEST|PostProcessing.SHORTCUT))
+				instructions.add(ActionType.MAKE);
 
 			// Rest default result type
 			// if (this.instructions.involves(Actions.MAKE | Actions.DELETE)) { }

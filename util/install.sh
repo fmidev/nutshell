@@ -98,10 +98,13 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 	cp -v $i $HTTP_ROOT/
     done
     for i in html/nutweb/*.html; do
+	#DIR=$HTTP_ROOT/
 	if [ ${i##*/} == 'template.html' ]; then
-	    cp -v $i $HTTP_ROOT/nutweb/
+	    cat $i | envsubst > $HTTP_ROOT/nutweb/${i%/*}
+	    #cp -v $i $HTTP_ROOT/nutweb/
 	else
-	    cp -v $i $HTTP_ROOT/
+	    cat $i | envsubst > $HTTP_ROOT/${i%/*}
+	    #cp -v $i $HTTP_ROOT/
 	fi
     done
     mkdir -v --parents $HTTP_ROOT/img
