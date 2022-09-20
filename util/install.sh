@@ -100,10 +100,10 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     for i in html/nutweb/*.html; do
 	#DIR=$HTTP_ROOT/
 	if [ ${i##*/} == 'template.html' ]; then
-	    cat $i | envsubst > $HTTP_ROOT/nutweb/${i%/*}
+	    cat $i | envsubst > $HTTP_ROOT/nutweb/${i##*/}
 	    #cp -v $i $HTTP_ROOT/nutweb/
 	else
-	    cat $i | envsubst > $HTTP_ROOT/${i%/*}
+	    cat $i | envsubst > $HTTP_ROOT/${i##*/}
 	    #cp -v $i $HTTP_ROOT/
 	fi
     done
