@@ -1,15 +1,72 @@
 package nutshell;
 
+
 import java.io.IOException;
 import java.nio.file.*;
 //import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.nio.file.Files.exists;
 
 public class FileUtils {
+
+    static private int getBit() {
+        int counter = 0;
+        return (1 << counter++);
+    }
+
+
+    interface Owner {
+        int USER   = getBit();
+        int GROUP  = getBit();
+        int OTHERS = getBit();
+        int OWNER = USER | GROUP | OTHERS;
+    }
+
+    interface Permission {
+        int READ  = getBit();
+        int WRITE = getBit();
+        int EXEC  = getBit();
+        //int PERMISSIONS = getBit();
+    }
+
+
+    class Status implements Owner, Permission {
+        // ..
+    }
+
+    static
+    //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+)(/[^/]*)$");
+    //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+/)([\\w]+\\.[a-z]{1,4})?(\\W[^/]*)?$",
+    //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)([.\\w]+\\.[a-z]+)?(\\s.*)?$",
+    public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
+            Pattern.CASE_INSENSITIVE);
+
+    static
+    public Path extractPath(String line){
+
+        Matcher m = filePathRe.matcher(line);
+        if (m.matches()){
+            //System.out.printf("Matches, %d groups:%n", m.groupCount());
+            for (int j = 0; j <= m.groupCount(); j++) {
+                System.out.printf("  %d ->  %s %n", j, m.group(j));
+            }
+            // System.out.println(m);
+            // crop leading (0) and trailing (-1)
+            String dir  = m.group(2);
+            String file = m.group(m.groupCount()-1);
+
+            if (file == null)
+                return Paths.get(dir);
+            else
+                return Paths.get(dir, file);
+        }
+        return Paths.get("");
+    };
 
 
     /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
@@ -20,24 +77,35 @@ public class FileUtils {
      * @throws IOException
      */
     static
-    public void ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
+    public int ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
+
+        int experimentalResult = 0;
 
         if ((path == null) || (path.getNameCount()==0)){
-            return;
+            return experimentalResult;
         }
 
         // Consider constructing error string (of GID and perms)
         if (!Files.exists(path)){
-            ensureWritableDir(path.getParent(), groupId, permissions);
-            Files.createDirectory(path); // potentially throws IOException
+            experimentalResult |= ensureWritableDir(path.getParent(), groupId, permissions);
+            try {
+                Files.createDirectory(path); // potentially throws IOException
+            }
+            catch (Exception e){
+                experimentalResult |= Permission.WRITE; // or "ALL" ?
+                // Exit, because does dir not exist now.
+                throw e;
+            }
+
             try {
                 Files.setAttribute(path, "unix:gid", groupId);
             }
             catch (Exception e){
+                experimentalResult |= Owner.GROUP;
             }
         }
         else if (Files.isWritable(path)){
-            return;
+            return experimentalResult;
         }
 
 
@@ -45,12 +113,14 @@ public class FileUtils {
             Files.setPosixFilePermissions(path, permissions);
         }
         catch (Exception e){
+            experimentalResult |= Permission.WRITE; // or "ALL" ?
         }
 
         if (!Files.isWritable(path)){
-            throw new IOException(String.format("Failed to create dir %s", path, permissions));
+            throw new IOException(String.format("Failed in creating dir %s", path, permissions));
         }
 
+        return experimentalResult;
 
     }
 
@@ -263,7 +333,17 @@ public class FileUtils {
                         //System.out.println(filePerms.toArray());
                         break;
                     default:
-                        System.out.println(String.format("No such option: %s", arg));
+                        Matcher m = filePathRe.matcher(arg);
+                        if (m.matches()){
+                            System.out.printf("Matches, %d groups:%n", m.groupCount());
+                            for (int j = 0; j <= m.groupCount(); j++) {
+                                System.out.printf("  %d: %s %n", j, m.group(j));
+                            }
+                            Path p = extractPath(arg);
+                            System.out.println(p);
+                        }
+                        else
+                            System.out.println(String.format("No such option: %s", arg));
                         break;
                 }
 

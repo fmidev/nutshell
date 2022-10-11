@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 0);
+		super.version = Arrays.asList(2, 1);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -160,7 +160,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + getTaskId();
-			this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
+			//this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
+			this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".html");
 			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
 			// Absolute
@@ -1132,21 +1133,22 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					task.instructions.add(ActionType.MAKE);
 				}
 
-				log.info(String.format("Prepared task: '%s' = %s [%s]", key, task, task.instructions));
+				log.info(String.format("Prepared task: %s= %s", key, task));  //, task.instructions
 				if ((directives != null) && !directives.isEmpty())
 					log.info(String.format("Directives: %s = %s", key, directives));
 
-				log.info(task.toString());
+				//log.info(task.toString());
 
 				task.log.setVerbosity(log.getVerbosity());
-				task.log.COLOURS = log.COLOURS;
+				task.log.decoration.set(Log.OutputFormat.COLOUR);
 				if (task.log.logFile != null) {
 					log.note(String.format("Log for '%s': %s", key, task.log.logFile));
 				}
 
 				tasks.put(key, task);
 
-			} catch (ParseException e) {
+			}
+			catch (ParseException e) {
 				//System.err.println(String.format("EROR here: %s = %s", key, value));
 
 				// TODO: is it a fatal error if a product defines its input wrong? Answer: YES
@@ -1154,7 +1156,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.warn(e.getMessage());
 				log.log(HttpLog.HttpStatus.NOT_ACCEPTABLE, e.getLocalizedMessage());
 				//log.error(e.getLocalizedMessage()); // RETURN?
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				// System.err.println(String.format("EROR2 here: %s = %s", key, value));
 				log.error(String.format("Unexpected exception in creating product %s(%s)", key, value));
 				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
@@ -1295,19 +1298,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	//  public String pythonScriptGenerator = "generate.py";
 
 
-	public enum OutputFormat {
-		TEXT,
-		VT100,
-		HTML;
-	}
-
-
-
 	class InstructionParameter extends Parameter.Simple<String> {
 
 		InstructionParameter(Instructions instructions){
 			super("instructions", "Set actions and properties: " +
-							String.join(",", Flags.getKeys(Instructions.class)),
+					String.join(",",
+							ClassUtils.getConstants(Instructions.class).keySet().toString()),
 					instructions.toString());
 			myInstructions = instructions;
 		}
@@ -1316,7 +1312,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		InstructionParameter(Instructions instructions, String fieldName){
 			super(fieldName.toLowerCase(),
-					String.format("Same as --instructions %s", fieldName),
+					String.format("Same as --instructions %s,...", fieldName),
 					fieldName.toUpperCase());
 			setReference(this, "");
 			//value = fieldName.toUpperCase();
@@ -1329,16 +1325,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public void exec() {
 			try {
 				myInstructions.add(value);
-				/*
-				if (hasParams()){
-					// Definite?  "--instructions A,B,C"
-					myInstructions.set(value);
-				}
-				else {
-					// Simple keys like "--generate"
-					myInstructions.add(value);
-				}
-				 */
+				// System.out.printf("DEBUG: %s %n", myInstructions);
 			} catch (NoSuchFieldException e) {
 				serverLog.error(e.getMessage());
 				//e.printStackTrace();
@@ -1376,17 +1363,30 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		});
 
 		registry.add(new Parameter.Simple<String>("log_style","Set formatting",
-				OutputFormat.TEXT.toString()){
+				Arrays.toString(Log.OutputFormat.values())){
+				// ClassUtils.getConstantKeys(Log.OutputFormat.class).toString() ){
+			//Log.OutputFormat.TEXT.toString() ){
 
 			@Override
 			public void exec() {
 				//serverLog.special("Value...");
 				//serverLog.warn(value);
-				OutputFormat f = OutputFormat.valueOf(value);
+				try {
+					//serverLog.special(ClassUtils.getConstants(Log.OutputFormat.class));
+					serverLog.decoration.set(value);
+				}
+				catch (Exception e) {
+					serverLog.warn(String.format("Argument '%s' contains unsupported flags(s)", value));
+					serverLog.error(String.format("%s: Not implemented: %s", this.getName(), e.getMessage()));
+				}
+				serverLog.special(serverLog.decoration.toString());
+				/*
+				Log.OutputFormat f = Log.OutputFormat.valueOf(value);
 				serverLog.special(f.toString());
+
 				switch (f){
 					case TEXT:
-						serverLog.COLOURS = false;
+						serverLog.decoration = f;
 						break;
 					case VT100:
 						serverLog.COLOURS = true;
@@ -1395,12 +1395,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					default:
 						serverLog.warn(String.format("%s: Not implemented: %s", this.getName(), f));
 				}
+
+				 */
 			}
 		});
 
 
 		registry.add(new InstructionParameter(batchConfig.instructions));
-		for (String instr: Flags.getKeys(Instructions.class)){ // consider instant .getClass()
+		for (String instr: ClassUtils.getConstantKeys(Instructions.class)){ // consider instant .getClass()
 			registry.add(instr.toLowerCase(), new InstructionParameter(batchConfig.instructions, instr));
 		}
 
@@ -1491,12 +1493,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			server.help();  // An instance, yes. Default values may habve been changed.
 			return;
 		}
+		*/
 
-		 */
-
-		HttpLog log = server.serverLog; //.child("CmdLine");
-		log.COLOURS = true;
-
+		HttpLog log = server.serverLog;
+		log.decoration.set(Log.OutputFormat.COLOUR);
 
 		// NEW
 		ProgramRegistry registry = new ProgramRegistry();
@@ -1520,7 +1520,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					for (String s : array) {
 						System.out.println(s);
 					}
-				} catch (ParseException e) {
+				}
+				catch (ParseException e) {
+					log.fail(e.getMessage());
+				}
+				catch (Exception e) {
+					e.printStackTrace(System.err);
 					log.fail(e.getMessage());
 				}
 			}
@@ -1622,6 +1627,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			args = new String[]{"--help"};
 		}
 
+		log.special("Instructions..." + batchConfig.instructions);
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1666,6 +1672,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					batchConfig.products.put("product" + (batchConfig.products.size()+1), arg);
 				}
 
+				log.special("Instructions: " + batchConfig.instructions);
 			}
 		}
 		catch (Exception e) {
@@ -1681,7 +1688,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		int result = 0;
 
 		if (!batchConfig.instructions.isEmpty())
-			log.info("Instructions: " + batchConfig.instructions);
+			log.debug("Instructions: " + batchConfig.instructions);
 
 		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
 			log.warn("Clearing cache");

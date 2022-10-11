@@ -5,25 +5,67 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 
-/**
+/** Utility for setting flags - labelled bit values.
+ *
+ *  For example, in a file system flags could be used for defining permissions:
+ *
+ *  * READ  = 1
+ *  * WRITE = 2
+ *  * EXEC  = 4
+ *  * ALL   = READ | WRITE | EXEC = 7
+ *
+ *  @Flags supports setting and resetting bits using both labels ("READ", "EXEC", "ALL", ... )
+ *  and numeric values (1, 4, 7...)
+ *
+ *
+ *
+ *
+ *  The labels and bit values can be taken from either
+ *
+ *  # Enum classes
+ *  # Subclasses extending @Flags
+ *  # External classes
+ *
+ *  Enum classes:
+ *  # the names of the constants serve as labels
+ *  # numeric values indicate the bits, ie. bitValue = (1 << ordinal()).
+ *  Consequently, the resulting flags are unique: their values start from 1, and are non-overlapping
+ *
+ *  Other classes:
+ *  # the names of the static public integer constants serve as labels
+ *  # numeric values are directly used as bit values; values can be equal or contain overlapping bits
  *
  */
 public class Flags {
 
     public Flags(){
-        value = 0;
+        domain = null;
+        set(0);
     }
 
-    public Flags(int v){
-        value = v;
+    public Flags(int bitMask){
+        domain = Flags.class;
+        setAllowedBits(bitMask);
+        set(0);
+    }
+    /** Sets
+     *
+     * @param
+     */
+    public Flags(Class<?> domain){
+        setDomain(domain);
+        set(0);
     }
 
-    static public int getValue(Object obj, String flags) throws NoSuchFieldException, IllegalAccessException{
+    public int value = 0;
+
+    static
+    private int getValue(Object obj, String flags) throws NoSuchFieldException, IllegalAccessException{
         return getValue(obj, flags.split(","));
     }
 
     public int getValue(String flags) throws NoSuchFieldException, IllegalAccessException{
-        return getValue(this, flags.split(","));
+        return getValue(getDomain(), flags.split(","));
     }
 
     /**
@@ -35,14 +77,15 @@ public class Flags {
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      */
-    static public int getValue(Object obj, String[] flags) throws NoSuchFieldException, IllegalAccessException {
+    static
+    private int getValue(Object obj, String[] flags) throws NoSuchFieldException, IllegalAccessException {
 
         int result = 0;
 
-        Class c = (obj instanceof  Class) ? (Class)obj : obj.getClass();
+        Class c = (obj instanceof Class) ? (Class)obj : obj.getClass();
 
         for (String s : flags) {
-            // Check here if s  contains comma-separated values.
+            // If s contains comma-separated values.
             String[] subFlags = s.split(",");
             if (subFlags.length > 1)
                  result = result | getValue(obj, subFlags);
@@ -53,7 +96,8 @@ public class Flags {
                     result = result | i;
                 }
                 catch (NumberFormatException e){
-                    result = result | c.getField(s).getInt(obj);
+                    result |= getStaticFieldValue(c.getField(s));
+                    //result = result | c.getField(s).getInt(obj);
                 }
             }
         }
@@ -65,18 +109,86 @@ public class Flags {
         return getValue(this, flags);
     }
 
-    static public String[] getFlags(Object obj, int value) throws IllegalAccessException{
+
+    /** A reference class, the static integer members of which will be used as (label,value) pairs.
+     *
+     *  The set of permissible values consists of
+     *
+     */
+    private Class<?> domain;
+
+    /**  Return the referemce class - the static integer members of which will be used as (label,value) pairs.
+     *
+     *
+     *  @param domain
+     */
+    public void setDomain(Class<?> domain){
+        this.domain = domain;
+        setAllowedBits(domain);
+        // System.out.printf("Set domain: %s <-%s", getClass().getSimpleName(), domain.getSimpleName());
+    };
+
+    /** Return the referemce class
+     *
+     *
+     */
+    public Class<?> getDomain(){
+        if (domain == null) {
+            setDomain(getClass());
+            //return getClass();
+        }
+        return domain;
+    };
+
+
+
+    /**  The allowed bit values.
+     *
+     *   A quick filter that accepts and rejects bit values of flags.
+     *
+     */
+    protected int bitMask = ~0;
+
+    /** A quick filter that accepts and rejects bit values of flags.
+     *
+     */
+    public void setAllowedBits(int bitMask){
+        this.bitMask = bitMask;
+    }
+
+
+    /** Get current flags (the ones that are set).
+     *
+     * @param value
+     * @return
+     * @throws IllegalAccessException
+     */
+    @Deprecated
+    public String[] getFlags(int value) throws IllegalAccessException{
+        return getFlags(getDomain(), value);
+    }
+
+
+    /**
+     *
+     *  Demonstration
+     *
+     * @param
+     */
+    static
+    private String[] getFlags(Class c, int value) throws IllegalAccessException{
 
         Set<String> result = new HashSet<>();
 
-        Class c = (obj instanceof  Class) ? (Class)obj : obj.getClass();
+        // Class c = (obj instanceof  Class) ? (Class)obj : obj.getClass();
 
         for (Field field : c.getFields()) {
-            String name = field.getName();
-            if (name.equals(name.toUpperCase())) { // TODO isValid(name)
-                int i = field.getInt(obj);
-                if ((i & value) == i){ // i fully covered
-                    result.add(name);
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                if (isIncluded(field)) {
+                    int i = getStaticFieldValue(field);
+                    if ((value & i) == i) { // i fully covered
+                        result.add(field.getName());
+                    }
                 }
             }
         }
@@ -84,29 +196,100 @@ public class Flags {
         return result.toArray(new String[0]);
     }
 
-    public String[] getFlags(int value) throws IllegalAccessException{
-        return getFlags(this, value);
+    /*
+    static public String[] getFlags(Object obj, Enum<?> value) throws IllegalAccessException{
+        return getFlags(obj, 1 << value.ordinal());
+        return new String[] {value.name()};
     }
+     */
+
+
+    public Map<String,Integer> getAllFlags() {
+
+        Map<String,Integer> m = new HashMap<>();
+
+        for (Field field : getDomain().getFields()) {
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                if (isIncluded(field)) {
+                    int i = getStaticFieldValue(field);
+                    m.put(field.getName(), i);
+                }
+            }
+        }
+        return m;
+
+        // return ClassUtils.getConstants(getDomain());
+    }
+
+
+    /** Check is a field is accepted as a (label,value) pair.
+     *
+     *  A filed is always checked to be constant and public.
+     *
+     * @param field
+     * @return
+     */
+    static
+    public boolean isIncluded(Field field){
+        String name = field.getName();
+        return name.equals(name.toUpperCase());
+    };
 
     static
-    public String[] getKeys(Class c){
-        //return getFlags(this, value);
-        return ClassUtils.getConstants(c).keySet().toArray(new String[0]);
+    protected int getStaticFieldValue(Field field){
+        Class c = field.getDeclaringClass();
+        String name = field.getName();
+        if (c.isEnum()){
+            return (1 << Enum.valueOf(c, name).ordinal());
+        }
+        else {
+            try {
+                return field.getInt(null);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    };
+
+    /** Sets bit mask for accepting valid values.
+     *
+     * @param c
+     */
+    public void setAllowedBits(Class c){
+        int m = 0;
+        for (Field field : c.getFields()) {
+            if (isIncluded(field)) {
+                m |= getStaticFieldValue(field);
+            }
+        }
+
+        this.bitMask = m;
     }
 
-    public String[] getEntries() {
-        return ClassUtils.getConstants(getClass()).entrySet().toArray(new String[0]);
-    }
-
-    public Map<String,Integer> getMap() {
-        return ClassUtils.getConstants(getClass());
-    }
+    //static
+    //public final int ALL_FIELDS = ~0;
 
 
 
     /// Further NON-STATICS
 
-    public int value = 0;
+    /*
+    public void validateStrict(int i) throws NoSuchFieldException{
+        int rejected = validate(i);
+        if (rejected > 0) {
+            throw new NoSuchFieldException(String.format("Illegal bits in %d : %d (mask=%d)", i, (i & rejected), bitMask));
+        }
+    }
+    */
+
+    public int validate(int i) {
+        return (i & ~bitMask);
+    }
+
+    public boolean check(int i) {
+       return (validate(i)>0);
+    }
 
     /**
      * @see #add(int) .
@@ -114,36 +297,70 @@ public class Flags {
      */
     public void set(int i){
         value = i;
-        //return true;
-        //return this;
+    }
+
+    /**
+     *  Assumes a valid (compatible) Enum class is used.
+     *
+     *  @param e
+     */
+    public void set(Enum<?> e){
+        set(1<<e.ordinal());
+    }
+
+    /**
+     *
+     * @param s
+     * @param scope – Object or Enum class the static members of which are considered.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
+    public void set(String[] s, Class<?> scope) throws NoSuchFieldException, IllegalAccessException {
+        set(getValue(scope, s));
+    }
+
+    /**
+     *
+     * @param s
+     * @param scope – Object or Enum class the static members of which are considered.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
+    private void set(String s, Class<?> scope) throws NoSuchFieldException, IllegalAccessException {
+        set(getValue(scope, s));
+    }
+
+
+    public void set(String[] s) throws NoSuchFieldException, IllegalAccessException {
+        set(getValue(s));
     }
 
     public void set(String s) throws NoSuchFieldException, IllegalAccessException {
-        set(s.split(","));
-    }
-
-    public void set(String[] s) throws NoSuchFieldException, IllegalAccessException {
-        value = getValue(s);
+        set(s.split(","), getDomain());
     }
 
     public void add(int i) {
-        value = (value | i);
+        value |= (i & bitMask);
+    }
+
+    public void add(Enum<?> e) {
+        add(1<<e.ordinal());
     }
 
     public void add(String[] s) throws NoSuchFieldException, IllegalAccessException {
-        add(getValue(s));
+        add(getValue(getDomain(), s));
     }
 
     public void add(String s) throws NoSuchFieldException, IllegalAccessException {
-        add(s.split(","));
+        // add(s.split(","));
+        add(getValue(getDomain(), s));
     }
 
     public void remove(int i) {
-
         value = (value & ~i);
-
     }
 
+    /*
     public String[] toStrings() {
         try {
             //return Flags.getFlags(AccessFlags.class, value);
@@ -152,13 +369,22 @@ public class Flags {
         catch (IllegalAccessException e) {
             return new String[0];
         }
-
     }
+     */
 
     @Override
     public String toString() {
-        return String.join(",", toStrings());
-        //return Arrays.toString(toStrings());
+        try {
+            //return Flags.getFlags(AccessFlags.class, value);
+            return String.join(",", getFlags(value));
+        }
+        catch (IllegalAccessException e) {
+            return "";
+        }
+
+        // return new String[0];
+        // return String.join(",", toStrings());
+        // return Arrays.toString(toStrings());
     }
 
 
@@ -172,81 +398,97 @@ public class Flags {
         //return (actions & a) != 0;
     }
 
-    /*
-    interface AccessFlags {
-        static final int A = 16;
-        static final int B = 32;
-        static final int C = 64;
+    boolean involves(Enum e) {
+        return (value & (1 << e.ordinal())) != 0;
+        //return (actions & a) != 0;
     }
-    */
-    enum Liput {
-        MIKA,
-        MÄKI;
 
-        int bit(){
-            return 1 << ordinal();
+
+
+    protected enum ExampleEnum {
+        READ,
+        WRITE,
+        EXEC,
+        SPECIAL;
+
+        final int bit;
+        ExampleEnum(){
+            bit = 1 << ordinal();
         }
+
     }
-
-    protected static int counter;
-
-    static {
-        counter = 0;
-    }
-
-    public static int getBit(){
-      return 1 << ++counter;
-    };
-
 
     public static void main(String[] args) {
 
-        //class Lipat extends Liput {
-        //}
-
-        Liput liput1 = Liput.MIKA;
-        Liput liput2 = Liput.MÄKI;
-        System.out.println(Liput.MIKA.bit() | Liput.MÄKI.bit());
-        // System.out.println(Liput.MIKA.ordinal());
-        // System.out.println(Liput.MÄKI.ordinal());
-        System.out.println(String.format(" %d ", Liput.MÄKI.ordinal()));
-        System.out.println(String.format(" %s ", Liput.MÄKI));
-        //Liput.MIKA.ordinal();
-
-        // class Access { // extends Flags implements AccessFlags {
-        // class Access extends Flags implements AccessFlags {
-        class Access extends Flags { // implements AccessFlags {
-            public final int READ  = Flags.getBit();
-            public final int WRITE = Flags.getBit();
-            public final int EXEC  = Flags.getBit();
+        if (args.length == 0){
+            System.out.printf("Usage: %n java %s <flags>  # flags = %s %n",
+                    Flags.class.getCanonicalName(), Arrays.toString(ExampleEnum.values()));
+            System.out.printf("Example: %n java %s READ WRITE READ,EXEC 7 1 0 %n",
+                    Flags.class.getCanonicalName());
         }
 
-        Access access2 = new Access();
 
-        Access access = new Access(){
-            final public int STREAM = Flags.getBit();
-            final public int SUDO = WRITE|READ;
-        };
+        Map<String,Flags> map = new HashMap<>();
 
-        System.out.println(ClassUtils.getConstants(access.getClass()).entrySet());
+        map.put("Plain (unlabelled) Flags class, 8 bits", new Flags(0xff));
+        map.put("Flags class + Enum", new Flags(ExampleEnum.class));
 
-        for (String s : args) {
+        class ExampleClass extends Flags {
+            static public final int READ  = 1;
+            static public final int WRITE = 2;
+            static public final int EXEC  = 4;
+        }
+        map.put("Inherited Class", new ExampleClass());
 
-            System.out.println(s);
 
-            try {
-                int i = Integer.parseInt(s);
-                access.set(i);
-            } catch (NumberFormatException e) {
+        for (Map.Entry<String,Flags> entry: map.entrySet()){
+
+            Flags flags = entry.getValue();
+            flags.getDomain(); // DEBUG
+
+            System.out.println();
+            System.out.printf("EXAMPLE: %s: ", entry.getKey());
+            //System.out.printf("EXAMPLE: ");
+            if (flags.getClass() == flags.getDomain()){
+                System.out.printf("%s", flags.getClass().getSimpleName());
+            }
+            else {
+                System.out.printf("%s[%s]", flags.getClass().getSimpleName(),flags.getDomain().getSimpleName());
+            }
+            System.out.printf("  %s", flags.getAllFlags());
+            // System.out.println(flags.getAllFlags().entrySet());
+            System.out.printf("  mask: %d %n", flags.bitMask);
+
+            for (String s : args) {
+
+                System.out.println();
+                System.out.printf("Arg: '%s' %n", s);
+
                 try {
-                    access.set(s);
-                } catch (NoSuchFieldException | IllegalAccessException e2) {
-                    e2.printStackTrace();
+                    int i = Integer.parseInt(s);
+                    int rejectedBits = flags.validate(i);
+                    if (rejectedBits != 0) {
+                        System.out.printf("Reject %d (mask=%d)%n", rejectedBits, flags.bitMask);
+                    }
+                    else {  // Alternatively: valid bits could be set (application dependent choice)
+                        flags.set(i);
+                    }
                 }
+                catch (NumberFormatException e) {
+                    try {
+                        flags.set(s, flags.getDomain());
+                    } catch (NoSuchFieldException | IllegalAccessException e2) {
+                        e2.printStackTrace();
+                    }
+                }
+
+                System.out.printf(" Value: %d == (%s)%n", flags.value, flags.toString());
+
+
             }
 
-            System.out.printf("  %d=\t %s%n", access.value, access.toString());
-
         }
+
+
     }
 }

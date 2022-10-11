@@ -21,19 +21,25 @@ import java.util.regex.Pattern;
     COMPRESSION = ''
     EXTENSION = ''
 
-	The members in capital letters will be passed to generators, for example to ExternalGenerator, as environment variables
+	The members in capital letters will be passed to generators,
+ 	for example to ExternalGenerator, as environment variables.
  */
 class ProductInfo extends ProductParameters {
 
 	final public String PRODUCT_ID; // TODO consider class / interface, also for Generator's
 
-	// Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
-	protected static final Pattern filenameRe = Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
-	// re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
-
+	/// Compression is a "special" filename segment, it is extracted first.
 	protected static final Pattern compressionRe = Pattern.compile("^(.*)\\.(zip|gz)$");
 
-	//
+	// Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
+	protected static final Pattern filenameRe =
+			Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
+	// re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
+
+
+	/** Additional parameters forwarded directly to product generator.
+	 *
+	 */
 	public final Map<String,String> directives = new HashMap<>();
 
 	/**
@@ -136,7 +142,7 @@ class ProductInfo extends ProductParameters {
 			}
 			//
 			
-			PRODUCT_ID   = m.group(3);
+			PRODUCT_ID   = m.group(3).replace('-', '.');
 			Map<String,Object> paramLink = INPUT_PARAMETERS;
 			String param = m.group(5);
 			// int index=0; // ordered params?
@@ -233,8 +239,18 @@ class ProductInfo extends ProductParameters {
 	public static void main(String[] args) {
 
 		if (args.length == 0){
-			System.out.println("Usage: <product> eg. 201012161615_misc.ppmforge_DIMENSION=2.5_ANGLE=45.ppm.gz?Threshold=0.1");
-			return; 
+
+			final String cmd = String.format("java %s", ProductInfo.class.getCanonicalName()) + " %s";
+
+			System.out.println("Usage:");
+			System.out.println(String.format(cmd, "<product_filename>"));
+			System.out.println(String.format(cmd, "<product_filename>?<directives> "));
+
+			System.out.println("Examples:");
+			System.out.println(String.format(cmd, "201012161615_misc.ppmforge_DIMENSION=2.5_ANGLE=45.ppm.gz"));
+			System.out.println(String.format(cmd, "201012161615_misc.ppmforge_DIMENSION=2.5_ANGLE=45.ppm.gz?Threshold=0.1"));
+			System.out.println(String.format(cmd, "201012161615_misc-ppmforge_DIMENSION=2.5_ANGLE=45.ppm.gz  # New!"));
+			return;
 		}
 
 		ProductInfo info;
@@ -243,7 +259,8 @@ class ProductInfo extends ProductParameters {
 			info = new ProductInfo(args[0]);
 			System.out.println(info.toString());
 			System.out.println(info.getParamEnv(null));
-		} catch (ParseException e) {
+		}
+		catch (ParseException e) {
 			e.printStackTrace();
 		}
 		

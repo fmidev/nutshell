@@ -216,7 +216,7 @@ public class Program {
                 //return String.format("ProgramOption{%s} %s,", name, Arrays.toString(paramKeys));
             }
             else if (reference == null) {
-                return String.format("%s(null) %s", name, p);
+                return String.format("%s(simple) %s", name, p);
             }
             else {
                 return String.format("%s&%s %s", name, reference.toString(),p);

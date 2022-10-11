@@ -1,5 +1,7 @@
 package nutshell;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,9 +61,19 @@ public class HttpLog extends Log {
         }
 
         final int status;
+
+
+
     }
 
-    final static Map<Integer, HttpStatus> statusCodes = new HashMap<>();
+    // Keys and values can be String:s or Path:s
+    static Map<Path,String> urlMap = new HashMap<Path,String>();  // URL?
+    static {
+        urlMap.put(Paths.get("/opt/nutshell"), "http://localhost/");
+    }
+
+
+        final static Map<Integer, HttpStatus> statusCodes = new HashMap<>();
 	static {
         // statusCodes = new HashMap<>();
         for (HttpStatus s : HttpStatus.values()) {
@@ -78,12 +90,12 @@ public class HttpLog extends Log {
 	 *
 	 *  This constructor is handy when creating a log for a child process.
 	 *
-	 * @param simpleName
-	 * @param mainLog - existing log ("parent" or main log)
+	 * @param name
+	 * @param verbosity -
 	 */
 	public HttpLog(String name, int verbosity) {
         //super(simpleName, mainLog);
-        super(name, verbosity);
+        super(name, verbosity, 5);
         reset();
     }
 
@@ -198,6 +210,85 @@ public class HttpLog extends Log {
         }
 
         return true;
+    }
+
+    @Override
+    protected <E> Log flush(Status status, E message){
+
+        //final String start = "<%s>"
+
+        /// Non-HTML
+        if (!this.decoration.involves(OutputFormat.HTML)){
+            return super.flush(status, message);
+        }
+
+        /// HTML
+        buffer.append("<pre>");
+
+        buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
+
+        //buffer.append(String.format("%7s", statusCodes.get(this.status)));
+        if (this.decoration.involves(OutputFormat.COLOUR)){
+            //buffer.append(String.format("<span style=\"background-color: %s\" >", status.colour.name()));
+        }
+        buffer.append(String.format("<span class=\"%s\" >", status.name().toLowerCase())); // TODO: levelName (WARN)
+
+
+        buffer.append(String.format("%7s", status));
+        buffer.append(':').append(' ').append(name);
+
+        //String s = message.toString();
+        //buffer.append(SimpleHtml.Tag.B.start());
+
+        //buffer.append(' ').append(message);
+        if (message != null){
+            PathDetector pd = null;
+            try {
+                buffer.append(' ');
+
+                pd = new PathDetector(message.toString());
+                while (pd.next()){
+
+                    buffer.append(pd.prefix);
+
+                    String result = null;
+                    for (Map.Entry<Path, String> entry: urlMap.entrySet()){
+                        Path p = entry.getKey();
+                        if (pd.path.startsWith(p)){
+                            Path relative = p.relativize(pd.path);
+                            result = String.format("<a href=\"%s\">%s</a>", relative, pd.filename); //SimpleHtml.Tag.H3.start());
+                            break;
+                        }
+                    }
+
+                    if (result == null)
+                        result = String.format("<b>%s</b>", pd.path);
+
+                    buffer.append(result);
+
+                    //buffer.append(pd.path);
+                    //buffer.append("}"); //SimpleHtml.Tag.H3.end());
+                }
+                buffer.append(pd.remainingLine);  // = trailing part of the line
+            }
+            catch (Exception e){
+                System.err.println(pd);
+                e.printStackTrace(getPrintStream());
+                //System.err.print(e.getMessage());
+            }
+        }
+
+
+        if (this.decoration.involves(OutputFormat.COLOUR)){
+            buffer.append("</span>");
+        }
+
+        buffer.append("</pre>\n");
+
+        flushBuffer();
+
+        return this;
+
     }
 
     static

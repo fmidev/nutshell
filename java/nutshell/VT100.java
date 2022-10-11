@@ -97,7 +97,8 @@ public class VT100 {
 
     //final static public String END = "\033[0m";
     //final static public String E = "\033[0m";
-    static public Control compound(Colours colour, int highlights){
+    static
+    public Control compound(Colours colour, int highlights){
 
         Control c = new Control() {
 

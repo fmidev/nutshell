@@ -112,7 +112,7 @@ public class ShellUtils {
 
 		 */
 		Log l = new Log();
-		l.COLOURS = true;
+		//l.decoration.set(Log.OutputFormat.COLOUR);
 
 		try {
 

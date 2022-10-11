@@ -11,19 +11,19 @@ import java.util.List;
 
 /**
  *
- * @param <T>
  */
-class Counter {
+class MyCounter  {
 
-    static protected int counter;
-    static {
-        counter = 0;
+    static protected int counter = 0;
+
+    static public int getBit() {
+        return (1 << counter++);
     }
 
-    public static int getBit(){
-      return 1 << counter++;
-    };
-}
+};
+
+
+
 
 /** Determines, what should be done with the resulting product file or instance.
  *
@@ -36,13 +36,13 @@ interface ResultType {
     /**
      * The product is in memory cache
      */
-    int MEMORY = Counter.getBit(); //Counter.getBit(); // 1 "RESULT=MEMORY"
+    int MEMORY = MyCounter.getBit(); //Counter.getBit(); // 1 "RESULT=MEMORY"
 
     /**
      * Product should be saved on disk. System side generator may save it anyway.
      * – return immediately in success
      */
-    int FILE = Counter.getBit(); // 2; // "RESULT=FILE"
+    int FILE = MyCounter.getBit(); // 2; // "RESULT=FILE"
 
 }
 
@@ -58,15 +58,15 @@ interface OutputType {
     /** HTTP only: client will be redirected to URL of generated product
      *  Strictly speaking - needs no file, but a result (file or object).
      *
-     * @see Nutlet#doGet
+     * @see Nutlet doGet
      */
-    int REDIRECT = Counter.getBit() | ResultType.FILE; //16 | ResultType.FILE;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
+    int REDIRECT = MyCounter.getBit() | ResultType.FILE; //16 | ResultType.FILE;  // "OUTPUT=REDIRECT require[RESULT=FILE]"
 
     /** Output in a stream (Currently, HTTP only. Future option: standard output.)
      *
-     * @see Nutlet#doGet
+     * @see Nutlet doGet
      */
-    int STREAM = Counter.getBit(); // 32;  // "OUTPUT=STREAM"
+    int STREAM = MyCounter.getBit(); // 32;  // "OUTPUT=STREAM"
 
 }
 
@@ -77,26 +77,26 @@ interface ActionType {
      *  Returns immediately, if a non-empty product instance is found.
      *  If an empty product is found, waits for completion.
      */
-    int EXISTS = Counter.getBit(); // 64; // "OUTPUT=INFO"
+    int EXISTS = MyCounter.getBit(); // 64; // "OUTPUT=INFO"
 
     /** Delete the product file on disk (future option: also in memory cache).
      */
-    int DELETE = Counter.getBit(); // 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
+    int DELETE = MyCounter.getBit(); // 128; // "ACTION=DELETE_FILE" or "PREOP_DELETE"
 
     /** Retrieve input list.
      */
-    int INPUTLIST = Counter.getBit(); // 256; // a "hidden" flag? "OUTPUT=INFO"
+    int INPUTLIST = MyCounter.getBit(); // 256; // a "hidden" flag? "OUTPUT=INFO"
 
     /** The product is (re)generated. Used with MEMORY and FILE
      *
      */
-    int GENERATE = Counter.getBit(); // 512; //  | INPUTLIST;
+    int GENERATE = MyCounter.getBit(); // 512; //  | INPUTLIST;
 
     /** Conditional generate: create product only if it does not exist. Used with MEMORY and FILE
      *
      *  In program flow, MEMORY and FILE will be checked first, and only if they fail, GENERATION takes place.
      */
-    int MAKE = Counter.getBit() | EXISTS; // 1024 | EXISTS;
+    int MAKE = MyCounter.getBit() | EXISTS; // 1024 | EXISTS;
     //public final int MAKE = EXIST | GENERATE;
     // A "hidden" flag? actually unclear, should be either RESULT=FILE or RESULT=MEMORY (but not RESULT=null);
     // Also, acts like "make both MEMORY and FILE objects".
@@ -104,18 +104,18 @@ interface ActionType {
 
     /** Run script "run.sh" in the product directory (after)
      */
-    int RUN = Counter.getBit(); // 2048; // PostProcessing!
+    int RUN = MyCounter.getBit(); // 2048; // PostProcessing!
 
     /** Go through product request handler checking existence of product generator, memory cache and output directory.
      */
-    // int INFO = Counter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
-    int STATUS = Counter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
+    // int INFO = MyCounter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
+    int STATUS = MyCounter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
 
-    int PARALLEL = Counter.getBit(); // 8192; // use threads
+    int PARALLEL = MyCounter.getBit(); // 8192; // use threads
 
     /// Computation intensive products are computed in the background; return a notification receipt in HTML format.
     //  public static final int BATCH = 4096;
-    int CLEAR_CACHE = Counter.getBit(); // 16384;
+    int CLEAR_CACHE = MyCounter.getBit(); // 16384;
 
 }
 
@@ -124,14 +124,14 @@ interface PostProcessing {
     /** Link file to short directory
      *
      */
-    int SHORTCUT = Counter.getBit() | ResultType.FILE; // 4 | FILE; // "POSTOP=LINK_SHORTCUT"
+    int SHORTCUT = MyCounter.getBit() | ResultType.FILE; // 4 | FILE; // "POSTOP=LINK_SHORTCUT"
 
     /** Link file to short directory, $TIMESTAMP replaced with 'LATEST'
      */
-    int LATEST = Counter.getBit() | ResultType.FILE; //8 | FILE;  // "POSTOP=LINK_LATEST"
+    int LATEST = MyCounter.getBit() | ResultType.FILE; //8 | FILE;  // "POSTOP=LINK_LATEST"
 
     /// Try to store the resulting file.
-    int STORE = Counter.getBit();
+    int STORE = MyCounter.getBit();
 
 }
 
@@ -139,9 +139,12 @@ interface PostProcessing {
 public class Instructions extends Flags implements ActionType, ResultType, OutputType, PostProcessing {
 
     public Instructions(){
+        super(Instructions.class);
     }
 
+
     public Instructions(int a){
+        super(Instructions.class);
         this.value = a;
     }
 

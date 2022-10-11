@@ -2,18 +2,15 @@ package nutshell;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 
+/** Logging safer than Log4j
 
-public class Log implements AutoCloseable {
-
-	/// Status levels (Error levels) and their colours (optional)
-	public enum Status implements Indexed {
-
-		/*
 		INSPIRED BY:
 		#define	LOG_EMERG	0	// system is unusable //
 		#define	LOG_ALERT	1	// action must be taken immediately //
@@ -23,7 +20,12 @@ public class Log implements AutoCloseable {
 		#define	LOG_NOTICE	5	// normal but significant condition  //
 		#define	LOG_INFO	6	// informational //
 		#define	LOG_DEBUG	7	// debug-level messages //
-		 */
+ */
+public class Log implements AutoCloseable {
+
+
+	/// Status levels (Error levels) and their colours (optional)
+	public enum Status implements Indexed {
 
 		// Fundamental
 		// TODO re-organize according to C error levels
@@ -33,24 +35,30 @@ public class Log implements AutoCloseable {
 		WARNING(3, VT100.Colours.YELLOW),
 		//FAIL(4,  VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.ITALIC.bitvalue)), 	/// Action completed unsuccessfully. // ?
 		NOTE(5,  VT100.Colours.DEFAULT), // VT100.compound(VT100.Colours.CYAN, VT100.Highlights.DIM.bitvalue)),   	/// Important information
-		INFO(6,  VT100.compound(VT100.Colours.DEFAULT,0)),  	/// Default color (white) Less important information
-		LOG(9, VT100.Highlights.DIM),     /// Sometimes informative messages.
-		DEBUG(10, VT100.compound(VT100.Colours.DEFAULT, VT100.Highlights.DIM.bitvalue)), // VT100.Highlights.RESET),      /// Technical information about the process
+		INFO(6,  VT100.Colours.DEFAULT),  	/// Default color (white) Less important information
+		LOG(9, VT100.Colours.DEFAULT, VT100.Highlights.DIM),     /// Sometimes informative messages.
+		DEBUG(10, VT100.Colours.DEFAULT, VT100.Highlights.DIM), // VT100.Highlights.RESET),      /// Technical information about the process
 		// Extensions
-		FAIL(WARNING.level, VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.DIM.bitvalue)), 	/// Action completed unsuccessfully. // ?
-		SUCCESS(WARNING.level, VT100.compound(VT100.Colours.GREEN,  VT100.Highlights.DIM.bitvalue)), 	/// Action completed unsuccessfully. // ?
-		WAIT(NOTE.level, VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.ITALIC.bitvalue)),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
+		FAIL(WARNING.level, VT100.Colours.YELLOW,  VT100.Highlights.DIM), 	/// Action completed unsuccessfully. // ?
+		SUCCESS(WARNING.level, VT100.Colours.GREEN,  VT100.Highlights.DIM), 	/// Action completed unsuccessfully. // ?
+		WAIT(NOTE.level, VT100.Colours.YELLOW,  VT100.Highlights.ITALIC),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
 		OK(NOTE.level,    VT100.Colours.GREEN),      /// Action completed successfully.
 		SPECIAL(NOTE.level, VT100.Colours.MAGENTA),
 		EXPERIMENTAL(NOTE.level, VT100.Colours.CYAN),
-		DEPRECATED(NOTE.level, VT100.compound(VT100.Colours.CYAN, VT100.Highlights.DIM.bitvalue)),
-		UNIMPLEMENTED(WARNING.level,  VT100.compound(VT100.Colours.YELLOW, VT100.Highlights.DIM.bitvalue)),
+		DEPRECATED(NOTE.level, VT100.Colours.CYAN, VT100.Highlights.DIM),
+		UNIMPLEMENTED(WARNING.level, VT100.Colours.YELLOW, VT100.Highlights.DIM),
 		;
 
-		Status(int level, VT100.Control colour){
+		Status(int level, VT100.Colours colour){
+			this(level, colour, VT100.Highlights.RESET); // default
+		}
+
+		Status(int level, VT100.Colours colour, VT100.Highlights highlights){
 			this.level = level;
 			this.colour = colour;
+			this.highlights = highlights;
 		}
+
 
 		public final int level;
 
@@ -59,7 +67,8 @@ public class Log implements AutoCloseable {
 			return level;
 		}
 
-		private final VT100.Control colour;
+		protected final VT100.Colours colour;
+		protected final VT100.Highlights highlights;
 
 	}
 
@@ -74,56 +83,85 @@ public class Log implements AutoCloseable {
 		}
 	}
 
+	/**
+	 *
+	 class MyCounter extends Counter<Log> {
+	 };
+	 */
 
-	/*
-	public static final int FATAL = 1;
-	public static final int ERROR = 2;
-	public static final int WARNING = 3;
-	public static final int FAIL = 4;
-	public static final int NOTE = 5;
-	public static final int INFO = 6;
-	public static final int WAIT = 7;
-	public static final int OK = 8;
-	public static final int VERBOSE = 9;
-	public static final int DEBUG = 10;
-	*/
+	public enum OutputFormat { // implements  Indexed {
+		TEXT,
+		COLOUR,
+		VT100,
+		HTML;
 
+		/*
+		final int bit;
+
+		OutputFormat(){
+			bit = 1 << this.ordinal();
+		}
+
+		@Override
+		public int getIndex() {
+			return bit;
+		}
+
+		 */
+
+	}
+
+	// public Flags decorations;
+	final public Flags decoration = new Flags(OutputFormat.class);
+
+
+	/** Create a log with a name prefixed with the name of a existing log.
+	 *
+	 *  This constructor is handy when creating a log for a child process.
+	 *
+	 *  Note: @printStream is initialized to @System.err , not to that of the mainLog
+	 *
+	 * @param localName - name
+	 * @param verbosity - log level
+	 * @param minDigits -
+	 *
+	 */
+	public Log(String localName, int verbosity, int minDigits) {
+
+		startTime = System.currentTimeMillis();
+
+		if (localName != null)
+			setName(localName);
+		setVerbosity(verbosity);
+		numberFormat.setMinimumIntegerDigits(minDigits);
+		printStream = System.err;
+		// decoration = new Flags();
+	}
 
 	public Log() {
-		startTime = System.currentTimeMillis();
-		//numberFormat = NumberFormat.getIntegerInstance();
-		numberFormat.setMinimumIntegerDigits(5);
-		printStream = System.err;
+		this("", Status.LOG.level, 5);
+	}
+
+	/** Create a log with a given name.
+	 *
+	 * @param name
+	 */
+	public Log(String name) {
+		this(name, Status.LOG.level, 5);
 	}
 
 	/** Create a log similar to an existing log.
 	 *
 	 *  This constructor is handy when creating...
 	 *
-	 *  Note: @printStream is initialized to @System.err , not to that of the mainLog
+	 *  Note: @printStream is initialized to @System.err
 	 *
 	 * @param log - existing log
 	 */
 	public Log(Log log) {
-		startTime = System.currentTimeMillis();
-		verbosity = log.getVerbosity();
-		// TODO: copy
-		numberFormat.setMinimumIntegerDigits(log.numberFormat.getMinimumIntegerDigits());
-		setVerbosity(log.getVerbosity());
-		printStream = System.err;
+		this("", log.getVerbosity(), log.numberFormat.getMinimumIntegerDigits());
 	}
 
-	/** Create a log with a given verbosity.
-	 *
-	 * @param name
-	 */
-	public Log(String name) {
-		startTime = System.currentTimeMillis();
-		numberFormat.setMinimumIntegerDigits(5);
-		setVerbosity(Status.LOG.level);
-		this.setName(name);
-		printStream = System.err;
-	}
 
 	/** Create a log with a given verbosity.
 	 *
@@ -136,36 +174,6 @@ public class Log implements AutoCloseable {
 		printStream = System.err;
 	}
 
-	/** Create a log with a name prefixed with the name of a existing log.
-	 *
-	 *  This constructor is handy when creating a log for a child process.
-	 *
-	 *  Note: @printStream is initialized to @System.err , not to that of the mainLog
-	 *
-	 * @param localName
-	 * @param mainLog - existing log ("parent" or main log)
-	 */
-	//public Log(String localName, Log mainLog) {
-	public Log(String localName, int verbosity) {
-
-		startTime = System.currentTimeMillis();
-		/*
-		if (mainLog != null){
-			setName(mainLog.getName() + '.' + localName);
-			setVerbosity(mainLog.getVerbosity());
-			numberFormat.setMinimumIntegerDigits(mainLog.numberFormat.getMinimumIntegerDigits());
-		}
-		else {
-			setName(localName);
-			setVerbosity(Status.LOG);
-			numberFormat.setMinimumIntegerDigits(5);
-		}
-		*/
-		setName(localName);
-		setVerbosity(verbosity);
-		numberFormat.setMinimumIntegerDigits(5);
-		printStream = System.err;
-	}
 
 	@Override
 	protected void finalize() throws Throwable {
@@ -289,18 +297,64 @@ public class Log implements AutoCloseable {
 		return flush(s, message);
 	}
 
-	/**
+	class PathDetector {
+
+		String prefix = "";
+		Path path = null;
+		String dir = null;
+		String filename = null;
+		String remainingLine = "";
+
+		PathDetector(String remainingLine){
+			this.remainingLine = remainingLine;
+		}
+
+		boolean next(){
+			Matcher m = FileUtils.filePathRe.matcher(remainingLine);
+			if (m.matches()){
+				prefix = m.group(1);
+				dir = m.group(2);
+				filename = m.group(m.groupCount()-1);
+				if (dir == null)
+					dir = ".";
+				if (filename == null)
+					filename = "";
+				path = Paths.get(dir, filename);
+				remainingLine = m.group(m.groupCount()); // note "N+1"
+				if (remainingLine == null)
+					remainingLine = "";
+				return true;
+			}
+			else {
+				return false;
+			}
+		};
+
+		@Override
+		public String toString() {
+			return "PathDetector{" +
+					"prefix='" + prefix + '\'' +
+					", path=" + path +
+					", line='" + remainingLine + '\'' +
+					'}';
+		}
+	}
+
+	/** Start log line with a status label and time stamp (milliseconds).
+	 *
 	 * @param status
-	 * @param message
-	 * @param <E>
 	 * @return
 	 */
-	protected <E> Log flush(Status status, E message){
+	protected void appendProlog(Status status) {
 
-		if (this.COLOURS){
-			//buffer.append(VT100.Highlights.BRIGHT); // consider conditional
-			//buffer.append(VT100.Codes.UNDERLINE);
-			buffer.append(status.colour);
+		if (this.decoration.involves(OutputFormat.VT100)) {
+			if (this.decoration.involves(OutputFormat.COLOUR)) {
+				//buffer.append(VT100.Highlights.BRIGHT); // consider conditional
+				//buffer.append(VT100.Codes.UNDERLINE);
+				buffer.append(status.colour);
+			}
+		} else if (this.decoration.involves(OutputFormat.HTML)) {
+			buffer.append(SimpleHtml.Tag.PRE.start());
 		}
 
 		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
@@ -311,26 +365,97 @@ public class Log implements AutoCloseable {
 		if (name != null)
 			buffer.append(':').append(' ').append(name);
 
+	}
+
+	/**
+	 * @param message
+	 * @param <E>
+	 * @return
+	 */
+	protected <E> void appendMessage(E message){
+
+		if (this.decoration.involves(OutputFormat.HTML)){
+			Path root = Paths.get("/opt/nutshell");
+			String s = message.toString();
+			buffer.append(' ');
+			buffer.append(SimpleHtml.Tag.B.start());
+
+			PathDetector pd = new PathDetector(message.toString());
+			while (pd.next()){
+				buffer.append(pd.prefix);
+				//Map<String,String>
+				Path relative = root.relativize(pd.path);
+				buffer.append(String.format("<a href=\"%s\">%s</a>%n", relative, pd.path.getFileName())); //SimpleHtml.Tag.H3.start());
+				//buffer.append(pd.path);
+				//buffer.append("}"); //SimpleHtml.Tag.H3.end());
+			}
+			buffer.append(pd.remainingLine);
+
+			// buffer.append(s);
+			buffer.append(SimpleHtml.Tag.B.end());
+		}
+		else {
+			buffer.append(' ').append(message);
+		}
+
+	}
+
+	/**
+	 *   Ensures that printStream exists
+	 *
+	 */
+	protected void flushBuffer() {
+
 		// Ensure printStream to avoid infinite buffer growth
 		// TODO: design control for buffer size.
 		// TODO: consider: if (size > 1M), clear(), and only light warning in stderr...
-		if (printStream == null){
-			printStream = System.err;
-			printStream.print(buffer.toString()); // "copy" prefix (ie. not do clear it)
-			printStream.append("NOTE: printStream undefined, using standard error.\n");
-		}
-
-		if (message != null)
-			buffer.append(' ').append(message);
-		//buffer.append('\t').append(message);
-
-		if (this.COLOURS){
-			buffer.append(VT100.Highlights.RESET);
-		}
-		buffer.append('\n');
+		getPrintStream();
 
 		printStream.print(buffer.toString());
 		buffer.setLength(0);  // TODO CLEAR?
+
+	}
+
+
+	/**
+	 * @param status
+	 * @param message
+	 * @param <E>
+	 * @return
+	 */
+	protected <E> Log flush(Status status, E message){
+
+		if (this.decoration.involves(OutputFormat.VT100)) {
+
+			if (status.highlights != VT100.Highlights.RESET) // default
+				buffer.append(status.highlights);
+
+			if (this.decoration.involves(OutputFormat.COLOUR)) {
+				buffer.append(status.colour);
+			}
+		}
+
+		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
+
+		//buffer.append(String.format("%7s", statusCodes.get(this.status)));
+		buffer.append(String.format("%7s", status));
+
+		if (name != null)
+			buffer.append(':').append(' ').append(name);
+
+
+		if (message != null) {
+			buffer.append(' ').append(message);
+			//appendMessage(message);
+		}
+
+		if (this.decoration.involves(OutputFormat.VT100)){
+			buffer.append(VT100.Highlights.RESET);
+		}
+
+		buffer.append('\n');
+
+		flushBuffer();
 
 		return this;
 	}
@@ -372,6 +497,7 @@ public class Log implements AutoCloseable {
 		return status;
 	}
 
+	@Deprecated
 	public String getStatusString() {
 		if (statusCodes.containsKey(status))
 			return statusCodes.get(status).name();
@@ -436,7 +562,7 @@ public class Log implements AutoCloseable {
 
 	final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
 
-	final private StringBuffer buffer = new StringBuffer();
+	final protected StringBuffer buffer = new StringBuffer();
 
 	public void clearBuffer(){
 		buffer.setLength(0);
@@ -472,6 +598,8 @@ public class Log implements AutoCloseable {
 			this.printStream = new PrintStream(this.fileOutputStream);
 			//this.log.printStream = System.err;
 			//this.setVerbosity(Status.DEBUG); //?
+			//this.printStream.println(SimpleHtml.Tag.HTML.start());
+			//this.printStream.println(SimpleHtml.Tag.PRE.start());
 			this.debug(String.format("Started log file: %s", this.logFile));
 		}
 		catch (IOException e) {
@@ -496,11 +624,17 @@ public class Log implements AutoCloseable {
 	private FileOutputStream fileOutputStream;
 
 	public PrintStream getPrintStream() {
-		return this.printStream;
+		if (printStream == null){
+			printStream = System.err;
+			printStream.print(buffer.toString()); // "Copy" the prefix (Do not clear it, yet!)
+			printStream.append("NOTE: printStream undefined, using standard error.\n");
+		}
+		return printStream;
 	}
 
 	// TODO decoration enum: NONE, VT100, HTML, CSS, static init!
-	public boolean COLOURS = false;
+	// public boolean COLOURS = false;
+	// public OutputFormat decoration = ne;
 
 	/** Close file (printStream).
 	 *
@@ -515,6 +649,13 @@ public class Log implements AutoCloseable {
 		}
 
 		if (this.printStream != null){
+			/* BUG: this is not fileOutputStream ?
+			if (decoration.involves(OutputFormat.HTML)) {
+				this.printStream.println(SimpleHtml.Tag.PRE.end());
+				this.printStream.println(SimpleHtml.Tag.HTML.end());
+			}
+
+			 */
 			if ((this.printStream != System.err) && (this.printStream != System.out)){
 				this.printStream.close();
 				this.printStream = null;
@@ -561,7 +702,7 @@ public class Log implements AutoCloseable {
 
 		Log log = new Log();
 		//log.printStream = null;
-		log.COLOURS = true;
+		log.decoration.set(OutputFormat.COLOUR);
 		log.setVerbosity(Status.DEBUG);
 
 		log.note("Starting");
@@ -617,5 +758,6 @@ public class Log implements AutoCloseable {
 		//log.warn("Hey!");
 
 	}
+
 
 }

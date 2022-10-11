@@ -55,12 +55,53 @@ public class SimpleHtml extends SimpleXML{
 		DIV,
 		LINK;
 
-		@Override
+		Tag(){
+			lowerCaseName = name().toLowerCase();
+			startStr = toString(true, null);
+			endStr   = toString(false,null);
+		}
+
+		final String lowerCaseName;
+		final String startStr;
+		final String endStr;
+
+		public String toString(boolean start, Map<String,?> attributes) {
+		  	StringBuilder builder = new StringBuilder();
+		  	builder.append('<');
+		  	if (!start)
+		  		builder.append('/');
+			builder.append(lowerCaseName);
+		  	if (attributes != null){
+				builder.append(' ');
+				for (Map.Entry<String,?> a: attributes.entrySet()){
+		  			builder.append(a.getKey()).append('=').append('"').append(a.getValue()).append('"').append(' ');
+				}
+			}
+			builder.append('>');
+		  	return builder.toString();
+		};
+
+
+			@Override
 		/** Returns the tag name in lowercase letters.
 		 */
 		public String toString() {
-			return super.toString().toLowerCase();
+			//return super.toString().toLowerCase();
+			return lowerCaseName;
 		}
+
+		/** Returns the tag name in lowercase letters.
+		 */
+		public String start(){
+			return startStr;
+		}
+
+		public String end() {
+			return endStr;
+		}
+
+
+
 	}
 
 	final public Element root;

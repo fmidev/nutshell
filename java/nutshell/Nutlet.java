@@ -289,6 +289,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		try {
 			task = productServer.new Task(product.value, batchConfig.instructions.value, null);
+			task.log.decoration.add(Log.OutputFormat.HTML);
+			task.log.decoration.add(Log.OutputFormat.COLOUR);
 		}
 		catch (ParseException e) {
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,"Product parse failure",
