@@ -30,17 +30,17 @@ public class ProductServerBase extends Program {
     public final Map<String,Object> setup = new HashMap<>();
 
     // Read in config, set in constructor
-    public int fileGroupID = 100;  // GROUP_ID
+    public int GROUP_ID = 0;  // GROUP_ID
     public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
     public String user = null;
 
     public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
-    public Path cacheRoot   = Paths.get(".");
+    public Path CACHE_ROOT = Paths.get(".");
     //public Path storageRoot   = Paths.get(".");
-    public Path productRoot = Paths.get(".");
+    public Path PRODUCT_ROOT = Paths.get(".");
     //protected Path storageRoot = Paths.get(".");
-    protected Path storageRoot = Paths.get(".");
+    protected Path STORAGE_ROOT = Paths.get(".");
     // Consider
     final protected List<StringMapper> storagePaths = new LinkedList<>();
 
@@ -66,7 +66,7 @@ public class ProductServerBase extends Program {
     };
 
     /// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
-    public int timeout = 30;
+    public int TIMEOUT = 30;
 
 
     static public Graph serverGraph = new Graph("Product Server");
@@ -74,7 +74,8 @@ public class ProductServerBase extends Program {
     /** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
      *
      */
-    protected String cmdPath = System.getenv("PATH");
+    public String PATH = "";
+    public String PATH_EXT = "";
 
     /** Read configuration file. This operation can be repeated (with --conf ).
      *
@@ -116,7 +117,8 @@ public class ProductServerBase extends Program {
                     serverLog.note(String.format("Re-reading setup: %s (old: %s)",
                             path, this.confFile));
                 //serverLog.note("Reading setup: " + path.toString());
-                MapUtils.read(path.toFile(), setup);
+                // MapUtils.read(path.toFile(), setup);
+                Manip.readConfig(path.toFile(), setup);
             }
             this.confFile = path; // null ok??
             setup.put("confFile", path);
@@ -126,13 +128,34 @@ public class ProductServerBase extends Program {
             setup.put("confFileError", e.getLocalizedMessage());
         }
 
+        System.err.println(setup);
+
         //log.debug(setup.toString());
+        // NEW
+        //this.PRODUCT_ROOT = Paths.get(".");
+        //this.CACHE_ROOT   = Paths.get(".");
+        //this.STORAGE_ROOT = Paths.get(".");
+        //this.TIMEOUT = 30;
+        //this.GROUP_ID = 0;
 
-        this.productRoot = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
-        this.cacheRoot   = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
-        this.storageRoot = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
 
-        this.timeout = Integer.parseInt(setup.getOrDefault("TIMEOUT",  30).toString());
+
+        Manip.assignToObjectLenient(setup, this);
+        if (GROUP_ID == 0){
+            try {
+                String gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();
+                System.err.println(String.format("Group id: %s %s ", gid, CACHE_ROOT));
+                this.GROUP_ID = Integer.parseInt(gid);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // this.PRODUCT_ROOT = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
+        // this.CACHE_ROOT = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
+        // this.STORAGE_ROOT = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
+
+        // this.TIMEOUT = Integer.parseInt(setup.getOrDefault("TIMEOUT",  30).toString());
 
         this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
         this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
@@ -146,8 +169,13 @@ public class ProductServerBase extends Program {
         this.user = System.getProperty("user.name"); // $USER
         setup.put("user.name", this.user);
 
+        this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
+
+        System.err.println(Manip.toString(this, '\n'));
+
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
+        /*
         String gid = null; //setup.getOrDefault("GROUP_ID", null);
         //Path trueCacheRoot = null;
         try {
@@ -157,8 +185,8 @@ public class ProductServerBase extends Program {
             // Override with conf value of GROUP_ID, if set.
             gid = setup.getOrDefault("GROUP_ID", "").toString();
             if (gid.isEmpty())
-                gid = Files.getAttribute(cacheRoot, "unix:gid").toString();
-            this.fileGroupID = Integer.parseInt(gid.toString()); // null?
+                gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();
+            this.GROUP_ID = Integer.parseInt(gid); // null?
             //System.err.println(String.format("GID: %s -> %d", gid, fileGroupID));
             // this.fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
         }
@@ -166,21 +194,23 @@ public class ProductServerBase extends Program {
             serverLog.warn(String.format("%s: %s", e.getClass().getCanonicalName(), e.getMessage()));
             // serverLog.error(String.format("Could not read group id of cache dir: %s, real path: %s, gid='%s'",
             //        cacheRoot, trueCacheRoot, gid));
-            serverLog.error(String.format("Could not solve group id: '%s', got '%s'", cacheRoot, gid));
+            serverLog.error(String.format("Could not solve group id: '%s', got '%s'", CACHE_ROOT, gid));
         }
-        setup.put("fileGroupID", this.fileGroupID);
+        //setup.put("fileGroupID", this.GROUP_ID);
+        */
 
+        /*
         Object logPathFormat = setup.get("LOGFILE");
         if (logPathFormat != null) {
             Path p = setLogFile(logPathFormat.toString());
             //System.err.println(String.format("Log file: %s", p);
         }
-        //logPathFormat = "./nutshell-" + System.getenv("USER")+"-%s.log";
-        // Path p = setLogFile(logPathFormat.toString());
+
+         */
         //
-        if (setup.containsKey("PATH_EXT"))
-            this.cmdPath += ":" + setup.get("PATH_EXT").toString();
-        setup.put("cmdPath", this.cmdPath);
+        //if (setup.containsKey("PATH_EXT"))
+                //setup.get("PATH_EXT").toString();
+        //setup.put("cmdPath", this.PATH);
         // this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
         // this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
     }
@@ -241,9 +271,9 @@ public class ProductServerBase extends Program {
 
         GeneratorTracker(Path startDir){
             if (startDir == null)
-                this.startDir = productRoot;
+                this.startDir = PRODUCT_ROOT;
             else
-                this.startDir = productRoot.resolve(startDir);
+                this.startDir = PRODUCT_ROOT.resolve(startDir);
         }
 
         Path startDir = null;
@@ -313,7 +343,7 @@ public class ProductServerBase extends Program {
                     System.out.printf(" Found: %s -> JSON %s %n", parentDir, jsonFile);
                 }
                 // System.out.printf(" ADD: %s -> DIR %s %n", path, dir);
-                Path dir = productRoot.relativize(parentDir);
+                Path dir = PRODUCT_ROOT.relativize(parentDir);
                 generators.add(dir);
                 //System.out.printf(" add: %s%n", dir);
             }
@@ -374,12 +404,12 @@ public class ProductServerBase extends Program {
 
     public void clearCache(boolean confirm) throws IOException {
 
-        if (!this.cacheRoot.endsWith("cache")){
-            serverLog.error("Cache root does not end with 'cache' : " + this.cacheRoot);
+        if (!this.CACHE_ROOT.endsWith("cache")){
+            serverLog.error("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
             return;
         }
 
-        Path p = this.cacheRoot.toRealPath();
+        Path p = this.CACHE_ROOT.toRealPath();
         if (!p.endsWith("cache")){
             serverLog.error("Cache root does not end with 'cache' : " + p);
             return;
@@ -415,9 +445,9 @@ public class ProductServerBase extends Program {
 
 
         ProductServerBase serverBase = new ProductServerBase();
-        serverBase.productRoot = Paths.get(args[0]);
+        serverBase.PRODUCT_ROOT = Paths.get(args[0]);
 
-        Path startDir = serverBase.productRoot;
+        Path startDir = serverBase.PRODUCT_ROOT;
         if (args.length >= 2)
             startDir = Paths.get(args[1]);
 

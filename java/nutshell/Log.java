@@ -93,6 +93,7 @@ public class Log implements AutoCloseable {
 		TEXT,
 		COLOUR,
 		VT100,
+		MAP_URLS,
 		HTML;
 
 		/*

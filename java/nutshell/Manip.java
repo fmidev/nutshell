@@ -73,14 +73,17 @@ public class Manip {
 			line = line.trim();
 
 			// Skip empty lines
-			if (line.length() == 0)
-				continue;
+			//if (line.length() == 0)
+			//	continue;
 
 			// Strip (trailing) comments
 			Matcher m = commentPattern.matcher(line);
 			if (m.matches())
-				line = m.group(1); //
+				line = m.group(1);
 
+			if (line.isEmpty())
+			    continue;
+            // System.err.printf(" LINE: '%s'%n", line);
 			parse(line, entry);
             try {
                 if (MAP)
@@ -109,26 +112,50 @@ public class Manip {
     }
 
     static
-    public boolean assignToMap(String key, Object value,  Map<String,Object> target)  {
+    public void assignToMap(String key, Object value,  Map<String,Object> target)  {
         target.put(key, value);
-        return true;
     }
 
     static
-    public boolean assignToObject(String key, Object value, Object target) throws NoSuchFieldException, IllegalAccessException {
+    public void assignToObject(Map<String,Object> source, Object target) throws NoSuchFieldException, IllegalAccessException {
+        for (Map.Entry<String,Object> entry: source.entrySet()) {
+            assignToObject(entry.getKey(), entry.getValue(), target);
+        }
+    }
+
+    static
+    public void assignToObjectLenient(Map<String,Object> source, Object target)  {
+        for (Map.Entry<String,Object> entry: source.entrySet()) {
+            try {
+                assignToObject(entry.getKey(), entry.getValue(), target);
+            } catch (NoSuchFieldException e) {
+                //e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // e.printStackTrace();
+            }
+        }
+    }
+
+
+    static
+    public void assignToObject(String key, Object value, Object target) throws NoSuchFieldException, IllegalAccessException {
 
         //if (target instanceof Map<String,Object>){ }
         Field field = target.getClass().getField(key);
 
         if (value == null) {
             field.set(target, null);
-            return false; // or true...
+            return;
         }
 
         Class cls = field.getType();
         // System.err.printf(" Class=%s %n", cls.getName());
 
         String s = value.toString(); // (value == null) ? null : value.toString();
+
+        if (cls.isPrimitive() && s.isEmpty()){
+            return;
+        }
 
         if (cls.equals(int.class) || (cls.equals(Integer.class))){
             field.set(target, Integer.parseInt(s));
@@ -154,13 +181,15 @@ public class Manip {
         else if (cls.equals(String.class)){
             field.set(target, s);
         }
+        else if (cls.equals(Path.class)){
+            field.set(target, Paths.get(s));
+        }
         else {
             if (cls.isPrimitive()){
                 throw new IllegalAccessException("Not yet implemented: " + cls.getName());
             }
             field.set(target, value); // obj
         }
-        return true;
     }
 
     static public String toString(Object obj, char separator){
@@ -213,6 +242,8 @@ public class Manip {
 
         System.out.println(example);
 
+        Map<String,Object> map = new HashMap<>();
+
         Manip.Entry entry = new Entry();
         for (String arg: args) {
 
@@ -221,7 +252,6 @@ public class Manip {
                 Path path = Paths.get(entry.value.toString());
                 try {
                     readConfig(path.toFile(), example);
-                    Map<String,Object> map = new HashMap<>();
                     readConfig(path.toFile(), map);
                     System.out.println(map);
                 } catch (IOException e) {
@@ -237,6 +267,17 @@ public class Manip {
                     e.printStackTrace();
                 }
             }
+        }
+
+
+        System.out.println(example);
+
+        try {
+            assignToObject(map, example);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
 
         System.out.println(example);

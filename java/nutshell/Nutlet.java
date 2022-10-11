@@ -173,7 +173,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			// ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
 			ProductServerBase.GeneratorTracker tracker =
-					productServer.new GeneratorTracker(productServer.productRoot);
+					productServer.new GeneratorTracker(productServer.PRODUCT_ROOT);
 
 			try {
 				tracker.run();

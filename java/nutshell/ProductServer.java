@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 1);
+		super.version = Arrays.asList(2, 2);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -134,7 +134,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 			// final String[] productDef = [productInfo, directives]
-			// in LOG // this.creationTime = System.currentTimeMillis();
+			// in LOG  // this.creationTime = System.currentTimeMillis();
 			this.id = getProcessId();
 
 			this.info = new ProductInfo(productStr);
@@ -165,19 +165,19 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
 			// Absolute
-			this.outputDir = cacheRoot.resolve(this.relativeOutputDir);
-			this.outputDirTmp = cacheRoot.resolve(this.relativeOutputDirTmp);
+			this.outputDir = CACHE_ROOT.resolve(this.relativeOutputDir);
+			this.outputDirTmp = CACHE_ROOT.resolve(this.relativeOutputDirTmp);
 			this.outputPath = outputDir.resolve(filename);
 			//this.outputPathTmp = outputDirTmp.resolve(getFilePrefix() + filename);
 			this.outputPathTmp = outputDirTmp.resolve(filename);
-			this.storagePath = storageRoot.resolve(this.relativeOutputDir).resolve(filename);
+			this.storagePath = STORAGE_ROOT.resolve(this.relativeOutputDir).resolve(filename);
 
 
 			try {
-				Path logPath = cacheRoot.resolve(relativeLogPath);
+				Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 				//ensureFile(cacheRoot, this.relativeLogPath);
 				//FileUtils.ensureWritableDir(logPath.getParent(), fileGroupID, dirPerms);
-				FileUtils.ensureWritableFile(logPath, fileGroupID, filePerms, dirPerms);
+				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath);
 				//FileUtils.ensureWritableFile(logPath.getParent().resolve("test"+getTaskId()+".foo"), fileGroupID, filePerms, dirPerms);
 
@@ -219,7 +219,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			try {
 				if (!Files.isSymbolicLink(dst))
-					FileUtils.ensureGroup(dst, fileGroupID, filePerms);
+					FileUtils.ensureGroup(dst, GROUP_ID, filePerms);
 			}
 			catch (IOException e){
 				// Could be logged?
@@ -273,7 +273,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			Path result = Files.createSymbolicLink(dst, src);
-			FileUtils.ensureGroup(result, fileGroupID, filePerms);
+			FileUtils.ensureGroup(result, GROUP_ID, filePerms);
 
 			return result;
 			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
@@ -440,7 +440,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.log(HttpLog.HttpStatus.OK, String.format("Stored file exists: %s", this.storagePath));
 
 					try {
-						FileUtils.ensureWritableDir(outputDir, fileGroupID, dirPerms);
+						FileUtils.ensureWritableDir(outputDir, GROUP_ID, dirPerms);
 						// ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					} catch (IOException e) {
 						log.warn(e.getMessage());
@@ -553,11 +553,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				// Mark this task being processed (empty file)
 				// if (this.instructions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
-					FileUtils.ensureWritableDir(outputDirTmp, fileGroupID, dirPerms);
-					FileUtils.ensureWritableDir(outputDir, fileGroupID, dirPerms);
+					FileUtils.ensureWritableDir(outputDirTmp, GROUP_ID, dirPerms);
+					FileUtils.ensureWritableDir(outputDir, GROUP_ID, dirPerms);
 					//ensureDir(cacheRoot, relativeOutputDirTmp);
 					//ensureDir(cacheRoot, relativeOutputDir);
-					FileUtils.ensureWritableFile(outputPath, fileGroupID, filePerms, dirPerms);
+					FileUtils.ensureWritableFile(outputPath, GROUP_ID, filePerms, dirPerms);
 
 					// ensureFile(cacheRoot, relativeOutputPath);
 					// Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
@@ -783,8 +783,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						if (this.info.isDynamic()) {
 							try {
 								//Path dir = ensureDir(cacheRoot, productDir);
-								Path dir = cacheRoot.resolve(productDir);
-								FileUtils.ensureWritableDir(dir, fileGroupID, dirPerms);
+								Path dir = CACHE_ROOT.resolve(productDir);
+								FileUtils.ensureWritableDir(dir, GROUP_ID, dirPerms);
 								this.link(this.outputPath, dir, true);
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
@@ -797,8 +797,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						if (this.info.isDynamic()) {
 							try {
 								//Path dir = ensureDir(cacheRoot, productDir);
-								Path dir = cacheRoot.resolve(productDir);
-								FileUtils.ensureWritableDir(dir, fileGroupID, dirPerms);
+								Path dir = CACHE_ROOT.resolve(productDir);
+								FileUtils.ensureWritableDir(dir, GROUP_ID, dirPerms);
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")), true);
 								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
@@ -810,14 +810,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (this.instructions.isSet(PostProcessing.STORE)) {
 						// Todo: traverse storage paths.
-						Path storageDir = storageRoot.resolve(relativeOutputDir);
+						Path storageDir = STORAGE_ROOT.resolve(relativeOutputDir);
 						Path storedFile = storageDir.resolve(this.info.getFilename());
 						if (Files.exists(storedFile)) {
 							log.experimental(String.format("Store: file exists already: %s", storedFile));
 						} else {
 							try {
 								//ensureDir(storageRoot, relativeOutputDir);
-								FileUtils.ensureWritableDir(storageDir, fileGroupID, dirPerms);
+								FileUtils.ensureWritableDir(storageDir, GROUP_ID, dirPerms);
 								this.copy(this.outputPath, storedFile);
 								log.experimental(String.format("Stored in: %s", storedFile));
 							} catch (IOException e) {
@@ -891,7 +891,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.isSet(Instructions.RUN)) {
 				ShellExec.OutputReader reader = new ShellExec.OutputReader(log.getPrintStream());
 				//ShellExec shellExec = new ShellExec(Paths.get("run.sh"), this.productDir);
-				ShellExec.exec("./run.sh", null, productRoot.resolve(productDir), reader);
+				ShellExec.exec("./run.sh", null, PRODUCT_ROOT.resolve(productDir), reader);
 
 			}
 
@@ -938,9 +938,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			env.put("OUTDIR", this.outputPathTmp.getParent().toString()); //cacheRoot.resolve(this.relativeOutputDir));
 			env.put("OUTFILE", this.outputPathTmp.getFileName().toString());
 
-			if (!cmdPath.isEmpty()) {
-				env.put("PATH", cmdPath);
-				log.special("PATH=" + cmdPath);
+			if (!PATH.isEmpty()) {
+				env.put("PATH", PATH);
+				log.special("PATH=" + PATH);
 			}
 
 			if (!this.retrievedInputs.isEmpty()) {
@@ -973,11 +973,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		public Path writeGraph() {
-			Path graphFile = cacheRoot.resolve(relativeGraphPath);
+			Path graphFile = CACHE_ROOT.resolve(relativeGraphPath);
 			log.special(String.format("Writing graph to file: %s", graphFile));
 			try {
 				Path graphDir = graphFile.getParent();
-				FileUtils.ensureWritableDir(graphDir, fileGroupID, dirPerms);
+				FileUtils.ensureWritableDir(graphDir, GROUP_ID, dirPerms);
 				// ensureDir(cacheRoot, relativeSystemDir);
 				// ensureFile(cacheRoot, relativeGraphPath);
 				graph.dotToFile(graphFile.toString());
@@ -1021,7 +1021,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 * @return
 	 */
 	public Generator getGenerator(String productID) throws IndexedState {
-		Path dir = productRoot.resolve(getProductDir(productID));
+		Path dir = PRODUCT_ROOT.resolve(getProductDir(productID));
 		Generator generator = new ExternalGenerator(productID, dir.toString());
 		return generator;
 	};
@@ -1243,7 +1243,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return false;
 		}
 
-		int remainingSec = this.timeout;
+		int remainingSec = this.TIMEOUT;
 
 		final long fileLength = file.length();
 
@@ -1485,7 +1485,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		final ProductServer server = new ProductServer();
 		server.serverLog.setVerbosity(Log.Status.DEBUG);
-		server.timeout = 20;
+		server.TIMEOUT = 20;
 		//server.version
 
 		/*
@@ -1597,8 +1597,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		registry.add(new Parameter.Simple<String>("path","Extend PATH variable for product generation",
 				""){
 			public void exec() {
-				server.cmdPath = value;
-				server.setup.put("cmdPath", server.cmdPath); // consider PARASITER...
+				server.PATH = value;
+				server.setup.put("cmdPath", server.PATH); // consider PARASITER...
 			}
 		});
 
@@ -1607,7 +1607,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			public void exec() {
 
-				GeneratorTracker tracker = server.new GeneratorTracker(server.productRoot.resolve(value));
+				GeneratorTracker tracker = server.new GeneratorTracker(server.PRODUCT_ROOT.resolve(value));
 
 				try {
 					System.out.println(String.format("List products (dir=%s)", tracker.startDir));
