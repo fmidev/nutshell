@@ -46,6 +46,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		productServer = new ProductServer();
 		productServer.serverLog.setVerbosity(Log.Status.DEBUG);
 		productServer.serverLog.note("Nutlet started");
+
 	}
 
 	//// String confDir = "";
@@ -66,7 +67,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 		}
 
-		// Here, for future extension dependen on ServletConfig config
+		HttpLog.urlMap.put(Paths.get("/opt/nutshell"), "http://dev.tutka.fmi.fi/nutshell/");
+
+		// Here, for future extension dependent on ServletConfig config
 		registry = new ProgramRegistry();
 
 	}

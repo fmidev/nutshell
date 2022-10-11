@@ -67,9 +67,10 @@ public class HttpLog extends Log {
     }
 
     // Keys and values can be String:s or Path:s
-    static Map<Path,String> urlMap = new HashMap<Path,String>();  // URL?
+    static
+    public Map<Path,String> urlMap = new HashMap<Path,String>();  // URL?
     static {
-        urlMap.put(Paths.get("/opt/nutshell"), "http://localhost/");
+        //urlMap.put(Paths.get("/opt/nutshell"), "http://dev.tutka.fmi.fi/nutshell/");
     }
 
 
