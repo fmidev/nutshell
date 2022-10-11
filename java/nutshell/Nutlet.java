@@ -67,7 +67,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 		}
 
-		HttpLog.urlMap.put(Paths.get("/opt/nutshell"), "http://dev.tutka.fmi.fi/nutshell/");
+		// Experimental
+		HttpLog.urlMap.put(Paths.get("/tutka/data/dev/cache"), "http://dev.tutka.fmi.fi/nutshell/cache");
+		HttpLog.urlMap.put(Paths.get("/tutka/code/dev/run"), "http://dev.tutka.fmi.fi/nutshell/products");
 
 		// Here, for future extension dependent on ServletConfig config
 		registry = new ProgramRegistry();
