@@ -9,10 +9,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
+/** Object manipulation utilities, including configuration read.
+ *
  *   See also: @{@link MapUtils}
  */
-public class Config {
+public class Manip {
 
     static
     public class Entry {
@@ -65,7 +66,7 @@ public class Config {
 
         String line = null;
 
-        Config.Entry entry = new Config.Entry();
+        Manip.Entry entry = new Manip.Entry();
 
         while ((line = input.readLine()) != null){
 
@@ -96,7 +97,7 @@ public class Config {
     }
 
     static
-    public void parse(String line, Config.Entry entry){
+    public void parse(String line, Manip.Entry entry){
 
         Matcher matcher = linePattern.matcher(line);
         if (matcher.matches()) {
@@ -194,7 +195,7 @@ public class Config {
 
         @Override
         public String toString() {
-            return Config.toString(this, '\n');
+            return Manip.toString(this, '\n');
         }
     }
 
@@ -205,14 +206,14 @@ public class Config {
 
         if (args.length == 0){
             System.out.println("Usage: \n");
-            System.out.println(Config.toString(example, ' '));
+            System.out.println(Manip.toString(example, ' '));
             System.out.println("CONFFILE=foo.cnf  f=0.1234\n");
             System.exit(0);
         }
 
         System.out.println(example);
 
-        Config.Entry entry = new Entry();
+        Manip.Entry entry = new Entry();
         for (String arg: args) {
 
             parse(arg, entry);
