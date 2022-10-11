@@ -30,9 +30,11 @@ public class ProductServerBase extends Program {
     public final Map<String,Object> setup = new HashMap<>();
 
     // Read in config, set in constructor
-    public int GROUP_ID = 0;  // GROUP_ID
-    public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString("rwxrwxr-x");
-    public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rw-rw-r--");
+    public int GROUP_ID = 0;  // GROUP_ID  *
+    public String DIR_PERMS  = "rwxrwxr-x";
+    public String FILE_PERMS = "rw-rw-r--";
+    public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString(DIR_PERMS);
+    public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString(FILE_PERMS);
     public String user = null;
 
     public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
@@ -90,6 +92,7 @@ public class ProductServerBase extends Program {
      */
     protected void readConfig(String path) {
         readConfig(Paths.get(path));
+        //Class cls = Set<PosixFilePermission>.class;
     }
 
     /** Read configuration file. This operation can be repeated (with --conf ).
@@ -128,37 +131,23 @@ public class ProductServerBase extends Program {
             setup.put("confFileError", e.getLocalizedMessage());
         }
 
-        System.err.println(setup);
-
-        //log.debug(setup.toString());
-        // NEW
-        //this.PRODUCT_ROOT = Paths.get(".");
-        //this.CACHE_ROOT   = Paths.get(".");
-        //this.STORAGE_ROOT = Paths.get(".");
-        //this.TIMEOUT = 30;
-        //this.GROUP_ID = 0;
-
-
+        //System.err.println(setup);
 
         Manip.assignToObjectLenient(setup, this);
+
         if (GROUP_ID == 0){
             try {
                 String gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();
-                System.err.println(String.format("Group id: %s %s ", gid, CACHE_ROOT));
+                // System.err.println(String.format("# Group id: %s %s ", gid, CACHE_ROOT));
                 this.GROUP_ID = Integer.parseInt(gid);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        // this.PRODUCT_ROOT = Paths.get(setup.getOrDefault("PRODUCT_ROOT", ".").toString());
-        // this.CACHE_ROOT = Paths.get(setup.getOrDefault("CACHE_ROOT",   ".").toString());
-        // this.STORAGE_ROOT = Paths.get(setup.getOrDefault("STORAGE_ROOT",   ".").toString());
 
-        // this.TIMEOUT = Integer.parseInt(setup.getOrDefault("TIMEOUT",  30).toString());
-
-        this.dirPerms = PosixFilePermissions.fromString(setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
-        this.filePerms = PosixFilePermissions.fromString(setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
+        dirPerms = PosixFilePermissions.fromString(DIR_PERMS); // setup.getOrDefault("DIR_PERMS","rwxrwxr-x").toString());
+        filePerms = PosixFilePermissions.fromString(FILE_PERMS); // setup.getOrDefault("FILE_PERMS","rw-rw-r--").toString());
         ExternalGenerator.umask = setup.getOrDefault("UMASK","").toString();
 
         /// Objects
@@ -171,7 +160,7 @@ public class ProductServerBase extends Program {
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
-        System.err.println(Manip.toString(this, '\n'));
+        //System.err.println(Manip.toString(this, '\n'));
 
         // Todo: consider optional conf file based  fileGroupID?
         // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
