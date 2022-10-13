@@ -1,7 +1,6 @@
 package nutshell;
 
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,13 +27,13 @@ public class NutWeb extends HttpServlet {
 	/**  System side directory for this HttpServlet
 	 *   Example:
 	 */
-	public String httpRoot = null; //"";
+	public String HTTP_ROOT = null; //"";
 
 
 	/** Name of the HTML document in which the other HTML doc will be embedded.
 	 *  Uses BODY contents.
 	 */
-	public String htmlTemplate = null; //"nutweb/template.html";
+	public String HTML_TEMPLATE = null; //"nutweb/template.html";
 
 	/**  Director for HTML documents to be processed (decorated, populated)
 	 *   Example: /html or /docs
@@ -69,14 +68,21 @@ public class NutWeb extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
+		getTomcatParameters(setup);
+
+		Manip.assignToObjectLenient(setup, this);
+
+
+		/*
 		retrieveInitParameter(config, "httpRoot",    "/undefined");
 		retrieveInitParameter(config, "htmlTemplate","nutweb/template.html");
 		// retrieveInitParameter(config, "docDir",      "");
 		retrieveInitParameter(config, "debug",       "false");
-
-		setup.putAll(getTomcatParameters());
+		*/
+		//setup.putAll(getTomcatParameters());
 	}
 
+	/*
 	private void retrieveInitParameter(ServletConfig config, String key, String defaultValue) throws ServletException{
 		//Field field = reference.getClass().getField(key)
 		String s = config.getInitParameter(key);
@@ -89,8 +95,8 @@ public class NutWeb extends HttpServlet {
 			//e.printStackTrace();
 			throw new ServletException(e);
 		}
-
 	}
+	*/
 
 
 
@@ -115,7 +121,6 @@ public class NutWeb extends HttpServlet {
 	{
 
 		//productStr = "";
-
 		/**  TODO: rename main.html to sth like layout.html or template.html
 		 */
 		String fileName = null;
@@ -218,7 +223,7 @@ public class NutWeb extends HttpServlet {
 		SimpleHtml html = null;
 		try {
 			//Path path = Paths.get(httpRoot,"template", "main.html");
-			Path path = Paths.get(httpRoot, htmlTemplate);
+			Path path = Paths.get(HTTP_ROOT, HTML_TEMPLATE);
 			html = new SimpleHtml(path);
 		}
 		catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
@@ -226,8 +231,8 @@ public class NutWeb extends HttpServlet {
 			html = new SimpleHtml(this.getClass().getCanonicalName() + " Exception");
 
 			Element ul = html.getUniqueElement(html.body, SimpleHtml.Tag.UL, "list");
-			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpRoot: %s", httpRoot) );
-			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpTemplate: %s", htmlTemplate) );
+			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpRoot: %s", HTTP_ROOT) );
+			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpTemplate: %s", HTML_TEMPLATE) );
 
 			//html.appendElement(ul, SimpleHtml.Tag.LI, e.getMessage());
 			html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
@@ -257,7 +262,7 @@ public class NutWeb extends HttpServlet {
 		}
 
 		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
-		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), httpRoot, htmlTemplate));
+		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), HTTP_ROOT, HTML_TEMPLATE));
 		return html;
 	}
 
@@ -273,7 +278,7 @@ public class NutWeb extends HttpServlet {
 	protected SimpleHtml includeHtml(String filename, SimpleHtml html) {
 
 		// Consider data security?
-		Path path = Paths.get(httpRoot, filename);
+		Path path = Paths.get(HTTP_ROOT, filename);
 
 		try {
 			Document doc = SimpleXML.readDocument(path);
@@ -533,9 +538,11 @@ public class NutWeb extends HttpServlet {
 
 	/** Read values listed in init-param section servlet section in WEB-INF/web.xml
 	 */
-	private Map<String,String> getTomcatParameters(){
+	private Map<String,Object> getTomcatParameters(Map<String,Object> map){
 
-		HashMap<String,String> map = new HashMap<String, String>();
+		if (map == null)
+			map = new HashMap<>();
+
 		try {
 			Enumeration<String> names = getInitParameterNames();
 			while (names.hasMoreElements()){

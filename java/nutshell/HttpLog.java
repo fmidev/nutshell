@@ -1,7 +1,6 @@
 package nutshell;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,15 +65,8 @@ public class HttpLog extends Log {
 
     }
 
-    // Keys and values can be String:s or Path:s
-    static
-    public Map<Path,String> urlMap = new HashMap<Path,String>();  // URL?
-    static {
-        //urlMap.put(Paths.get("/opt/nutshell"), "http://dev.tutka.fmi.fi/nutshell/");
-    }
 
-
-        final static Map<Integer, HttpStatus> statusCodes = new HashMap<>();
+    final static Map<Integer, HttpStatus> statusCodes = new HashMap<>();
 	static {
         // statusCodes = new HashMap<>();
         for (HttpStatus s : HttpStatus.values()) {
@@ -241,44 +233,8 @@ public class HttpLog extends Log {
         //String s = message.toString();
         //buffer.append(SimpleHtml.Tag.B.start());
 
-        //buffer.append(' ').append(message);
-        if (message != null){
-            PathDetector pd = null;
-            try {
-                buffer.append(' ');
-
-                pd = new PathDetector(message.toString());
-                while (pd.next()){
-
-                    buffer.append(pd.prefix);
-
-                    String result = null;
-                    for (Map.Entry<Path, String> entry: urlMap.entrySet()){
-                        Path p = entry.getKey();
-                        if (pd.path.startsWith(p)){
-                            Path relative = p.relativize(pd.path);
-                            result = String.format("<a href=\"%s\">%s</a>", relative, pd.filename); //SimpleHtml.Tag.H3.start());
-                            break;
-                        }
-                    }
-
-                    if (result == null)
-                        result = String.format("<b>%s</b>", pd.path);
-
-                    buffer.append(result);
-
-                    //buffer.append(pd.path);
-                    //buffer.append("}"); //SimpleHtml.Tag.H3.end());
-                }
-                buffer.append(pd.remainingLine);  // = trailing part of the line
-            }
-            catch (Exception e){
-                System.err.println(pd);
-                e.printStackTrace(getPrintStream());
-                //System.err.print(e.getMessage());
-            }
-        }
-
+        buffer.append(' ').append(message);
+        // TODO: use url mapping!
 
         if (this.decoration.involves(OutputFormat.COLOUR)){
             buffer.append("</span>");

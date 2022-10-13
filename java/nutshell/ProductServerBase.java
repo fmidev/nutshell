@@ -29,6 +29,14 @@ public class ProductServerBase extends Program {
 
     public final Map<String,Object> setup = new HashMap<>();
 
+    // The following HTTP setting are optional
+
+    /** HTTP protocol and host name */
+    public String HTTP_HOST = "";
+    /** Port for HTTP server */
+    public String HTTP_PORT = "";  // GROUP_ID  *
+    public String HTTP_PREFIX = "/nutshell";
+
     // Read in config, set in constructor
     public int GROUP_ID = 0;  // GROUP_ID  *
     public String DIR_PERMS  = "rwxrwxr-x";
@@ -42,7 +50,12 @@ public class ProductServerBase extends Program {
     //public Path storageRoot   = Paths.get(".");
     public Path PRODUCT_ROOT = Paths.get(".");
     //protected Path storageRoot = Paths.get(".");
-    protected Path STORAGE_ROOT = Paths.get(".");
+    public Path STORAGE_ROOT = Paths.get(".");
+
+    final
+    public Map<String,String> MAP_URL = new HashMap<>();
+
+
     // Consider
     final protected List<StringMapper> storagePaths = new LinkedList<>();
 
@@ -125,7 +138,7 @@ public class ProductServerBase extends Program {
             }
             this.confFile = path; // null ok??
             setup.put("confFile", path);
-        } catch (IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             setup.put("confFileError", e.getLocalizedMessage());
@@ -160,6 +173,15 @@ public class ProductServerBase extends Program {
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
+        StringBuilder sb = new StringBuilder();
+        sb.append(HTTP_HOST);
+        if (HTTP_PORT != null)
+            sb.append(':').append(HTTP_PORT);
+        sb.append(HTTP_PREFIX);
+        String httpPrefix = sb.toString();
+        Log.pathMap.put(CACHE_ROOT, httpPrefix+"/cache/");  // <- append relative path
+        Log.pathMap.put(STORAGE_ROOT, httpPrefix+"/storage/");
+		Log.pathMap.put(PRODUCT_ROOT, httpPrefix+"/products/");
         //System.err.println(Manip.toString(this, '\n'));
 
         // Todo: consider optional conf file based  fileGroupID?

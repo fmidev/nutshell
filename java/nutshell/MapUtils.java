@@ -32,10 +32,9 @@ public class MapUtils {
 	// Accepts:
 	// key=value  
 	// key CAN BE NOW ANYTHING EXCEPT white or =
-	//protected static final Pattern linePattern = Pattern.compile("^\\s*[\\-]*([^=]*)\\s*[\\s=]\\s*((.*[^;\\s])?)[;\\s]*$");
-	//protected Pattern linePattern = Pattern.compile("^\\s*[\\-]*([\\w\\.:]*)\\s*[\\s=]\\s*((.*[^;\\s])?)[;\\s]*$");  
+	// protected static final Pattern linePattern = Pattern.compile("^\\s*[\\-]*([^=]*)\\s*[\\s=]\\s*((.*[^;\\s])?)[;\\s]*$");
+	// protected Pattern linePattern = Pattern.compile("^\\s*[\\-]*([\\w\\.:]*)\\s*[\\s=]\\s*((.*[^;\\s])?)[;\\s]*$");
 	protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
-
 
 
 	static public <K,V> String[] toArray(Map<K,V> map){
@@ -59,6 +58,7 @@ public class MapUtils {
 			String key = matcher.group(1).trim();
 			String value = matcher.group(2).trim();
 			map.put(key, (V)value);
+
 		}
 		
 	}

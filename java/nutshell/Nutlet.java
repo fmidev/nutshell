@@ -46,7 +46,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		productServer = new ProductServer();
 		productServer.serverLog.setVerbosity(Log.Status.DEBUG);
 		productServer.serverLog.note("Nutlet started");
-
 	}
 
 	//// String confDir = "";
@@ -68,9 +67,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		// Experimental
+		/*
 		HttpLog.urlMap.put(Paths.get("/tutka/data/dev/cache"), "http://dev.tutka.fmi.fi/nutshell/cache");
 		HttpLog.urlMap.put(Paths.get("/tutka/code/dev/run"), "http://dev.tutka.fmi.fi/nutshell/products");
-
+		 */
 		// Here, for future extension dependent on ServletConfig config
 		registry = new ProgramRegistry();
 
@@ -274,7 +274,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
-			elem.setTextContent(String.format(" Page: %s/%s ", httpRoot, page.value ));
+			elem.setTextContent(String.format(" Page: %s/%s ", HTTP_ROOT, page.value ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
 			response.setStatus(HttpServletResponse.SC_OK); // tes
@@ -602,7 +602,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
 		String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
 		String name = productServer.getClass().getCanonicalName();
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, httpRoot, name, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, HTTP_ROOT, name, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
 		String cmdLine2 = "nutshell --verbose --conf %s --instructions %s %s ";
 		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");

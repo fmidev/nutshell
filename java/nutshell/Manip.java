@@ -4,6 +4,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -17,16 +18,27 @@ public class Manip {
 
     static
     public class Entry {
-        String key = "";
-        Object value = null;
+        public String key = "";
+        public String index = "";
+        public Object value = null;
     }
 
     protected static final Pattern commentPattern = Pattern.compile("^(.*)[%#](.*)$");
 
-	// Accepts:
-	// key=value
-	// key CAN BE NOW ANYTHING EXCEPT white or =
-	protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
+    /**
+     *  Accepts:
+     * 	VARIABLE_NAME=VALUE
+     * 	VARIABLE_NAME='VALUE'
+     * 	VARIABLE_NAME="VALUE"
+     *
+     *  also:
+     *  VARIABLE[KEY]=VALUE
+     *  VARIABLE[KEY2]=VALUE2
+     *
+     *
+     */
+    protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)(\\[(\\w+)\\])?\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
+    // protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
 
 	/*
     static
@@ -40,10 +52,10 @@ public class Manip {
      * @param file –
      * @param target – onject in which values are assigned
      * @param <T> – Object or Map<String,Object>
-     * @throws IOException
+     * @throws Exception – Either {@link IOException} or {@link ParseException}
      */
     static
-    public <T> void readConfig(File file, T target) throws IOException {
+    public <T> void readConfig(File file, T target) throws Exception {
         BufferedReader input = new BufferedReader(new FileReader(file));
 		readConfig(input, target);
 		input.close();
@@ -57,24 +69,21 @@ public class Manip {
      * @throws IOException
      */
     static
-    public <T> void readConfig(BufferedReader input, T target) throws IOException {
+    public <T> void readConfig(BufferedReader input, T target) throws Exception {
 
         // System.err.printf(" Target class=%s %n", target.getClass().getName());
         // System.err.printf(" Map? %b %n", Map.class.isInstance(target));
         // System.err.printf(" Map? %b %n", );
         final boolean MAP = (target instanceof Map);
 
-        String line = null;
+        Exception exception = null;
+        String line;
 
         Manip.Entry entry = new Manip.Entry();
 
         while ((line = input.readLine()) != null){
 
 			line = line.trim();
-
-			// Skip empty lines
-			//if (line.length() == 0)
-			//	continue;
 
 			// Strip (trailing) comments
 			Matcher m = commentPattern.matcher(line);
@@ -84,31 +93,69 @@ public class Manip {
 			if (line.isEmpty())
 			    continue;
             // System.err.printf(" LINE: '%s'%n", line);
-			parse(line, entry);
             try {
-                if (MAP)
-                    assignToMap(entry.key, entry.value, (Map<String, Object>) target);
-                else
-                    assignToObject(entry.key, entry.value, target);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                parse(line, entry);
             }
+            catch (Exception e){
+                exception = e;
+                continue;
+            }
+
+            try {
+                 if (MAP) {
+                     ((Map<String, Object>) target).put(entry.key, entry.value);
+                 }
+                 else {
+                     // if entry.index != null, assume target has member "key" which is a map.
+                    assignToObject(entry.key, entry.index, entry.value, target);
+                 }
+            } catch (NoSuchFieldException e) {
+                exception = e;
+            } catch (IllegalAccessException e) {
+                exception = e;
+                //e.printStackTrace();
+            }
+
+            if (exception != null)
+                throw exception;
 
         }
     }
 
+    /** Extracts KEY=VALUE from the line.
+     *
+     * @param line
+     * @param entry
+     * @return
+     * @throws ParseException
+     */
     static
-    public void parse(String line, Manip.Entry entry){
+    public void parse(String line, Manip.Entry entry) throws ParseException {
 
         Matcher matcher = linePattern.matcher(line);
+
         if (matcher.matches()) {
-            entry.key = matcher.group(1).trim();
-            entry.value = matcher.group(2).trim();
+            entry.key   = trim(matcher.group(1));
+            entry.index = trim(matcher.group(3));
+            entry.value = trim(matcher.group(4));
+            //return true;
         }
+        else {
+            //matcher.
+            throw new ParseException(String.format("line='%s' regex='%s'", line, linePattern), 0);
+
+        }
+
+        // return false;
         // Map.Entry<String,Integer> entry =
         // new AbstractMap<String,Integer>().SimpleEntry<String, Integer>("exmpleString", 42);
+    }
+
+    private static String trim(String s){
+        if (s == null)
+            return null; // or "" ?
+        else
+            return s.trim();
     }
 
     static
@@ -136,12 +183,30 @@ public class Manip {
         }
     }
 
-
     static
     public void assignToObject(String key, Object value, Object target) throws NoSuchFieldException, IllegalAccessException {
+        assignToObject(key, null, value, target);
+    }
+
+
+    static
+    public void assignToObject(String key, String index, Object value, Object target) throws NoSuchFieldException, IllegalAccessException {
 
         //if (target instanceof Map<String,Object>){ }
         Field field = target.getClass().getField(key);
+
+        if (index != null){
+            target = field.get(target);
+            if (target instanceof Map){
+                Map<String,Object> map = (Map)target;
+                map.put(index, value);
+            }
+            else {
+                throw new NoSuchFieldException(String.format("%s is not a Map", key));
+            }
+            return;
+        }
+        //System.err.printf("Key=%s (%s) %n", key, value);
 
         if (value == null) {
             field.set(target, null);
@@ -192,6 +257,10 @@ public class Manip {
         }
     }
 
+    static public String toString(Object obj){
+        return toString(obj, ',');
+    }
+
     static public String toString(Object obj, char separator){
 
         StringBuilder builder = new StringBuilder();
@@ -221,6 +290,7 @@ public class Manip {
         public long l;
         public boolean b;
         public byte B;
+        public HashMap<String,Object> map = new HashMap<>();
 
         @Override
         public String toString() {
@@ -247,20 +317,28 @@ public class Manip {
         Manip.Entry entry = new Entry();
         for (String arg: args) {
 
-            parse(arg, entry);
+            try {
+                parse(arg, entry);
+            } catch (ParseException e) {
+                //e.printStackTrace();
+                System.out.println(e);
+                continue;
+            }
+
+
             if (entry.key.equals("CONFFILE")){
                 Path path = Paths.get(entry.value.toString());
                 try {
                     readConfig(path.toFile(), example);
                     readConfig(path.toFile(), map);
                     System.out.println(map);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             else {
                 try {
-                    assignToObject(entry.key, entry.value, example);
+                    assignToObject(entry.key, entry.index, entry.value, example);
                 } catch (NoSuchFieldException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
@@ -270,6 +348,7 @@ public class Manip {
         }
 
 
+        //System.out.println(map);
         System.out.println(example);
 
         try {

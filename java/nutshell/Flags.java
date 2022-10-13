@@ -308,6 +308,14 @@ public class Flags {
         set(1<<e.ordinal());
     }
 
+    /** Copy bits from another Flags object.
+     *
+     * @param flags
+     */
+    public void set(Flags flags){
+        set(flags.value);
+    }
+
     /**
      *
      * @param s

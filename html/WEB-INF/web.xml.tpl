@@ -48,12 +48,12 @@
 
     <!-- NEW -->
     <init-param>
-      <param-name>httpRoot</param-name>
+      <param-name>HTTP_ROOT</param-name>
       <param-value>${NUTSHELL_ROOT}</param-value>
     </init-param>
 
     <init-param>
-      <param-name>htmlTemplate</param-name>
+      <param-name>HTML_TEMPLATE</param-name>
       <param-value>nutweb/template.html</param-value>
     </init-param>
 

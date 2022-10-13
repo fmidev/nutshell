@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 2);
+		super.version = Arrays.asList(2, 3);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -140,9 +140,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.info = new ProductInfo(productStr);
 			if (parentLog != null){
 				this.log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
+				this.log.decoration.set(parentLog.decoration);
 			}
 			else {
 				this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
+				this.log.decoration.set(serverLog.decoration);
 			}
 
 			this.filename = this.info.getFilename();
@@ -160,8 +162,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + getTaskId();
-			//this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
-			this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".html");
+
+			// Is this sometimes confusing?
+			if (log.decoration.involves(Log.OutputFormat.HTML))
+				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".html");
+			else
+				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
+
 			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
 			// Absolute
@@ -1140,7 +1147,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.info(task.toString());
 
 				task.log.setVerbosity(log.getVerbosity());
-				task.log.decoration.set(Log.OutputFormat.COLOUR);
+				// task.log.decoration.set(Log.OutputFormat.COLOUR);
 				if (task.log.logFile != null) {
 					log.note(String.format("Log for '%s': %s", key, task.log.logFile));
 				}
@@ -1183,6 +1190,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
 			Task task = entry.getValue();
+			task.log.info("Decoration: " + task.log.decoration.toString());
 			if (task.instructions.isSet(ActionType.PARALLEL)) {
 				try {
 					// serverLog.special
@@ -1208,8 +1216,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				else {
 					// serverLog.special
 					log.info(String.format("Starting task '%s': %s (in main thread)", key, task));
+
 					task.execute();
 				}
+
 				log.info(String.format("Finished task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 
 				//serverLog.special(String.format("Finished task: %s", task));
@@ -1380,23 +1390,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					serverLog.error(String.format("%s: Not implemented: %s", this.getName(), e.getMessage()));
 				}
 				serverLog.special(serverLog.decoration.toString());
-				/*
-				Log.OutputFormat f = Log.OutputFormat.valueOf(value);
-				serverLog.special(f.toString());
-
-				switch (f){
-					case TEXT:
-						serverLog.decoration = f;
-						break;
-					case VT100:
-						serverLog.COLOURS = true;
-						break;
-					case HTML:
-					default:
-						serverLog.warn(String.format("%s: Not implemented: %s", this.getName(), f));
-				}
-
-				 */
 			}
 		});
 

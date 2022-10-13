@@ -24,6 +24,10 @@ import java.util.regex.Matcher;
 public class Log implements AutoCloseable {
 
 
+	// Keys and values can be String:s or Path:s
+	static
+	public Map<Path,String> pathMap = new HashMap<Path,String>();  // URL?
+
 	/// Status levels (Error levels) and their colours (optional)
 	public enum Status implements Indexed {
 
@@ -444,9 +448,47 @@ public class Log implements AutoCloseable {
 		if (name != null)
 			buffer.append(':').append(' ').append(name);
 
-
 		if (message != null) {
-			buffer.append(' ').append(message);
+			if (!this.decoration.involves(OutputFormat.MAP_URLS)){
+				buffer.append(' ').append(message);
+			}
+			else {
+				PathDetector pd = null;
+				try {
+					buffer.append(' ');
+
+					pd = new PathDetector(message.toString());
+					while (pd.next()){
+
+						buffer.append(pd.prefix);
+
+						String result = pd.path.toString(); // default
+						for (Map.Entry<Path, String> entry: pathMap.entrySet()){
+							Path p = entry.getKey();
+							if (pd.path.startsWith(p)){
+								Path relative = p.relativize(pd.path);
+								//result = String.format("<a href=\"%s\">%s</a>", relative, pd.filename); //SimpleHtml.Tag.H3.start());
+								result = entry.getValue() + relative.toString();
+								break;
+							}
+						}
+
+						//if (result == null)
+						//result = String.format("<b>%s</b>", pd.path);
+
+						buffer.append(result);
+
+						//buffer.append(pd.path);
+						//buffer.append("}"); //SimpleHtml.Tag.H3.end());
+					}
+					buffer.append(pd.remainingLine);  // = trailing part of the line
+				}
+				catch (Exception e){
+					System.err.println(pd);
+					e.printStackTrace(getPrintStream());
+					//System.err.print(e.getMessage());
+				}
+			}
 			//appendMessage(message);
 		}
 

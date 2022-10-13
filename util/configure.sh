@@ -43,23 +43,31 @@ echo
 # Root dir of this installation package
 PKG_ROOT=`pwd -P`
 
-if [ $NUTSHELL_VERSION == 'python' ] || [ $NUTSHELL_VERSION == 'tomcat' ]; then
-
-   
-    vt100echo blue "HTTP server configuration"
-
-    ask_variable HTTP_PORT '8080'  "Port for HTTP server"
-
-    ask_variable HTTP_ROOT "/usr/local/nutshell" "Root directory for HTTP server "  #(including ./WEB-INF/lib/Nutlet.jar):"
-    check_dir_syntax HTTP_ROOT
-    NUTSHELL_ROOT=${NUTSHELL_ROOT:-$HTTP_ROOT}
-    
-    ask_variable HTTP_PREFIX "/nutshell" "URL prefix"   # (with leading '/' but without trailing '/')"
-    check_dir_syntax HTTP_PREFIX
-
-    echo
-    
+#if [ $NUTSHELL_VERSION == 'python' ] || [ $NUTSHELL_VERSION == 'tomcat' ]; then
+vt100echo blue "HTTP server configuration"
+if [ $NUTSHELL_VERSION == 'java' ]; then
+    vt100echo green "(HTTP variables are optional for  $NUTSHELL_VERSION)"
 fi
+
+ask_variable HTTP_HOST 'http://localhost'  "HTTP protocol and host name"
+
+ask_variable HTTP_PORT '8080'  "Port for HTTP server"
+
+ask_variable HTTP_ROOT "/usr/local/nutshell" "Root directory for HTTP server "  #(including ./WEB-INF/lib/Nutlet.jar):"
+check_dir_syntax HTTP_ROOT
+NUTSHELL_ROOT=${NUTSHELL_ROOT:-$HTTP_ROOT}
+    
+ask_variable HTTP_PREFIX "/nutshell" "URL prefix"   # (with leading '/' but without trailing '/')"
+check_dir_syntax HTTP_PREFIX
+
+
+#export MAP_URL=
+#ask_variable 'MAP_URL' ''  "EDIT LATER: Convert path prefix to accessible URL, eg. MAP_URL[$NUTSHELL_ROOT]=http://localhost:8080/nutshell/"
+
+
+echo
+    
+
 
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
