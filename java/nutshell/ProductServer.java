@@ -198,6 +198,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.result = null;
 		}
 
+		public Task(String productStr, int instructions) throws ParseException {
+			this(productStr, instructions, null);
+		}
 
 		protected void close() {
 			// System.err.println("CLOSE task: " + toString());
@@ -1620,7 +1623,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			args = new String[]{"--help"};
 		}
 
-		log.special("Instructions..." + batchConfig.instructions);
+		// log.special("Instructions..." + batchConfig.instructions);
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1651,7 +1654,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								param.setParams(""); // Support "premature" end of cmd line, esp. with --help
 						}
 						param.exec();
-						log.debug(String.format("Handled: %s", param));
+						log.special(String.format("Handled: %s", param));
 						//log.special(param.toString());
 						continue;
 					}

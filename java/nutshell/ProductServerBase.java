@@ -34,7 +34,7 @@ public class ProductServerBase extends Program {
     /** HTTP protocol and host name */
     public String HTTP_HOST = "";
     /** Port for HTTP server */
-    public String HTTP_PORT = "";  // GROUP_ID  *
+    public String HTTP_PORT = null; // "";  // GROUP_ID  *
     public String HTTP_PREFIX = "/nutshell";
 
     // Read in config, set in constructor
@@ -60,7 +60,8 @@ public class ProductServerBase extends Program {
     final protected List<StringMapper> storagePaths = new LinkedList<>();
 
     // Not configurable at the moment...
-    static final public Path cachePrefix = Paths.get("cache");
+    static
+    final public Path cachePrefix = Paths.get("cache");
 
     /// System side setting.// TODO: conf
     //public String inputCmd = "./input.sh";  // -> ExternalGenerator NOTE: executed in CWD
@@ -84,7 +85,8 @@ public class ProductServerBase extends Program {
     public int TIMEOUT = 30;
 
 
-    static public Graph serverGraph = new Graph("Product Server");
+    static
+    final public Graph serverGraph = new Graph("Product Server");
 
     /** Unix PATH variable extension, eg. "/var/local/bin:/media/mnt/bin"
      *

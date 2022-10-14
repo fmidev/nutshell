@@ -23,15 +23,6 @@ public class Program {
             this.description = description;
         }
 
-        /*
-        Parameter(String name, String description, T reference) {
-            this.name = name;
-            this.description = description;
-            this.reference = reference;
-            this.paramKeys = collectParamKeys(reference.getClass()); //.split(",");
-
-        }*/
-
         /**
          *
          * @param name - Command name appearing in command line options.
@@ -61,14 +52,6 @@ public class Program {
             this(paramName, description, reference, paramName);
         }
 
-        /*
-        Parameter(String name, String description, Object reference, String[] paramKeys) {
-            this.name = name;
-            this.description = description;
-            this.reference = reference;
-            this.paramKeys = paramKeys; //.split(",");
-        }
-         */
 
         /** Parameter that is handled as single word, even containing commas (,) or assignments (=) .
          *
@@ -96,19 +79,6 @@ public class Program {
            private void assign(String args) throws NoSuchFieldException, IllegalAccessException {
                // System.err.println(String.format("assign: %s='%s'", paramKey, args));
                setParam(paramKey, args);
-               /*
-               String[] keyWordArg = args.split("=", 2);
-               if (keyWordArg.length == 2){
-                   if (!keyWordArg[0].equals(paramKey)){
-                       throw new NoSuchFieldException(
-                               String.format("key='%s', should be '%s' ", keyWordArg[0], paramKey) );
-                   }
-                   setParam(paramKey, keyWordArg[1]);
-               }
-               else {
-                   setParam(paramKey, args);
-               }
-               */
            }
 
            private
@@ -141,14 +111,16 @@ public class Program {
 
         @Override
         public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
-            Field field = reference.getClass().getField(key);
-            setField(reference, field, value);
+            //Field field = reference.getClass().getField(key);
+            // setField(reference, field, value);
+            Manip.assignToObject(key, value, reference);
         }
 
         static
         private void setField(Object target, Field field, Object value) throws NoSuchFieldException, IllegalAccessException {
 
             Class c = field.getType();
+
 
             // System.err.println(String.format("setField: %s :: %s = %s ", target.getClass(), c.getSimpleName(), value));
 
@@ -206,10 +178,12 @@ public class Program {
 
         }
 
+        /** Describes a Parameter and its state (options).
+         *
+         * @return
+         */
         public String toString() {
             // Skip: description
-            //return String.format("ProgramOption{%s} %s,", name, Arrays.toString(paramKeys));
-            //return String.format("ProgramOption{%s} %s,", name, getParams());
             String p = hasParams() ? getParams().toString() : "";
             if (reference == this){
                 return String.format("%s %s", name, p);
@@ -218,8 +192,15 @@ public class Program {
             else if (reference == null) {
                 return String.format("%s(simple) %s", name, p);
             }
+            // Externaö reference
             else {
-                return String.format("%s&%s %s", name, reference.toString(),p);
+                /*
+                for (String s: this.paramKeys){
+                    this.ge
+                }
+
+                 */
+                return String.format("%s*%s : %s", name, reference.toString(),p);
             }
 
         }

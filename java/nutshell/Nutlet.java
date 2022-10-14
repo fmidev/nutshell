@@ -39,7 +39,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	/**
 	 * param arg Input
 	 *
-	 *
 	 */
 	public Nutlet() {
 		setup.put("Nutlet-version", version);  // TODO
@@ -63,7 +62,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		////httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
 		if (!productServer.serverLog.logFileIsSet()){
-			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
+			Path p = productServer.CACHE_ROOT.resolve("nutshell/nutshell-tomcat-%s.html");
+			try {
+				FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
+				productServer.setLogFile(p.toString());
+				productServer.serverLog.decoration.add(Log.OutputFormat.HTML); // + MAP_URLS
+			} catch (IOException e) {
+				e.printStackTrace();
+				productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
+			}
 		}
 
 		// Experimental
@@ -293,7 +300,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// TODO: -> _link_ equivalent files?
 
 		try {
-			task = productServer.new Task(product.value, batchConfig.instructions.value, null);
+			// OutputFormat#HTML
+			task = productServer.new Task(product.value, batchConfig.instructions.value, productServer.serverLog);
+			//task = productServer.new Task(product.value, batchConfig.instructions.value, null);
 			task.log.decoration.add(Log.OutputFormat.HTML);
 			task.log.decoration.add(Log.OutputFormat.COLOUR);
 		}
