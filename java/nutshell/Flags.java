@@ -59,6 +59,19 @@ public class Flags {
 
     public int value = 0;
 
+
+    public boolean contains(String label){
+        //java.lang.reflect.Modifier.isStatic(field.getModifiers()
+        try {
+            Field field = domain.getField(label);
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())){
+                return isIncluded(field);
+            }
+        } catch (NoSuchFieldException e) {
+        }
+        return false;
+    };
+
     static
     private int getValue(Object obj, String flags) throws NoSuchFieldException, IllegalAccessException{
         return getValue(obj, flags.split(","));
@@ -302,10 +315,13 @@ public class Flags {
     /**
      *  Assumes a valid (compatible) Enum class is used.
      *
-     *  @param e
+     *  @param enums
      */
-    public void set(Enum<?> e){
-        set(1<<e.ordinal());
+    public void set(Enum<?>... enums){
+        value = 0;
+        for (Enum e: enums) {
+            add(1<<e.ordinal());
+        }
     }
 
     /** Copy bits from another Flags object.
@@ -401,14 +417,17 @@ public class Flags {
         return (value & i) == i;
     }
 
+    boolean isSet(Enum e) {
+        return isSet(1 << e.ordinal());
+    }
+
+
     boolean involves(int i) {
         return (value & i) != 0;
-        //return (actions & a) != 0;
     }
 
     boolean involves(Enum e) {
-        return (value & (1 << e.ordinal())) != 0;
-        //return (actions & a) != 0;
+        return involves(1 << e.ordinal());
     }
 
 

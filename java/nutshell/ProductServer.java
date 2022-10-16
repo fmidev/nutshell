@@ -141,6 +141,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (parentLog != null){
 				this.log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
 				this.log.decoration.set(parentLog.decoration);
+				this.log.setFormat(parentLog.textOutput.getFormat());
+				// this.log.textDecoration = parentLog.textDecoration; // static
 			}
 			else {
 				this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
@@ -164,7 +166,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + getTaskId();
 
 			// Is this sometimes confusing?
-			if (log.decoration.involves(Log.OutputFormat.HTML))
+			if (log.textOutput.getFormat() == TextOutput.Format.HTML)
 				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".html");
 			else
 				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
@@ -1361,12 +1363,27 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	}
 
+
 	public void populate(BatchConfig batchConfig, ProgramRegistry registry){
 
 		registry.add(new ProgramUtils.Help(registry));
 		registry.add(new ProgramUtils.LogLevel(serverLog));
 		registry.add(new ProgramUtils.LogLevel.Debug(serverLog));
 		registry.add(new ProgramUtils.LogLevel.Verbose(serverLog));
+
+		/*
+		registry.add(new Parameter.Simple<Float>("test",
+				"Log file format.", (float) 123.456){
+
+			@Override
+			public void exec() {
+				System.err.println(" VALUE="+value);
+				System.err.println(Manip.toString(this));
+				System.err.println(getClass().getGenericSuperclass().getTypeName());
+				System.err.println(value.getClass());
+			}
+		});
+		*/
 
 
 		registry.add(new Parameter.Simple<String>("conf","Read configuration", "") {
@@ -1375,21 +1392,48 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			public void exec() { readConfig(value);}
 		});
 
-		registry.add(new Parameter.Simple<String>("log_style","Set formatting",
-				Arrays.toString(Log.OutputFormat.values())){
-				// ClassUtils.getConstantKeys(Log.OutputFormat.class).toString() ){
-			//Log.OutputFormat.TEXT.toString() ){
+		registry.add(new Parameter.Simple<TextOutput.Format>("log_format",
+				"Log file format.", TextOutput.Format.VT100 ){
 
 			@Override
 			public void exec() {
+				//System.err.println(" VALUE="+value);
+				//System.err.println(Manip.toString(this));
+				//System.err.printf("Value='%s' [%s] %n", LOG_FORMAT, LOG_FORMAT.getClass().getName());
+				LOG_FORMAT = value;
+				serverLog.setFormat(LOG_FORMAT);
+				serverLog.debug(serverLog.textOutput.toString());
+			}
+		});
+
+
+		registry.add(new Parameter.Simple<Integer>("log_style","Set decoration", 0
+				//, Arrays.toString(TextDecoration.Colour.values()) + ',' +
+				//Arrays.toString(TextDecoration.Colour.values())
+		){
+
+			@Override
+			public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
+				//super.setParam(key, value);
+				serverLog.decoration.set(value.toString());
+				serverLog.special("deco: "+ serverLog.decoration.toString());
+				serverLog.special("deco: "+ value.toString());
+			}
+
+			// public TextDecoration.Highlight highlight =  TextDecoration.Colour.DEFAULT;
+			// ClassUtils.getConstantKeys(Log.OutputFormat.class).toString() ){
+			// Log.OutputFormat.TEXT.toString() ){
+
+
+			public void execFOO() {
 				//serverLog.special("Value...");
 				//serverLog.warn(value);
 				try {
 					//serverLog.special(ClassUtils.getConstants(Log.OutputFormat.class));
-					serverLog.decoration.set(value);
+					serverLog.debug(serverLog.textOutput.toString());
 				}
 				catch (Exception e) {
-					serverLog.warn(String.format("Argument '%s' contains unsupported flags(s)", value));
+					//serverLog.warn(String.format("Argument '%s' contains unsupported flags(s)", ));
 					serverLog.error(String.format("%s: Not implemented: %s", this.getName(), e.getMessage()));
 				}
 				serverLog.special(serverLog.decoration.toString());
@@ -1426,11 +1470,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new Parameter<ProductServer>("gid",
 				"Unix file group id (gid) to use.",
-				this, "fileGroupID"));
+				this, "GROUP_ID"));
 
+		// Consider: to NutLet
 		registry.add(new Parameter<ProductServer>("timeout",
 				"Time in seconds to wait.",
-				this, "timeout"));
+				this, "TIMEOUT"));
 
 		registry.add(new Parameter<ProductServer>("counter",
 				"Initial value of task counter (id).", this));
@@ -1492,7 +1537,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		*/
 
 		HttpLog log = server.serverLog;
-		log.decoration.set(Log.OutputFormat.COLOUR);
+		log.decoration.set(TextOutput.Options.COLOUR);
 
 		// NEW
 		ProgramRegistry registry = new ProgramRegistry();
@@ -1672,6 +1717,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		}
 		catch (Exception e) {
+			if (log.getVerbosity() >= Log.Status.DEBUG.level){
+				e.printStackTrace(log.getPrintStream());
+			}
 			log.error(String.format("Unhandled exception: %s", e));
 			//e.printStackTrace(log.printStream);
 			System.exit(1);

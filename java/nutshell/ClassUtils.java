@@ -42,4 +42,51 @@ public class ClassUtils {
         return getConstants(c).keySet();
     }
 
+    static
+    public  class Test<T>  {
+
+        public T value;
+
+
+        public Test(T initValue){
+            value = initValue;
+        }
+
+        @Override
+        public String toString() {
+            if (value == null)
+                return "value=null";
+            else
+                return String.format("value=%s (%s)", value, value.getClass().getName());
+        }
+    }
+
+    public enum Format {
+        TEXT,
+        HTML;
+    }
+
+    public static void main(String[] args) {
+
+
+        Test<String> str = new Test<>("abcd");
+        System.out.println(str);
+
+        Test<Format> e = new Test<>(Format.HTML);
+
+        System.out.println(e);
+        System.out.println(Manip.toString(e));
+        System.out.printf("%s [%s] %n", e.value, e.value.getClass().getName());
+
+        // System.out.printf("%s [%s] %n", e.value, e.value.getClass().getName());
+
+        Test<?> e2 = new Test<Format>(Format.TEXT){
+        };
+
+        System.out.println(e2);
+        System.out.println(Manip.toString(e2));
+        System.out.printf("%s [%s] %n", e2.value, e2.value.getClass().getName());
+
+    }
+
 }

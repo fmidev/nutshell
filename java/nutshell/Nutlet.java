@@ -64,11 +64,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		if (!productServer.serverLog.logFileIsSet()){
 			Path p = productServer.CACHE_ROOT.resolve("nutshell/nutshell-tomcat-%s.html");
 			try {
+				productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
+				productServer.serverLog.decoration.set(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
 				FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
 				productServer.setLogFile(p.toString());
-				productServer.serverLog.decoration.add(Log.OutputFormat.HTML); // + MAP_URLS
 			} catch (IOException e) {
 				e.printStackTrace();
+				productServer.serverLog.setFormat(TextOutput.Format.TEXT); // + MAP_URLS
 				productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 			}
 		}
@@ -303,8 +305,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// OutputFormat#HTML
 			task = productServer.new Task(product.value, batchConfig.instructions.value, productServer.serverLog);
 			//task = productServer.new Task(product.value, batchConfig.instructions.value, null);
-			task.log.decoration.add(Log.OutputFormat.HTML);
-			task.log.decoration.add(Log.OutputFormat.COLOUR);
+			task.log.setFormat(TextOutput.Format.HTML);
+			//task.log.textDecoration.setColour(TextDecoration.Options.COLOUR);
 		}
 		catch (ParseException e) {
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,"Product parse failure",

@@ -33,31 +33,32 @@ public class Log implements AutoCloseable {
 
 		// Fundamental
 		// TODO re-organize according to C error levels
-		UNDEFINED(0, VT100.Colours.WHITE_BG),
-		FATAL(1, VT100.Colours.RED_BG),
-		ERROR(2, VT100.Colours.RED),
-		WARNING(3, VT100.Colours.YELLOW),
-		//FAIL(4,  VT100.compound(VT100.Colours.YELLOW,  VT100.Highlights.ITALIC.bitvalue)), 	/// Action completed unsuccessfully. // ?
-		NOTE(5,  VT100.Colours.DEFAULT), // VT100.compound(VT100.Colours.CYAN, VT100.Highlights.DIM.bitvalue)),   	/// Important information
-		INFO(6,  VT100.Colours.DEFAULT),  	/// Default color (white) Less important information
-		LOG(9, VT100.Colours.DEFAULT, VT100.Highlights.DIM),     /// Sometimes informative messages.
-		DEBUG(10, VT100.Colours.DEFAULT, VT100.Highlights.DIM), // VT100.Highlights.RESET),      /// Technical information about the process
+		UNDEFINED(0, TextOutput.Colour.WHITE),
+		//FATAL(1, TextDecoration.Colour.RED_BG),
+		FATAL(1, TextOutput.Colour.RED),
+		ERROR(2, TextOutput.Colour.RED),
+		WARNING(3, TextOutput.Colour.YELLOW),
+		//FAIL(4,  VT100.compound(TextDecoration.Colour.YELLOW,  TextDecoration.Highlight.ITALIC.bitvalue)), 	/// Action completed unsuccessfully. // ?
+		NOTE(5,  TextOutput.Colour.DEFAULT), // VT100.compound(TextDecoration.Colour.CYAN, TextDecoration.Highlight.DIM.bitvalue)),   	/// Important information
+		INFO(6,  TextOutput.Colour.DEFAULT),  	/// Default color (white) Less important information
+		LOG(9, TextOutput.Colour.DEFAULT, TextOutput.Highlight.DIM),     /// Sometimes informative messages.
+		DEBUG(10, TextOutput.Colour.DEFAULT, TextOutput.Highlight.DIM), // TextDecoration.Highlight.RESET),      /// Technical information about the process
 		// Extensions
-		FAIL(WARNING.level, VT100.Colours.YELLOW,  VT100.Highlights.DIM), 	/// Action completed unsuccessfully. // ?
-		SUCCESS(WARNING.level, VT100.Colours.GREEN,  VT100.Highlights.DIM), 	/// Action completed unsuccessfully. // ?
-		WAIT(NOTE.level, VT100.Colours.YELLOW,  VT100.Highlights.ITALIC),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
-		OK(NOTE.level,    VT100.Colours.GREEN),      /// Action completed successfully.
-		SPECIAL(NOTE.level, VT100.Colours.MAGENTA),
-		EXPERIMENTAL(NOTE.level, VT100.Colours.CYAN),
-		DEPRECATED(NOTE.level, VT100.Colours.CYAN, VT100.Highlights.DIM),
-		UNIMPLEMENTED(WARNING.level, VT100.Colours.YELLOW, VT100.Highlights.DIM),
+		FAIL(WARNING.level, TextOutput.Colour.YELLOW,  TextOutput.Highlight.DIM), 	/// Action completed unsuccessfully. // ?
+		SUCCESS(WARNING.level, TextOutput.Colour.GREEN,  TextOutput.Highlight.DIM), 	/// Action completed unsuccessfully. // ?
+		WAIT(NOTE.level, TextOutput.Colour.YELLOW,  TextOutput.Highlight.ITALIC),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
+		OK(NOTE.level,    TextOutput.Colour.GREEN),      /// Action completed successfully.
+		SPECIAL(NOTE.level, TextOutput.Colour.MAGENTA),
+		EXPERIMENTAL(NOTE.level, TextOutput.Colour.CYAN),
+		DEPRECATED(NOTE.level, TextOutput.Colour.CYAN, TextOutput.Highlight.DIM),
+		UNIMPLEMENTED(WARNING.level, TextOutput.Colour.YELLOW, TextOutput.Highlight.DIM),
 		;
 
-		Status(int level, VT100.Colours colour){
-			this(level, colour, VT100.Highlights.RESET); // default
+		Status(int level, TextOutput.Colour colour){
+			this(level, colour, TextOutput.Highlight.RESET); // default
 		}
 
-		Status(int level, VT100.Colours colour, VT100.Highlights highlights){
+		Status(int level, TextOutput.Colour colour, TextOutput.Highlight highlights){
 			this.level = level;
 			this.colour = colour;
 			this.highlights = highlights;
@@ -71,8 +72,8 @@ public class Log implements AutoCloseable {
 			return level;
 		}
 
-		protected final VT100.Colours colour;
-		protected final VT100.Highlights highlights;
+		protected final TextOutput.Colour colour;
+		protected final TextOutput.Highlight highlights;
 
 	}
 
@@ -87,37 +88,20 @@ public class Log implements AutoCloseable {
 		}
 	}
 
-	/**
-	 *
-	 class MyCounter extends Counter<Log> {
-	 };
-	 */
+	static
+	final protected TextOutput plainText = new TextOutput();
 
-	public enum OutputFormat { // implements  Indexed {
-		TEXT,
-		COLOUR,
-		VT100,
-		MAP_URLS,
-		HTML;
+	static
+	final protected TextOutput.Vt100 vt100Text = new TextOutput.Vt100();
 
-		/*
-		final int bit;
+	static
+	final protected TextOutput.Html htmlText = new TextOutput.Html();
 
-		OutputFormat(){
-			bit = 1 << this.ordinal();
-		}
+	public TextOutput textOutput = vt100Text; // plain
 
-		@Override
-		public int getIndex() {
-			return bit;
-		}
-
-		 */
-
-	}
 
 	// public Flags decorations;
-	final public Flags decoration = new Flags(OutputFormat.class);
+	final public Flags decoration = new Flags(TextOutput.Options.class);
 
 
 	/** Create a log with a name prefixed with the name of a existing log.
@@ -352,9 +336,10 @@ public class Log implements AutoCloseable {
 	 */
 	protected void appendProlog(Status status) {
 
-		if (this.decoration.involves(OutputFormat.VT100)) {
+		/*
+		if (this.decoration.involves(TextDecoration.Format.VT100)) {
 			if (this.decoration.involves(OutputFormat.COLOUR)) {
-				//buffer.append(VT100.Highlights.BRIGHT); // consider conditional
+				//buffer.append(TextDecoration.Highlight.BRIGHT); // consider conditional
 				//buffer.append(VT100.Codes.UNDERLINE);
 				buffer.append(status.colour);
 			}
@@ -369,7 +354,7 @@ public class Log implements AutoCloseable {
 
 		if (name != null)
 			buffer.append(':').append(' ').append(name);
-
+		*/
 	}
 
 	/**
@@ -379,6 +364,7 @@ public class Log implements AutoCloseable {
 	 */
 	protected <E> void appendMessage(E message){
 
+		/*
 		if (this.decoration.involves(OutputFormat.HTML)){
 			Path root = Paths.get("/opt/nutshell");
 			String s = message.toString();
@@ -403,6 +389,8 @@ public class Log implements AutoCloseable {
 			buffer.append(' ').append(message);
 		}
 
+		 */
+
 	}
 
 	/**
@@ -421,6 +409,17 @@ public class Log implements AutoCloseable {
 
 	}
 
+	/**
+	 *  Convert links etc
+	 *
+	 * @param message
+	 * @param <E>
+	 * @return
+	 */
+	static
+	protected <E> void processMessage(E message, StringBuffer bf){
+
+	}
 
 	/**
 	 * @param status
@@ -430,71 +429,75 @@ public class Log implements AutoCloseable {
 	 */
 	protected <E> Log flush(Status status, E message){
 
-		if (this.decoration.involves(OutputFormat.VT100)) {
+		if (true){
+			this.textOutput.setHighlights(status.highlights);
+		}
 
-			if (status.highlights != VT100.Highlights.RESET) // default
-				buffer.append(status.highlights);
-
-			if (this.decoration.involves(OutputFormat.COLOUR)) {
-				buffer.append(status.colour);
+		if (this.decoration.isSet(TextOutput.Options.COLOUR)){
+			this.textOutput.setColour(status.colour);
+			if (status.colour != TextOutput.Colour.DEFAULT) {
+				this.textOutput.highlights.add(TextOutput.Highlight.BRIGHT);
 			}
 		}
 
+		this.textOutput.startSection(buffer); // TODO: Log.startFile()
+
+		this.textOutput.startLine(buffer);
+
 		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
 
-		//buffer.append(String.format("%7s", statusCodes.get(this.status)));
+		//buffer.append(String.format("<span class=\"%s\" >", status.name().toLowerCase())); // TODO: levelName (WARN)
 		buffer.append(String.format("%7s", status));
+		buffer.append(':').append(' ').append(name);
 
-		if (name != null)
-			buffer.append(':').append(' ').append(name);
 
-		if (message != null) {
-			if (!this.decoration.involves(OutputFormat.MAP_URLS)){
-				buffer.append(' ').append(message);
-			}
-			else {
+		if (message != null){
+			if (this.decoration.isSet(TextOutput.Options.URLS)){
 				PathDetector pd = null;
 				try {
 					buffer.append(' ');
 
 					pd = new PathDetector(message.toString());
-					while (pd.next()){
+					while (pd.next()) {
 
 						buffer.append(pd.prefix);
 
-						String result = pd.path.toString(); // default
-						for (Map.Entry<Path, String> entry: pathMap.entrySet()){
+						String label = "";
+						String path = pd.path.toString(); // default
+						for (Map.Entry<Path, String> entry : pathMap.entrySet()) {
 							Path p = entry.getKey();
-							if (pd.path.startsWith(p)){
+							if (pd.path.startsWith(p)) {
 								Path relative = p.relativize(pd.path);
-								//result = String.format("<a href=\"%s\">%s</a>", relative, pd.filename); //SimpleHtml.Tag.H3.start());
-								result = entry.getValue() + relative.toString();
+								label = relative.getFileName().toString();
+								path = entry.getValue() + relative.toString();
 								break;
 							}
 						}
+						this.textOutput.appendLink(label, path, buffer);
 
-						//if (result == null)
-						//result = String.format("<b>%s</b>", pd.path);
 
-						buffer.append(result);
+						//buffer.append(result);
 
-						//buffer.append(pd.path);
-						//buffer.append("}"); //SimpleHtml.Tag.H3.end());
 					}
 					buffer.append(pd.remainingLine);  // = trailing part of the line
+
 				}
-				catch (Exception e){
+				catch (Exception e) {
 					System.err.println(pd);
 					e.printStackTrace(getPrintStream());
 					//System.err.print(e.getMessage());
 				}
 			}
-			//appendMessage(message);
+			else {
+				this.textOutput.append(message.toString(), buffer);
+			}
 		}
 
-		if (this.decoration.involves(OutputFormat.VT100)){
-			buffer.append(VT100.Highlights.RESET);
-		}
+		this.textOutput.endLine(buffer);
+
+		this.textOutput.endSection(buffer); // TODO: Log.startFile()
+		this.textOutput.reset(); // check
+
 
 		buffer.append('\n');
 
@@ -641,9 +644,7 @@ public class Log implements AutoCloseable {
 			this.printStream = new PrintStream(this.fileOutputStream);
 			//this.log.printStream = System.err;
 			//this.setVerbosity(Status.DEBUG); //?
-			//this.printStream.println(SimpleHtml.Tag.HTML.start());
-			//this.printStream.println(SimpleHtml.Tag.PRE.start());
-			this.debug(String.format("Started log file: %s", this.logFile));
+			this.debug(String.format("Started this log: %s", this.logFile));
 		}
 		catch (IOException e) {
 			e.printStackTrace(); //this.log.printStream);
@@ -735,6 +736,24 @@ public class Log implements AutoCloseable {
 	}
 
 	 */
+	public void setFormat(TextOutput.Format fmt) {
+		System.err.printf("Format: %s%n", fmt);
+
+		switch (fmt){
+			case TEXT:
+				textOutput = Log.plainText;
+				break;
+			case VT100:
+				textOutput = Log.vt100Text;
+				break;
+			case HTML:
+				textOutput = Log.htmlText;
+				break;
+			default:
+				throw new IllegalStateException("Unexpected value: " + fmt); // impossible...
+		}
+
+	}
 
 
 
@@ -745,7 +764,7 @@ public class Log implements AutoCloseable {
 
 		Log log = new Log();
 		//log.printStream = null;
-		log.decoration.set(OutputFormat.COLOUR);
+		log.decoration.set(TextOutput.Options.COLOUR);
 		log.setVerbosity(Status.DEBUG);
 
 		log.note("Starting");
@@ -756,7 +775,7 @@ public class Log implements AutoCloseable {
 
 			System.out.println("Statuses: ");
 			for (Log.Status s: Status.values()) {
-				System.out.println(String.format("\t%s %s = %d %s", s.colour, s, s.level, VT100.Highlights.RESET));
+				System.out.println(String.format("\t%s %s = %d %s", s.colour, s, s.level, TextOutput.Highlight.RESET));
 			}
 
 			System.out.println("Usage: ");

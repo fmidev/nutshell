@@ -205,17 +205,20 @@ public class HttpLog extends Log {
         return true;
     }
 
-    @Override
-    protected <E> Log flush(Status status, E message){
 
-        //final String start = "<%s>"
+
+
+    protected <E> Log flush2(Status status, E message){
 
         /// Non-HTML
+        /*
         if (!this.decoration.involves(OutputFormat.HTML)){
             return super.flush(status, message);
         }
 
         /// HTML
+
+        // Each line is a PRE element.
         buffer.append("<pre>");
 
         buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
@@ -232,8 +235,43 @@ public class HttpLog extends Log {
 
         //String s = message.toString();
         //buffer.append(SimpleHtml.Tag.B.start());
+        if (message != null) {
+            if (!this.decoration.involves(OutputFormat.MAP_URLS)) {
+                buffer.append(' ').append(message);
+            } else {
+                PathDetector pd = null;
+                try {
+                    buffer.append(' ');
 
-        buffer.append(' ').append(message);
+                    pd = new PathDetector(message.toString());
+                    while (pd.next()) {
+
+                        buffer.append(pd.prefix);
+
+                        String result = pd.path.toString(); // default
+                        for (Map.Entry<Path, String> entry : pathMap.entrySet()) {
+                            Path p = entry.getKey();
+                            if (pd.path.startsWith(p)) {
+                                Path relative = p.relativize(pd.path);
+                                //result = String.format("<a href=\"%s\">%s</a>", relative, pd.filename); //SimpleHtml.Tag.H3.start());
+                                result = entry.getValue() + relative.toString();
+                                break;
+                            }
+                        }
+
+                        buffer.append(result);
+
+                    }
+                    buffer.append(pd.remainingLine);  // = trailing part of the line
+                } catch (Exception e) {
+                    System.err.println(pd);
+                    e.printStackTrace(getPrintStream());
+                    //System.err.print(e.getMessage());
+                }
+            }
+
+
+        }
         // TODO: use url mapping!
 
         if (this.decoration.involves(OutputFormat.COLOUR)){
@@ -243,7 +281,7 @@ public class HttpLog extends Log {
         buffer.append("</pre>\n");
 
         flushBuffer();
-
+        */
         return this;
 
     }

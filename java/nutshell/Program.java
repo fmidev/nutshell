@@ -1,5 +1,7 @@
 package nutshell;
 
+import sun.font.CreatedFontTracker;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -62,9 +64,19 @@ public class Program {
 
             Single(String name, String description, String paramKey) {
                 super(name, description);
+                // Note: "this" does not exist before super()
                 this.paramKey = paramKey;
                 setReference(this, paramKey);
             }
+
+            /*
+            protected Single(String name, String description) {
+                super(name, description);
+                // Set paremkey
+            }
+
+             */
+
 
             @Override
             public void setParams(String args) throws NoSuchFieldException, IllegalAccessException {
@@ -95,12 +107,21 @@ public class Program {
 
             Simple(String name, String description,T initValue){
                 super(name, description, "value");
+                cls = initValue.getClass();
                 value = initValue;
+                setReference(this, "value");
             }
 
             public T value;
 
+            final private Class cls;
 
+            @Override
+            public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
+                Field field = reference.getClass().getField(key);
+                // setField(reference, field, value);
+                Manip.assignToObject(value, reference, field, cls);
+            }
 
         }
 
@@ -113,9 +134,10 @@ public class Program {
         public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
             //Field field = reference.getClass().getField(key);
             // setField(reference, field, value);
-            Manip.assignToObject(key, value, reference);
+            Manip.assignToObject(value, reference, key);
         }
 
+        /*
         static
         private void setField(Object target, Field field, Object value) throws NoSuchFieldException, IllegalAccessException {
 
@@ -144,6 +166,7 @@ public class Program {
                 field.set(target, value.toString());
             }
         }
+         */
 
         @Override
         public void setParams(String args) throws NoSuchFieldException, IllegalAccessException {

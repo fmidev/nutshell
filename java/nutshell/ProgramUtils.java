@@ -55,7 +55,7 @@ public class ProgramUtils {
         // Base class constructor
         LogLevel(String name, Log log, Log.Status init) {
             super(name, String.format("Same as --log_level %s", init.toString()));
-            this.level = init.toString();
+            this.level = init;
             this.log = log;
         }
 
@@ -63,10 +63,10 @@ public class ProgramUtils {
         LogLevel(Log log) {
             super("log_level", "Set verbosity level");
             this.log = log;
-            this.level = Log.Status.UNDEFINED.toString();
+            this.level = Log.Status.UNDEFINED;
             for (Log.Status status:  Log.Status.values()){
                 if (status.level == log.getVerbosity()){
-                    this.level = status.toString();
+                    this.level = status;
                 }
             }
             setReference(this, "level");
@@ -75,14 +75,19 @@ public class ProgramUtils {
 
         @Override
         public void exec() {
+            log.setVerbosity(level);
+            /*
             try {
                 log.setVerbosity(level);
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
             }
+
+             */
         }
 
-        public String level = Log.Status.NOTE.toString();
+        //public String level = Log.Status.NOTE.toString();
+        public Log.Status level;
         protected final Log log;
 
         static

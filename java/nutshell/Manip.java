@@ -1,5 +1,7 @@
 package nutshell;
 
+import com.sun.istack.internal.NotNull;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -107,7 +109,7 @@ public class Manip {
                  }
                  else {
                      // if entry.index != null, assume target has member "key" which is a map.
-                    assignToObject(entry.key, entry.index, entry.value, target);
+                    assignToObject(entry.value, target, entry.key, entry.index);
                  }
             } catch (NoSuchFieldException e) {
                 exception = e;
@@ -166,7 +168,7 @@ public class Manip {
     static
     public void assignToObject(Map<String,Object> source, Object target) throws NoSuchFieldException, IllegalAccessException {
         for (Map.Entry<String,Object> entry: source.entrySet()) {
-            assignToObject(entry.getKey(), entry.getValue(), target);
+            assignToObject( entry.getValue(), target, entry.getKey());
         }
     }
 
@@ -174,7 +176,7 @@ public class Manip {
     public void assignToObjectLenient(Map<String,Object> source, Object target)  {
         for (Map.Entry<String,Object> entry: source.entrySet()) {
             try {
-                assignToObject(entry.getKey(), entry.getValue(), target);
+                assignToObject( entry.getValue(), target, entry.getKey());
             } catch (NoSuchFieldException e) {
                 //e.printStackTrace();
             } catch (IllegalAccessException e) {
@@ -184,17 +186,16 @@ public class Manip {
     }
 
     static
-    public void assignToObject(String key, Object value, Object target) throws NoSuchFieldException, IllegalAccessException {
-        assignToObject(key, null, value, target);
+    public void assignToObject(Object value, Object target, String key) throws NoSuchFieldException, IllegalAccessException {
+        assignToObject(value, target, key, null);
     }
 
 
+
     static
-    public void assignToObject(String key, String index, Object value, Object target) throws NoSuchFieldException, IllegalAccessException {
+    public void assignToObject(Object value, Object target, String key, String index) throws NoSuchFieldException, IllegalAccessException {
 
-        //if (target instanceof Map<String,Object>){ }
         Field field = target.getClass().getField(key);
-
         if (index != null){
             target = field.get(target);
             if (target instanceof Map){
@@ -206,17 +207,33 @@ public class Manip {
             }
             return;
         }
-        //System.err.printf("Key=%s (%s) %n", key, value);
+
+        assignToObject(value, target, field, field.getType());
+    }
+
+    /** Assignment with explicit class definition
+     *
+     *  Designed for generic classes to keep members class specific.
+     *
+     * @param value
+     * @param field
+     * @param target
+     * @param cls – explicit class parameter (when field.getType() would give a superclass, say Object)
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
+    static
+    public void assignToObject(Object value, Object target, Field field,  Class cls) throws IllegalAccessException {
 
         if (value == null) {
             field.set(target, null);
             return;
         }
 
-        Class cls = field.getType();
-        // System.err.printf(" Class=%s %n", cls.getName());
+        // System.err.printf(" Field=%s [%s] <- Value %s [%s] %n",
+        //         field.getName(), cls.getName(), value.toString(), value.getClass().getName());
 
-        String s = value.toString(); // (value == null) ? null : value.toString();
+        String s = value.toString(); // value not null here
 
         if (cls.isPrimitive() && s.isEmpty()){
             return;
@@ -249,6 +266,10 @@ public class Manip {
         else if (cls.equals(Path.class)){
             field.set(target, Paths.get(s));
         }
+        else if (cls.isEnum()){
+            //System.err.printf(" Enum [%s] '%s' %n", Enum.valueOf(cls, s), s);
+            field.set(target, Enum.valueOf(cls, s));
+        }
         else {
             if (cls.isPrimitive()){
                 throw new IllegalAccessException("Not yet implemented: " + cls.getName());
@@ -268,6 +289,7 @@ public class Manip {
             builder.append(field.getName()).append('=');
             try {
                 builder.append(field.get(obj));
+                builder.append('[').append(field.getType().getName()).append(']');
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -338,7 +360,7 @@ public class Manip {
             }
             else {
                 try {
-                    assignToObject(entry.key, entry.index, entry.value, example);
+                    assignToObject(entry.value, example, entry.key, entry.index);
                 } catch (NoSuchFieldException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {

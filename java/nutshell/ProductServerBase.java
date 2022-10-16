@@ -52,6 +52,10 @@ public class ProductServerBase extends Program {
     //protected Path storageRoot = Paths.get(".");
     public Path STORAGE_ROOT = Paths.get(".");
 
+    public TextOutput.Format LOG_FORMAT = TextOutput.Format.TEXT;
+
+
+
     final
     public Map<String,String> MAP_URL = new HashMap<>();
 
