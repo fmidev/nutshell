@@ -227,7 +227,12 @@ public class TextOutput {
                     buffer.append(" style=\"");
                     STYLE = true;
                 }
-                buffer.append("color: " + colour.name().toLowerCase());
+                if (highlights.involves(Highlight.REVERSE)){
+                    buffer.append("background-color: " + colour.name().toLowerCase());
+                }
+                else {
+                    buffer.append("color: " + colour.name().toLowerCase());
+                }
             }
 
             if (STYLE){

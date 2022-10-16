@@ -367,6 +367,7 @@ public class Log implements AutoCloseable {
 		}
 
 		// this.textOutput.startSection(buffer); // TODO: Log.startFile()
+		this.textOutput.highlights.add(TextOutput.Highlight.REVERSE);
 
 		this.textOutput.startLine(buffer);
 
@@ -375,6 +376,15 @@ public class Log implements AutoCloseable {
 		//buffer.append(String.format("<span class=\"%s\" >", status.name().toLowerCase())); // TODO: levelName (WARN)
 		buffer.append(String.format("%7s", status));
 		buffer.append(':').append(' ').append(name);
+
+		this.textOutput.endLine(buffer);
+
+
+		if (true){
+			this.textOutput.setHighlights(status.highlights);
+		}
+
+		this.textOutput.startLine(buffer);
 
 
 		if (message != null){
