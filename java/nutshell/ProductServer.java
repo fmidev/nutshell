@@ -1407,7 +1407,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		});
 
 
-		registry.add(new Parameter.Simple<Integer>("log_style","Set decoration", 0
+		registry.add(new Parameter.Simple<String>("log_style",
+				"Set decoration: " + Arrays.toString(TextOutput.Options.values()), ""
 				//, Arrays.toString(TextDecoration.Colour.values()) + ',' +
 				//Arrays.toString(TextDecoration.Colour.values())
 		){
@@ -1420,24 +1421,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				serverLog.special("deco: "+ value.toString());
 			}
 
-			// public TextDecoration.Highlight highlight =  TextDecoration.Colour.DEFAULT;
-			// ClassUtils.getConstantKeys(Log.OutputFormat.class).toString() ){
-			// Log.OutputFormat.TEXT.toString() ){
 
-
-			public void execFOO() {
-				//serverLog.special("Value...");
-				//serverLog.warn(value);
-				try {
-					//serverLog.special(ClassUtils.getConstants(Log.OutputFormat.class));
-					serverLog.debug(serverLog.textOutput.toString());
-				}
-				catch (Exception e) {
-					//serverLog.warn(String.format("Argument '%s' contains unsupported flags(s)", ));
-					serverLog.error(String.format("%s: Not implemented: %s", this.getName(), e.getMessage()));
-				}
-				serverLog.special(serverLog.decoration.toString());
-			}
 		});
 
 

@@ -19,6 +19,7 @@ public class TextOutput {
 
     public enum Options {
         COLOUR,
+        HIGHLIGHT,
         URLS
     }
 
@@ -38,6 +39,7 @@ public class TextOutput {
 
     public enum Colour {
         BLACK,
+        GRAY, // Not supported in VT100
         RED,
         GREEN,  // # Red
         YELLOW, // # Orange prompt
@@ -137,7 +139,8 @@ public class TextOutput {
             cmap.put(Colour.BLUE, 34);
             cmap.put(Colour.MAGENTA, 35);
             cmap.put(Colour.CYAN, 36);
-            cmap.put(Colour.WHITE,37);   // # Gray
+            cmap.put(Colour.GRAY,37);   //
+            cmap.put(Colour.WHITE,38);   // CHECK
             cmap.put(Colour.DEFAULT,39);
         }
 
@@ -156,7 +159,9 @@ public class TextOutput {
                 }
             }
             // COLOUR
-            buffer.append(cmap.getOrDefault(colour, 39));
+            if (!colour.equals(Colour.DEFAULT))
+                buffer.append(cmap.getOrDefault(colour, 39));
+
             buffer.append('m');
         }
 
@@ -228,7 +233,7 @@ public class TextOutput {
                     STYLE = true;
                 }
                 if (highlights.involves(Highlight.REVERSE)){
-                    buffer.append("background-color: " + colour.name().toLowerCase());
+                    buffer.append("background-color: light" + colour.name().toLowerCase());
                 }
                 else {
                     buffer.append("color: " + colour.name().toLowerCase());

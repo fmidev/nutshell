@@ -42,14 +42,14 @@ public class Log implements AutoCloseable {
 		NOTE(5,  TextOutput.Colour.DEFAULT), // VT100.compound(TextDecoration.Colour.CYAN, TextDecoration.Highlight.DIM.bitvalue)),   	/// Important information
 		INFO(6,  TextOutput.Colour.DEFAULT),  	/// Default color (white) Less important information
 		LOG(9, TextOutput.Colour.DEFAULT, TextOutput.Highlight.DIM),     /// Sometimes informative messages.
-		DEBUG(10, TextOutput.Colour.DEFAULT, TextOutput.Highlight.DIM), // TextDecoration.Highlight.RESET),      /// Technical information about the process
+		DEBUG(10, TextOutput.Colour.GRAY, TextOutput.Highlight.DIM), // TextDecoration.Highlight.RESET),      /// Technical information about the process
 		// Extensions
 		FAIL(WARNING.level, TextOutput.Colour.YELLOW,  TextOutput.Highlight.DIM), 	/// Action completed unsuccessfully. // ?
 		SUCCESS(WARNING.level, TextOutput.Colour.GREEN,  TextOutput.Highlight.DIM), 	/// Action completed unsuccessfully. // ?
 		WAIT(NOTE.level, TextOutput.Colour.YELLOW,  TextOutput.Highlight.ITALIC),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
 		OK(NOTE.level,    TextOutput.Colour.GREEN),      /// Action completed successfully.
-		SPECIAL(NOTE.level, TextOutput.Colour.MAGENTA),
-		EXPERIMENTAL(NOTE.level, TextOutput.Colour.CYAN),
+		SPECIAL(NOTE.level, TextOutput.Colour.MAGENTA,  TextOutput.Highlight.ITALIC),
+		EXPERIMENTAL(NOTE.level, TextOutput.Colour.CYAN,  TextOutput.Highlight.ITALIC),
 		DEPRECATED(NOTE.level, TextOutput.Colour.CYAN, TextOutput.Highlight.DIM),
 		UNIMPLEMENTED(WARNING.level, TextOutput.Colour.YELLOW, TextOutput.Highlight.DIM),
 		;
@@ -385,6 +385,7 @@ public class Log implements AutoCloseable {
 		}
 
 		this.textOutput.startLine(buffer);
+		buffer.append(':').append(' ');
 
 
 		if (message != null){
