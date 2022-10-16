@@ -329,69 +329,7 @@ public class Log implements AutoCloseable {
 		}
 	}
 
-	/** Start log line with a status label and time stamp (milliseconds).
-	 *
-	 * @param status
-	 * @return
-	 */
-	protected void appendProlog(Status status) {
 
-		/*
-		if (this.decoration.involves(TextDecoration.Format.VT100)) {
-			if (this.decoration.involves(OutputFormat.COLOUR)) {
-				//buffer.append(TextDecoration.Highlight.BRIGHT); // consider conditional
-				//buffer.append(VT100.Codes.UNDERLINE);
-				buffer.append(status.colour);
-			}
-		} else if (this.decoration.involves(OutputFormat.HTML)) {
-			buffer.append(SimpleHtml.Tag.PRE.start());
-		}
-
-		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
-
-		//buffer.append(String.format("%7s", statusCodes.get(this.status)));
-		buffer.append(String.format("%7s", status));
-
-		if (name != null)
-			buffer.append(':').append(' ').append(name);
-		*/
-	}
-
-	/**
-	 * @param message
-	 * @param <E>
-	 * @return
-	 */
-	protected <E> void appendMessage(E message){
-
-		/*
-		if (this.decoration.involves(OutputFormat.HTML)){
-			Path root = Paths.get("/opt/nutshell");
-			String s = message.toString();
-			buffer.append(' ');
-			buffer.append(SimpleHtml.Tag.B.start());
-
-			PathDetector pd = new PathDetector(message.toString());
-			while (pd.next()){
-				buffer.append(pd.prefix);
-				//Map<String,String>
-				Path relative = root.relativize(pd.path);
-				buffer.append(String.format("<a href=\"%s\">%s</a>%n", relative, pd.path.getFileName())); //SimpleHtml.Tag.H3.start());
-				//buffer.append(pd.path);
-				//buffer.append("}"); //SimpleHtml.Tag.H3.end());
-			}
-			buffer.append(pd.remainingLine);
-
-			// buffer.append(s);
-			buffer.append(SimpleHtml.Tag.B.end());
-		}
-		else {
-			buffer.append(' ').append(message);
-		}
-
-		 */
-
-	}
 
 	/**
 	 *   Ensures that printStream exists
@@ -406,18 +344,6 @@ public class Log implements AutoCloseable {
 
 		printStream.print(buffer.toString());
 		buffer.setLength(0);  // TODO CLEAR?
-
-	}
-
-	/**
-	 *  Convert links etc
-	 *
-	 * @param message
-	 * @param <E>
-	 * @return
-	 */
-	static
-	protected <E> void processMessage(E message, StringBuffer bf){
 
 	}
 
@@ -440,7 +366,7 @@ public class Log implements AutoCloseable {
 			}
 		}
 
-		this.textOutput.startSection(buffer); // TODO: Log.startFile()
+		// this.textOutput.startSection(buffer); // TODO: Log.startFile()
 
 		this.textOutput.startLine(buffer);
 
@@ -495,7 +421,7 @@ public class Log implements AutoCloseable {
 
 		this.textOutput.endLine(buffer);
 
-		this.textOutput.endSection(buffer); // TODO: Log.startFile()
+		//this.textOutput.endSection(buffer); // TODO: Log.startFile()
 		this.textOutput.reset(); // check
 
 
@@ -640,10 +566,10 @@ public class Log implements AutoCloseable {
 			this.logFile = path.toFile();
 			this.fileOutputStream = new FileOutputStream(this.logFile);
 			this.debug(String.format("Continuing log in file: %s", this.logFile));
-
 			this.printStream = new PrintStream(this.fileOutputStream);
 			//this.log.printStream = System.err;
 			//this.setVerbosity(Status.DEBUG); //?
+			textOutput.startSection(buffer);
 			this.debug(String.format("Started this log: %s", this.logFile));
 		}
 		catch (IOException e) {
@@ -700,6 +626,9 @@ public class Log implements AutoCloseable {
 			}
 
 			 */
+			textOutput.endSection(buffer);
+			this.printStream.print(buffer.toString());
+
 			if ((this.printStream != System.err) && (this.printStream != System.out)){
 				this.printStream.close();
 				this.printStream = null;
