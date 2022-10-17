@@ -366,40 +366,35 @@ public class Log implements AutoCloseable {
 	 */
 	protected <E> Log flush(Status status, E message){
 
-		this.textOutput.startElem(buffer);
+		textOutput.startElem(buffer);
 		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
-		this.textOutput.endElem(buffer);
+		textOutput.endElem(buffer);
 
 		if (true){
-			this.textOutput.setHighlights(status.highlights);
+			textOutput.setHighlights(status.highlights);
 		}
 
-		if (this.decoration.isSet(TextOutput.Options.COLOUR)){
-			this.textOutput.setColour(status.colour);
+		if (decoration.isSet(TextOutput.Options.COLOUR)){
+			textOutput.setColour(status.colour);
 			if (status.colour != TextOutput.Colour.DEFAULT) {
 				//this.textOutput.highlights.add(TextOutput.Highlight.BRIGHT);
 			}
 		}
 
 		// this.textOutput.startSection(buffer); // TODO: Log.startFile()
-		this.textOutput.highlights.add(TextOutput.Highlight.REVERSE);
+		textOutput.highlights.add(TextOutput.Highlight.REVERSE);
 
-		this.textOutput.startElem(buffer);
-
-		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
-
-		//buffer.append(String.format("<span class=\"%s\" >", status.name().toLowerCase())); // TODO: levelName (WARN)
+		textOutput.startElem(buffer);
 		buffer.append(String.format("%7s", status));
 		buffer.append(':').append(' ').append(name);
-
-		this.textOutput.endElem(buffer);
+		textOutput.endElem(buffer);
 
 
 		//if (true){
-		this.textOutput.setHighlights(status.highlights);
+		textOutput.setHighlights(status.highlights);
 		//}
 
-		this.textOutput.startElem(buffer);
+		textOutput.startElem(buffer);
 		buffer.append(':').append(' ');
 
 
