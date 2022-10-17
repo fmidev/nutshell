@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 4);
+		super.version = Arrays.asList(2, 5);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -159,18 +159,19 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.timeStampDir = getTimestampDir(this.info.time);
 			this.relativeOutputDir = this.timeStampDir.resolve(this.productDir);
 			//this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve(String.format("tmp-%s-%d", ) + getTaskId());
-			this.relativeOutputDirTmp = this.relativeOutputDir.resolve(String.format("tmp-%s-%d", user, getTaskId()));
+			this.relativeOutputDirTmp = this.relativeOutputDir.resolve(String.format("tmp-%s-%d", USER, getTaskId()));
 			this.relativeOutputPath = relativeOutputDir.resolve(filename);
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
-			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + getTaskId();
+			String label = String.format(LABEL, USER, getTaskId());
+			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
 
 			// Is this sometimes confusing?
 			if (log.textOutput.getFormat() == TextOutput.Format.HTML)
-				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".html");
+				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log.html");
 			else
-				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + getTaskId() + ".log");
+				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log");
 
 			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
@@ -1459,6 +1460,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		registry.add(new Parameter<ProductServer>("gid",
 				"Unix file group id (gid) to use.",
 				this, "GROUP_ID"));
+
+		registry.add(new Parameter<ProductServer>("label",
+				"Additional marker in log files.",
+				this, "LABEL"));
 
 		// Consider: to NutLet
 		registry.add(new Parameter<ProductServer>("timeout",

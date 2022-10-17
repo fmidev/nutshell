@@ -44,7 +44,6 @@ public class ProductServerBase extends Program {
     public String FILE_PERMS = "rw-rw-r--";
     public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString(DIR_PERMS);
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString(FILE_PERMS);
-    public String user = null;
 
     public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
     public Path CACHE_ROOT = Paths.get(".");
@@ -57,6 +56,9 @@ public class ProductServerBase extends Program {
 
     final public Flags LOG_STYLE = serverLog.decoration;
 
+    public String USER = System.getProperty("user.name");;
+
+    public String LABEL = "%s-%d"; // USER-counter
 
     final
     public Map<String,String> MAP_URL = new HashMap<>();
@@ -176,8 +178,8 @@ public class ProductServerBase extends Program {
         setup.put("filePerms", filePerms);
 
         /// "read-only" variables (for debugging)
-        this.user = System.getProperty("user.name"); // $USER
-        setup.put("user.name", this.user);
+        //this.USER = System.getProperty("user.name"); // $USER
+        setup.put("user.name", this.USER);
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
