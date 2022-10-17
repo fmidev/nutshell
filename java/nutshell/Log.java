@@ -682,7 +682,7 @@ public class Log implements AutoCloseable {
          *
          */
 	public void setFormat(TextOutput.Format fmt) {
-		System.err.printf("Format: %s%n", fmt);
+		// System.err.printf("Format: %s%n", fmt);
 
 		switch (fmt){
 			case DEFAULT:
