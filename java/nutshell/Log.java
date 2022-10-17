@@ -35,19 +35,19 @@ public class Log implements AutoCloseable {
 		// TODO re-organize according to C error levels
 		UNDEFINED(0, TextOutput.Colour.WHITE),
 		//FATAL(1, TextDecoration.Colour.RED_BG),
-		FATAL(1, TextOutput.Colour.RED),
-		ERROR(2, TextOutput.Colour.RED),
-		WARNING(3, TextOutput.Colour.YELLOW),
+		FATAL(1, TextOutput.Colour.RED, TextOutput.Highlight.BRIGHT),
+		ERROR(2, TextOutput.Colour.RED, TextOutput.Highlight.BRIGHT),
+		WARNING(3, TextOutput.Colour.YELLOW, TextOutput.Highlight.BRIGHT),
 		//FAIL(4,  VT100.compound(TextDecoration.Colour.YELLOW,  TextDecoration.Highlight.ITALIC.bitvalue)), 	/// Action completed unsuccessfully. // ?
 		NOTE(5,  TextOutput.Colour.DEFAULT), // VT100.compound(TextDecoration.Colour.CYAN, TextDecoration.Highlight.DIM.bitvalue)),   	/// Important information
 		INFO(6,  TextOutput.Colour.DEFAULT),  	/// Default color (white) Less important information
 		LOG(9, TextOutput.Colour.DEFAULT, TextOutput.Highlight.DIM),     /// Sometimes informative messages.
 		DEBUG(10, TextOutput.Colour.GRAY, TextOutput.Highlight.DIM), // TextDecoration.Highlight.RESET),      /// Technical information about the process
 		// Extensions
-		FAIL(WARNING.level, TextOutput.Colour.YELLOW,  TextOutput.Highlight.DIM), 	/// Action completed unsuccessfully. // ?
-		SUCCESS(WARNING.level, TextOutput.Colour.GREEN,  TextOutput.Highlight.DIM), 	/// Action completed unsuccessfully. // ?
+		FAIL(WARNING.level, TextOutput.Colour.YELLOW), 	/// Action completed unsuccessfully. // ?
+		SUCCESS(WARNING.level, TextOutput.Colour.GREEN), 	/// Action completed unsuccessfully. // ?
 		WAIT(NOTE.level, TextOutput.Colour.YELLOW,  TextOutput.Highlight.ITALIC),  	/// Indication of a "weak fail", pending status, leading soon recipient OK, WARNING, or ERROR.
-		OK(NOTE.level,    TextOutput.Colour.GREEN),      /// Action completed successfully.
+		OK(NOTE.level,    TextOutput.Colour.GREEN, TextOutput.Highlight.BRIGHT),      /// Action completed successfully.
 		SPECIAL(NOTE.level, TextOutput.Colour.MAGENTA,  TextOutput.Highlight.ITALIC),
 		EXPERIMENTAL(NOTE.level, TextOutput.Colour.CYAN,  TextOutput.Highlight.ITALIC),
 		DEPRECATED(NOTE.level, TextOutput.Colour.CYAN, TextOutput.Highlight.DIM),
@@ -355,6 +355,10 @@ public class Log implements AutoCloseable {
 	 */
 	protected <E> Log flush(Status status, E message){
 
+		this.textOutput.startElem(buffer);
+		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
+		this.textOutput.endElem(buffer);
+
 		if (true){
 			this.textOutput.setHighlights(status.highlights);
 		}
@@ -362,14 +366,14 @@ public class Log implements AutoCloseable {
 		if (this.decoration.isSet(TextOutput.Options.COLOUR)){
 			this.textOutput.setColour(status.colour);
 			if (status.colour != TextOutput.Colour.DEFAULT) {
-				this.textOutput.highlights.add(TextOutput.Highlight.BRIGHT);
+				//this.textOutput.highlights.add(TextOutput.Highlight.BRIGHT);
 			}
 		}
 
 		// this.textOutput.startSection(buffer); // TODO: Log.startFile()
 		this.textOutput.highlights.add(TextOutput.Highlight.REVERSE);
 
-		this.textOutput.startLine(buffer);
+		this.textOutput.startElem(buffer);
 
 		buffer.append("[").append(numberFormat.format(System.currentTimeMillis() - startTime)).append("] ");
 
@@ -377,14 +381,14 @@ public class Log implements AutoCloseable {
 		buffer.append(String.format("%7s", status));
 		buffer.append(':').append(' ').append(name);
 
-		this.textOutput.endLine(buffer);
+		this.textOutput.endElem(buffer);
 
 
-		if (true){
-			this.textOutput.setHighlights(status.highlights);
-		}
+		//if (true){
+		this.textOutput.setHighlights(status.highlights);
+		//}
 
-		this.textOutput.startLine(buffer);
+		this.textOutput.startElem(buffer);
 		buffer.append(':').append(' ');
 
 
@@ -430,7 +434,7 @@ public class Log implements AutoCloseable {
 			}
 		}
 
-		this.textOutput.endLine(buffer);
+		this.textOutput.endElem(buffer);
 
 		//this.textOutput.endSection(buffer); // TODO: Log.startFile()
 		this.textOutput.reset(); // check
@@ -502,6 +506,7 @@ public class Log implements AutoCloseable {
 
 	public void setVerbosity(String verbosity) throws NoSuchFieldException {
 
+
 		try {
 			int level = Integer.parseInt(verbosity);
 			this.setVerbosity(level);
@@ -514,15 +519,6 @@ public class Log implements AutoCloseable {
 				}
 				//statusCodes.put(s.level, s);
 			}
-			/*
-			for (Map.Entry<Integer, Status> entry: statusCodes.entrySet()){
-				if (entry.getValue().equals(verbosity)) {
-					this.verbosity = entry.getKey();
-					return; // true
-				}
-			}
-
-			 */
 			this.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
 			this.warn(String.format("No such verbosity level: %s", verbosity));
 			this.warn(String.format("Retaining level: %s", Log.statusCodes.get(this.getVerbosity())));
@@ -667,14 +663,8 @@ public class Log implements AutoCloseable {
 		return buffer.toString();
 	}
 
-	/*
-	public Log getChild(String childName){
-		Log log = new Log(this.name + "." + childName);
-		log.printStream = System.err; //this.printStream;
-		log.verbosity = this.verbosity;
-		return log;
-	}
-
+	/** Set formatting: plain TEXT, VT100 text, or HTML.
+	 *
 	 */
 	public void setFormat(TextOutput.Format fmt) {
 		System.err.printf("Format: %s%n", fmt);

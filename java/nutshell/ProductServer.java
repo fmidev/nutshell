@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 3);
+		super.version = Arrays.asList(2, 4);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -140,14 +140,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.info = new ProductInfo(productStr);
 			if (parentLog != null){
 				this.log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
-				this.log.decoration.set(parentLog.decoration);
 				this.log.setFormat(parentLog.textOutput.getFormat());
-				// this.log.textDecoration = parentLog.textDecoration; // static
+				this.log.decoration.set(parentLog.decoration);
 			}
 			else {
 				this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
+				this.log.setFormat(serverLog.textOutput.getFormat());
 				this.log.decoration.set(serverLog.decoration);
 			}
+			this.log.warn(String.format("Log format: %s (%s)",  this.log.textOutput.getFormat(), log.decoration));
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
@@ -1317,8 +1318,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		InstructionParameter(Instructions instructions){
 			super("instructions", "Set actions and properties: " +
-					String.join(",",
-							ClassUtils.getConstants(Instructions.class).keySet().toString()),
+							instructions.getAllFlags().keySet().toString(),
+							// String.join(",",
+							//ClassUtils.getConstants(Instructions.class).keySet().toString()),
 					instructions.toString());
 			myInstructions = instructions;
 		}
@@ -1408,7 +1410,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 		registry.add(new Parameter.Simple<String>("log_style",
-				"Set decoration: " + Arrays.toString(TextOutput.Options.values()), ""
+				"Set decoration: " + serverLog.decoration.getAllFlags().keySet(), ""
+				// "Set decoration: " + Arrays.toString(TextOutput.Options.values()), ""
 				//, Arrays.toString(TextDecoration.Colour.values()) + ',' +
 				//Arrays.toString(TextDecoration.Colour.values())
 		){

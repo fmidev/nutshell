@@ -95,10 +95,10 @@ public class TextOutput {
     }
 
 
-    public void startLine(StringBuffer buffer){
+    public void startElem(StringBuffer buffer){
     }
 
-    public void endLine(StringBuffer buffer){
+    public void endElem(StringBuffer buffer){
     }
 
     void append(String text, StringBuffer buffer){
@@ -109,7 +109,9 @@ public class TextOutput {
         buffer.append(url);
     }
 
-
+    /** Text terminal output supporting colours and highlighting
+     *
+     */
     static
     public class Vt100 extends TextOutput {
 
@@ -119,7 +121,9 @@ public class TextOutput {
         static
         final Map<Colour,Integer> cmap;
 
-
+        /**
+         *  for i in {0..99}; do echo -e "$i \033[1;${i}m Test \033[0m"; done
+         */
         static {
             hmap = new HashMap<>();
             hmap.put(Highlight.RESET,0);
@@ -150,7 +154,7 @@ public class TextOutput {
         }
 
         @Override
-        public void startLine(StringBuffer buffer){
+        public void startElem(StringBuffer buffer){
             buffer.append("\033[");
             // HIGHLIGHT
             for (Highlight h: Highlight.values()) {
@@ -166,7 +170,7 @@ public class TextOutput {
         }
 
         @Override
-        public void endLine(StringBuffer buffer){
+        public void endElem(StringBuffer buffer){
             buffer.append("\033[0m");
         }
 
@@ -176,7 +180,9 @@ public class TextOutput {
         }
     }
 
-
+    /** Lightweight output, esp. for logging.
+     *
+     */
     static
     public class Html extends TextOutput {
 
@@ -187,12 +193,12 @@ public class TextOutput {
             hmap = new HashMap<>();
             hmap.put(Highlight.RESET,"font-style: normal; font-weight:normal; text-decoration:none");
             hmap.put(Highlight.BRIGHT,"font-weight: bold");
-            //hmap.put(Highlight.DIM,2);
+            hmap.put(Highlight.DIM,"font-weight: lighter");
             hmap.put(Highlight.UNDERLINE,"text-decoration: underline");
             hmap.put(Highlight.UNDERLINE2,"text-decoration: double-underline"); // Double unnderline
             // hmap.put(Highlight.BLINK,);
             hmap.put(Highlight.ITALIC,"font-style: italic");
-            // hmap.put(Highlight.REVERSE,7);
+            // hmap.put(Highlight.REVERSE,7); color -> background-color.
         }
 
         @Override
@@ -211,7 +217,7 @@ public class TextOutput {
         }
 
         @Override
-        public void startLine(StringBuffer buffer){
+        public void startElem(StringBuffer buffer){
 
             buffer.append("<span");
             // HIGHLIGHT
@@ -247,7 +253,7 @@ public class TextOutput {
         }
 
         @Override
-        public void endLine(StringBuffer buffer){
+        public void endElem(StringBuffer buffer){
             buffer.append("</span>");
         }
 
@@ -259,9 +265,9 @@ public class TextOutput {
 
 
     public void decorate(String s, StringBuffer buffer){
-        startLine(buffer);
+        startElem(buffer);
         append(s, buffer);
-        endLine(buffer);
+        endElem(buffer);
     }
 
     public static void main(String[] args) {

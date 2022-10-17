@@ -23,7 +23,8 @@ import static java.nio.file.FileVisitResult.CONTINUE;
  */
 public class ProductServerBase extends Program {
 
-    final public HttpLog serverLog = new HttpLog(getClass().getSimpleName());
+    //final public HttpLog serverLog = new HttpLog(getClass().getSimpleName());
+    final public HttpLog serverLog = new HttpLog("NutShell");
 
     static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
