@@ -104,6 +104,16 @@ public class Log implements AutoCloseable {
 	// public Flags decorations;
 	final public Flags decoration = new Flags(TextOutput.Options.class);
 
+	public void setDecoration(String s) throws NoSuchFieldException, IllegalAccessException {
+		decoration.set(s);
+	};
+	public void setDecoration(TextOutput.Options... dec){
+		decoration.set(dec);
+	}
+
+	public void setDecoration(Flags flags)  {
+		decoration.set(flags);
+	};
 
 	/** Create a log with a name prefixed with the name of a existing log.
 	 *
@@ -664,13 +674,19 @@ public class Log implements AutoCloseable {
 		return buffer.toString();
 	}
 
-	/** Set formatting: plain TEXT, VT100 text, or HTML.
-	 *
-	 */
+	public TextOutput.Format getFormat() {
+		return textOutput.getFormat();
+	}
+
+		/** Set formatting: plain TEXT, VT100 text, or HTML.
+         *
+         */
 	public void setFormat(TextOutput.Format fmt) {
 		System.err.printf("Format: %s%n", fmt);
 
 		switch (fmt){
+			case DEFAULT:
+				// no break
 			case TEXT:
 				textOutput = Log.plainText;
 				break;

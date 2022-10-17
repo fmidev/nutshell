@@ -266,6 +266,17 @@ public class Manip {
         else if (cls.equals(Path.class)){
             field.set(target, Paths.get(s));
         }
+        else if (cls.isAssignableFrom(Flags.class)){
+            Flags flags = (Flags) field.get(target);
+            try {
+                //String v = value.toString();
+                //if (v.isEmpty())
+                //    flags.set(
+                flags.set(value.toString()); // how should empty string be handled?
+            } catch (NoSuchFieldException e) {
+                throw new IllegalAccessException(e.getMessage()); // kludge
+            }
+        }
         else if (cls.isEnum()){
             //System.err.printf(" Enum [%s] '%s' %n", Enum.valueOf(cls, s), s);
             field.set(target, Enum.valueOf(cls, s));
@@ -289,7 +300,7 @@ public class Manip {
             builder.append(field.getName()).append('=');
             try {
                 builder.append(field.get(obj));
-                builder.append('[').append(field.getType().getName()).append(']');
+                builder.append(" [").append(field.getType().getName()).append("] ");
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -303,6 +314,11 @@ public class Manip {
     static
     public class Example {
 
+        public enum Values {
+          FIRST,
+          SECOND
+        };
+
         public Object obj;
         public String ss;
         public Integer ii;
@@ -313,6 +329,8 @@ public class Manip {
         public boolean b;
         public byte B;
         public HashMap<String,Object> map = new HashMap<>();
+        public Values e;
+        public Flags flags = new Flags(Values.class);
 
         @Override
         public String toString() {
@@ -327,6 +345,7 @@ public class Manip {
 
         if (args.length == 0){
             System.out.println("Usage: \n");
+            System.out.println("java -cp out/production/nutshell nutshell.Manip map[eka]=toka e=SECOND flags=FIRST,SECOND");
             System.out.println(Manip.toString(example, ' '));
             System.out.println("CONFFILE=foo.cnf  f=0.1234\n");
             System.exit(0);

@@ -67,7 +67,10 @@ check_dir_syntax HTTP_PREFIX
 
 echo
     
+export LOG_STYLE
+#LOG_STYLE=${LOG_FORMAT:-'HTML'}
 
+export LOG_FORMAT
 
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
@@ -81,9 +84,10 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     check_dir_syntax TOMCAT_CONF_DIR
 
     NUTSHELL_JAR_DIR=$HTTP_ROOT/WEB-INF/lib
-       
+
+    LOG_FORMAT=${LOG_FORMAT:-'HTML'}
     #  else
-    
+    #    LOG_FORMAT=$LOG_FORMAT:-'VT100'}
 fi
 
 echo
@@ -119,6 +123,9 @@ ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache directories created b
 ask_variable FILE_PERMS "rw-rw-r--" "Permissions for cache files created by the system"
 ask_variable UMASK "" "Defines the file permissions created by a product generator. (optional)"
 
+ask_variable LOG_FORMAT "VT100" "Log formatting: (plain) TEXT, VT100 (text), HTML or DEFAULT"
+
+ask_variable LOG_STYLE "COLOUR,URLS" "Log formatting: (use) COLOUR, (convert) URLS"
 
 echo
 vt100echo green "Resulting configuration: "

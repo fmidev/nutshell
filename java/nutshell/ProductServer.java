@@ -140,15 +140,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.info = new ProductInfo(productStr);
 			if (parentLog != null){
 				this.log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
-				this.log.setFormat(parentLog.textOutput.getFormat());
-				this.log.decoration.set(parentLog.decoration);
+				this.log.setFormat(parentLog.getFormat());
+				this.log.setDecoration(parentLog.decoration);
 			}
 			else {
 				this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
-				this.log.setFormat(serverLog.textOutput.getFormat());
-				this.log.decoration.set(serverLog.decoration);
+				this.log.setFormat(LOG_FORMAT);
+				this.log.setDecoration(LOG_STYLE);
 			}
-			this.log.warn(String.format("Log format: %s (%s)",  this.log.textOutput.getFormat(), log.decoration));
+			this.log.debug(String.format("Log format: %s (%s)",  this.log.textOutput.getFormat(), log.decoration));
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
@@ -1419,9 +1419,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
 				//super.setParam(key, value);
-				serverLog.decoration.set(value.toString());
-				serverLog.special("deco: "+ serverLog.decoration.toString());
-				serverLog.special("deco: "+ value.toString());
+				LOG_STYLE.set(value.toString());
+				serverLog.decoration.set(LOG_STYLE);
+				//serverLog.special("deco: "+ serverLog.decoration.toString());
+				//serverLog.special("deco: "+ value.toString());
 			}
 
 

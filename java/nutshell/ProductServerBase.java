@@ -53,8 +53,9 @@ public class ProductServerBase extends Program {
     //protected Path storageRoot = Paths.get(".");
     public Path STORAGE_ROOT = Paths.get(".");
 
-    public TextOutput.Format LOG_FORMAT = TextOutput.Format.TEXT;
+    public TextOutput.Format LOG_FORMAT = TextOutput.Format.DEFAULT;
 
+    final public Flags LOG_STYLE = serverLog.decoration;
 
 
     final
@@ -180,6 +181,14 @@ public class ProductServerBase extends Program {
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
+        // Logging
+        if (LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
+            serverLog.setFormat(TextOutput.Format.VT100);
+        else
+            serverLog.setFormat(LOG_FORMAT);
+
+        serverLog.setDecoration(LOG_STYLE);
+
         StringBuilder sb = new StringBuilder();
         sb.append(HTTP_HOST);
         if (HTTP_PORT != null)
@@ -191,46 +200,9 @@ public class ProductServerBase extends Program {
 		Log.pathMap.put(PRODUCT_ROOT, httpPrefix+"/products/");
         //System.err.println(Manip.toString(this, '\n'));
 
-        // Todo: consider optional conf file based  fileGroupID?
-        // this.fileGroupID = setup.getOrDefault("FILE_GROUP",  ".").toString();
-        /*
-        String gid = null; //setup.getOrDefault("GROUP_ID", null);
-        //Path trueCacheRoot = null;
-        try {
-            //trueCacheRoot = cacheRoot.toRealPath();
-            // Default: root of the cache dir
-            //System.err.println(String.format("GID: %s ", gid));
-            // Override with conf value of GROUP_ID, if set.
-            gid = setup.getOrDefault("GROUP_ID", "").toString();
-            if (gid.isEmpty())
-                gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();
-            this.GROUP_ID = Integer.parseInt(gid); // null?
-            //System.err.println(String.format("GID: %s -> %d", gid, fileGroupID));
-            // this.fileGroupID = Integer.parseInt(Files.getAttribute(cacheRoot, "unix:gid").toString());
-        }
-        catch (Exception e) {
-            serverLog.warn(String.format("%s: %s", e.getClass().getCanonicalName(), e.getMessage()));
-            // serverLog.error(String.format("Could not read group id of cache dir: %s, real path: %s, gid='%s'",
-            //        cacheRoot, trueCacheRoot, gid));
-            serverLog.error(String.format("Could not solve group id: '%s', got '%s'", CACHE_ROOT, gid));
-        }
-        //setup.put("fileGroupID", this.GROUP_ID);
-        */
 
-        /*
-        Object logPathFormat = setup.get("LOGFILE");
-        if (logPathFormat != null) {
-            Path p = setLogFile(logPathFormat.toString());
-            //System.err.println(String.format("Log file: %s", p);
-        }
 
-         */
-        //
-        //if (setup.containsKey("PATH_EXT"))
-                //setup.get("PATH_EXT").toString();
-        //setup.put("cmdPath", this.PATH);
-        // this.generatorScriptName = setup.getOrDefault("CAC",   ".").toString();
-        // this.inputScriptName     = setup.getOrDefault("PRO", ".").toString();
+
     }
 
     /**

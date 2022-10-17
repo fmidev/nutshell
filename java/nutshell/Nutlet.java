@@ -64,8 +64,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		if (!productServer.serverLog.logFileIsSet()){
 			Path p = productServer.CACHE_ROOT.resolve("nutshell/nutshell-tomcat-%s.html");
 			try {
-				productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
-				productServer.serverLog.decoration.set(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
+				if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
+					productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
+				productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
 				FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
 				productServer.setLogFile(p.toString());
 			} catch (IOException e) {

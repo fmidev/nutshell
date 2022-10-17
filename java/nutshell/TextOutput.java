@@ -7,6 +7,7 @@ import java.util.Map;
 public class TextOutput {
 
     public enum Format {
+        DEFAULT,
         TEXT,
         VT100,
         HTML;
