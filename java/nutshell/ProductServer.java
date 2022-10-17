@@ -1704,7 +1704,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		}
 		catch (Exception e) {
-			if (log.getVerbosity() >= Log.Status.DEBUG.level){
+			if (log.getVerbosity() >= Log.Status.NOTE.level){
 				e.printStackTrace(log.getPrintStream());
 			}
 			log.error(String.format("Unhandled exception: %s", e));

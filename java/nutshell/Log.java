@@ -35,9 +35,10 @@ public class Log implements AutoCloseable {
 		// TODO re-organize according to C error levels
 		UNDEFINED(0, TextOutput.Colour.WHITE),
 		//FATAL(1, TextDecoration.Colour.RED_BG),
-		FATAL(1, TextOutput.Colour.RED, TextOutput.Highlight.BRIGHT),
-		ERROR(2, TextOutput.Colour.RED, TextOutput.Highlight.BRIGHT),
-		WARNING(3, TextOutput.Colour.YELLOW, TextOutput.Highlight.BRIGHT),
+		FATAL(1, TextOutput.Colour.BLUE, TextOutput.Highlight.BRIGHT),
+		CRITICAL(2, TextOutput.Colour.MAGENTA, TextOutput.Highlight.BRIGHT),
+		ERROR(3, TextOutput.Colour.RED, TextOutput.Highlight.BRIGHT),
+		WARNING(4, TextOutput.Colour.YELLOW, TextOutput.Highlight.BRIGHT),
 		//FAIL(4,  VT100.compound(TextDecoration.Colour.YELLOW,  TextDecoration.Highlight.ITALIC.bitvalue)), 	/// Action completed unsuccessfully. // ?
 		NOTE(5,  TextOutput.Colour.DEFAULT), // VT100.compound(TextDecoration.Colour.CYAN, TextDecoration.Highlight.DIM.bitvalue)),   	/// Important information
 		INFO(6,  TextOutput.Colour.DEFAULT),  	/// Default color (white) Less important information
