@@ -94,9 +94,9 @@ public class FileUtils {
             catch (Exception e){
                 experimentalResult |= Permission.WRITE; // or "ALL" ?
                 // Exit, because does dir not exist now.
-                //throw e;
-                throw new IOException(String.format("Failed in CREATING dir %s, write=%b, orig:%s",
-                        path, Files.isWritable(path), e.getMessage()));
+                throw e;
+                //throw new IOException(String.format("Failed in CREATING dir %s, write=%b, orig:%s",
+                //path, Files.isWritable(path), e.getMessage()));
             }
 
             try {
@@ -119,7 +119,7 @@ public class FileUtils {
         }
 
         if (!Files.isWritable(path)){
-            throw new IOException(String.format("Failed in making [writable] dir %s", path, permissions));
+            throw new IOException(String.format("Dir exists, but is not writable: %s %s", path, permissions));
         }
 
         return experimentalResult;
