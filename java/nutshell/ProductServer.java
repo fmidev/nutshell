@@ -1199,7 +1199,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return tasks;
 		}
 
-		log.note(String.format("Starting (%d) tasks", tasks.size()));
+		log.note(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 
 		/// Start as threads, if requested
 		for (Entry<String,Task> entry : tasks.entrySet()){
