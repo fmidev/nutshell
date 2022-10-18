@@ -158,7 +158,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 			// Accept only word \\w chars and '-'.
-			String label = String.format(LABEL, getTaskId(), USER).replaceAll("[^\\w\\-\\.]", "");
+			String label = String.format(LABEL, getTaskId(), USER).replaceAll("[^\\w\\-\\.@]", "");
 			// final Pattern nonWord = Pattern.compile("\\W");
 			// label.replaceAll("\\W", "_");
 
