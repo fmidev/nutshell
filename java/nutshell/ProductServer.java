@@ -9,6 +9,8 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.nio.file.Files.*;
 
@@ -148,23 +150,29 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				this.log.setFormat(LOG_FORMAT);
 				this.log.setDecoration(LOG_STYLE);
 			}
-			this.log.debug(String.format("Log format: %s (%s)",  this.log.textOutput.getFormat(), log.decoration));
+			this.log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 
 			this.filename = this.info.getFilename();
 			this.instructions.set(instructions);
 			this.instructions.regenerateDepth = defaultRemakeDepth;
+
+
+			// Accept only word \\w chars and '-'.
+			String label = String.format(LABEL, getTaskId(), USER).replaceAll("[^\\w\\-\\.]", "");
+			// final Pattern nonWord = Pattern.compile("\\W");
+			// label.replaceAll("\\W", "_");
 
 			// Relative
 			this.productDir = getProductDir(this.info.PRODUCT_ID);
 			this.timeStampDir = getTimestampDir(this.info.time);
 			this.relativeOutputDir = this.timeStampDir.resolve(this.productDir);
 			//this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve(String.format("tmp-%s-%d", ) + getTaskId());
-			this.relativeOutputDirTmp = this.relativeOutputDir.resolve(String.format("tmp-%s-%d", USER, getTaskId()));
+			this.relativeOutputDirTmp = this.relativeOutputDir.resolve(label); //String.format("tmp-%s-%d", USER, getTaskId()));
 			this.relativeOutputPath = relativeOutputDir.resolve(filename);
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
-			String label = String.format(LABEL, getTaskId(), USER);
+
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
 
 			// Is this sometimes confusing?
