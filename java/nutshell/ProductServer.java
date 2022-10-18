@@ -1205,7 +1205,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
 			Task task = entry.getValue();
-			task.log.info("Decoration: " + task.log.decoration.toString());
+			task.log.debug("Decoration: " + task.log.decoration.toString());
 			if (task.instructions.isSet(ActionType.PARALLEL)) {
 				try {
 					// serverLog.special
