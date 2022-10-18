@@ -58,7 +58,10 @@ public class ProductServerBase extends Program {
 
     public String USER = System.getProperty("user.name");;
 
-    public String LABEL = "%s-%d"; // USER-counter
+    /** Marker for logs and temporary files.
+     *  To separate different users/processes in shared directories.
+     */
+    public String LABEL = "%d-%s"; // USER-counter
 
     final
     public Map<String,String> MAP_URL = new HashMap<>();

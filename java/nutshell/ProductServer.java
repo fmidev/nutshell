@@ -164,7 +164,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
-			String label = String.format(LABEL, USER, getTaskId());
+			String label = String.format(LABEL, getTaskId(), USER);
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
 
 			// Is this sometimes confusing?
@@ -1420,10 +1420,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
 				//super.setParam(key, value);
-				LOG_STYLE.set(value.toString());
+				String s = value.toString();
+				if (s.isEmpty())
+					LOG_STYLE.clear();
+				else
+					LOG_STYLE.set(value.toString());
 				serverLog.decoration.set(LOG_STYLE);
-				//serverLog.special("deco: "+ serverLog.decoration.toString());
-				//serverLog.special("deco: "+ value.toString());
+				// serverLog.special("deco: "+ serverLog.decoration.toString());
+				// serverLog.special("deco: "+ value.toString());
 			}
 
 
@@ -1462,7 +1466,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				this, "GROUP_ID"));
 
 		registry.add(new Parameter<ProductServer>("label",
-				"Additional marker in log files.",
+				"Marker for logs and tmps, supporting %d=task-id [%s=user].",
 				this, "LABEL"));
 
 		// Consider: to NutLet

@@ -384,6 +384,10 @@ public class Flags {
         value = (value & ~i);
     }
 
+    public void clear() {
+        value = 0;
+    }
+
     /*
     public String[] toStrings() {
         try {
@@ -399,19 +403,13 @@ public class Flags {
     @Override
     public String toString() {
         try {
-            //return Flags.getFlags(AccessFlags.class, value);
             return String.join(",", getFlags(value));
         }
         catch (IllegalAccessException e) {
             return "";
         }
 
-        // return new String[0];
-        // return String.join(",", toStrings());
-        // return Arrays.toString(toStrings());
     }
-
-
 
     boolean isSet(int i) {
         return (value & i) == i;
