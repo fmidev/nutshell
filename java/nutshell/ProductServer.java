@@ -1704,7 +1704,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								param.setParams(""); // Support "premature" end of cmd line, esp. with --help
 						}
 						param.exec();
-						log.special(String.format("Handled: %s", param));
+						log.debug(String.format("Handled: %s", param));
 						//log.special(param.toString());
 						continue;
 					}
@@ -1718,7 +1718,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					batchConfig.products.put("product" + (batchConfig.products.size()+1), arg);
 				}
 
-				log.special("Instructions: " + batchConfig.instructions);
+				log.info("Instructions: " + batchConfig.instructions);
 			}
 		}
 		catch (Exception e) {
