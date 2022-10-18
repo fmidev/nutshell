@@ -295,7 +295,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			Path result = Files.createSymbolicLink(dst, src);
-			FileUtils.ensureGroup(result, GROUP_ID, filePerms);
+			try {
+				FileUtils.ensureGroup(result, GROUP_ID, filePerms);
+			}
+			catch (Exception e) {
+				log.note(String.format("Failed setting GROUP_ID=%d %s ", GROUP_ID, filePerms));
+			}
 
 			return result;
 			//return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
