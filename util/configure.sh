@@ -28,9 +28,9 @@ if [ $NUTSHELL_VERSION == 'docker-java' ]; then
     NUTSHELL_ROOT='/opt/nutshell'
     NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
     CMD_SCRIPT_DIR=/usr/local/bin
-#    NUTSHELL_ROOT="$PWD/docker"
-#    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
-#    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
+    #    NUTSHELL_ROOT="$PWD/docker"
+    #    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+    #    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
 fi
 
 
@@ -47,20 +47,24 @@ PKG_ROOT=`pwd -P`
 vt100echo blue "HTTP server configuration"
 if [ $NUTSHELL_VERSION == 'java' ]; then
     vt100echo green "(HTTP variables are optional for  $NUTSHELL_VERSION)"
+else
+    HTTP_HOST=${HTTP_HOST:-'http://localhost'}
 fi
 
-ask_variable HTTP_HOST 'http://localhost'  "HTTP protocol and host name"
+ask_variable HTTP_HOST "$HTTP_HOST"  "HTTP protocol and host name. Leave empty if not used."
 
-ask_variable HTTP_PORT '8080'  "Port for HTTP server"
+if [ "$HTTP_HOST" != '' ]; then
+    ask_variable HTTP_PORT '8080'  "Port for HTTP server"
 
-ask_variable HTTP_ROOT "/usr/local/nutshell" "Root directory for HTTP server "  #(including ./WEB-INF/lib/Nutlet.jar):"
-check_dir_syntax HTTP_ROOT
-NUTSHELL_ROOT=${NUTSHELL_ROOT:-$HTTP_ROOT}
+    ask_variable HTTP_ROOT "/usr/local/nutshell" "Root directory for HTTP server "  #(including ./WEB-INF/lib/Nutlet.jar):"
+    check_dir_syntax HTTP_ROOT
+    NUTSHELL_ROOT=${NUTSHELL_ROOT:-$HTTP_ROOT}
+
+    ask_variable HTTP_PREFIX "/nutshell" "URL prefix"   # (with leading '/' but without trailing '/')"
+    check_dir_syntax HTTP_PREFIX
+fi
+
     
-ask_variable HTTP_PREFIX "/nutshell" "URL prefix"   # (with leading '/' but without trailing '/')"
-check_dir_syntax HTTP_PREFIX
-
-
 #export MAP_URL=
 #ask_variable 'MAP_URL' ''  "EDIT LATER: Convert path prefix to accessible URL, eg. MAP_URL[$NUTSHELL_ROOT]=http://localhost:8080/nutshell/"
 
@@ -92,8 +96,7 @@ fi
 
 echo
 
-
-
+# "$prefix/nutshell"
 
 vt100echo blue "Nutshell product server configuration"
 
@@ -106,6 +109,9 @@ ask_variable PATH_EXT "" "Command path extension 'dir:dir2:dir3...'"
 NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-$NUTSHELL_ROOT/jar}
 show_variable NUTSHELL_JAR_DIR
 write_variable NUTSHELL_JAR_DIR $NUTSHELL_JAR_DIR  "Location of JAR file for cmd line access (Java versions only)"
+
+ask_variable CMD_SCRIPT_DIR "$CMD_SCRIPT_DIR" "Directory for 'nutshell' executable (script)"
+
 
 ask_variable PRODUCT_ROOT "$NUTSHELL_ROOT/products" "Root directory for product generators"
 check_dir_syntax PRODUCT_ROOT

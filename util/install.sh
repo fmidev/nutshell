@@ -6,13 +6,9 @@ source util/vt100utils.sh
 source util/init-config.sh
 
 
-
-
 #vt100echo green "Main options"
 #ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
 #CONF_FILE="nutshell-$NUTSHELL_VERSION.cnf"
-
-
 
 if [ -f $CONF_FILE ]; then
     #vt100echo green "Reading CONF_FILE=$CONF_FILE "
@@ -23,14 +19,7 @@ if [ -f $CONF_FILE ]; then
 else
     vt100echo yellow "Conf file does not exist"
     show_variable CONF_FILE
-    #CONF_SCRIPT="util/configure-$NUTSHELL_VERSION.sh"
-    #if [ -x $CONF_SCRIPT ]; then
-    #	$CONF_SCRIPT
-    #else
-    #vt100echo red "CONF_SCRIPT=$CONF_SCRIPT does not exist"
     vt100echo yellow "Run first: util/configure.sh $NUTSHELL_VERSION"
-    exit 1
-    #fi
 fi
 
 
@@ -40,9 +29,6 @@ if [ $NUTSHELL_VERSION == 'docker-java' ]; then
     NUTSHELL_ROOT="$PWD/docker"
     NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
     CMD_SCRIPT_DIR=$NUTSHELL_ROOT
-    #    NUTSHELL_ROOT='/opt/nutshell'
-    #    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
-    #    CMD_SCRIPT_DIR=$NUTSHELL_ROOT
 fi
 
 if [ ! -v NUTSHELL_ROOT ]; then
@@ -61,8 +47,6 @@ echo
 
 backup_file ${NUTSHELL_ROOT}/nutshell.cnf
 cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
-
-
 
 
 
