@@ -191,9 +191,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.outputPathTmp = outputDirTmp.resolve(filename);
 			this.storagePath = STORAGE_ROOT.resolve(this.relativeOutputDir).resolve(filename);
 
-
+			Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 			try {
-				Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 				//ensureFile(cacheRoot, this.relativeLogPath);
 				//FileUtils.ensureWritableDir(logPath.getParent(), fileGroupID, dirPerms);
 				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
@@ -201,7 +200,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//FileUtils.ensureWritableFile(logPath.getParent().resolve("test"+getTaskId()+".foo"), fileGroupID, filePerms, dirPerms);
 
 			} catch (IOException e) {
-				System.err.println(String.format("Opening Log file (%s) failed: %s", this.relativeLogPath, e));
+				System.err.println(String.format("Log GID=%d  file=%s dir=%s", GROUP_ID, filePerms, dirPerms));
+				System.err.println(String.format("Opening Log file (%s) failed: %s", logPath, e));
 				//log.setLogFile(null);
 			}
 
