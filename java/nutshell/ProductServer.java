@@ -49,7 +49,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 5);
+		super.version = Arrays.asList(2, 6);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -158,7 +158,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 			// Accept only word \\w chars and '-'.
-			String label = String.format(LABEL, getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "");
+			String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
 			// final Pattern nonWord = Pattern.compile("\\W");
 			// label.replaceAll("\\W", "_");
 

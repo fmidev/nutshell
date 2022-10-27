@@ -58,10 +58,14 @@ public class ProductServerBase extends Program {
 
     public String USER = System.getProperty("user.name");;
 
-    /** Marker for logs and temporary files.
+    /** Prefix for the marker used in logs and temporary files.
      *  To separate different users/processes in shared directories.
+     *
+     *  The label will be automatically appended also the counter number
+     *  and user.
+     *
      */
-    public String LABEL = "%d-%s"; // USER-counter
+    public String LABEL = ""; // ""%d-%s"; // USER-counter
 
     final
     public Map<String,String> MAP_URL = new HashMap<>();
