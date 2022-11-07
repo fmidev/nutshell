@@ -37,6 +37,7 @@ public class ProductServerBase extends Program {
     /** Port for HTTP server */
     public String HTTP_PORT = null; // "";  // GROUP_ID  *
     public String HTTP_PREFIX = "/nutshell";
+    protected String HTTP_BASE = "";
 
     // Read in config, set in constructor
     public int GROUP_ID = 0;  // GROUP_ID  *
@@ -151,7 +152,7 @@ public class ProductServerBase extends Program {
                             path, this.confFile));
                 //serverLog.note("Reading setup: " + path.toString());
                 // MapUtils.read(path.toFile(), setup);
-                Manip.readConfig(path.toFile(), setup);
+                Config.readConfig(path.toFile(), setup);
             }
             this.confFile = path; // null ok??
             setup.put("confFile", path);
@@ -203,10 +204,10 @@ public class ProductServerBase extends Program {
         if (HTTP_PORT != null)
             sb.append(':').append(HTTP_PORT);
         sb.append(HTTP_PREFIX);
-        String httpPrefix = sb.toString();
-        Log.pathMap.put(CACHE_ROOT, httpPrefix+"/cache/");  // <- append relative path
-        Log.pathMap.put(STORAGE_ROOT, httpPrefix+"/storage/");
-		Log.pathMap.put(PRODUCT_ROOT, httpPrefix+"/products/");
+        HTTP_BASE = sb.toString();
+        Log.pathMap.put(CACHE_ROOT, HTTP_BASE+"/cache/");  // <- append relative path
+        Log.pathMap.put(STORAGE_ROOT, HTTP_BASE+"/storage/");
+		Log.pathMap.put(PRODUCT_ROOT, HTTP_BASE+"/products/");
         //System.err.println(Manip.toString(this, '\n'));
 
 

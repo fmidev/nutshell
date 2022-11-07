@@ -12,11 +12,8 @@ import java.util.regex.Pattern;
 
 
 
-/** 
- *  Currently, only reading is implemented.
- * 
- * TODO: make template a concept
- * 
+/** Partly outdated. Use @{@link Manip} instead.
+ *
  * @author Markus.Peura@fmi.fi 20 Feb 2010
  *
  */
@@ -161,12 +158,13 @@ public class MapUtils {
 	 *
 	 * @return map
 	 */
-	static public Map<String,String> setEntries(String s, String separatorRegExp, String defaultValue, Map<String,String> map){
+	static
+	public Map<String,String> setEntries(String s, String separatorRegExp, String defaultValue, Map<String,String> map){
 
 		for (String d : s.split(separatorRegExp)) { // Note: regexp
 			int j = d.indexOf('=');
-			if (j > 1) {
-				map.put(d.substring(0, j), d.substring(j + 1));
+			if (j > 0) {
+				map.put(d.substring(0, j).trim(), d.substring(j + 1).trim());
 			} else {
 				map.put(d, defaultValue);
 			}
@@ -174,71 +172,6 @@ public class MapUtils {
 
 		return map;
 
-	}
-
-
-	static public Map<String, Object> getMap(Object src){
-		return getMap(new HashMap<String,Object>(), src);
-	}
-
-	static public Map<String, Object> getMap(Object src, int modifiers){
-		return getFields(new HashMap<String,Object>(), src, modifiers);
-	}
-
-
-	static public Map<String, Object> getMap(Map<String, Object> map, Object src){
-		return getFields(map, src, Modifier.STATIC);
-	}
-
-
-	// See also configuration
-	static public Map<String, Object> getFields(Map<String, Object> map, Object src, int modifiers){
-		// java.lang.reflect.Modifier.is
-		//Modifier.PUBLIC
-		Field[] fields = src.getClass().getFields();
-		for (Field field : fields) {
-			if ((field.getModifiers() & modifiers) > 0){
-				// if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())){ // consider Bool nonStatic
-				String name = field.getName();		
-				try {
-					map.put(name, field.get(src));
-				} catch (Exception e) {
-					map.put(name, e.getMessage());
-				}					
-			}
-		}
-		return map;
-	}
-
-	static public Map<String, Object> getMethods(Object src) {
-		return getMethods(new HashMap<String, Object>(), src);
-	}
-
-	static public Map<String, Object> getMethods(Map<String, Object> map, Object src) { //}, int modifiers){
-
-		final Object[] empty = new Object[0]; // ??
-
-		Method[] methods =  src.getClass().getMethods();
-		for (Method method : methods) {
-			// if (method.isAccessible())
-			String name = method.getName();
-			if (name.startsWith("get") && (method.getParameterCount()==0) && (method.getReturnType() != void.class)){
-				Object value = null;
-				try {
-					value = method.invoke(src, empty);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					// value = e.getClass().getName();
-					value = e.getMessage();
-				}
-				if (value == null)
-					value = "";
-				map.put(name, value.toString()); // +method.toGenericString()); // or object?
-
-			}
-
-		}
-
-		return map;
 	}
 
 

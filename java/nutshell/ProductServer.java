@@ -9,8 +9,6 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.nio.file.Files.*;
 
@@ -68,7 +66,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	@Override
 	public String toString() {
-		return MapUtils.getMap(this).toString() + "\n" + setup.toString();
+		return Config.getMap(this).toString() + "\n" + setup.toString();
 	}
 
 	/**
@@ -761,13 +759,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
 					serverLog.fail(info.getFilename());
 					// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
-					try {
-						log.warn(String.format("Failed in generating, so deleting: %s", info));
-						this.delete(this.outputPathTmp);
-					} catch (Exception e) {
-						/// TODO: is it a fatal error if a product defines its input wrong?
-						log.error(e.getMessage()); // RETURN?
-						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
+					if (instructions.isSet(Instructions.GENERATE)) {
+						try {
+							log.warn(String.format("Failed in generating: %s", info));
+							if (outputPathTmp.toFile().exists())
+								this.delete(this.outputPathTmp);
+						} catch (Exception e) {
+							/// TODO: is it a fatal error if a product defines its input wrong?
+							log.error(e.getMessage()); // RETURN?
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
+						}
 					}
 				}
 
@@ -1453,12 +1454,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 
-		registry.add(new Parameter.Simple<String>("directives","Set application properties",
+		registry.add(new Parameter.Simple<String>("directives",
+				"Set application (env) variables separated with '|'",
 				""){
 			@Override
 			public void exec() {
-				System.err.print(String.format("Type: %s %s", value.getClass(), value));
+				//System.err.print(String.format("Type: %s %s", value.getClass(), value));
+
 				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
+				//System.err.print(batchConfig.directives);
+				//serverLog.special(batchConfig.directives.toString());
 			}
 		});
 

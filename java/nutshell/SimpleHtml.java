@@ -104,6 +104,14 @@ public class SimpleHtml extends SimpleXML{
 
 	}
 
+	/** Interface for Objects the state of which can appear as HTML nodes.
+	 *
+	 */
+	interface Nodifiable {
+
+		Node getNode(Document basedoc);
+	}
+
 	final public Element root;
 	final public Element head;
 	final public Element encoding;
@@ -309,6 +317,8 @@ public class SimpleHtml extends SimpleXML{
 				}
 				else if (value instanceof Node)
 					tdVal.appendChild((Node)value);
+				else if (value instanceof Nodifiable)
+					tdVal.appendChild(((Nodifiable)value).getNode(document));
 				else
 					tdVal.setTextContent(value.toString());
 			}

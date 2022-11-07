@@ -1,16 +1,11 @@
 package nutshell;
 
-import com.sun.istack.internal.NotNull;
-
-import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /** Object manipulation utilities, including configuration read.
  *
@@ -25,21 +20,6 @@ public class Manip {
         public Object value = null;
     }
 
-    protected static final Pattern commentPattern = Pattern.compile("^(.*)[%#](.*)$");
-
-    /**
-     *  Accepts:
-     * 	VARIABLE_NAME=VALUE
-     * 	VARIABLE_NAME='VALUE'
-     * 	VARIABLE_NAME="VALUE"
-     *
-     *  also:
-     *  VARIABLE[KEY]=VALUE
-     *  VARIABLE[KEY2]=VALUE2
-     *
-     *
-     */
-    protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)(\\[(\\w+)\\])?\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
     // protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
 
 	/*
@@ -48,117 +28,6 @@ public class Manip {
         readConfig(path.toFile(), target);
     }
 	 */
-
-    /**
-     *
-     * @param file –
-     * @param target – onject in which values are assigned
-     * @param <T> – Object or Map<String,Object>
-     * @throws Exception – Either {@link IOException} or {@link ParseException}
-     */
-    static
-    public <T> void readConfig(File file, T target) throws Exception {
-        BufferedReader input = new BufferedReader(new FileReader(file));
-		readConfig(input, target);
-		input.close();
-    }
-
-    /**
-     *
-     * @param input
-     * @param target
-     * @param <T> – Object or Map<String,Object>
-     * @throws IOException
-     */
-    static
-    public <T> void readConfig(BufferedReader input, T target) throws Exception {
-
-        // System.err.printf(" Target class=%s %n", target.getClass().getName());
-        // System.err.printf(" Map? %b %n", Map.class.isInstance(target));
-        // System.err.printf(" Map? %b %n", );
-        final boolean MAP = (target instanceof Map);
-
-        Exception exception = null;
-        String line;
-
-        Manip.Entry entry = new Manip.Entry();
-
-        while ((line = input.readLine()) != null){
-
-			line = line.trim();
-
-			// Strip (trailing) comments
-			Matcher m = commentPattern.matcher(line);
-			if (m.matches())
-				line = m.group(1);
-
-			if (line.isEmpty())
-			    continue;
-            // System.err.printf(" LINE: '%s'%n", line);
-            try {
-                parse(line, entry);
-            }
-            catch (Exception e){
-                exception = e;
-                continue;
-            }
-
-            try {
-                 if (MAP) {
-                     ((Map<String, Object>) target).put(entry.key, entry.value);
-                 }
-                 else {
-                     // if entry.index != null, assume target has member "key" which is a map.
-                    assignToObject(entry.value, target, entry.key, entry.index);
-                 }
-            } catch (NoSuchFieldException e) {
-                exception = e;
-            } catch (IllegalAccessException e) {
-                exception = e;
-                //e.printStackTrace();
-            }
-
-            if (exception != null)
-                throw exception;
-
-        }
-    }
-
-    /** Extracts KEY=VALUE from the line.
-     *
-     * @param line
-     * @param entry
-     * @return
-     * @throws ParseException
-     */
-    static
-    public void parse(String line, Manip.Entry entry) throws ParseException {
-
-        Matcher matcher = linePattern.matcher(line);
-
-        if (matcher.matches()) {
-            entry.key   = trim(matcher.group(1));
-            entry.index = trim(matcher.group(3));
-            entry.value = trim(matcher.group(4));
-            //return true;
-        }
-        else {
-            //matcher.
-            throw new ParseException(String.format("line='%s' regex='%s'", line, linePattern), 0);
-
-        }
-
-        // return false;
-        // Map.Entry<String,Integer> entry =
-        // new AbstractMap<String,Integer>().SimpleEntry<String, Integer>("exmpleString", 42);
-    }
-
-    private static String trim(String s){
-        if (s == null)
-            return null; // or "" ?
-        else
-            return s.trim();
-    }
 
     static
     public void assignToMap(String key, Object value,  Map<String,Object> target)  {
@@ -172,6 +41,11 @@ public class Manip {
         }
     }
 
+    /**
+     *
+     * @param source
+     * @param target
+     */
     static
     public void assignToObjectLenient(Map<String,Object> source, Object target)  {
         for (Map.Entry<String,Object> entry: source.entrySet()) {
@@ -191,7 +65,15 @@ public class Manip {
     }
 
 
-
+    /** Assign value to target.key[index] .
+     *
+     * @param value - value to be assigned
+     * @param target - object
+     * @param key - member name
+     * @param index – if not null, assume target.key is a Map.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
     static
     public void assignToObject(Object value, Object target, String key, String index) throws NoSuchFieldException, IllegalAccessException {
 
@@ -359,7 +241,7 @@ public class Manip {
         for (String arg: args) {
 
             try {
-                parse(arg, entry);
+                Config.parseConfigLine(arg, entry);
             } catch (ParseException e) {
                 //e.printStackTrace();
                 System.out.println(e);
@@ -370,8 +252,8 @@ public class Manip {
             if (entry.key.equals("CONFFILE")){
                 Path path = Paths.get(entry.value.toString());
                 try {
-                    readConfig(path.toFile(), example);
-                    readConfig(path.toFile(), map);
+                    Config.readConfig(path.toFile(), example);
+                    Config.readConfig(path.toFile(), map);
                     System.out.println(map);
                 } catch (Exception e) {
                     e.printStackTrace();

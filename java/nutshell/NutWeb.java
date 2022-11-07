@@ -462,7 +462,7 @@ public class NutWeb extends HttpServlet {
 			html.appendTable(request.getParameterMap(), null);
 			html.appendTag(SimpleHtml.Tag.H1, "HttpServletRequest");
 			//html.appendTable(getConf(request), null);
-			html.appendTable(MapUtils.getMethods(request), null);
+			html.appendTable(Config.getValues(request), null);
 		}
 	}
 

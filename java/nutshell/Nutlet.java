@@ -21,12 +21,34 @@ import org.w3c.dom.Node;
 
 public class Nutlet extends NutWeb { //HttpServlet {
 
+	//static
+	public class Tasklet implements SimpleHtml.Nodifiable {
+
+		Tasklet(Task task){
+			this.task = task;
+		}
+
+		final
+		protected Task task;
+
+		@Override
+		public Node getNode(Document basedoc) {
+			Element elem = basedoc.createElement(SimpleHtml.Tag.A.toString());
+			elem.setAttribute("href", String.format("%s/NutShell?product=%s&instructions=MAKE,STATUS",
+					productServer.HTTP_BASE, task.filename)); // , task.instructions
+			elem.setAttribute("target", "_new");
+			elem.setTextContent(task.toString());
+			return elem;
+		}
+	}
+
 	private static final long serialVersionUID;
 	static {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static final public String version = "1.5";
+	// static final public String version = "1.5";
+	static final public List<Integer> version = Arrays.asList(1, 6);
 
 	String confDir = "";
 
@@ -35,6 +57,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	final ProductServer productServer;
 	//final GregorianCalendar startTime;
 
+	static
+	final public Map<Integer, Tasklet> taskMap = new HashMap<>();
 
 	/**
 	 * param arg Input
@@ -61,20 +85,25 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		*/
 		////httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
-		if (!productServer.serverLog.logFileIsSet()){
-			Path p = productServer.CACHE_ROOT.resolve("nutshell/nutshell-tomcat-%s.html");
-			try {
+		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell");
+
+		//Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
+		try {
+			FileUtils.ensureWritableDir(cacheNutShell, productServer.GROUP_ID, productServer.dirPerms);
+			if (!productServer.serverLog.logFileIsSet()) {
+				Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
 				if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
 					productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
 				productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
 				FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
 				productServer.setLogFile(p.toString());
-			} catch (IOException e) {
-				e.printStackTrace();
-				productServer.serverLog.setFormat(TextOutput.Format.TEXT); // + MAP_URLS
-				productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			productServer.serverLog.setFormat(TextOutput.Format.TEXT); // + MAP_URLS
+			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
 		}
+
 
 		// Experimental
 		/*
@@ -305,8 +334,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		try {
 			// OutputFormat#HTML
 			task = productServer.new Task(product.value, batchConfig.instructions.value, productServer.serverLog);
-			//task = productServer.new Task(product.value, batchConfig.instructions.value, null);
-			task.log.setFormat(TextOutput.Format.HTML);
+			// task = productServer.new Task(product.value, batchConfig.instructions.value, null);
+			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
+			task.log.setFormat(productServer.LOG_FORMAT);
+			taskMap.put(task.getTaskId(), new Tasklet(task));
+
 			//task.log.textDecoration.setColour(TextDecoration.Options.COLOUR);
 		}
 		catch (ParseException e) {
@@ -350,9 +382,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			try {
 				task.execute();
 			} catch (InterruptedException e) {
+				taskMap.remove(task.getTaskId());
+				task.close();
 				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Product request interrupted.",
 				e, request, response);
-				task.close();
+				// task.close();
 				return;
 			}
 			//task.log.ok("-------- see separate log <---");
@@ -376,6 +410,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				task.log.debug("sendToStream: " + task.outputPath);
 				try {
 					sendToStream(task.outputPath, response);
+					taskMap.remove(task.getTaskId());
 					task.close();
 					return;
 				}
@@ -384,10 +419,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				}
 			}
 			else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
+				taskMap.remove(task.getTaskId());
+				task.close();
 				String url = String.format("%s/cache/%s?redirect=NO", request.getContextPath(), task.relativeOutputPath);
 				//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
 				response.sendRedirect(url);
-				task.close();
+				// task.close();
 				return;
 			}
 			// if not STATUS
@@ -401,9 +438,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 
 				if (!task.instructions.isSet(Instructions.STATUS)) {
+					taskMap.remove(task.getTaskId());
+					task.close();
 					sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
 							os.toString("UTF8"), request, response);
-					task.close();
+					// task.close();
 					return;
 				}
 			}
@@ -628,8 +667,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// 2
 		addRequestStatus(html, request);
 		addServerStatus(html);
-		sendToStream(html.document, response);
+
+		html.appendTag(SimpleHtml.Tag.H1, "Running tasks");
+		html.appendTable(taskMap, "Tasks");
+		taskMap.remove(task.getTaskId());
 		task.close();
+
+		sendToStream(html.document, response);
+		//task.close();
 		// 1
 	}
 
