@@ -1421,24 +1421,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec(){
 
-				String[] env = {"A=1", "B=2"};
-
 				File directory = new File(".");
-				//try {
-
 
 				ShellUtils.ProcessReader handler = new ShellUtils.ProcessReader() {
 
 					@Override
 					public void handleStdOut(String line) {
 						serverLog.note(line);
-						//System.out.println("STDOUT:" + line);
 					}
 
 					@Override
 					public void handleStdErr(String line) {
 						serverLog.warn(line);
-						// System.err.println("STDERR:" + line);
 					}
 				};
 
@@ -1448,28 +1442,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				serverLog.special("Executing special KILL command: " + Arrays.toString(killCmd));
 
-				int result = ShellExec.exec(killCmd, null, directory.toPath(),
+				int result = ShellExec.exec(killCmd, null, null, // directory.toPath(),
 						handler);
 						//new ShellExec.OutputReader(serverLog.getPrintStream()));
 
-				//read(process, handler);
-				// System.out.println("exit value: " + process.exitValue());
 				// System.out.printf("exit value: " + value);
 				serverLog.special("Return code: " + result);
 
-				/*
-				final Process process = Runtime.getRuntime().exec(
-						String.format("killall %s", value), null, null);
-				OutputStream outputStream = process.getOutputStream();
-				PrintStream printStream = new PrintStream(outputStream);
-				// TODO: handler error stream
-
-				printStream.close();
-				outputStream.close();
-				// log.warn("Waiting...");
-				process.waitFor();
-
-				 */
 			}
 		});
 

@@ -148,10 +148,13 @@ public class ShellExec {
 
 		try {
 			// System.err.println(String.format("Starting %s ...", cmd));
-			final Process process = Runtime.getRuntime().exec(cmd, env, dir.toFile());
+			final File d = (dir==null) ? null : dir.toFile();
+
+			final Process process = Runtime.getRuntime().exec(cmd, env, d);
 			// process.
 			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
+			// what about waitFor ?
 			// System.err.println(String.format("Exit value: %d", exitValue));
 		}
  		catch (IOException e){
