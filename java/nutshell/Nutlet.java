@@ -85,6 +85,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		*/
 		////httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
+
+		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
+
 		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell");
 
 		//Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
@@ -113,6 +116,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// Here, for future extension dependent on ServletConfig config
 		registry = new ProgramRegistry();
 
+		productServer.populate(registry);
+
+		/*
+		Program.Parameter.Simple<String> product = new Program.Parameter.Simple("product",
+				"Product to be processed", "");
+		registry.add(product);
+		*/
 	}
 
 	/** Main handler. Returns a requested product in the HTTP stream or dumps an HTML status page.
@@ -131,14 +141,18 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		// Why not in init() ?
 		ProductServer.BatchConfig batchConfig = new ProductServer.BatchConfig();
-		productServer.populate(batchConfig, registry);
 
+		// productServer.populate(batchConfig, registry);
+
+		/*
 		ProductServer.InstructionParameter instructionParameter = productServer.new InstructionParameter(batchConfig.instructions);
 		registry.add(instructionParameter);
 		registry.add("actions", instructionParameter);
 		registry.add("output",  instructionParameter);
 		registry.add("request", instructionParameter); // oldest
+		 */
 
+		/*
 		Program.Parameter.Simple<String> page = new Program.Parameter.Simple("page",
 				"HTML page to be viewed", "menu.html");
 		registry.add(page);
@@ -146,6 +160,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		Program.Parameter.Simple<String> product = new Program.Parameter.Simple("product",
 				"Product to be processed", "");
 		registry.add(product);
+		*/
+
+		// NEW
+		String page = "";
+		String product = "";
+
 
 		// Pre-interpret some idioms
 		//if (request.getParameterMap().size() == 1){
@@ -155,16 +175,18 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				switch (q){
 					case "status":
 					case "catalog":
-						page.value = q;
+						//page.value = q;
+						page = q;
 						break;
 					default:
 						if (q.endsWith(".html")) {
 							// NOTE: accepts also files of type: page.value="page=form.html"
-							page.value = q;
+							page = q;
+							// page.value = q;
 							// ... but overridden just below
 						}
 						else {
-							productServer.serverLog.warn(String.format("Could not parse query: %s", q));
+							productServer.serverLog.warn(String.format("Could not parse query: %s", q)); // ?
 						}
 				}
 			}
@@ -173,16 +195,34 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// "Main" command handling loop
 		for (Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()){
 			final String key = entry.getKey();
+			final String[] values = entry.getValue();
+			final String value = (values.length == 0) ? "" : values[0];
 			if (registry.has(key)){
 				Program.Parameter parameter = registry.get(key);
 				if (parameter.hasParams()){
 					try {
-						parameter.setParams(entry.getValue());
+						parameter.setParams(values);
 						parameter.exec(); // Remember! And TODO: update()
 					} catch (NoSuchFieldException | IllegalAccessException e) {
 						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
 					}
 				}
+			}
+			else if (key.equals("product")){
+				product = value;
+				//batchConfig.products.put("product1", value);
+			}
+			else if (key.equals("instructions") || key.equals("request") || key.equals("output")){ // +actions?
+				try {
+					batchConfig.instructions.set(values);
+				}
+				catch (NoSuchFieldException | IllegalAccessException e) {
+					sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ", e.getMessage(), response);
+					return;
+				}
+			}
+			else if (key.equals("page")){
+				page = value;
 			}
 		}
 
@@ -208,7 +248,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			return;
 		}
 
-		if (page.value.equals("catalog")){
+		//if (page.value.equals("catalog")){
+		if (page.equals("catalog")){
 
 			// ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
 			ProductServerBase.GeneratorTracker tracker =
@@ -241,27 +282,17 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 
-		//if (request.getParameterMap().values().isEmpty()){
-		/*
-		for (String key: request.getParameterMap().keySet()){
-			if (key.endsWith(".html")) {
-				page.value = key;
-			}
-			break;
-		}
-
-		 */
-		if (page.value.equals("status")){
+		if (page.equals("status")){
 			setup.put("counter", ProductServer.counter);
 			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 					"NutShell server is running since " + setup.get("startTime"), request, response);
 			return;
 		}
 
-		if (product.value.equals("resolve")){
+		if (product.equals("resolve")){
 			/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
 
-			product.value = "";
+			product = "";
 
 			final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
 
@@ -274,13 +305,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			Path path = Paths.get(requestUri.toString());
 			for (int i = 0; i < path.getNameCount(); i++) {
 				if (path.getName(i).toString().equals("cache")){
-					product.value = path.getFileName().toString();
+					product = path.getFileName().toString();
 					batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
 					break;
 				}
 			}
 
-			if (product.value.isEmpty()){
+			if (product.isEmpty()){
 				Map p = new HashMap();
 				p.put("path", path);
 				p.put("Parent", path.getParent());
@@ -295,9 +326,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		/// Respond with an HTML page, if query contains no product request
 		//if ((productStr == null) || productStr.isEmpty()){
-		if (product.value.isEmpty()){ // redesign ?
+		if (product.isEmpty()){ // redesign ?
 
-			if (page.value.isEmpty()){
+			if (page.isEmpty()){
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
 								String.format("Query: %s", request.getQueryString()), request, response);
 						return;
@@ -306,14 +337,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			/**  TODO: rename main.html to sth like layout.html or template.html
 			 *   Note: main.html is also utilied as index.html -> template/main.html (ie. linked)
 			 */
-			SimpleHtml html = includeHtml(page.value); // fail?
+			SimpleHtml html = includeHtml(page); // fail?
 
 			if (request.getParameterMap().size() > 1){
 				html.appendTable(request.getParameterMap(), "Several parameters");
 			}
 
 			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
-			elem.setTextContent(String.format(" Page: %s/%s ", HTTP_ROOT, page.value ));
+			elem.setTextContent(String.format(" Page: %s/%s ", HTTP_ROOT, page ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
 			response.setStatus(HttpServletResponse.SC_OK); // tes
@@ -333,7 +364,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		try {
 			// OutputFormat#HTML
-			task = productServer.new Task(product.value, batchConfig.instructions.value, productServer.serverLog);
+			task = productServer.new Task(product, batchConfig.instructions.value, productServer.serverLog);
 			// task = productServer.new Task(product.value, batchConfig.instructions.value, null);
 			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
 			task.log.setFormat(productServer.LOG_FORMAT);
@@ -491,7 +522,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			Map<String,Object> map = new LinkedHashMap<>();
 
 			map.put("instr", batchConfig.instructions);
-			map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
+			// map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
 			//map.putAll(registry.map);
 
 

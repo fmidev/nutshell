@@ -169,9 +169,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.relativeOutputPath = relativeOutputDir.resolve(filename);
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
-			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 
-			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
 
 			// Is this sometimes confusing?
 			if (log.textOutput.getFormat() == TextOutput.Format.HTML)
@@ -179,7 +177,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			else
 				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log");
 
-			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
 			// Absolute
 			this.outputDir = CACHE_ROOT.resolve(this.relativeOutputDir);
@@ -202,6 +199,17 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", logPath, e));
 				//log.setLogFile(null);
 			}
+
+			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
+			Path systemPath = CACHE_ROOT.resolve(relativeSystemDir);
+			try {
+				FileUtils.ensureWritableDir(systemPath, GROUP_ID, dirPerms);
+			} catch (IOException e) {
+				System.err.println(String.format("Opening product aux dir failed: %s '%s'", systemPath , e));
+			}
+
+			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
+			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
 			//log.warn("Where am I?");
 			log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
@@ -1381,12 +1389,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	}
 
 
-	public void populate(BatchConfig batchConfig, ProgramRegistry registry){
+	public void populate(ProgramRegistry registry) {
 
-		registry.add(new ProgramUtils.Help(registry));
-		registry.add(new ProgramUtils.LogLevel(serverLog));
-		registry.add(new ProgramUtils.LogLevel.Debug(serverLog));
-		registry.add(new ProgramUtils.LogLevel.Verbose(serverLog));
+        registry.add(new ProgramUtils.Help(registry));
+        registry.add(new ProgramUtils.LogLevel(serverLog));
+        registry.add(new ProgramUtils.LogLevel.Debug(serverLog));
+        registry.add(new ProgramUtils.LogLevel.Verbose(serverLog));
 
 		/*
 		registry.add(new Parameter.Simple<Float>("test",
@@ -1403,50 +1411,73 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		*/
 
 
-		registry.add(new Parameter.Simple<String>("conf","Read configuration", "") {
-			/// It is recommended to give --conf among the first options, unless default used.
-			@Override
-			public void exec() { readConfig(value);}
-		});
+        registry.add(new Parameter.Simple<String>("conf", "Read configuration", "") {
+            /// It is recommended to give --conf among the first options, unless default used.
+            @Override
+            public void exec() {
+                readConfig(value);
+            }
+        });
 
-		registry.add(new Parameter.Simple<TextOutput.Format>("log_format",
-				"Log file format.", TextOutput.Format.VT100 ){
+        registry.add(new Parameter.Simple<TextOutput.Format>("log_format",
+                "Log file format.", TextOutput.Format.VT100) {
 
-			@Override
-			public void exec() {
-				//System.err.println(" VALUE="+value);
-				//System.err.println(Manip.toString(this));
-				//System.err.printf("Value='%s' [%s] %n", LOG_FORMAT, LOG_FORMAT.getClass().getName());
-				LOG_FORMAT = value;
-				serverLog.setFormat(LOG_FORMAT);
-				serverLog.debug(serverLog.textOutput.toString());
-			}
-		});
-
-
-		registry.add(new Parameter.Simple<String>("log_style",
-				"Set decoration: " + serverLog.decoration.getAllFlags().keySet(), ""
-				// "Set decoration: " + Arrays.toString(TextOutput.Options.values()), ""
-				//, Arrays.toString(TextDecoration.Colour.values()) + ',' +
-				//Arrays.toString(TextDecoration.Colour.values())
-		){
-
-			@Override
-			public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
-				//super.setParam(key, value);
-				String s = value.toString();
-				if (s.isEmpty())
-					LOG_STYLE.clear();
-				else
-					LOG_STYLE.set(value.toString());
-				serverLog.decoration.set(LOG_STYLE);
-				// serverLog.special("deco: "+ serverLog.decoration.toString());
-				// serverLog.special("deco: "+ value.toString());
-			}
+            @Override
+            public void exec() {
+                //System.err.println(" VALUE="+value);
+                //System.err.println(Manip.toString(this));
+                //System.err.printf("Value='%s' [%s] %n", LOG_FORMAT, LOG_FORMAT.getClass().getName());
+                LOG_FORMAT = value;
+                serverLog.setFormat(LOG_FORMAT);
+                serverLog.debug(serverLog.textOutput.toString());
+            }
+        });
 
 
-		});
+        registry.add(new Parameter.Simple<String>("log_style",
+                "Set decoration: " + serverLog.decoration.getAllFlags().keySet(), ""
+                // "Set decoration: " + Arrays.toString(TextOutput.Options.values()), ""
+                //, Arrays.toString(TextDecoration.Colour.values()) + ',' +
+                //Arrays.toString(TextDecoration.Colour.values())
+        ) {
 
+            @Override
+            public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
+                //super.setParam(key, value);
+                String s = value.toString();
+                if (s.isEmpty())
+                    LOG_STYLE.clear();
+                else
+                    LOG_STYLE.set(value.toString());
+                serverLog.decoration.set(LOG_STYLE);
+                // serverLog.special("deco: "+ serverLog.decoration.toString());
+                // serverLog.special("deco: "+ value.toString());
+            }
+
+
+        });
+
+        registry.add(new Parameter<ProductServer>("gid",
+                "Unix file group id (gid) to use.",
+                this, "GROUP_ID"));
+
+        registry.add(new Parameter<ProductServer>("label",
+                "Marker for logs and tmps, supporting %d=task-id [%s=user].",
+                this, "LABEL"));
+
+        // Consider: to NutLet
+        registry.add(new Parameter<ProductServer>("timeout",
+                "Time in seconds to wait.",
+                this, "TIMEOUT"));
+
+        registry.add(new Parameter<ProductServer>("counter",
+                "Initial value of task counter (id).", this));
+
+	}
+
+
+	// Note: this "makes" program registry dynamic. It should be shared, static?
+    public void populate(BatchConfig batchConfig, ProgramRegistry registry){
 
 		registry.add(new InstructionParameter(batchConfig.instructions));
 		for (String instr: ClassUtils.getConstantKeys(Instructions.class)){ // consider instant .getClass()
@@ -1475,25 +1506,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
+
 		registry.add(new Parameter<Instructions>("regenerate",
 				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
 				batchConfig.instructions, "regenerateDepth"));
 
-		registry.add(new Parameter<ProductServer>("gid",
-				"Unix file group id (gid) to use.",
-				this, "GROUP_ID"));
-
-		registry.add(new Parameter<ProductServer>("label",
-				"Marker for logs and tmps, supporting %d=task-id [%s=user].",
-				this, "LABEL"));
-
-		// Consider: to NutLet
-		registry.add(new Parameter<ProductServer>("timeout",
-				"Time in seconds to wait.",
-				this, "TIMEOUT"));
-
-		registry.add(new Parameter<ProductServer>("counter",
-				"Initial value of task counter (id).", this));
 
 		registry.add(new Parameter.Single("regenerate2",
 				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
@@ -1503,35 +1520,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			@Override
 			public void exec() {
-				/*
-				if (value.intValue() < 0){
-					serverLog.warn(String.format("Negative cache clearance depth %d, setting to zero.", value.intValue()));
-					value = 0;
-				}
-
-				 */
-				//serverLog.warn(String.format("Nyt on paha! %d <= %s",
-				//		batchConfig.instructions.regenerateDepth, depth));
-				//serverLog.warn(value.toString());
 				batchConfig.instructions.regenerateDepth = depth;
-				/*
-				if (depth != null) {
-					System.err.println("ASETETAAN");
-					System.err.println(depth);
-					//serverLog.warn(value.toString());
-					for (TypeVariable tv: this.getClass().getTypeParameters()){
-						System.err.println(tv);
-					}
-					// batchConfig.instructions.regenerateDepth = Integer.parseInt(value.toString()); //Integer)value;
-				}
-				else {
-					System.err.println("EI ASETETA");
-					batchConfig.instructions.regenerateDepth = 0;
-				}
-				 */
 			}
 		});
-
 
 
 	}
@@ -1554,8 +1545,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		HttpLog log = server.serverLog;
 		log.decoration.set(TextOutput.Options.COLOUR);
 
-		// NEW
 		ProgramRegistry registry = new ProgramRegistry();
+        // NEW global (batch-independent)
+		server.populate(registry);
 
 		BatchConfig batchConfig = new BatchConfig();
 		server.populate(batchConfig, registry);
