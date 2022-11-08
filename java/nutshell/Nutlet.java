@@ -163,11 +163,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		*/
 
 		// NEW
-		String page = "";
+		String page = "menu.html";
 		String product = "";
 
 
 		// Pre-interpret some idioms
+		/*
 		//if (request.getParameterMap().size() == 1){
 		if (request.getParameterMap().keySet().size() == 1){
 			String q = request.getQueryString();
@@ -192,6 +193,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 		}
 
+		 */
+
 		// "Main" command handling loop
 		for (Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()){
 			final String key = entry.getKey();
@@ -214,7 +217,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 			else if (key.equals("instructions") || key.equals("request") || key.equals("output")){ // +actions?
 				try {
-					batchConfig.instructions.set(values);
+					//batchConfig.instructions.set(values);
+					batchConfig.instructions.add(values);
 				}
 				catch (NoSuchFieldException | IllegalAccessException e) {
 					sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ", e.getMessage(), response);
@@ -223,6 +227,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 			else if (key.equals("page")){
 				page = value;
+			}
+			else if (key.equals("catalog") || key.equals("status") || key.endsWith(".html")){
+				page = key;
 			}
 		}
 
@@ -282,7 +289,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 
-		if (page.equals("status")){
+		//if (page.equals("status")){
+		if (page.equals("status")){ //|| batchConfig.instructions.isSet(ActionType.STATUS)){
 			setup.put("counter", ProductServer.counter);
 			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 					"NutShell server is running since " + setup.get("startTime"), request, response);
@@ -367,7 +375,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			task = productServer.new Task(product, batchConfig.instructions.value, productServer.serverLog);
 			// task = productServer.new Task(product.value, batchConfig.instructions.value, null);
 			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
-			task.log.setFormat(productServer.LOG_FORMAT);
+			task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
+			//task.log.setFormat(productServer.LOG_FORMAT);
+			task.log.setFormat(TextOutput.Format.HTML);
+			task.log.setDecoration(productServer.LOG_STYLE);
+			task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
+
 			taskMap.put(task.getTaskId(), new Tasklet(task));
 
 			//task.log.textDecoration.setColour(TextDecoration.Options.COLOUR);
@@ -405,8 +418,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		try {
 			// track esp. missing inputs
 			//task.log.ok("-------- see separate log --->");
-			productServer.serverLog.info(String.format("Executing... %s", task));
-			productServer.serverLog.debug(String.format("See separate log: %s", task.log.logFile));
+			productServer.serverLog.debug(String.format("Task: %s", task));
+			productServer.serverLog.info(String.format("See separate log: %s", task.log.logFile));
 			//log.warn(String.format("Executing... %s", task));
 			task.log.ok("Executing...");
 
@@ -658,6 +671,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		html.appendTag(SimpleHtml.Tag.H2, "Log");
 		if ((task.log.logFile!=null) && task.log.logFile.exists()){
+			// <embed type="text/html" src="snippet.html" width="500" height="200">
+			Element embed = html.appendTag(SimpleHtml.Tag.EMBED);
+			embed.setAttribute("type", "text/html");
+			embed.setAttribute("src", Paths.get("cache").resolve(task.relativeLogPath).toString());
+			embed.setAttribute("width", "100%");
+			embed.setAttribute("height", "300");
+			embed.setAttribute("class", "code"); // Has no effect?
+			embed.setAttribute("style", "outline: 2px dotted"); // Has no effect?
+			/*
 			html.appendTag(SimpleHtml.Tag.H3, "Task log");
 			StringBuilder builder = new StringBuilder();
 			BufferedReader reader = new BufferedReader(new FileReader(task.log.logFile));
@@ -669,6 +691,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				builder.append(line).append('\n');
 			}
 			html.appendTag(SimpleHtml.Tag.PRE, builder.toString()).setAttribute("class", "code");
+			 */
 
 		}
 

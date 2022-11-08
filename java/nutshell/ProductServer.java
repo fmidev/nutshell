@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 6);
+		super.version = Arrays.asList(2, 7);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -132,12 +132,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 		public Task(String productStr, int instructions, HttpLog parentLog) throws ParseException {
 
-
-			// final String[] productDef = [productInfo, directives]
-			// in LOG  // this.creationTime = System.currentTimeMillis();
 			id = getProcessId();
-
 			info = new ProductInfo(productStr);
+			filename = info.getFilename();
+
+			// Accept only word \\w chars and '-'.
+			String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			// final Pattern nonWord = Pattern.compile("\\W");
+			// label.replaceAll("\\W", "_");
+
+			/*
 			if (parentLog != null){
 				log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
 				log.setFormat(parentLog.getFormat());
@@ -148,36 +152,24 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.setFormat(LOG_FORMAT);
 				log.setDecoration(LOG_STYLE);
 			}
-			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+			 */
 
-			filename = info.getFilename();
+			// final String[] productDef = [productInfo, directives]
+			// in LOG  // this.creationTime = System.currentTimeMillis();
+
 			this.instructions.set(instructions);
 			this.instructions.regenerateDepth = defaultRemakeDepth;
 
-
-			// Accept only word \\w chars and '-'.
-			String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
-			// final Pattern nonWord = Pattern.compile("\\W");
-			// label.replaceAll("\\W", "_");
-
 			// Relative
-			this.productDir = getProductDir(this.info.PRODUCT_ID);
-			this.timeStampDir = getTimestampDir(this.info.time);
-			this.relativeOutputDir = this.timeStampDir.resolve(this.productDir);
+			productDir = getProductDir(this.info.PRODUCT_ID);
+			timeStampDir = getTimestampDir(this.info.time);
+			relativeOutputDir = timeStampDir.resolve(this.productDir);
+
 			//this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve(String.format("tmp-%s-%d", ) + getTaskId());
-			this.relativeOutputDirTmp = this.relativeOutputDir.resolve(label); //String.format("tmp-%s-%d", USER, getTaskId()));
-			this.relativeOutputPath = relativeOutputDir.resolve(filename);
+			relativeOutputDirTmp = this.relativeOutputDir.resolve(label); //String.format("tmp-%s-%d", USER, getTaskId()));
+			relativeOutputPath = relativeOutputDir.resolve(filename);
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
-
-
-			// Is this sometimes confusing?
-			if (log.textOutput.getFormat() == TextOutput.Format.HTML)
-				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log.html");
-			else
-				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log");
-
-
 			// Absolute
 			this.outputDir = CACHE_ROOT.resolve(this.relativeOutputDir);
 			this.outputDirTmp = CACHE_ROOT.resolve(this.relativeOutputDirTmp);
@@ -185,6 +177,21 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//this.outputPathTmp = outputDirTmp.resolve(getFilePrefix() + filename);
 			this.outputPathTmp = outputDirTmp.resolve(filename);
 			this.storagePath = STORAGE_ROOT.resolve(this.relativeOutputDir).resolve(filename);
+
+			if (parentLog == null){
+				parentLog = serverLog;
+			}
+			log = new HttpLog(parentLog.getName() + "[" + this.info.PRODUCT_ID + "]", parentLog.getVerbosity());
+			log.setFormat(parentLog.getFormat());
+			log.setDecoration(parentLog.decoration);
+
+
+
+			// Is this sometimes confusing?
+			if (log.textOutput.getFormat() == TextOutput.Format.HTML)
+				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log.html");
+			else
+				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log");
 
 			Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 			try {
@@ -195,20 +202,24 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				System.err.println(String.format("Opening Log file (%s) failed: %s", logPath, e));
 				//log.setLogFile(null); ?
 			}
+			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			Path systemPath = CACHE_ROOT.resolve(relativeSystemDir);
 			try {
 				FileUtils.ensureWritableDir(systemPath, GROUP_ID, dirPerms);
 			} catch (IOException e) {
-				System.err.println(String.format("Opening product aux dir failed: %s '%s'", systemPath , e));
+				log.error(String.format("Opening product aux dir failed: %s '%s'", systemPath , e));
 			}
 
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
 			this.relativeGraphPath = relativeSystemDir.resolve(systemBaseName + ".svg");
 
 			//log.warn("Where am I?");
-			log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
+			//log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+			log.debug(String.format("Created Task: %s ", this.toString())); //
+			//log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
 			this.result = null;
 		}
 
@@ -729,11 +740,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					/// Override
 					log.setStatus(Log.Status.OK);
 					log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
-					serverLog.success(info.getFilename());
+					//serverLog.success(info.getFilename());
 
 					// Let's take this slowly...
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
+						serverLog.success(this.outputPath.toString());
 						//this.copy(this.outputPathTmp, this.outputPath);
 					} catch (IOException e) {
 						log.warn(e.toString());
@@ -1421,8 +1433,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec(){
 
-				File directory = new File(".");
-
 				ShellUtils.ProcessReader handler = new ShellUtils.ProcessReader() {
 
 					@Override
@@ -1436,15 +1446,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 				};
 
-
 				String killCmd[] = new String[]{"killall", value};
 				//String.format("killall %s", value);
 
 				serverLog.special("Executing special KILL command: " + Arrays.toString(killCmd));
 
-				int result = ShellExec.exec(killCmd, null, null, // directory.toPath(),
-						handler);
-						//new ShellExec.OutputReader(serverLog.getPrintStream()));
+				int result = ShellExec.exec(killCmd, null, null, handler);
 
 				// System.out.printf("exit value: " + value);
 				serverLog.special("Return code: " + result);
@@ -1549,7 +1556,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
                 "Marker for logs and tmps, supporting %d=task-id [%s=user].",
                 this, "LABEL"));
 
-        // Consider: to NutLet
+        // Consider: to NutLet and @ShellExec
         registry.add(new Parameter<ProductServer>("timeout",
                 "Time in seconds to wait.",
                 this, "TIMEOUT"));
@@ -1575,10 +1582,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				//System.err.print(String.format("Type: %s %s", value.getClass(), value));
-
 				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
-				//System.err.print(batchConfig.directives);
-				//serverLog.special(batchConfig.directives.toString());
 			}
 		});
 
@@ -1586,7 +1590,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				batchConfig.products.put("product", value);
+				int i = batchConfig.products.size();
+				batchConfig.products.put("product" + i, value);
 			}
 		});
 
