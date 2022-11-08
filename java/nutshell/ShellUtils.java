@@ -9,7 +9,7 @@ import java.nio.CharBuffer;
 
 public class ShellUtils {
 
-
+	/*
 	static public Process run(String[] cmdArray, String[] env, File directory) throws IOException, InterruptedException{
 
 		final Process child = Runtime.getRuntime().exec(cmdArray, env, directory);
@@ -36,6 +36,8 @@ public class ShellUtils {
 		
 		return ShellUtils.run(cmdArray, env, directory);
 	}
+
+	 */
 	
 	/*
 	static public String[] mapToArray(Map<String, Object> map){
@@ -198,31 +200,33 @@ public class ShellUtils {
 		String[] env = {"A=1", "B=2"};
 		
 		File directory = new File(".");
-		try {
+		//try {
 
-			if (args.length == 1)
-				args = args[0].split(" ");
-				
-			Process process = ShellUtils.run(args, env, directory);
-			
-			ProcessReader handler = new ProcessReader() {
-				
-				@Override
-				public void handleStdOut(String line) {
-					System.out.println("STDOUT:" + line);
-				}
-				
-				@Override
-				public void handleStdErr(String line) {
-					System.err.println("STDERR:" + line);
-				}
-			};
-			
-			read(process, handler);
-			
-			System.out.println("exit value: " + process.exitValue());
-			
-			
+		if (args.length == 1)
+			args = args[0].split(" ");
+
+
+		ProcessReader handler = new ProcessReader() {
+
+			@Override
+			public void handleStdOut(String line) {
+				System.out.println("STDOUT:" + line);
+			}
+
+			@Override
+			public void handleStdErr(String line) {
+				System.err.println("STDERR:" + line);
+			}
+		};
+
+		//Process process = ShellExec.exec(args, env, directory.toPath(), handler);
+		int value = ShellExec.exec(args, env, directory.toPath(), handler);
+
+		//read(process, handler);
+		// System.out.println("exit value: " + process.exitValue());
+		System.out.println("exit value: " + value);
+
+		/*
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -230,6 +234,8 @@ public class ShellUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		 */
 		
 	}
 

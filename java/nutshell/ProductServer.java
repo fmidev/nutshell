@@ -135,22 +135,22 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			// final String[] productDef = [productInfo, directives]
 			// in LOG  // this.creationTime = System.currentTimeMillis();
-			this.id = getProcessId();
+			id = getProcessId();
 
-			this.info = new ProductInfo(productStr);
+			info = new ProductInfo(productStr);
 			if (parentLog != null){
-				this.log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
-				this.log.setFormat(parentLog.getFormat());
-				this.log.setDecoration(parentLog.decoration);
+				log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
+				log.setFormat(parentLog.getFormat());
+				log.setDecoration(parentLog.decoration);
 			}
 			else {
-				this.log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
-				this.log.setFormat(LOG_FORMAT);
-				this.log.setDecoration(LOG_STYLE);
+				log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
+				log.setFormat(LOG_FORMAT);
+				log.setDecoration(LOG_STYLE);
 			}
-			this.log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 
-			this.filename = this.info.getFilename();
+			filename = info.getFilename();
 			this.instructions.set(instructions);
 			this.instructions.regenerateDepth = defaultRemakeDepth;
 
@@ -188,16 +188,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 			try {
-				//ensureFile(cacheRoot, this.relativeLogPath);
-				//FileUtils.ensureWritableDir(logPath.getParent(), fileGroupID, dirPerms);
 				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath);
-				//FileUtils.ensureWritableFile(logPath.getParent().resolve("test"+getTaskId()+".foo"), fileGroupID, filePerms, dirPerms);
-
 			} catch (IOException e) {
 				System.err.println(String.format("Log GID=%d  file=%s dir=%s", GROUP_ID, filePerms, dirPerms));
 				System.err.println(String.format("Opening Log file (%s) failed: %s", logPath, e));
-				//log.setLogFile(null);
+				//log.setLogFile(null); ?
 			}
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
@@ -1412,14 +1408,72 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
         registry.add(new Parameter.Simple<String>("conf", "Read configuration", "") {
-            /// It is recommended to give --conf among the first options, unless default used.
+            /// It is recommended to give --conf as the first option, unless default used.
             @Override
             public void exec() {
                 readConfig(value);
             }
         });
 
-        registry.add(new Parameter.Simple<TextOutput.Format>("log_format",
+		registry.add(new Parameter.Simple<String>("killall",
+				String.format("Kill named process(es) of this USER=%s", USER), "") {
+
+			@Override
+			public void exec(){
+
+				String[] env = {"A=1", "B=2"};
+
+				File directory = new File(".");
+				//try {
+
+
+				ShellUtils.ProcessReader handler = new ShellUtils.ProcessReader() {
+
+					@Override
+					public void handleStdOut(String line) {
+						serverLog.note(line);
+						//System.out.println("STDOUT:" + line);
+					}
+
+					@Override
+					public void handleStdErr(String line) {
+						serverLog.warn(line);
+						// System.err.println("STDERR:" + line);
+					}
+				};
+
+
+				String killCmd[] = new String[]{"killall", value};
+				//String.format("killall %s", value);
+
+				serverLog.special("Executing special KILL command: " + Arrays.toString(killCmd));
+
+				int result = ShellExec.exec(killCmd, null, directory.toPath(),
+						handler);
+						//new ShellExec.OutputReader(serverLog.getPrintStream()));
+
+				//read(process, handler);
+				// System.out.println("exit value: " + process.exitValue());
+				// System.out.printf("exit value: " + value);
+				serverLog.special("Return code: " + result);
+
+				/*
+				final Process process = Runtime.getRuntime().exec(
+						String.format("killall %s", value), null, null);
+				OutputStream outputStream = process.getOutputStream();
+				PrintStream printStream = new PrintStream(outputStream);
+				// TODO: handler error stream
+
+				printStream.close();
+				outputStream.close();
+				// log.warn("Waiting...");
+				process.waitFor();
+
+				 */
+			}
+		});
+
+		registry.add(new Parameter.Simple<TextOutput.Format>("log_format",
                 "Log file format.", TextOutput.Format.VT100) {
 
             @Override
@@ -1429,21 +1483,21 @@ public class ProductServer extends ProductServerBase { //extends Cache {
                 //System.err.printf("Value='%s' [%s] %n", LOG_FORMAT, LOG_FORMAT.getClass().getName());
                 LOG_FORMAT = value;
                 serverLog.setFormat(LOG_FORMAT);
-                serverLog.debug(serverLog.textOutput.toString());
+                // serverLog.debug(serverLog.textOutput.toString());
+				serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
+				serverLog.debug(serverLog.textOutput.toString());
             }
         });
 
 
         registry.add(new Parameter.Simple<String>("log_style",
-                "Set decoration: " + serverLog.decoration.getAllFlags().keySet(), ""
-                // "Set decoration: " + Arrays.toString(TextOutput.Options.values()), ""
-                //, Arrays.toString(TextDecoration.Colour.values()) + ',' +
-                //Arrays.toString(TextDecoration.Colour.values())
-        ) {
+                "Set decoration: " + serverLog.decoration.getAllFlags().keySet(),
+				"") {
 
             @Override
             public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
                 //super.setParam(key, value);
+				serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
                 String s = value.toString();
                 if (s.isEmpty())
                     LOG_STYLE.clear();
@@ -1456,6 +1510,57 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
         });
+
+		registry.add(new Parameter.Simple<String>("log",
+				String.format("Set log properties: verbosity (%s), format (%s), decoration (%s) ",
+						Arrays.toString(Log.Status.values()),
+						Arrays.toString(TextOutput.Format.values()),
+						Arrays.toString(TextOutput.Options.values())),
+				"") {
+
+			@Override
+			public void exec() {
+
+				Flags deco = new Flags(TextOutput.Options.class);
+
+				for (String s: value.split(",")){
+
+					if (s.isEmpty()){
+						serverLog.decoration.clear();
+						continue;
+					}
+
+					try {
+						deco.add(s);
+						serverLog.setDecoration(deco); // overrides
+						serverLog.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
+						continue;
+					}
+					catch (Exception e){
+					}
+
+					try {
+						serverLog.setVerbosity(Log.Status.valueOf(s));
+						serverLog.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
+						continue;
+					}
+					catch (Exception e){
+					}
+
+					try {
+						serverLog.setFormat(TextOutput.Format.valueOf(s));
+						serverLog.debug(String.format("%s: updated format: %s", getName(), serverLog.getFormat()));
+						continue;
+					}
+					catch (Exception e){
+					}
+
+					serverLog.error(String.format("%s: unsupported Log parameter %s, see --help log", getName(), value));
+
+				}
+				//serverLog.debug(serverLog.textOutput.toString());
+			}
+		});
 
         registry.add(new Parameter<ProductServer>("gid",
                 "Unix file group id (gid) to use.",

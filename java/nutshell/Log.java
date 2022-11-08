@@ -102,7 +102,8 @@ public class Log implements AutoCloseable {
 
 
 	// public Flags decorations;
-	final public Flags decoration = new Flags(TextOutput.Options.class);
+	final
+	public Flags decoration = new Flags(TextOutput.Options.class);
 
 	public void setDecoration(String s) throws NoSuchFieldException, IllegalAccessException {
 		decoration.set(s);

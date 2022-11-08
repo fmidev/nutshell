@@ -84,7 +84,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		if (umask.isEmpty()){
 			//System.err.println(String.format("UMASK empty, ok. ERR: %s"));
-			exitValue = exec(cmd.toString(), envArray, dir, reader);
+			exitValue = ShellExec.exec(cmd.toString(), envArray, dir, reader);
 		}
 		else {
 			final String[] batch = {"bash", "-c", String.format("umask %s; %s", ExternalGenerator.umask, cmd)};
