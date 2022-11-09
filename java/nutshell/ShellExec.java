@@ -6,34 +6,15 @@ package nutshell;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.*;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  */
 public class ShellExec {
-	
-	/*
-	final Path dir;
-	final File cmd;
 
-	public ShellExec(Path cmd, Path dir){
-		//throws IndexedException
-		this.dir = dir.normalize(); //new File(dir);
-		this.cmd = this.dir.resolve(cmd).toFile().getAbsoluteFile();
-	}
-
-
-	public ShellExec(String cmd, String dir){
-		this(Paths.get(cmd), Paths.get(dir));
-		// throws IndexedException
-		// this.dir = Paths.get(dir).normalize(); //new File(dir);
-		// this.cmd = this.dir.resolve(cmd).toFile().getAbsoluteFile();
-	}
-
-	 */
+	static
+	public int TIMEOUT_SEC = 120;
 
 	@Override
 	public String toString() {
@@ -44,29 +25,45 @@ public class ShellExec {
 	static
 	public class OutputReader implements ShellUtils.ProcessReader {
 
-		final PrintStream stream;
+		final PrintStream stdOut;
+		final PrintStream stdErr;
+
 		public String lastLineOut;
 		public String lastLineErr;
 
-		OutputReader(PrintStream log) {
-			stream = log;
+		/** Simple reader directs both std. output and errors in the same stream.
+		 *
+		 * @param outStream
+		 */
+		OutputReader(PrintStream outStream) {
+			stdOut = outStream;
+			stdErr = outStream;
 			lastLineOut = null;
 			lastLineErr = null;
 		}
 
+		/** Reader that sepately directs std. output and error output.
+		 *
+		 * @param outStream
+		 * @param errStream
+		 */
+		OutputReader(PrintStream outStream, PrintStream errStream) {
+			stdOut = outStream;
+			stdErr = errStream;
+			lastLineOut = null;
+			lastLineErr = null;
+		}
 
 		@Override
 		public void handleStdOut(String line) {
-			//System.out.println(String.format("OUT: %s", line));
 			lastLineOut = line;
-			stream.println(line);
+			stdOut.println(line);
 		}
 
 		@Override
 		public void handleStdErr(String line) {
-			//System.err.println(String.format("ERR: %s", line));
 			lastLineErr = line;
-			stream.println(line);
+			stdErr.println(line);
 		}
 
 	}
@@ -151,6 +148,13 @@ public class ShellExec {
 			final File d = (dir==null) ? null : dir.toFile();
 
 			final Process process = Runtime.getRuntime().exec(cmd, env, d);
+
+
+			if(!process.waitFor(TIMEOUT_SEC, TimeUnit.SECONDS)) {
+				//timeout - kill the process.
+				process.destroy(); // consider using destroyForcibly instead
+				throw new InterruptedException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
+			}
 			// process.
 			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
@@ -180,13 +184,15 @@ public class ShellExec {
 	public static void main(String[] args) {
 
 		String dir = ".";
-		String cmd = null;
+		String[] cmd = null;
 
 		switch (args.length){
+			case 3:
+				ShellExec.TIMEOUT_SEC = Integer.parseInt(args[2]);
 			case 2:
 				dir = args[1];
 			case 1:
-				cmd = args[0];
+				cmd = args[0].trim().split(" ");
 
 				break;
 			case 0:
@@ -194,9 +200,9 @@ public class ShellExec {
 			default:
 				System.out.println(ShellExec.class.getCanonicalName());
 				System.out.println(String.format("Run shell executable in a given working dir (default: %s)", dir));
-				System.out.println("Usage:   <cmd>  [<dir>] ");
-				System.out.println("Example: ls");
-				System.out.println("Example: ./generate.sh /opt/nutshell/products/test/checkboard");
+				System.out.println("Usage:  <cmd>  [<dir>] [timeout]");
+				System.out.printf("Example:%n  'ls -ltr' /tmp %d %n", ShellExec.TIMEOUT_SEC);
+				System.out.printf("Example:%n  ./generate.sh /opt/nutshell/products/test/checkboard");
 			return;
 		}
 
@@ -215,18 +221,19 @@ public class ShellExec {
 		 */
 
 
-		OutputReader reader = new OutputReader(System.err);
+		OutputReader reader; // = new OutputReader(System.out);
 
 		final String logname = ShellExec.class.getSimpleName() + ".log";
-		System.out.println("Writing log :" + logname);
+		System.out.println("# Writing log :" + logname);
 		File logFile = new File(logname);
-		System.out.println(String.format("Executing: %s (dir=%s)", cmd, dir));
+		System.err.println(String.format("Executing: %s (dir=%s)", cmd, dir));
 		int result = 0;
 		try {
 			logFile.createNewFile();
 			FileOutputStream fw = new FileOutputStream(logFile);
+			reader = new OutputReader(System.out, System.err);
 			result = ShellExec.exec(cmd, null, Paths.get(dir), reader);
-			System.out.println("Done");
+			System.err.println("Done");
 		}
 		catch (Exception e) {
 			/*

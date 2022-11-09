@@ -166,6 +166,9 @@ public class ProductServerBase extends Program {
 
         Manip.assignToObjectLenient(setup, this);
 
+        /// Ensure quitting processes as well.
+        ShellExec.TIMEOUT_SEC = TIMEOUT;
+
         if (GROUP_ID == 0){
             try {
                 String gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();

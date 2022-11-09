@@ -47,13 +47,10 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 7);
+		super.version = Arrays.asList(2, 7, 1);
 		setup.put("ProductServer-version", version);
 	}
 
-	//static final public String version = "1.5";
-	/// Experimental log of products and their inputs(s)
-	//public final Map<String,Map<String,String>> statistics = new HashMap<>();
 
 	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
 	// TODO: consider general query depth (for inputs etc)
@@ -1434,12 +1431,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			public void exec(){
 
 				ShellUtils.ProcessReader handler = new ShellUtils.ProcessReader() {
-
 					@Override
 					public void handleStdOut(String line) {
 						serverLog.note(line);
 					}
-
 					@Override
 					public void handleStdErr(String line) {
 						serverLog.warn(line);
@@ -1559,7 +1554,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
         // Consider: to NutLet and @ShellExec
         registry.add(new Parameter<ProductServer>("timeout",
                 "Time in seconds to wait.",
-                this, "TIMEOUT"));
+                this, "TIMEOUT"){
+			@Override
+			public void exec() {
+				ShellExec.TIMEOUT_SEC = TIMEOUT;
+			}
+		});
 
         registry.add(new Parameter<ProductServer>("counter",
                 "Initial value of task counter (id).", this));

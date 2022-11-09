@@ -17,17 +17,19 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	// extends ShellExec
 	// TODO: override these from ProductServer.conf?
 	//static public final String scriptName = "./generate.sh";
-	static public final String scriptName = "generate.sh";
+	static
+	public final String scriptName = "generate.sh";
 	//static public final String inputDeclarationScript = "./input.sh";
-	static public final String inputDeclarationScript = "input.sh";
+	static
+	public final String inputDeclarationScript = "input.sh";
 
 	/// Permissions to set on Unix file system
-	static public String umask = "";
+	static
+	public String umask = "";
 
 	final String id;
 	final Path dir;
 	final File cmd;
-
 
 	final protected File inputDeclarationCmd;
 
