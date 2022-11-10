@@ -95,12 +95,6 @@ public class StringMapper extends LinkedList<Object> {
 		// First, try curly form, ${KEY}. 
 		m = curlyVariable.matcher(s);
 
-		// Then, try plain form, $KEY. (The tests have recipient be in this order.)
-		/*
-		if (!m.matches())
-			m = plainVariable.matcher(s);
-		*/
-
 		// String contains no variables, return as such.
 		if (!m.matches()){
 			list.add(s);
@@ -108,12 +102,11 @@ public class StringMapper extends LinkedList<Object> {
 		}
 
 		// Now 3 String segments:
-		// Literal
+		// 1: Literal
 		list.add(m.group(1));
-		// Variable name without dollar sign (and curly braces).
-		//list.add(new MapWatcher(map,m.group(2)));
+		// 2: Variable name without dollar sign (and curly braces).
 		list.add(new StringLet(m.group(2)));
-		// Yet unprocessed
+		// 3: Yet unprocessed
 		parse(list, m.group(3));
 
 		return;
@@ -186,8 +179,8 @@ public class StringMapper extends LinkedList<Object> {
 		System.out.println("Sample text: '" + text + "'");
 		System.out.println("String mapper (raw): '" + stringMapper + "'");
 
-		stringMapper.addFirst("Eka.");
-		stringMapper.addLast("Vika.");
+		//stringMapper.addFirst("Eka.");
+		//stringMapper.addLast("Vika.");
 
 
 		Map<String,Object> map = new HashMap<String,Object>();
@@ -201,7 +194,7 @@ public class StringMapper extends LinkedList<Object> {
 			if (s.length == 2)
 				map.put(s[0],s[1]);
 		}
-		stringMapper.addAll(map.keySet());
+		//stringMapper.addAll(map.keySet());
 
 		System.out.println("Map '" + map + "'");
 		System.out.println("String mapper (raw): '" + stringMapper + "'");

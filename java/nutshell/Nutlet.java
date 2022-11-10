@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jdk.nashorn.internal.parser.JSONParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -167,34 +168,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		String product = "";
 
 
-		// Pre-interpret some idioms
-		/*
-		//if (request.getParameterMap().size() == 1){
-		if (request.getParameterMap().keySet().size() == 1){
-			String q = request.getQueryString();
-			if (q != null) {
-				switch (q){
-					case "status":
-					case "catalog":
-						//page.value = q;
-						page = q;
-						break;
-					default:
-						if (q.endsWith(".html")) {
-							// NOTE: accepts also files of type: page.value="page=form.html"
-							page = q;
-							// page.value = q;
-							// ... but overridden just below
-						}
-						else {
-							productServer.serverLog.warn(String.format("Could not parse query: %s", q)); // ?
-						}
-				}
-			}
-		}
-
-		 */
-
 		// "Main" command handling loop
 		for (Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()){
 			final String key = entry.getKey();
@@ -228,8 +201,24 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			else if (key.equals("page")){
 				page = value;
 			}
+			// Interpret some "idioms"
 			else if (key.equals("catalog") || key.equals("status") || key.endsWith(".html")){
 				page = key;
+			}
+			else if (key.equals("demo")){
+				File jsonFile = productServer.CACHE_ROOT.resolve(value).toFile();
+                if (jsonFile.exists()){
+                	//JSONParser parser = new JSONParser(jsonFile);
+                    // JSONParser jsonParser = new JSONParser();
+                    //System.out.printf(" Found: %s -> JSON %s %n", parentDir, jsonFile);
+					sendStatusPage(HttpServletResponse.SC_ACCEPTED, "JSON demo under construction",
+							entry.toString(), response);
+                }
+                else {
+					sendStatusPage(HttpServletResponse.SC_NOT_FOUND, "Demo conf file  (JSON) not found",
+							entry.toString(), response);
+				}
+
 			}
 		}
 

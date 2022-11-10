@@ -1,10 +1,7 @@
 package nutshell;
 
-import sun.font.CreatedFontTracker;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.*;
 
 public class Program {
@@ -12,17 +9,12 @@ public class Program {
     //public int[] version = {1,0};
     List<Integer> version = Arrays.asList(1, 0);
 
-    static class Parameter<T> implements Option { // add Program ?E
+    static class Parameter<T> extends BeanLike { // add Program ?E
 
-        protected final String name;
-        protected final String description;
-        protected String[] paramKeys = new String[0];
         protected T reference = null;
 
-
         Parameter(String name, String description) {
-            this.name = name;
-            this.description = description;
+            super(name, description);
         }
 
         /**
@@ -33,8 +25,7 @@ public class Program {
          * @param paramKeys - Comma separated names of the members
          */
         Parameter(String name, String description, T reference, String paramKeys) {
-            this.name = name;
-            this.description = description;
+            super(name, description);
             this.reference = reference;
             if (!paramKeys.isEmpty()) {
                 this.paramKeys = paramKeys.split(",");
@@ -68,15 +59,6 @@ public class Program {
                 this.paramKey = paramKey;
                 setReference(this, paramKey);
             }
-
-            /*
-            protected Single(String name, String description) {
-                super(name, description);
-                // Set paremkey
-            }
-
-             */
-
 
             @Override
             public void setParams(String args) throws NoSuchFieldException, IllegalAccessException {
@@ -125,52 +107,10 @@ public class Program {
 
         }
 
-        @Override
-        public boolean hasParams() {
-            return paramKeys.length > 0;
-        }
 
         @Override
         public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
-            //Field field = reference.getClass().getField(key);
-            // setField(reference, field, value);
             Manip.assignToObject(value, reference, key);
-        }
-
-        /*
-        static
-        private void setField(Object target, Field field, Object value) throws NoSuchFieldException, IllegalAccessException {
-
-            Class c = field.getType();
-
-
-            // System.err.println(String.format("setField: %s :: %s = %s ", target.getClass(), c.getSimpleName(), value));
-
-            if (c.equals(String.class)) {
-                field.set(target, value.toString()); // value.toString()
-            }
-            else if (c.equals(boolean.class)) { // || c.equals(Boolean.class)){
-                field.setBoolean(target, Boolean.parseBoolean(value.toString()));
-            }
-            else if (c.equals(int.class)) { // || c.equals(Integer.class)){
-                field.setInt(target, Integer.parseInt(value.toString()));
-            }
-            else if (c.equals(float.class)) { // || c.equals(Float.class)){
-                field.setFloat(target, Float.parseFloat(value.toString()));
-            }
-            else if (c.equals(double.class)) { // || c.equals(Double.class)){
-                field.setDouble(target, Double.parseDouble(value.toString()));
-            }
-            else {  // Object, also for <T> members?
-                //System.err.println("setField unimplemented class: "  + c);
-                field.set(target, value.toString());
-            }
-        }
-         */
-
-        @Override
-        public void setParams(String args) throws NoSuchFieldException, IllegalAccessException {
-            setParams(args.split(","));
         }
 
         @Override
@@ -228,20 +168,8 @@ public class Program {
 
         }
 
-        @Override
-        public String getName() {
-            return name;
-        }
 
-        @Override
-        public String getDescription() {
-            return description;
-        }
 
-        @Override
-        public String[] getParamKeys() {
-            return paramKeys;
-        }
 
         public Object[] getValues() {
             List values = new ArrayList();

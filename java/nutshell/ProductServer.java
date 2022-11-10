@@ -166,6 +166,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			relativeOutputDirTmp = this.relativeOutputDir.resolve(label); //String.format("tmp-%s-%d", USER, getTaskId()));
 			relativeOutputPath = relativeOutputDir.resolve(filename);
 
+
+
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			// Absolute
 			this.outputDir = CACHE_ROOT.resolve(this.relativeOutputDir);
@@ -179,7 +181,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				parentLog = serverLog;
 			}
 			log = new HttpLog(parentLog.getName() + "[" + this.info.PRODUCT_ID + "]", parentLog.getVerbosity());
-			log.setFormat(parentLog.getFormat());
+			//log.setFormat(parentLog.getFormat());
+			log.setFormat(LOG_FORMAT);
+			log.setDecoration(LOG_STYLE);
 			log.setDecoration(parentLog.decoration);
 
 
@@ -200,6 +204,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+
 
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
@@ -710,6 +715,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				File fileTmp = outputPathTmp.toFile();
 
 				try {
+					/*
+					TODO: StringMapper -based dynamio Path
+					TODO: Needs more envs, like TIMESTAMP_DIR
+					log.experimental(relativeOutputPath.toString());
+					Path test = Paths.get(cachePathSyntax.toString(getParamEnv())).normalize();
+					log.experimental(test.toString());
+					*/
 					generator.generate(this);
 				} catch (IndexedState e) {
 
@@ -1371,13 +1383,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 				myInstructions.add(value);
 				// System.out.printf("DEBUG: %s %n", myInstructions);
-			} catch (NoSuchFieldException e) {
+			} catch (NoSuchFieldException | IllegalAccessException e) {
+
 				serverLog.error(e.getMessage());
-				//e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				serverLog.error(e.getMessage());
-				//e.printStackTrace();
 			}
+
 		}
 	}
 
@@ -1621,7 +1631,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		final ProductServer server = new ProductServer();
 		server.serverLog.setVerbosity(Log.Status.DEBUG);
-		server.TIMEOUT = 20;
+		//server.TIMEOUT = 120;
 		//server.version
 
 		/*

@@ -309,19 +309,16 @@ public class SimpleHtml extends SimpleXML{
 			Element tdVal = this.appendElement(tr, Tag.TD);
 			tdVal.setAttribute("class", "value");
 			V value = entry.getValue();
-			if (value != null) {
-				//if (value.getClass().isArray())
-				if (value instanceof String[]) {
-					tdVal.setTextContent(String.join(",", (String[])value));
-					//tdVal.setTextContent(Arrays.toString((String[])value));
-				}
-				else if (value instanceof Node)
-					tdVal.appendChild((Node)value);
-				else if (value instanceof Nodifiable)
-					tdVal.appendChild(((Nodifiable)value).getNode(document));
-				else
-					tdVal.setTextContent(value.toString());
-			}
+			if (value == null)
+				tdVal.setTextContent("<null>");
+			else if (value instanceof String[])
+				tdVal.setTextContent(String.join(",", (String[])value));
+			else if (value instanceof Node)
+				tdVal.appendChild((Node)value);
+			else if (value instanceof Nodifiable)
+				tdVal.appendChild(((Nodifiable)value).getNode(document));
+			else
+				tdVal.setTextContent(value.toString());
 		}
 
 		return table;

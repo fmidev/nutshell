@@ -48,10 +48,19 @@ public class ProductServerBase extends Program {
 
     public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
     public Path CACHE_ROOT = Paths.get(".");
+
+    // NEW
+    public String CACHE_PATH = null;
+    public StringMapper cachePathSyntax = null;
+
+    public String STORAGE_PATH = null;
+    public StringMapper storagePathSyntax = null;
+
     //public Path storageRoot   = Paths.get(".");
     public Path PRODUCT_ROOT = Paths.get(".");
     //protected Path storageRoot = Paths.get(".");
     public Path STORAGE_ROOT = Paths.get(".");
+
 
     public TextOutput.Format LOG_FORMAT = TextOutput.Format.DEFAULT;
 
@@ -73,7 +82,7 @@ public class ProductServerBase extends Program {
 
 
     // Consider
-    final protected List<StringMapper> storagePaths = new LinkedList<>();
+    //final protected List<StringMapper> storagePaths = new LinkedList<>();
 
     // Not configurable at the moment...
     static
@@ -98,7 +107,7 @@ public class ProductServerBase extends Program {
     };
 
     /// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
-    public int TIMEOUT = 30;
+    public int TIMEOUT = 60;
 
 
     static
@@ -165,6 +174,23 @@ public class ProductServerBase extends Program {
         //System.err.println(setup);
 
         Manip.assignToObjectLenient(setup, this);
+
+        if (CACHE_PATH != null){
+            cachePathSyntax = new StringMapper(CACHE_PATH);
+        }
+        else {
+            cachePathSyntax = new StringMapper(CACHE_ROOT.toString()+"/${TIMESTAMP}/${PRODUCT}/${OUTFILE}");
+        }
+        setup.put("cacheDirSyntax", cachePathSyntax);
+
+        if (STORAGE_PATH != null){
+            storagePathSyntax = new StringMapper(STORAGE_PATH);
+        }
+        else {
+            storagePathSyntax = new StringMapper(STORAGE_ROOT.toString()+"/${TIMESTAMP_DIR}/${PRODUCT_DIR}/${OUTFILE}");
+        }
+        setup.put("storagePath", storagePathSyntax);
+
 
         /// Ensure quitting processes as well.
         ShellExec.TIMEOUT_SEC = TIMEOUT;

@@ -2,7 +2,7 @@ package nutshell;
 
 import java.util.Map;
 
-public interface Option {
+public interface Beanish {
 
     String getName();
 
