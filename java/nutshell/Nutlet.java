@@ -371,7 +371,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
 
 			taskMap.put(task.getTaskId(), new Tasklet(task));
-
+			task.log.special(String.format("taskMap size: %d", taskMap.size()));
 			//task.log.textDecoration.setColour(TextDecoration.Options.COLOUR);
 		}
 		catch (ParseException e) {
@@ -703,18 +703,21 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		html.appendTable(task.info.getParamEnv(null), "Product parameters");
 
-		html.appendTable(registry.map, "Command set");
 
 		//log.warn("Nyt jotain");
 
 		// 2
 		addRequestStatus(html, request);
-		addServerStatus(html);
 
 		html.appendTag(SimpleHtml.Tag.H1, "Running tasks");
 		html.appendTable(taskMap, "Tasks");
 		taskMap.remove(task.getTaskId());
 		task.close();
+
+		html.appendTable(registry.map, "Command set");
+
+		addServerStatus(html);
+
 
 		sendToStream(html.document, response);
 		//task.close();

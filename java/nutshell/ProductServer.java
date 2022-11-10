@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 7, 1);
+		super.version = Arrays.asList(2, 7, 2);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -145,7 +145,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.setDecoration(parentLog.decoration);
 			}
 			else {
-				log = new HttpLog("[" + this.info.PRODUCT_ID + "]", serverLog.getVerbosity());
+				log = new HttpLog("[" + this.info.PRODUCT_ID + "]", server Log.getVerbosity());
 				log.setFormat(LOG_FORMAT);
 				log.setDecoration(LOG_STYLE);
 			}
@@ -199,12 +199,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath);
 			} catch (IOException e) {
-				System.err.println(String.format("Log GID=%d  file=%s dir=%s", GROUP_ID, filePerms, dirPerms));
-				System.err.println(String.format("Opening Log file (%s) failed: %s", logPath, e));
+				System.err.println(String.format("Opening Log file (%s) failed: Log GID=%d  file=%s dir=%s, error: %s",
+						logPath, GROUP_ID, filePerms, dirPerms, e));
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
-
 
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
@@ -726,8 +725,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				} catch (IndexedState e) {
 
 					// NOTE: possibly the file has been generated, but with some less significant errors.
-					// serverLog.warn(info.getFilename() + ": " + e);
-					// serverLog.warn(info.getFilename());
 
 					log.log(e);
 
@@ -738,9 +735,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					} catch (Exception e2) {
 						log.error(e2.getLocalizedMessage());
 					}
-					//log.error(e.getMessage());
-					//throw e;
-					//return false;
 				}
 
 
@@ -754,7 +748,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					// Let's take this slowly...
 					try {
 						this.move(this.outputPathTmp, this.outputPath);
-						serverLog.success(this.outputPath.toString());
+						log.success(this.outputPath.toString());
 						//this.copy(this.outputPathTmp, this.outputPath);
 					} catch (IOException e) {
 						log.warn(e.toString());
@@ -782,7 +776,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				else {
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
-					serverLog.fail(info.getFilename());
+					// server Log.fail(info.getFilename());
 					// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
 					if (instructions.isSet(Instructions.GENERATE)) {
 						try {
@@ -1239,7 +1233,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			task.log.debug("Decoration: " + task.log.decoration.toString());
 			if (task.instructions.isSet(ActionType.PARALLEL)) {
 				try {
-					// serverLog.special
 					log.info(String.format("Starting task[%d] '%s': %s as a thread", task.getTaskId(), key, task));
 					// log.debug(String.format("Starting thread '%s': %s", key, task));
 					task.start();
@@ -1260,7 +1253,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					task.join();
 				}
 				else {
-					// serverLog.special
 					log.info(String.format("Starting task '%s': %s (in main thread)", key, task));
 
 					task.execute();
@@ -1268,7 +1260,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				log.info(String.format("Finished task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 
-				//serverLog.special(String.format("Finished task: %s", task));
 			} catch (InterruptedException e) {
 				log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
 				log.warn(String.format("Pending file? : ", task.outputPathTmp));
@@ -1341,7 +1332,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			catch (IOException e) {
 				// TODO: redesign (check if delete needed at all)
-				this.serverLog.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
+				log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
 			}
 
 			return false;
@@ -1383,9 +1374,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 				myInstructions.add(value);
 				// System.out.printf("DEBUG: %s %n", myInstructions);
-			} catch (NoSuchFieldException | IllegalAccessException e) {
-
-				serverLog.error(e.getMessage());
+			}
+			catch (NoSuchFieldException | IllegalAccessException e) {
+				throw new RuntimeException("Unsupoorted Instruction", e);
 			}
 
 		}
@@ -1440,6 +1431,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec(){
 
+				String killCmd[] = new String[]{"killall", value};
+				serverLog.special("Executing KILL command: " + Arrays.toString(killCmd));
+
 				ShellUtils.ProcessReader handler = new ShellUtils.ProcessReader() {
 					@Override
 					public void handleStdOut(String line) {
@@ -1451,14 +1445,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 				};
 
-				String killCmd[] = new String[]{"killall", value};
-				//String.format("killall %s", value);
-
-				serverLog.special("Executing special KILL command: " + Arrays.toString(killCmd));
-
 				int result = ShellExec.exec(killCmd, null, null, handler);
 
-				// System.out.printf("exit value: " + value);
 				serverLog.special("Return code: " + result);
 
 			}
@@ -1469,14 +1457,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
             @Override
             public void exec() {
-                //System.err.println(" VALUE="+value);
-                //System.err.println(Manip.toString(this));
-                //System.err.printf("Value='%s' [%s] %n", LOG_FORMAT, LOG_FORMAT.getClass().getName());
                 LOG_FORMAT = value;
-                serverLog.setFormat(LOG_FORMAT);
-                // serverLog.debug(serverLog.textOutput.toString());
+                serverLog.setFormat(LOG_FORMAT); // needed?
+                // server Log.debug(server Log.textOutput.toString());
 				serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
-				serverLog.debug(serverLog.textOutput.toString());
+				//server Log.debug(server Log.textOutput.toString());
             }
         });
 
@@ -1495,8 +1480,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
                 else
                     LOG_STYLE.set(value.toString());
                 serverLog.decoration.set(LOG_STYLE);
-                // serverLog.special("deco: "+ serverLog.decoration.toString());
-                // serverLog.special("deco: "+ value.toString());
             }
 
 
@@ -1524,7 +1507,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					try {
 						deco.add(s);
 						serverLog.setDecoration(deco); // overrides
-						serverLog.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
+						// serverL og.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
 						continue;
 					}
 					catch (Exception e){
@@ -1532,7 +1515,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					try {
 						serverLog.setVerbosity(Log.Status.valueOf(s));
-						serverLog.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
+						// server Log.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
 						continue;
 					}
 					catch (Exception e){
@@ -1540,13 +1523,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					try {
 						serverLog.setFormat(TextOutput.Format.valueOf(s));
-						serverLog.debug(String.format("%s: updated format: %s", getName(), serverLog.getFormat()));
+						//server Log.debug(String.format("%s: updated format: %s", getName(), serverLog.getFormat()));
 						continue;
 					}
 					catch (Exception e){
 					}
 
-					serverLog.error(String.format("%s: unsupported Log parameter %s, see --help log", getName(), value));
+					throw new RuntimeException(String.format("%s: unsupported Log parameter %s, see --help log",
+							getName(), value));
+					// serve rLog.error(String.format("%s: unsupported Log parameter %s, see --help log", getName(), value));
 
 				}
 				//serverLog.debug(serverLog.textOutput.toString());
@@ -1948,6 +1933,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			task.close();
 		}
+
+		if (batchConfig.instructions.isSet(ActionType.STATUS)){
+			//
+			for (Entry<String,Object> entry: server.setup.entrySet()) {
+				System.out.printf("%s = %s %n", entry.getKey(), entry.getValue());
+			}
+		}
+
 
 
 		// System.err.println("Eksit");

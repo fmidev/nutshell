@@ -24,7 +24,7 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 public class ProductServerBase extends Program {
 
     //final public HttpLog serverLog = new HttpLog(getClass().getSimpleName());
-    final public HttpLog serverLog = new HttpLog("NutShell");
+    final public HttpLog serverLog = new HttpLog("[NutShell]");
 
     static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -159,8 +159,6 @@ public class ProductServerBase extends Program {
                 else
                     serverLog.note(String.format("Re-reading setup: %s (old: %s)",
                             path, this.confFile));
-                //serverLog.note("Reading setup: " + path.toString());
-                // MapUtils.read(path.toFile(), setup);
                 Config.readConfig(path.toFile(), setup);
             }
             this.confFile = path; // null ok??
@@ -221,12 +219,17 @@ public class ProductServerBase extends Program {
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
         // Logging
+        /*
         if (LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
             serverLog.setFormat(TextOutput.Format.VT100);
         else
             serverLog.setFormat(LOG_FORMAT);
 
         serverLog.setDecoration(LOG_STYLE);
+        */
+
+        serverLog.setFormat(TextOutput.Format.TEXT);
+        serverLog.setDecoration(); // "None"
 
         StringBuilder sb = new StringBuilder();
         sb.append(HTTP_HOST);
@@ -250,14 +253,16 @@ public class ProductServerBase extends Program {
      * @return
      */
     public Path setLogFile(String pathFormat) {
+
         if (pathFormat == null)
             pathFormat = "/tmp/nutshell-%s.log";
+
         try {
             Path p = Paths.get(String.format(pathFormat,
                     logFilenameTimeFormat.format(System.currentTimeMillis())));
             //ensureFile(p.getParent(), p.getFileName());
             serverLog.setLogFile(p);
-            serverLog.debug(setup.toString());
+            // server Log.debug("Setup: " +setup.toString());
             try {
                 Files.setPosixFilePermissions(p, filePerms);
             }
@@ -382,7 +387,6 @@ public class ProductServerBase extends Program {
         // If there is some error accessing
         @Override
         public FileVisitResult visitFileFailed(Path file, IOException e) {
-            //serverLog.warn(e.getMessage());
             return CONTINUE;
         }
     }
@@ -396,7 +400,7 @@ public class ProductServerBase extends Program {
         public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
             if (attr.isRegularFile() || attr.isSymbolicLink()) {
                 try {
-                    serverLog.note(String.format("Deleting file: %s", file));
+                    //server Log.note(String.format("Deleting file: %s", file));
                     Files.delete(file);
                 } catch (IOException e) {
                     serverLog.warn(e.toString());
@@ -415,7 +419,7 @@ public class ProductServerBase extends Program {
                 return CONTINUE;
 
             try {
-                serverLog.debug(String.format("Delete dir: %s", dir));
+                // server Log.debug(String.format("Delete dir: %s", dir));
                 Files.delete(dir);
             } catch (IOException e) {
                 serverLog.warn(e.toString());
@@ -434,14 +438,16 @@ public class ProductServerBase extends Program {
     public void clearCache(boolean confirm) throws IOException {
 
         if (!this.CACHE_ROOT.endsWith("cache")){
-            serverLog.error("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
-            return;
+            throw new RuntimeException("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
+            //serverLog.error("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
+            //return;
         }
 
         Path p = this.CACHE_ROOT.toRealPath();
         if (!p.endsWith("cache")){
-            serverLog.error("Cache root does not end with 'cache' : " + p);
-            return;
+            throw new RuntimeException("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
+            // serverLog.error("Cache root does not end with 'cache' : " + p);
+            // return;
         }
 
         if (confirm){

@@ -204,9 +204,7 @@ public class Program {
             return  result;
         }
 
-        public void exec() {
-           // System.err.print(getName() + " exec:");
-           //  System.err.println(toString());
+        public void exec() throws RuntimeException{
         }
 
         // ------------------------------------
