@@ -19,7 +19,9 @@ public class FileUtils {
         return (1 << counter++);
     }
 
-
+    /**
+     *  Could be based on {@link PosixFilePermission}
+     */
     interface Owner {
         int USER   = getBit();
         int GROUP  = getBit();
@@ -39,10 +41,10 @@ public class FileUtils {
         // ..
     }
 
-    static
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+)(/[^/]*)$");
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+/)([\\w]+\\.[a-z]{1,4})?(\\W[^/]*)?$",
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)([.\\w]+\\.[a-z]+)?(\\s.*)?$",
+    static
     public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
             Pattern.CASE_INSENSITIVE);
 
@@ -80,6 +82,7 @@ public class FileUtils {
     public int ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
 
         int experimentalResult = 0;
+
 
         if ((path == null) || (path.getNameCount()==0)){
             return experimentalResult;
@@ -119,7 +122,8 @@ public class FileUtils {
         }
 
         if (!Files.isWritable(path)){
-            throw new IOException(String.format("Dir exists, but is not writable: %s %s", path, permissions));
+            throw new IOException(String.format("Dir %s owned by %s is not writable: %s",
+                    path, Files.getOwner(path), Files.getPosixFilePermissions(path)));
         }
 
         return experimentalResult;
