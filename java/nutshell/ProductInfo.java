@@ -131,14 +131,14 @@ class ProductInfo extends ProductParameters {
 		final Matcher m = filenameRe.matcher(filename); // filenameUncompressed
 		if (m.matches()){
 			
-			//TIMESTAMP_ = m.group(mTIMESTAMP_) == null ? "" : m.group(mTIMESTAMP_);
-			TIMESTAMP    = m.group(2) == null ? "" : m.group(2);
+			TIMESTAMP = m.group(2) == null ? "" : m.group(2);
 			
-			if ((TIMESTAMP != "") && (TIMESTAMP != "LATEST") && (TIMESTAMP != "TIMESTAMP")){
-				time = timeStampFormat.parse(TIMESTAMP).getTime();
+			if (TIMESTAMP.isEmpty() || TIMESTAMP.equals("LATEST") || TIMESTAMP.equals("TIMESTAMP")){
+				// TODO: Handle LATEST and TIMESTAMP
+				time = 0L;
 			}
 			else {
-				time = 0L;
+				time = timeStampFormat.parse(TIMESTAMP).getTime();
 			}
 			//
 			
@@ -146,7 +146,6 @@ class ProductInfo extends ProductParameters {
 			Map<String,Object> paramLink = INPUT_PARAMETERS;
 			String param = m.group(5);
 			// int index=0; // ordered params?
-			if (param != null){
 				String p[] = param.split("_");
 				for (int i=0; i<p.length; i++){
 					String entry[] = p[i].split("=", 2);
