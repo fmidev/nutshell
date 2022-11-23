@@ -122,8 +122,9 @@ public class FileUtils {
         }
 
         if (!Files.isWritable(path)){
-            throw new IOException(String.format("Dir %s owned by %s is not writable: %s",
-                    path, Files.getOwner(path), Files.getPosixFilePermissions(path)));
+            experimentalResult |= Permission.WRITE;
+            throw new IOException(String.format("Dir %s owned by %s is not writable by %s: %s",
+                    path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }
 
         return experimentalResult;
