@@ -143,20 +143,22 @@ class ProductInfo extends ProductParameters {
 			Map<String, Object> paramLink = INPUT_PARAMETERS;
 			String param = m.group(5);
 			// int index=0; // ordered params?
+
+			if (param != null){
 			String p[] = param.split("_");
-			for (int i = 0; i < p.length; i++) {
-				String entry[] = p[i].split("=", 2);
-				if (entry.length == 2) /// Specific parameters
-					paramLink.put(entry[0], entry[1]);
-				else if (entry[0].isEmpty()) {
-					paramLink = PARAMETERS;
-					//System.out.println(" entry=" + p[0]);
-				} else {
-					/// Ordered parameters
-					paramLink.put("P" + i, entry[0]);
+				for (int i = 0; i < p.length; i++) {
+					String entry[] = p[i].split("=", 2);
+					if (entry.length == 2) /// Specific parameters
+						paramLink.put(entry[0], entry[1]);
+					else if (entry[0].isEmpty()) {
+						paramLink = PARAMETERS;
+						//System.out.println(" entry=" + p[0]);
+					} else {
+						/// Ordered parameters
+						paramLink.put("P" + i, entry[0]);
+					}
 				}
 			}
-			//}
 
 			FORMAT = m.group(6);
 			if (COMPRESSION.isEmpty())
