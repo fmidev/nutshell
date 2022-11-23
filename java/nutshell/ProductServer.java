@@ -1206,6 +1206,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			catch (Exception e) {
 				// System.err.println(String.format("EROR2 here: %s = %s", key, value));
+				log.warn(e.getMessage());
 				log.error(String.format("Unexpected exception in creating product %s(%s)", key, value));
 				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
 			}
