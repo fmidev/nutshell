@@ -211,7 +211,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 				FileUtils.ensureWritableDir(systemPath, GROUP_ID, dirPerms);
 			} catch (IOException e) {
-				log.error(String.format("Opening product aux dir failed: %s '%s'", systemPath , e));
+				log.error(String.format("Creating product aux dir failed: %s '%s'", systemPath , e));
 			}
 
 			String systemBaseName = this.info.TIMESTAMP + "_nutshell." + this.info.PRODUCT_ID + "_" + label; //getTaskId();
@@ -1350,8 +1350,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		InstructionParameter(Instructions instructions){
 			super("instructions", "Set actions and properties: " +
 							instructions.getAllFlags().keySet().toString(),
-							// String.join(",",
-							//ClassUtils.getConstants(Instructions.class).keySet().toString()),
 					instructions.toString());
 			myInstructions = instructions;
 		}
@@ -1562,7 +1560,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	}
 
 
-	// Note: this "makes" program registry dynamic. It should be shared, static?
+	// Note: this turns program registry dynamic. It should be shared, static?
     public void populate(BatchConfig batchConfig, ProgramRegistry registry){
 
 		registry.add(new InstructionParameter(batchConfig.instructions));

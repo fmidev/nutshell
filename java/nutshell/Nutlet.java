@@ -137,7 +137,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	 *  TODO: request-response wrapper to support offline testing
 	 */
 	@Override	
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	public void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException, ServletException
 	{
 
 		// Why not in init() ?
@@ -169,7 +169,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 		// "Main" command handling loop
-		for (Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()){
+		for (Map.Entry<String,String[]> entry: httpRequest.getParameterMap().entrySet()){
 			final String key = entry.getKey();
 			final String[] values = entry.getValue();
 			final String value = (values.length == 0) ? "" : values[0];
@@ -194,7 +194,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					batchConfig.instructions.add(values);
 				}
 				catch (NoSuchFieldException | IllegalAccessException e) {
-					sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ", e.getMessage(), response);
+					sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ", e.getMessage(), httpResponse);
 					return;
 				}
 			}
@@ -212,11 +212,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
                     // JSONParser jsonParser = new JSONParser();
                     //System.out.printf(" Found: %s -> JSON %s %n", parentDir, jsonFile);
 					sendStatusPage(HttpServletResponse.SC_ACCEPTED, "JSON demo under construction",
-							entry.toString(), response);
+							entry.toString(), httpResponse);
                 }
                 else {
 					sendStatusPage(HttpServletResponse.SC_NOT_FOUND, "Demo conf file  (JSON) not found",
-							entry.toString(), response);
+							entry.toString(), httpResponse);
 				}
 
 			}
@@ -237,9 +237,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			try {
 				productServer.clearCache(false);
 				sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
-						"OK", request, response);
+						"OK", httpRequest, httpResponse);
 			} catch (IOException e) {
-				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), response);
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), httpResponse);
 			}
 			return;
 		}
@@ -255,7 +255,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				tracker.run();
 				// System.out.println(tracker.generators);
 			} catch (IOException e) {
-				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Retrieving catalog failed", e.getMessage(), response);
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Retrieving catalog failed", e.getMessage(), httpResponse);
 			}
 
 			SimpleHtml html = getHtmlPage();
@@ -271,8 +271,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 			html.appendTable(catalogMap, "Catalog");
 			html.appendTag(SimpleHtml.Tag.PRE, tracker.generators.toString());
-			response.setStatus(HttpServletResponse.SC_OK); // tes
-			sendToStream(html.document, response);
+			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
+			sendToStream(html.document, httpResponse);
 
 			return;
 		}
@@ -282,7 +282,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		if (page.equals("status")){ //|| batchConfig.instructions.isSet(ActionType.STATUS)){
 			setup.put("counter", ProductServer.counter);
 			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
-					"NutShell server is running since " + setup.get("startTime"), request, response);
+					"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
 			return;
 		}
 
@@ -291,11 +291,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			product = "";
 
-			final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
+			final Object requestUri = httpRequest.getAttribute("javax.servlet.error.request_uri");
 
 			if (requestUri == null){
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product redirection error",
-						"No request_uri for resolving a product", response);
+						"No request_uri for resolving a product", httpResponse);
 				return;
 			}
 
@@ -315,7 +315,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				p.put("FileName", path.getFileName());
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,
 						String.format("Not-found-404 failed: %s: %s -> %s", requestUri, path.getName(1), path.getFileName()),
-						p, response);
+						p, httpResponse);
 				return;
 			}
 
@@ -327,7 +327,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			if (page.isEmpty()){
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
-								String.format("Query: %s", request.getQueryString()), request, response);
+								String.format("Query: %s", httpRequest.getQueryString()), httpRequest, httpResponse);
 						return;
 			}
 
@@ -336,16 +336,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			 */
 			SimpleHtml html = includeHtml(page); // fail?
 
-			if (request.getParameterMap().size() > 1){
-				html.appendTable(request.getParameterMap(), "Several parameters");
+			if (httpRequest.getParameterMap().size() > 1){
+				html.appendTable(httpRequest.getParameterMap(), "Several parameters");
 			}
 
 			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
 			elem.setTextContent(String.format(" Page: %s/%s ", HTTP_ROOT, page ));
 			//html.appendElement(SimpleHtml.H2, "Testi");
 
-			response.setStatus(HttpServletResponse.SC_OK); // tes
-			sendToStream(html.document, response);
+			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
+			sendToStream(html.document, httpResponse);
 			return;
 		}
 
@@ -376,13 +376,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 		catch (ParseException e) {
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST,"Product parse failure",
-				e,	request, response);
+				e,	httpRequest, httpResponse);
 			return;
 		}
 		catch (Exception e) { // TODO: consider like above, indexedException
 			//e.printStackTrace();
 			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product generation error",
-				e, request, response);
+				e, httpRequest, httpResponse);
 			return;
 		}
 
@@ -397,7 +397,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		//String[] directives = request.getParameterValues("directives");
-		task.info.setDirectives(request.getParameterMap());
+		task.info.setDirectives(httpRequest.getParameterMap());
 		//task.log.setVerbosity(log.verbosity);
 
 		task.log.note(task.toString());
@@ -418,7 +418,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				taskMap.remove(task.getTaskId());
 				task.close();
 				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Product request interrupted.",
-				e, request, response);
+				e, httpRequest, httpResponse);
 				// task.close();
 				return;
 			}
@@ -442,7 +442,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				//Log.Level.NOTE.ordinal();
 				task.log.debug("sendToStream: " + task.outputPath);
 				try {
-					sendToStream(task.outputPath, response);
+					sendToStream(task.outputPath, httpResponse);
 					taskMap.remove(task.getTaskId());
 					task.close();
 					return;
@@ -454,9 +454,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
 				taskMap.remove(task.getTaskId());
 				task.close();
-				String url = String.format("%s/cache/%s?redirect=NO", request.getContextPath(), task.relativeOutputPath);
+				String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.relativeOutputPath);
 				//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
-				response.sendRedirect(url);
+				httpResponse.sendRedirect(url);
 				// task.close();
 				return;
 			}
@@ -474,16 +474,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					taskMap.remove(task.getTaskId());
 					task.close();
 					sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
-							os.toString("UTF8"), request, response);
+							os.toString("UTF8"), httpRequest, httpResponse);
 					// task.close();
 					return;
 				}
 			}
 
-			response.setStatus(HttpServletResponse.SC_OK); // tes
+			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
 		}
 		catch (IndexedState e) {
-			response.setStatus(e.index);
+			httpResponse.setStatus(e.index);
 			task.instructions.add(Instructions.STATUS);
 			//task.instructions.add(Instructions.STATUS); // ?
 			task.instructions.add(Instructions.INPUTLIST);
@@ -646,7 +646,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				for (Map.Entry<String, String> e : task.inputs.entrySet()) {
 					String inputFilename = e.getValue();
 					//elem = html.createAnchor("?request=CHECK&product="+e.getValue(), e.getValue());
-					String url = String.format("%s%s?actions=DEBUG&product=%s", request.getContextPath(), request.getServletPath(), inputFilename);
+					String url = String.format("%s%s?actions=DEBUG&product=%s", httpRequest.getContextPath(), httpRequest.getServletPath(), inputFilename);
 					linkMap.put(e.getKey(), html.createAnchor(url, inputFilename));
 					//Object inp = task.retrievedInputs.get(e.getKey());
 					//if ()
@@ -707,7 +707,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		//log.warn("Nyt jotain");
 
 		// 2
-		addRequestStatus(html, request);
+		addRequestStatus(html, httpRequest);
 
 		html.appendTag(SimpleHtml.Tag.H1, "Running tasks");
 		html.appendTable(taskMap, "Tasks");
@@ -719,7 +719,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		addServerStatus(html);
 
 
-		sendToStream(html.document, response);
+		sendToStream(html.document, httpResponse);
 		//task.close();
 		// 1
 	}

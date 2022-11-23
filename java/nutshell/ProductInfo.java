@@ -111,58 +111,54 @@ class ProductInfo extends ProductParameters {
 		String[] s = productStr.split("\\?", 2);
 		String filename = s[0];
 		//String filenameUncompressed = filename;
-		if (s.length == 2){
+		if (s.length == 2) {
 			setDirectives(s[1], "\\?");
 		}
 		//postProcessingInfo = (s.length==2) ? s[1] : "";
 
 		/// Parse compression extension, like .gz in .txt.gz)
 		final Matcher cm = compressionRe.matcher(filename);
-		if (cm.matches()){
+		if (cm.matches()) {
 			filename = cm.group(1); // filenameUncompressed
 			COMPRESSION = cm.group(2);
-		}
-		else {
+		} else {
 			COMPRESSION = "";
 		}
-	
-		
+
+
 		/// Main parsing
 		final Matcher m = filenameRe.matcher(filename); // filenameUncompressed
-		if (m.matches()){
-			
+		if (m.matches()) {
+
 			TIMESTAMP = m.group(2) == null ? "" : m.group(2);
-			
-			if (TIMESTAMP.isEmpty() || TIMESTAMP.equals("LATEST") || TIMESTAMP.equals("TIMESTAMP")){
-				// TODO: Handle LATEST and TIMESTAMP
+
+			// TODO: Handle LATEST and TIMESTAMP
+			if (TIMESTAMP.isEmpty() || TIMESTAMP.equals("LATEST") || TIMESTAMP.equals("TIMESTAMP")) {
 				time = 0L;
-			}
-			else {
+			} else {
 				time = timeStampFormat.parse(TIMESTAMP).getTime();
 			}
-			//
-			
-			PRODUCT_ID   = m.group(3).replace('-', '.');
-			Map<String,Object> paramLink = INPUT_PARAMETERS;
+
+			PRODUCT_ID = m.group(3).replace('-', '.');
+			Map<String, Object> paramLink = INPUT_PARAMETERS;
 			String param = m.group(5);
 			// int index=0; // ordered params?
-				String p[] = param.split("_");
-				for (int i=0; i<p.length; i++){
-					String entry[] = p[i].split("=", 2);
-					if (entry.length == 2) /// Specific parameters
-						paramLink.put(entry[0], entry[1]);
-					else if (entry[0].isEmpty()) {
-						paramLink = PARAMETERS;
-						//System.out.println(" entry=" + p[0]);
-					}
-					else {
-						/// Ordered parameters
-						paramLink.put("P"+i, entry[0]);
-					}
-				} 
+			String p[] = param.split("_");
+			for (int i = 0; i < p.length; i++) {
+				String entry[] = p[i].split("=", 2);
+				if (entry.length == 2) /// Specific parameters
+					paramLink.put(entry[0], entry[1]);
+				else if (entry[0].isEmpty()) {
+					paramLink = PARAMETERS;
+					//System.out.println(" entry=" + p[0]);
+				} else {
+					/// Ordered parameters
+					paramLink.put("P" + i, entry[0]);
+				}
 			}
+			//}
 
-			FORMAT     = m.group(6);
+			FORMAT = m.group(6);
 			if (COMPRESSION.isEmpty())
 				EXTENSION = FORMAT;
 			else
