@@ -49,6 +49,7 @@ public class SimpleHtml extends SimpleXML{
 		PRE,
 		CODE,
 		TT,
+		SUP,
 		A,
 		STYLE,
 		SPAN,
@@ -120,6 +121,11 @@ public class SimpleHtml extends SimpleXML{
 	public Element main;
 	// protected Element lastElement = null;
 
+	/** If true.
+	 *
+	 */
+	static
+	public boolean AUTO_ANCHORS = false;
 
 	/** Constructor that creates an empty document with title @title.
 	 *
@@ -164,6 +170,8 @@ public class SimpleHtml extends SimpleXML{
 
 		// Search for HEAD element (should be unique)
 		this.head = getUniqueElement(this.root, Tag.HEAD);
+
+
 		// Override...
 		this.encoding = this.appendElement(this.head, Tag.META);
 		this.encoding.setAttribute("http-equiv", "Content-Type");
@@ -173,6 +181,10 @@ public class SimpleHtml extends SimpleXML{
 		if (this.title.getParentNode() == null){ // ???
 			this.head.appendChild(this.title); // REMOVE!
 		}
+
+		// Add style for automatic header anchors
+		if (AUTO_ANCHORS)
+			addAutoAnchorSupport();
 
 		// Search for BODY element (should be unique)
 		this.body = getUniqueElement(this.root, Tag.BODY);
@@ -241,15 +253,26 @@ public class SimpleHtml extends SimpleXML{
 
 
 	public Element appendTag(Tag tag, String text){
-		return super.appendElement(this.main, tag.toString(), text);
+		Element elem = createElement(tag, text);
+		return appendElement(elem);
+		// return super.appendElement(this.main, tag.toString(), text);
 	}
 
 	public Element appendTag(Tag tag){
-		return super.appendElement(this.main, tag.toString());
+		Element elem = createElement(tag, null);
+		return appendElement(elem);
+		//return super.appendElement(this.main, tag.toString());
 	}
 
 	public Element appendElement(Element elem){
 		this.main.appendChild(elem);
+		if (AUTO_ANCHORS) {
+			String tagName = elem.getTagName();
+			// Add anchor to header elements H1, H2, H3,...
+			if (tagName.codePointAt(0) == 'h'){
+				createSuperAnchor(elem);
+			}
+		}
 		return elem;
 	}
 
@@ -263,8 +286,11 @@ public class SimpleHtml extends SimpleXML{
 	}
 
 	public Element appendStyleElement(String style){
-		Element element = appendElement(this.head, Tag.STYLE, style);
+		Element element = appendElement(this.head, Tag.STYLE);
 		element.setAttribute("type", "text/css");
+		style = style.replace("{", "{\n   ");
+		style = style.replace(";", ";\n   ");
+		style = style.replace("}","\n}\n");
 		element.setTextContent(style);
 		return element;
 	}
@@ -287,6 +313,29 @@ public class SimpleHtml extends SimpleXML{
 	public Element appendAnchor(String url) {
 		return appendAnchor(url, url);
 	}
+
+	// teSuperAnchor(node.getTextContent().trim().replaceAll("\\W",""));
+	public Element createSuperAnchor(Node node) {
+		Element elem = createSuperAnchor(node.getTextContent().trim().replaceAll("\\W",""));
+		node.appendChild(elem);
+		return elem;
+	}
+
+
+	public Element createSuperAnchor(String name) {
+		Element elem = createElement(Tag.A);
+		elem.appendChild(createElement(Tag.SUP, "∞"));
+		elem.setAttribute("name", name);
+		elem.setAttribute("href", "#" + name);
+		elem.setAttribute("class", "anchor");
+		return elem;
+	}
+
+	public Element addAutoAnchorSupport() {
+		return appendStyleElement(".anchor {color:black; opacity:0; text-decoration:none}"
+			+ ".anchor:hover {opacity:0.25}");
+	}
+
 
 	public <K,V> Element appendTable(Map<K,V> map, String title){ //} throws IOException {
 
@@ -367,6 +416,7 @@ public class SimpleHtml extends SimpleXML{
 
 	public static void main(String[] args) {
 
+		SimpleHtml.AUTO_ANCHORS = true;
 
 		SimpleHtml html = new SimpleHtml("Kokeilu");
 
@@ -374,17 +424,21 @@ public class SimpleHtml extends SimpleXML{
 		if (args.length == 0){
 			System.out.println("Writes SimpleHtml-test.html");
 			System.out.println("Example:");
-			System.out.println("java " + html.getClass().getCanonicalName() + " foo.html  # create doc and dump");
-			System.out.println("java " + html.getClass().getCanonicalName() + " test-body.html  # read body");
+			String cp = System.getProperty("java.class.path");
+			String cl = html.getClass().getCanonicalName();
+			//System.out.println(System.getProperty("java.class.path"));
+			System.out.printf("java -cp %s %s foo.html        # create doc and dump to foo.html", cp, cl);
+			System.out.printf("java -cp %s %s test-body.html  # read body, embed, and dump", cp, cl);
+			// System.out.println("java " + html.getClass().getCanonicalName() + " test-body.html  # read body");
 			return;
 		}
-
 
 		// 1 arg: try to read file
 		if (args.length == 1){
 
 			// File file = new File(args[0]);
 			html.title.setTextContent(args[0]);
+			html.addAutoAnchorSupport();
 
 			try {
 				NodeList list = getChildNodes(Paths.get(args[0]), Tag.BODY);
@@ -400,7 +454,12 @@ public class SimpleHtml extends SimpleXML{
 					//node.cloneNode()
 					node = html.document.importNode(node, true);
 					//
+					if (nodeName.equals(Tag.H1.lowerCaseName)){
+						Element elem = html.createSuperAnchor(node.getTextContent().trim().replaceAll("\\W",""));
+						node.appendChild(elem);
+					}
 					html.main.appendChild(node);
+
 					//html.document.appendChild(node);
 				}
 			}
