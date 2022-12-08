@@ -70,6 +70,7 @@ class Entity {
 public class Graph extends Entity {
 
     Graph(String name){
+        // System.err.println("TAAS LUOTIIN " + name);
         setName(name);
     }
 
@@ -348,8 +349,10 @@ public class Graph extends Entity {
         Path filePath = Paths.get(outfile);
         File file = filePath.toFile();
 
+        Path dirPath = filePath.getParent() != null ? filePath.getParent() : Paths.get(".");
+
         //log.warn("Creating process");
-        final Process process = Runtime.getRuntime().exec(cmd, null, filePath.getParent().toFile());
+        final Process process = Runtime.getRuntime().exec(cmd, null, dirPath.toFile());
         OutputStream outputStream = process.getOutputStream();
         PrintStream printStream = new PrintStream(outputStream);
 
@@ -386,7 +389,8 @@ public class Graph extends Entity {
         if (args.length == 0){
             System.err.println();
             System.err.println("Example:");
-            System.err.println("'My super, test!' node1 ");
+            //System.err.println(System.getProperty("classp") + "/tmp/file.dot  dot");
+            System.err.println("/tmp/file.dot  dot");
             System.exit(1);
         }
 
@@ -403,12 +407,12 @@ public class Graph extends Entity {
 
         Node node3 = graph.addNode("C");
         // Alternative 2
-        Node.Link link2 = node1.addLink(node3);
+        Node.Link link2 = node2.addLink(node3);
         link2.attributes.put("label", "reijo");
 
         // graph.toStream(System.out);
         try {
-            graph.dotToFile(args[0], "");
+            graph.dotToFile(args[0], args[1]);
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }

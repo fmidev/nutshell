@@ -109,13 +109,97 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		//public final Map<String,String> directives = new HashMap<>();
 		public final Map<String, String> inputs = new HashMap<>();
-		public final Map<String, Object> retrievedInputs = new HashMap<>();
 
+		// TODO rename inputTasks
+		public final Map<String, Task> inputTasksNEW = new HashMap<>();
+
+		// Consider get node
+		public Graph getGraph(Graph graph) {
+
+			if (graph == null) {
+				graph = new Graph(this.info.PRODUCT_ID);
+			}
+
+			// Ensure this task (and its descendants) on the Graph.
+			Graph.Node node = getNode(graph);
+			node.attributes.put("style", "filled");
+			node.attributes.put("fillcolor", "lightblue");
+
+			return graph;
+		}
+
+		/** Retrieve a node of this task, including all its input tasks.
+		 *
+		 * @param graph
+		 * @return
+		 */
+		public Graph.Node getNode(Graph graph){
+			if (graph == null){
+				graph = new Graph("request: " + this.info.PRODUCT_ID);
+			};
+			Graph.Node node = graph.getNode(this.info.PRODUCT_ID);
+			// if (result != null){
+			if (result instanceof Path){
+				node.attributes.put("href", String.format(
+						"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
+			}
+
+
+			for (Map.Entry<String,Task> entry: inputTasksNEW.entrySet()) {
+				Task t = entry.getValue();
+				Graph.Node n = t.getNode(graph);
+				//System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
+				Graph.Node.Link link = node.addLink(n);
+				// TODO: Style
+				if (t.log.indexedState.index > 300) {
+					n.attributes.put("style", "filled");
+					n.attributes.put("fillcolor", "#ffc090");
+					link.attributes.put("style", "dashed");
+					link.attributes.put("label", t.log.indexedState.getMessage());
+					link.attributes.put("color", "red");
+				}
+
+
+				if (t.result == null){
+					// link.attributes.put("color", "red"); // ""#800000");
+					link.attributes.put("style", "dotted");
+				}
+				else {
+					if (t.result instanceof Exception){
+						link.attributes.put("color", "brown");
+						// FIX: error msg
+						link.attributes.put("label", t.result.getClass().getSimpleName());
+					}
+					else {
+						link.attributes.put("color", "green");
+						String label = t.result.toString();
+						if (t.instructions.isSet(ActionType.GENERATE)){
+							label = "GENERATE";
+							link.attributes.put("width", "2");
+						}
+						else if (t.instructions.isSet(ActionType.MAKE)){
+							label = "MAKE";
+						}
+						else if (t.instructions.isSet(ActionType.EXISTS)){
+							label = "EXISTS";
+						}
+						link.attributes.put("label", label);
+					}
+					//link.attributes.put("", "");
+				}
+				// YYY
+
+			}
+
+			return node;
+		};
+
+		/*
 		public Graph graph = null;
-
 		public void setGraph(Graph graph) {
 			this.graph = graph;
 		}
+		 */
 
 		/**
 		 * Product generation task defining a product instance and operations on it.
@@ -186,9 +270,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.setDecoration(LOG_STYLE);
 			log.setDecoration(parentLog.decoration);
 
-
-
 			// Is this sometimes confusing?
+			// Consider extension in uppercase: .LOG and  .HTML
 			if (log.textOutput.getFormat() == TextOutput.Format.HTML)
 				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log.html");
 			else
@@ -370,6 +453,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		public Object result;
 
+		/** Returns a node describing this task. Creates it, if not exists already.
+		 *
+		 * @param graph
+		 * @return
+		 */
+		/*
 		public Graph.Node getGraphNode(Graph graph) {
 			if (graph.hasNode(info.getID())) {
 				return graph.getNode(info.getID());
@@ -382,11 +471,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				return node;
 			}
 		}
+		 */
 
 		// " MAIN "
 
-		/**
-		 * Execute this task: delete, load, generate a product, for example.
+		/** Execute this task: delete, load, generate a product, for example.
 		 * <p>
 		 * Processing is done inside the parent thread  – by default the main thread.
 		 * To invoke this function as a separate thread, use #run().
@@ -399,10 +488,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			Generator generator = null;
 
-			//log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this.info.PRODUCT_ID));
 			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Preparing %s", this));
 
 			// Logical corrections
+			if (instructions.isEmpty()){
+				instructions.add(ActionType.MAKE);
+			}
 
 			if (!instructions.copies.isEmpty())
 				instructions.add(ActionType.MAKE);
@@ -416,20 +507,21 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.involves(PostProcessing.LATEST|PostProcessing.SHORTCUT))
 				instructions.add(ActionType.MAKE);
 
-			// Rest default result type
-			// if (this.instructions.involves(Actions.MAKE | Actions.DELETE)) { }
-			if (!instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
-				// This "type selection" could be also done with Generator?
-				log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
-				instructions.add(ResultType.FILE);
-			}
 
 			log.experimental(String.format("Cache depth: %s", instructions.regenerateDepth));
 
-			if (instructions.involves(ActionType.MAKE | ActionType.GENERATE)
-					&& (instructions.regenerateDepth > 0)) {
-				log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", instructions.regenerateDepth));
-				instructions.add(ActionType.GENERATE);
+			if (instructions.involves(ActionType.MAKE | ActionType.GENERATE)){
+				// Rest default result type
+				if (! instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
+					// Note: this "type selection" could be also done with Generator?
+					log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
+					instructions.add(ResultType.FILE);
+				}
+
+				if (instructions.regenerateDepth > 0) {
+					log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", instructions.regenerateDepth));
+					instructions.add(ActionType.GENERATE);
+				}
 			}
 			log.debug(String.format("Instructions (updated): %s", instructions));
 
@@ -530,7 +622,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						if (generator instanceof ExternalGenerator)
 							instructions.add(ResultType.FILE); // PREPARE dir & empty file
 						else
-							instructions.add(ResultType.MEMORY);
+							instructions.add(ResultType.MEMORY); // Yes, internal should not save?
 					}
 
 				}
@@ -589,7 +681,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.isSet(Instructions.GENERATE)) {
 
 				log.reset(); // Forget old sins
-				log.debug("Ok, generate.");
 
 				// Mark this task being processed (empty file)
 				// if (this.instructions.isSet(ResultType.FILE) && !fileFinal.exists()){
@@ -608,18 +699,31 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					return;
 				}
 
-				//	log.debug(String.format("No need to create: %s/./%s",  cacheRoot, this.relativeOutputDirTmp));
-				// Assume Generator uses input similar to output (File or Object)
-				//final int inputActions = this.instructions.value & (ResultType.MEMORY | ResultType.FILE);
-				//final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE));
+				log.debug("Ok, generate...");
+
+			}
+
+			if (instructions.isSet(Instructions.GENERATE) || instructions.isSet(Instructions.INPUTLIST)) {
 
 				// Input generation uses parallel threads only if this product uses.
-				final Instructions inputInstructions = new Instructions(this.instructions.value & (ResultType.MEMORY | ResultType.FILE | ActionType.PARALLEL));
+				// NEW
+				final Instructions inputInstructions = new Instructions(); //this.instructions.value &
+				//(ResultType.MEMORY | ResultType.FILE | ActionType.PARALLEL | ActionType.INPUTLIST));
 				//inputInstructions.add(Instructions.GENERATE);
-				inputInstructions.add(ActionType.MAKE);
+				//inputInstructions.add(ActionType.MAKE);
+
+				if (instructions.isSet(Instructions.GENERATE)){
+					inputInstructions.add(ActionType.MAKE);
+					//inputInstructions.add(Instructions.GENERATE);
+				}
+
+				if (instructions.isSet(Instructions.INPUTLIST)){
+					inputInstructions.add(ActionType.INPUTLIST);
+					//inputInstructions.add(Instructions.GENERATE);
+				}
+
 
 				if (instructions.regenerateDepth > 0) {
-					//instructions.add(ActionType.GENERATE);
 					inputInstructions.regenerateDepth = instructions.regenerateDepth - 1;
 				} else {
 					inputInstructions.regenerateDepth = 0;
@@ -633,30 +737,38 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.special(String.format("Input instructions: %s", inputInstructions));
 				}
 
-				// Consider forwarding directives?
-				// Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, null, log);
+				// Ok - forwarding directives?
 				Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
 
 				// Statistics
+				/*
 				Graph.Node node = null;
 				if (graph != null) {
 					node = getGraphNode(graph);
-					for (Entry<String,Task> entry : inputTasks.entrySet()) {
-						entry.getValue().setGraph(graph);
+
+					for (Entry<String,Task> entry : inputTasks.entrySet()) {  // FIX: move, see below?
+						//entry.getValue().setGraph(graph);
+						Task inputTask = entry.getValue();
+						inputTask.setGraph(graph);
+						//inputTask.getGraphNodee(graph); // "reserve"
 					}
 					//node.attributes.put("fillcolor", "lightblue");
 				}
+				 */
 
+				serverLog.special("runTasks:" + inputTasks.keySet());
 				runTasks(inputTasks, log);
+
 
 				for (Entry<String, Task> entry : inputTasks.entrySet()) {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 
+					/*
 					Graph.Node inputNode = null;
 					Graph.Node.Link link = null;
 
-					if (graph != null) {
+					if (node != null) {
 						inputNode = inputTask.getGraphNode(graph);
 						inputNode.attributes.put("fillcolor", "#40ff40"); // ""lightgreen");
 						inputNode.attributes.put("href", String.format(
@@ -669,19 +781,23 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						// link.attributes.put("label", key);
 						// link.attributes.put("title", "avain_"+key); // SVG only
 					}
-
-
+					*/
+					this.inputTasksNEW.put(key, inputTask);
+					// FIX: check unneeded errors if only INPUTLIST requested
 					if (inputTask.result != null) {
-						String r = inputTask.result.toString();
-						log.note(String.format("Retrieved: %s = %s", key, r));
-						this.retrievedInputs.put(key, r);
+						//String r = inputTask.result.toString();
+						log.note(String.format("Retrieved: %s = %s [%s]",
+								key, inputTask.result, inputTask.result.getClass().getSimpleName()));
+						//this.inputTasksNEW.put(key, inputTask);
 						// inputStats.put(key, inputTask.info.getID());
 
+						/*
 						if (link != null) {
 							if (inputTask.log.indexedState.index > 300) {
 								link.attributes.put("style", "dashed");
 							}
 						}
+						*/
 						if (inputTask.log.indexedState.index > 300) {
 							log.warn("Errors in input generation: " + inputTask.log.indexedState.getMessage());
 						}
@@ -689,16 +805,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						log.warn(inputTask.log.indexedState.getMessage());
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 						log.reset(); // Forget that anyway...
-						if (link != null) {
-							// inputNode.attributes.put("color", "red");
-							//inputNode.attributes.put("style", "dashed");
-							//inputNode.attributes.put("fillcolor", "#ffb080"); // ""orange");"#ffb080"
-							inputNode.attributes.put("fillcolor", "#ffc090"); // ""orange");"#ffb080"
-							link.attributes.put("color", "#800000");
-							link.attributes.put("style", "dashed");
-						}
 					}
 					//inputTask.log.close(); // close PrintStream
+					//inputTask.close();
+				}
+
+				for (Task inputTask : inputTasks.values()) {
 					inputTask.close();
 				}
 
@@ -708,94 +820,99 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				 */
 
-				/// MAIN
-				log.note("Running Generator: " + info.PRODUCT_ID);
+				/// "MAIN"
+				if (instructions.isSet(ActionType.GENERATE)){
+					log.note("Running Generator: " + info.PRODUCT_ID);
 
-				File fileTmp = outputPathTmp.toFile();
-
-				try {
-					/*
-					TODO: StringMapper -based dynamio Path
-					TODO: Needs more envs, like TIMESTAMP_DIR
-					log.experimental(relativeOutputPath.toString());
-					Path test = Paths.get(cachePathSyntax.toString(getParamEnv())).normalize();
-					log.experimental(test.toString());
-					*/
-					generator.generate(this);
-				} catch (IndexedState e) {
-
-					// NOTE: possibly the file has been generated, but with some less significant errors.
-
-					log.log(e);
+					File fileTmp = outputPathTmp.toFile();
 
 					try {
-						log.warn("Error was: " + e.getMessage());
-						this.delete(this.outputPathTmp);
-						//this.delete(fileFinal);
-					} catch (Exception e2) {
-						log.error(e2.getLocalizedMessage());
-					}
-				}
+						/*
+						TODO: StringMapper -based dynamio Path
+						TODO: Needs more envs, like TIMESTAMP_DIR
+						log.experimental(relativeOutputPath.toString());
+						Path test = Paths.get(cachePathSyntax.toString(getParamEnv())).normalize();
+						log.experimental(test.toString());
+						*/
+						generator.generate(this);
+					} catch (IndexedState e) {
 
+						// NOTE: possibly the file has been generated, but with some less significant errors.
 
-				if (fileTmp.length() > 0) {
+						log.log(e);
 
-					/// Override
-					log.setStatus(Log.Status.OK);
-					log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
-					//serverLog.success(info.getFilename());
-
-					// Let's take this slowly...
-					try {
-						this.move(this.outputPathTmp, this.outputPath);
-						log.success(this.outputPath.toString());
-						//this.copy(this.outputPathTmp, this.outputPath);
-					} catch (IOException e) {
-						log.warn(e.toString());
-						//log.warn(String.format("filePerms: %s", filePerms));
-						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
-						// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
-					}
-
-					if (!Files.isSymbolicLink(this.outputPath)) {
 						try {
-							// Todo: skip this if already ok...
-							// Check: is needed? this.move contains copy_attributes
-							Files.setPosixFilePermissions(this.outputPath, filePerms);
+							log.warn("Error was: " + e.getMessage());
+							this.delete(this.outputPathTmp);
+							//this.delete(fileFinal);
+						} catch (Exception e2) {
+							log.error(e2.getLocalizedMessage());
+						}
+					}
+
+
+					if (fileTmp.length() > 0) {
+
+						/// Override
+						log.setStatus(Log.Status.OK);
+						log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
+						//serverLog.success(info.getFilename());
+
+						// Let's take this slowly...
+						try {
+							this.move(this.outputPathTmp, this.outputPath);
+							log.success(this.outputPath.toString());
+							//this.copy(this.outputPathTmp, this.outputPath);
 						} catch (IOException e) {
 							log.warn(e.toString());
-							log.warn(String.format("Failed in setting perms %s for file: %s", filePerms, this.outputPath));
-							// log.warn(String.format("filePerms: %s", filePerms));
-							// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
+							//log.warn(String.format("filePerms: %s", filePerms));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in moving tmp file: %s", this.outputPathTmp));
 							// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
 						}
+
+						if (!Files.isSymbolicLink(this.outputPath)) {
+							try {
+								// Todo: skip this if already ok...
+								// Check: is needed? this.move contains copy_attributes
+								Files.setPosixFilePermissions(this.outputPath, filePerms);
+							} catch (IOException e) {
+								log.warn(e.toString());
+								log.warn(String.format("Failed in setting perms %s for file: %s", filePerms, this.outputPath));
+								// log.warn(String.format("filePerms: %s", filePerms));
+								// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms for file: %s", this.outputPath));
+								// log.error(String.format("Failed in moving tmp file: %s", this.outputPath));
+							}
+						}
+
+
+						// this.result = this.outputPath;
 					}
-
-
-					// this.result = this.outputPath;
-				}
-				else {
-					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
-					// server Log.fail(info.getFilename());
-					// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
-					if (instructions.isSet(Instructions.GENERATE)) {
-						try {
-							log.warn(String.format("Failed in generating: %s", info));
-							if (outputPathTmp.toFile().exists())
-								this.delete(this.outputPathTmp);
-						} catch (Exception e) {
-							/// TODO: is it a fatal error if a product defines its input wrong?
-							log.error(e.getMessage()); // RETURN?
-							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
+					else {
+						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
+						// server Log.fail(info.getFilename());
+						// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
+						if (instructions.isSet(Instructions.GENERATE)) {
+							try {
+								log.warn(String.format("Failed in generating: %s", info));
+								if (outputPathTmp.toFile().exists())
+									this.delete(this.outputPathTmp);
+							} catch (Exception e) {
+								/// TODO: is it a fatal error if a product defines its input wrong?
+								log.error(e.getMessage()); // RETURN?
+								log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
+							}
 						}
 					}
+
 				}
+
+
 
 			}
 
 			if (instructions.isSet(ActionType.INPUTLIST) && !instructions.involves(ActionType.GENERATE)) {
 				log.note("Input list: requested");
-				result = inputs;
+				// result = inputs;
 			}
 
 
@@ -942,10 +1059,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 
-			if (graph != null) {
-				serverGraph.importGraph(graph);
-			}
-			// return true; // SEMANTICS?
+			//if (graph != null) {
+			// serverGraph.importGraph(graph); importNode?
+
+			//}
+
 		}
 
 
@@ -990,9 +1108,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.special("PATH=" + PATH);
 			}
 
-			if (!this.retrievedInputs.isEmpty()) {
-				env.put("INPUTKEYS", String.join(",", this.retrievedInputs.keySet().toArray(new String[0])));
-				env.putAll(this.retrievedInputs);
+			if (!this.inputTasksNEW.isEmpty()) {
+				env.put("INPUTKEYS", String.join(",", this.inputTasksNEW.keySet().toArray(new String[0])));
+				// FIX: String.join(",", retrievedInputs.keySet());
+				// env.putAll(this.inputTasksNEW);
+				for (Map.Entry<String,Task> entry: inputTasksNEW.entrySet()){
+					String key = entry.getKey();
+					Task inputTask = entry.getValue();
+					if (inputTask.outputPath != null){
+						env.put(key,inputTask.outputPath);
+					}
+
+				}
 			}
 
 			env.putAll(this.info.directives);
@@ -1010,7 +1137,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		//final long creationTime;
-
+		/*
 		public Graph addGraph(String name){
 			this.graph = new Graph(name);
 			Graph.Node nodeDef = graph.addNode("node");
@@ -1018,15 +1145,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			nodeDef.attributes.put("style", "filled");
 			return this.graph;
 		}
+		 */
+
 
 		public Path writeGraph() {
 			Path graphFile = CACHE_ROOT.resolve(relativeGraphPath);
 			log.special(String.format("Writing graph to file: %s", graphFile));
+			Graph graph = this.getGraph(null);
 			try {
 				Path graphDir = graphFile.getParent();
 				FileUtils.ensureWritableDir(graphDir, GROUP_ID, dirPerms);
-				// ensureDir(cacheRoot, relativeSystemDir);
-				// ensureFile(cacheRoot, relativeGraphPath);
 				graph.dotToFile(graphFile.toString());
 				graph.dotToFile(graphFile.toString()+".dot"); // debugging
 				Files.setPosixFilePermissions(graphFile, filePerms);
@@ -1124,7 +1252,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		final int count = productRequests.size();
 
 		if (count == 0) {
-			//log.info(String.format("Inits (%d) tasks "));
 			return tasks;
 		}
 
@@ -1135,18 +1262,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				instructions, instructions.regenerateDepth, directives));
 		 */
 
-		/// Check COPY & LINK targets (must be directories, if several tasks)
+		/// Check COPY & LINK targets: must be directories, if several tasks (several files produced)
 		if (count > 1) {
 
 			for (Path p : instructions.copies) {
 				if (!p.toFile().isDirectory()) {
-					log.warn(String.format("Several tasks (%d), but single COPY target: %s", count, p));
+					log.warn(String.format("Several tasks (%d), but single COPY file target: %s", count, p));
 				}
 			}
 
 			for (Path p : instructions.links) {
 				if (!p.toFile().isDirectory()) {
-					log.warn(String.format("Several tasks (%d), but single LINK target: %s", count, p));
+					log.warn(String.format("Several tasks (%d), but single LINK file target: %s", count, p));
 				}
 			}
 
@@ -1196,13 +1323,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 			catch (ParseException e) {
-				//System.err.println(String.format("EROR here: %s = %s", key, value));
-
-				// TODO: is it a fatal error if a product defines its input wrong? Answer: YES
+				// A fatal error if a product defines its input wrong? Probably yes...
 				log.warn(String.format("Could not parse product: %s(%s)", key, value));
-				//log.warn(e.getMessage());
 				log.log(HttpLog.HttpStatus.NOT_ACCEPTABLE, e.getLocalizedMessage());
-				//log.error(e.getLocalizedMessage()); // RETURN?
 			}
 			catch (Exception e) {
 				// System.err.println(String.format("EROR2 here: %s = %s", key, value));
@@ -1218,7 +1341,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return tasks;
 	}
 
-	public Map<String,Task> runTasks(Map<String,Task> tasks, HttpLog log){
+	public Map<String,Task> runTasks(Map<String,Task> tasks, HttpLog log) {
 
 		if (tasks.isEmpty()){
 			//log.debug("No subtasks");
@@ -1255,7 +1378,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				else {
 					log.info(String.format("Starting task '%s': %s (in main thread)", key, task));
-
 					task.execute();
 				}
 
@@ -1268,6 +1390,60 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.info(String.format("Final status: %s", task.log.indexedState));
 			//log.log("test");
 			//task.close(); ?
+
+
+			/*
+			Graph.Node node = null;
+			Graph.Node.Link link = null;
+			//if (parentNode != null) {
+			if (false) {
+
+				node = task.getGraphNode(task.graph);
+				node.attributes.put("fillcolor", "#40ff44"); // ""lightgreen");
+				node.attributes.put("href", String.format(
+						"?instructions=GENERATE,STATUS&amp;product=%s",
+						task.info.getFilename()));
+				node.attributes.put("class", "clickable");
+
+				link = parentNode.addLink(node);
+				//System.err.println("LINK = " + parentNode.getId() + " -> " + node.getId());
+				//System.err.println(parentNode.links);
+				//graph.addLink(node, node);
+				// link.attributes.put("label", key);
+				// link.attributes.put("title", "avain_"+key); // SVG only
+			}
+			 */
+
+			// FIX: check unneeded errors if only INPUTLIST requested
+			if (task.result != null) {
+				String r = task.result.toString();
+				log.note(String.format("Retrieved: %s = %s", key, r));
+				// inputStats.put(key, task.info.getID());
+				/*
+				if (link != null) {
+					if (task.log.indexedState.index > 300) {
+						link.attributes.put("style", "dashed");
+					}
+				}
+				 */
+				if (task.log.indexedState.index > 300) {
+					log.warn("Errors in input generation: " + task.log.indexedState.getMessage());
+				}
+			} else {
+				log.warn(task.log.indexedState.getMessage());
+				log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, task));
+				log.reset(); // Forget that anyway...
+				/*
+				if (link != null) {
+					node.attributes.put("fillcolor", "#ffc090"); // ""orange");"#ffb080"
+					link.attributes.put("color", "#800000");
+					link.attributes.put("style", "dashed");
+				}
+
+				 */
+			}
+
+
 		}
 
 		return tasks;
@@ -1859,14 +2035,17 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		Map<String, Task> tasks = server.prepareTasks(batchConfig, log);
 
+		Graph graph = new Graph("ProductServer");
 		if (batchConfig.instructions.isSet(ActionType.STATUS)){
-			Graph graph = null;
+
 			for (Entry<String,Task> entry : tasks.entrySet()) {
 				Task task = entry.getValue();
+				/*
 				if (graph == null){
 					graph = task.addGraph("ProductServer");
 				}
-				task.graph = graph;
+				 */
+				//task.graph = graph;
 			}
 		}
 
@@ -1891,6 +2070,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.info(String.format("Status:\t%s", task.log.indexedState.getMessage()));
 			}
 
+			task.getNode(serverGraph);
+
 			/*
 			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
 			if (task.log.logFile != null) {
@@ -1912,14 +2093,26 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			if (task.instructions.isSet(ActionType.INPUTLIST)){
 
+				System.out.println();
 				for (Map.Entry<String,String> ec: task.inputs.entrySet()) {
 					System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
 				}
 
 			}
 
-			if (task.instructions.isSet(ActionType.STATUS) && (task.graph != null)){
-				task.writeGraph();
+			if (task.instructions.isSet(ActionType.STATUS)){
+				/*
+				Graph g = task.getGraph(null);
+				g.toStream(System.out);
+				try {
+					g.dotToFile("graph.svg");
+				} catch (IOException | InterruptedException e) {
+					log.experimental(e.getMessage());
+				}
+
+				 */
+				Path p = task.writeGraph();
+				log.experimental(String.format("Wrote graph %s", p));
 			}
 
 			/*
@@ -1935,10 +2128,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		if (batchConfig.instructions.isSet(ActionType.STATUS)){
 			//
+			System.out.println();
 			for (Entry<String,Object> entry: server.setup.entrySet()) {
 				System.out.printf("%s = %s %n", entry.getKey(), entry.getValue());
 			}
+
 		}
+
+
 
 
 

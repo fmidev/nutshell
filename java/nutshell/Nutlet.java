@@ -395,7 +395,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		if (task.instructions.isSet(Instructions.STATUS)){
-			task.addGraph("ProductServer.Task" + task.getTaskId());
+			//task.addGraph("ProductServer.Task" + task.getTaskId());
 		}
 
 		//String[] directives = request.getParameterValues("directives");
@@ -543,7 +543,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
 				}
 
-				if ((task.relativeGraphPath != null) && (task.graph != null)){
+				if ((task.relativeGraphPath != null)){ //  && (task.graph != null)
 
 					task.log.debug("Writing graph to SVG file");
 					Path graphPath = task.writeGraph();
@@ -592,8 +592,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					}
 					catch (Exception e){
 
-
-
 						Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
 						html.appendAnchor("cache/"+task.relativeGraphPath, task.relativeGraphPath.getFileName().toString());
 
@@ -601,7 +599,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						// Comments! Consider tail?
 						try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 							PrintStream printStream = new PrintStream(os);
-							task.graph.toStream(printStream);
+							Graph graph = task.getGraph(null);
+							graph.toStream(printStream);
 							printStream.append("--------------");
 							e.printStackTrace(printStream);
 							// html.appendComment(os.toString("UTF8")); ILLEGALS
