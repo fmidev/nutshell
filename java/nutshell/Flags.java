@@ -307,9 +307,16 @@ public class Flags {
     /**
      * @see #add(int) .
      * @param i
-     */
     public void set(int i){
         value = i;
+    }
+     */
+
+    public void set(Integer... integers){
+        value = 0;
+        for (Integer i: integers) {
+            add(i);
+        }
     }
 
     /**
@@ -323,6 +330,7 @@ public class Flags {
             add(1<<e.ordinal());
         }
     }
+
 
     /** Copy bits from another Flags object.
      *

@@ -142,7 +142,10 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
         super(Instructions.class);
     }
 
-
+    public Instructions(Instructions instructions){
+        super(Instructions.class);
+        this.value = instructions.value;
+    }
     public Instructions(int a){
         super(Instructions.class);
         this.value = a;

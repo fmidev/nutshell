@@ -118,12 +118,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			if (graph == null) {
 				graph = new Graph(this.info.PRODUCT_ID);
+				graph.attributes.put("label", String.format("NutShell request: &s", this.toString()));
 			}
 
 			// Ensure this task (and its descendants) on the Graph.
-			Graph.Node node = getNode(graph);
-			node.attributes.put("style", "filled");
-			node.attributes.put("fillcolor", "lightblue");
+			Graph.Node node = getGraphNode(graph);
+			//node.attributes.put("style", "filled");
+			//node.attributes.put("fillcolor", "lightblue");
 
 			return graph;
 		}
@@ -133,21 +134,50 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param graph
 		 * @return
 		 */
-		public Graph.Node getNode(Graph graph){
+		public Graph.Node getGraphNode(Graph graph){
 			if (graph == null){
 				graph = new Graph("request: " + this.info.PRODUCT_ID);
 			};
 			Graph.Node node = graph.getNode(this.info.PRODUCT_ID);
+			node.attributes.put("style", "filled");
 			// if (result != null){
-			if (result instanceof Path){
-				node.attributes.put("href", String.format(
-						"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
+			File p = outputPath.toFile();
+			if (p.exists()){
+				String color = "orange"; // ripe fruit
+				long ageSeconds = (System.currentTimeMillis() - p.lastModified())/1000;
+				if (ageSeconds < 60){ // 1 min
+					color = "#60ff30";
+				}
+				else if (ageSeconds < 300){ // 5 mins
+					color = "#90f000";
+				}
+				else if (ageSeconds < 3600){ // 1 hour
+					color = "#b0f030";
+				}
+				else if (ageSeconds < 86400){ // 24 hours = 60*60*24
+					color = "#c0d030";
+				}
+				node.attributes.put("color", color);
 			}
+			else {
+				node.attributes.put("color", "gray");
+			}
+
+			node.attributes.put("comment", log.indexedState.getMessage().replace('"','\''));
+
+			//if (result instanceof Path){
+			Instructions instr = new Instructions();
+			instr.set(ActionType.STATUS, ActionType.INPUTLIST, ActionType.MAKE);
+			//instr.add(instructions.value & (ActionType.GENERATE | ActionType.MAKE));
+			node.attributes.put("href", String.format(
+					"?instructions=%s&amp;product=%s", instr, info.getFilename()));
+					//"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
+			//}
 
 
 			for (Map.Entry<String,Task> entry: inputTasksNEW.entrySet()) {
 				Task t = entry.getValue();
-				Graph.Node n = t.getNode(graph);
+				Graph.Node n = t.getGraphNode(graph);
 				//System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
 				Graph.Node.Link link = node.addLink(n);
 				// TODO: Style
@@ -172,17 +202,21 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 					else {
 						link.attributes.put("color", "green");
-						String label = t.result.toString();
+						String label = ""+t.log.indexedState.getIndex(); // t.result.toString();
 						if (t.instructions.isSet(ActionType.GENERATE)){
 							label = "GENERATE";
-							link.attributes.put("width", "2");
+							link.attributes.put("style", "bold");
 						}
+						else {
+						}
+						/*
 						else if (t.instructions.isSet(ActionType.MAKE)){
-							label = "MAKE";
+							label = ""+t.log.indexedState.getIndex(); //"MAKE";
 						}
 						else if (t.instructions.isSet(ActionType.EXISTS)){
-							label = "EXISTS";
-						}
+							label = ""+t.log.indexedState.getIndex();
+							link.attributes.put("style", "dotted");
+						}*/
 						link.attributes.put("label", label);
 					}
 					//link.attributes.put("", "");
@@ -2070,7 +2104,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.info(String.format("Status:\t%s", task.log.indexedState.getMessage()));
 			}
 
-			task.getNode(serverGraph);
+			task.getGraphNode(serverGraph);
 
 			/*
 			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
