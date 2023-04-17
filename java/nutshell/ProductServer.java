@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(2, 9);
+		super.version = Arrays.asList(3, 0);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -358,7 +358,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 
 		public String getStatus() {
-			return (String.format("%s[%d] %s [%s] {%s}", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
+			return (String.format("%s[%d] %s [%s] %s", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
 		}
 
 		// Consider moving these to @ProductServerBase, with Log param.
@@ -538,7 +538,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.move != null)
 				instructions.add(ActionType.MAKE);
 
-			if (instructions.involves(PostProcessing.LATEST|PostProcessing.SHORTCUT))
+			if (instructions.involves(PostProcessing.STORE|PostProcessing.LATEST|PostProcessing.SHORTCUT))
 				instructions.add(ActionType.MAKE);
 
 
@@ -559,8 +559,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			log.debug(String.format("Instructions (updated): %s", instructions));
 
-			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
-			log.log(String.format("Starting: %s ", getStatus())); //  this.toString()
+			//log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
+			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting: %s ", getStatus())); //  this.toString()
 
 
 			/// Main DELETE operation
@@ -756,6 +756,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					//inputInstructions.add(Instructions.GENERATE);
 				}
 
+				if (instructions.isSet(Instructions.PARALLEL)){
+					inputInstructions.add(ActionType.PARALLEL);
+					//inputInstructions.add(Instructions.GENERATE);
+				}
+
 
 				if (instructions.regenerateDepth > 0) {
 					inputInstructions.regenerateDepth = instructions.regenerateDepth - 1;
@@ -790,7 +795,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				 */
 
-				serverLog.special("runTasks:" + inputTasks.keySet());
+				if (!inputTasks.keySet().isEmpty())
+					serverLog.debug("runTasks:" + inputTasks.keySet());
 				runTasks(inputTasks, log);
 
 
@@ -833,7 +839,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						}
 						*/
 						if (inputTask.log.indexedState.index > 300) {
-							log.warn("Errors in input generation: " + inputTask.log.indexedState.getMessage());
+							log.warn(String.format("Errors in generating input of: %s %s", key, inputTask.log.indexedState.getMessage()));
 						}
 					} else {
 						log.warn(inputTask.log.indexedState.getMessage());
@@ -890,7 +896,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						/// Override
 						log.setStatus(Log.Status.OK);
 						log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
-						//serverLog.success(info.getFilename());
+						serverLog.success(info.getFilename());
 
 						// Let's take this slowly...
 						try {
@@ -1053,7 +1059,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						try {
 							this.move(this.outputPath, this.instructions.move);
 							this.result = this.instructions.move;
-							log.log(HttpLog.HttpStatus.MOVED_PERMANENTLY, String.format("Moved: %s", this.instructions.move));
+							//log.log(HttpLog.HttpStatus.MOVED_PERMANENTLY, String.format("Moved: %s", this.instructions.move));
+							log.log(HttpLog.HttpStatus.OK, String.format("Moved: %s", this.instructions.move));
 						} catch (IOException e) {
 							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Moving failed: %s", this.instructions.move));
 							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
@@ -1382,7 +1389,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return tasks;
 		}
 
-		log.note(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
+		log.note (String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
+		//log.debug(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 
 		/// Start as threads, if requested
 		for (Entry<String,Task> entry : tasks.entrySet()){
@@ -1799,20 +1807,27 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
-
+		/*
 		registry.add(new Parameter<Instructions>("regenerate",
-				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
+				"Deprecating, use --depth instead.",
+				batchConfig.instructions, "regenerateDepth"));
+		 */
+
+		registry.add(new Parameter<Instructions>("depth",
+				"Cache clearance depth (0MAKE, 1GENERATE, N...: remake inputs)",
 				batchConfig.instructions, "regenerateDepth"));
 
 
-		registry.add(new Parameter.Single("regenerate2",
-				"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
+		registry.add(new Parameter.Single("regenerate",
+				"Deprecating, use --depth instead.",
+				//"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
 				"depth"){
 
 			public int depth;
 
 			@Override
 			public void exec() {
+				serverLog.deprecated("Use --depth instead.");
 				batchConfig.instructions.regenerateDepth = depth;
 			}
 		});
@@ -2086,7 +2101,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		server.runTasks(tasks, log);
 
 		if (log.getStatus() <= Log.Status.ERROR.level){
-			log.warn("Errors: %d " + log.getStatus());
+			log.warn(String.format("Errors: %d ", log.getStatus()));
 			++result;
 		}
 

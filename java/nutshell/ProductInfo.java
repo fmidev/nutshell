@@ -33,7 +33,8 @@ class ProductInfo extends ProductParameters {
 
 	// Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
 	protected static final Pattern filenameRe =
-			Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
+			//Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
+			Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
 	// re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
 
 
@@ -104,6 +105,18 @@ class ProductInfo extends ProductParameters {
 		return directives;
 	}
 
+	protected long getTime(String timestamp) throws ParseException {
+		if (timestamp.isEmpty() || timestamp.equals("LATEST") || timestamp.equals("TIMESTAMP")) {
+			return 0L;
+		} else {
+			for (TimeResolution t : TimeResolution.values()) {
+				if (timestamp.length() == t.length) {
+					return t.timeStampFormat.parse(timestamp).getTime();
+				}
+			}
+		}
+		return -1;
+	}
 
 
 	public ProductInfo(String productStr) throws ParseException { //,Log log){
@@ -127,21 +140,36 @@ class ProductInfo extends ProductParameters {
 
 
 		/// Main parsing
-		final Matcher m = filenameRe.matcher(filename); // filenameUncompressed
+		final Matcher m = filenameRe.matcher(filename);
 		if (m.matches()) {
 
 			TIMESTAMP = m.group(2) == null ? "" : m.group(2);
 
-			// TODO: Handle LATEST and TIMESTAMP
+			TIMESTAMP2 = m.group(4) == null ? "" : m.group(4);
+
+			time  = getTime(TIMESTAMP);
+			time2 = getTime(TIMESTAMP2);
+
+			/*
 			if (TIMESTAMP.isEmpty() || TIMESTAMP.equals("LATEST") || TIMESTAMP.equals("TIMESTAMP")) {
 				time = 0L;
 			} else {
 				time = timeStampFormat.parse(TIMESTAMP).getTime();
 			}
 
-			PRODUCT_ID = m.group(3).replace('-', '.');
+			for (TimeResolution t: TimeResolution.values()){
+				if (TIMESTAMP.length() == t.length){
+					t.timeStampFormat.parse(TIMESTAMP).getTime();
+				}
+			}
+			 */
+
+
+			//PRODUCT_ID = m.group(3).replace('-', '.');
+			PRODUCT_ID = m.group(5).replace('-', '.');
 			Map<String, Object> paramLink = INPUT_PARAMETERS;
-			String param = m.group(5);
+			//String param = m.group(5);
+			String param = m.group(7);
 			// int index=0; // ordered params?
 
 			if (param != null){
@@ -160,7 +188,7 @@ class ProductInfo extends ProductParameters {
 				}
 			}
 
-			FORMAT = m.group(6);
+			FORMAT = m.group(8);
 			if (COMPRESSION.isEmpty())
 				EXTENSION = FORMAT;
 			else

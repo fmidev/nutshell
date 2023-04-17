@@ -12,9 +12,33 @@ import java.util.*;
  */
 public class ProductParameters { // consider derived classes, like DynamicProductParameters
 
+    public enum TimeResolution {
+        YEAR(4),
+        MONTH(6),
+        DAY(8),
+        HOUR(10),
+        MINUTE(12);
+
+        int length;
+        //String format;
+        DateFormat timeStampFormat;
+        TimeResolution(int length){
+            this.length = length;
+            //this.format = fullFormat.substring(0, length);
+            timeStampFormat = new SimpleDateFormat("YYYYmmddHHmm".substring(0, length));
+        }
+
+        //protected
+        //static String fullFormat = "YYYmmddHHmm";
+
+    }
     /** Data and time formatted as @timeStampFormat or "LATEST".
      */
     public String TIMESTAMP;
+
+    /** Optional. Secondary time, if applicable.
+     */
+    public String TIMESTAMP2;
 
     /**
      *   Note: in future versions, this may change. Products may have time resolution of days or seconds.
@@ -26,6 +50,11 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
      *
      */
     protected long time;
+
+    /** Secondary time (like end time) of the product in Unix seconds.
+     *
+     */
+    protected long time2;
 
     /// Product-specific parameters
     /**
