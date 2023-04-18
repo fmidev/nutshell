@@ -114,7 +114,7 @@ class ProductInfo extends ProductParameters {
 		else {
 			for (TimeResolution t : TimeResolution.values()) {
 				if (timestamp.length() == t.length) {
-					System.err.println(String.format("TimeResolution t=%s %s", t, t.timeStampFormat.toString()));
+					// System.err.println(String.format("TimeResolution t=%s %s", t, t.timeStampFormat.toString()));
 					return t.timeStampFormat.parse(timestamp).getTime();
 				}
 			}
