@@ -1,7 +1,9 @@
 package nutshell;
 
 
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -108,12 +110,16 @@ class ProductInfo extends ProductParameters {
 	protected long getTime(String timestamp) throws ParseException {
 		if (timestamp.isEmpty() || timestamp.equals("LATEST") || timestamp.equals("TIMESTAMP")) {
 			return 0L;
-		} else {
+		}
+		else {
 			for (TimeResolution t : TimeResolution.values()) {
 				if (timestamp.length() == t.length) {
+					System.err.println(String.format("TimeResolution t=%s %s", t, t.timeStampFormat.toString()));
 					return t.timeStampFormat.parse(timestamp).getTime();
 				}
 			}
+			//final DateFormat timeStampFormat = new SimpleDateFormat("YYYYmmddHHMM");
+			// return timeStampFormat.parse(timestamp).getTime();
 		}
 		return -1;
 	}
@@ -149,6 +155,7 @@ class ProductInfo extends ProductParameters {
 
 			time  = getTime(TIMESTAMP);
 			time2 = getTime(TIMESTAMP2);
+
 
 			/*
 			if (TIMESTAMP.isEmpty() || TIMESTAMP.equals("LATEST") || TIMESTAMP.equals("TIMESTAMP")) {

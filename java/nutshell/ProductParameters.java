@@ -24,8 +24,8 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
         DateFormat timeStampFormat;
         TimeResolution(int length){
             this.length = length;
-            //this.format = fullFormat.substring(0, length);
-            timeStampFormat = new SimpleDateFormat("YYYYmmddHHmm".substring(0, length));
+            //this.format = fullFormat.substring(0, length); // YYYYmmddHHMM
+            timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm".substring(0, length));
         }
 
         //protected

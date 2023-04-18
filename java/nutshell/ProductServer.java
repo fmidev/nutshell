@@ -47,7 +47,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 0);
+		super.version = Arrays.asList(3, 1);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -118,7 +118,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			if (graph == null) {
 				graph = new Graph(this.info.PRODUCT_ID);
-				graph.attributes.put("label", String.format("NutShell request: &s", this.toString()));
+				graph.attributes.put("label", String.format("NutShell request: %s", this.toString()));
 			}
 
 			// Ensure this task (and its descendants) on the Graph.
@@ -1876,6 +1876,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					for (String s : array) {
 						System.out.println(s);
 					}
+					System.out.println(String.format("time : %d", product.info.time ));
+					System.out.println(String.format("time2: %d", product.info.time2));
 				}
 				catch (ParseException e) {
 					log.fail(e.getMessage());
