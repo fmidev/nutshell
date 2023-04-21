@@ -99,6 +99,10 @@ class ProductInfo extends ProductParameters {
 						}
 
 					}
+					else {
+						directives.put(key, "True");
+					}
+
 
 				}
 			}

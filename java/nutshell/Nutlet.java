@@ -398,7 +398,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//task.addGraph("ProductServer.Task" + task.getTaskId());
 		}
 
-		//String[] directives = request.getParameterValues("directives");
+		MapUtils.setEntries(httpRequest.getParameterValues("directives"), "True", task.info.directives);
 		task.info.setDirectives(httpRequest.getParameterMap());
 		//task.log.setVerbosity(log.verbosity);
 
@@ -636,6 +636,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 			map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
 			map.put("actions", batchConfig.instructions);
+			// task.info.directives.put("TEST", "value");
 			map.put("directives", task.info.directives);
 
 

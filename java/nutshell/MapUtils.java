@@ -159,19 +159,32 @@ public class MapUtils {
 	 * @return map
 	 */
 	static
-	public Map<String,String> setEntries(String s, String separatorRegExp, String defaultValue, Map<String,String> map){
+	public Map<String,String> setEntries(String entries, String separatorRegExp, String defaultValue, Map<String,String> map){
+		if (entries != null)
+			return setEntries(entries.split(separatorRegExp), defaultValue, map);
+		else
+			return map;
+	}
 
-		for (String d : s.split(separatorRegExp)) { // Note: regexp
-			int j = d.indexOf('=');
-			if (j > 0) {
-				map.put(d.substring(0, j).trim(), d.substring(j + 1).trim());
-			} else {
-				map.put(d, defaultValue);
+	static
+	public Map<String,String> setEntries(String[] entries, String defaultValue, Map<String,String> map){
+
+		if (entries != null){
+
+			if (map == null)
+				map = new HashMap<>();
+
+			for (String d: entries) {
+				int j = d.indexOf('=');
+				if (j > 0) {
+					map.put(d.substring(0, j).trim(), d.substring(j + 1).trim());
+				} else {
+					map.put(d, defaultValue);
+				}
 			}
+
 		}
-
 		return map;
-
 	}
 
 
