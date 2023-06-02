@@ -22,13 +22,14 @@ public class Config {
     static
     protected final Pattern commentPattern = Pattern.compile("^([^%#]*)[%#](.*)$");
 
-    /**
+    /** Syntax for assignment lines of general type "KEY=VALUE"
+     *
      *  Accepts:
      * 	VARIABLE_NAME=VALUE
      * 	VARIABLE_NAME='VALUE'
      * 	VARIABLE_NAME="VALUE"
      *
-     *  also:
+     *  Also:
      *  VARIABLE[KEY]=VALUE
      *  VARIABLE[KEY2]=VALUE2
      *
