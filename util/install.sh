@@ -72,6 +72,15 @@ else
 fi
 
 
+if [ $NUTSHELL_VERSION == 'demo' ]; then
+    vt100echo cyan  "# Install demo products (product generators) only"	
+    # cp -vaux  demo/products/demo /opt/products/
+    cp -vaux  demo/products/demo $PRODUCT_ROOT/
+    exit $?
+fi
+
+
+
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
     show_variable HTTP_ROOT
