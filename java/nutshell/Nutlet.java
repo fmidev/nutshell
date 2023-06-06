@@ -543,6 +543,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
 				}
 
+				if (task.log.getStatus() > Log.Status.ERROR.level){
+					// TODO: draw graph only...
+					html.appendTag(SimpleHtml.Tag.PRE, "See above message. (Less important debugging follows.)");
+				}
+
 				if ((task.relativeGraphPath != null)){ //  && (task.graph != null)
 
 					task.log.debug("Writing graph to SVG file");

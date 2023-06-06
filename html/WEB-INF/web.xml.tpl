@@ -49,7 +49,7 @@
     <!-- NEW -->
     <init-param>
       <param-name>HTTP_ROOT</param-name>
-      <param-value>${NUTSHELL_ROOT}</param-value>
+      <param-value>${HTTP_ROOT}</param-value>
     </init-param>
 
     <init-param>

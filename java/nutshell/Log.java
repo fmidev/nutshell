@@ -483,7 +483,7 @@ public class Log implements AutoCloseable {
 		this.status = status.getIndex();
 	}
 
-	/** Return current status.
+	/** Return current status as a numeric value of enum type @{@link Log.Status}
 	 *
 	 * @return
 	 */

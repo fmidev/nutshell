@@ -139,6 +139,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     vt100echo green "# Setting WEB-INF/web.xml"
     WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
     export NUTSHELL_ROOT
+    export HTTP_ROOT
     export HOSTNAME    
     cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
 
@@ -155,6 +156,8 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 	#mv -v web.xml.new web.xml
 	popd &> /dev/null
 	mv -v $WEB_XML.new $WEB_XML
+    else
+	mv -v $WEB_XML.new $WEB_XML
     fi
 
     #<!-- Tomcat 7: -->
@@ -168,7 +171,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
    
     NUTSHELL_XML=$TOMCAT_CONF_DIR/nutshell.xml
     show_variable NUTSHELL_XML
-    if [ -w $NUTSHELL_XML/ ]; then
+    if [ -w $NUTSHELL_XML ]; then
 	cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
     else
 	NUTSHELL_XML_NEW=./html/nutshell.xml.new
@@ -180,9 +183,10 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 	NUTSHELL_XML=$NUTSHELL_XML_NEW
     fi
 
-    vt100echo green "Try Tomcat restart: "
+    vt100echo green "OK! Now restart Tomcat. E.g. using one of the following commands: "
     echo "#   sudo /etc/init.d/tomcat8 restart"
     echo "#   sudo systemctl restart httpd"
+    echo "#   sudo systemctl restart tomcat9"
     echo
     #echo "# For local (script) installation: "
     #echo "#   [sudo] NUTSHELL_VERSION=java util/install-local.sh"

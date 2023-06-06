@@ -1,6 +1,7 @@
 package nutshell;
 
 
+import java.io.FilePermission;
 import java.io.IOException;
 import java.nio.file.*;
 //import java.nio.file.attribute.FileAttribute;
@@ -70,16 +71,30 @@ public class FileUtils {
         return Paths.get("");
     };
 
-
     /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
      *
      * @param path
      * @param groupId
      * @param permissions
+     * @param  stripFilename - if the leaf resembles a filename, skip creating it as a directory.
      * @throws IOException
      */
     static
     public int ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
+        return ensureWritablePath(path, groupId, permissions, false);
+    }
+
+
+    /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
+         *
+         * @param path
+         * @param groupId
+         * @param permissions
+         * @param  stripFilename - if the leaf resembles a filename, skip creating it as a directory.
+         * @throws IOException
+         */
+    static
+    public int ensureWritablePath(Path path, int groupId, Set<PosixFilePermission> permissions, boolean stripFilename) throws IOException {
 
         int experimentalResult = 0;
 
@@ -90,7 +105,18 @@ public class FileUtils {
 
         // Consider constructing error string (of GID and perms)
         if (!Files.exists(path)){
-            experimentalResult |= ensureWritableDir(path.getParent(), groupId, permissions);
+
+            // If looks like a filename, skip creating it as a dir.
+            if (stripFilename) {
+                Matcher m = filePathRe.matcher(path.getFileName().toString());
+                if (m.matches()) {
+                    String file = m.group(m.groupCount()-1);
+                    if (file != null)
+                        return ensureWritablePath(path.getParent(), groupId, permissions, false);
+                }
+            }
+
+            experimentalResult |= ensureWritablePath(path.getParent(), groupId, permissions, false);
             try {
                 Files.createDirectory(path); // potentially throws IOException
             }
@@ -121,15 +147,26 @@ public class FileUtils {
             experimentalResult |= Permission.WRITE; // or "ALL" ?
         }
 
+        /*
+        Set<?> perms = Files.getPosixFilePermissions(path);
+        if (perms.contains(PosixFilePermission.OWNER_WRITE) ||
+            perms.contains(PosixFilePermission.GROUP_WRITE) ||
+            perms.contains(PosixFilePermission.OTHERS_WRITE)
+        ){
+            // OK
+        }
+        else {
+         */
         if (!Files.isWritable(path)){
             experimentalResult |= Permission.WRITE;
-            throw new IOException(String.format("Dir %s owned by %s is not writable by %s: %s",
+            throw new IOException(String.format("Dir %s owned by %s is unwritable by %s: %s",
                     path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }
 
         return experimentalResult;
 
     }
+
 
     static
     public void ensureWritableFile(Path path, int groupId, Set<PosixFilePermission> filePerms, Set<PosixFilePermission> dirPerms) throws IOException {
@@ -146,26 +183,6 @@ public class FileUtils {
             // Files.setPosixFilePermissions(path, filePerms);
         }
 
-        /*
-        try {
-            //System.err.println(String.format("Trying to set groupID: %d for %s", groupId, path));
-            Files.setAttribute(path, "unix:gid", groupId);
-        }
-        catch (IOException e){
-            //System.err.println(e);
-            // May be group writable, just altering forbidden?
-        }
-
-        try {
-            //System.err.println(String.format("Trying to set filePerms: %s ", filePerms));
-            Files.setPosixFilePermissions(path, filePerms);
-        }
-        catch (IOException e){
-            //System.err.println(e);
-            // May be group writable, just altering forbidden?
-        }
-        */
-
         try {
             ensureGroup(path, groupId, filePerms);
         }
@@ -180,20 +197,8 @@ public class FileUtils {
 
     static
     public void ensureGroup(Path path, int groupId, Set<PosixFilePermission> perms) throws IOException {
-
-        /*
-        try {
-            //System.err.println(String.format("Trying to set groupID: %d for %s", groupId, path));
-            Files.setAttribute(path, "unix:gid", groupId);
-        }
-        catch (IOException e){
-            System.err.println(e);
-            // May be group writable, just altering forbidden?
-        }
-        */
         Files.setAttribute(path, "unix:gid", groupId);
         Files.setPosixFilePermissions(path, perms);
-
     }
 
     /*

@@ -394,8 +394,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 *
 		 * @param src - original, physical file
 		 * @param dst - link to be created
-		 * @param force
-		 * @return
+		 * @param force - overwrite link or file
+		 * @return successfully generated path
 		 * @throws IOException
 		 */
 		public Path link(Path src, Path dst, boolean force) throws IOException {
@@ -427,7 +427,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			Path result = Files.createSymbolicLink(dst, src);
 			try {
-				FileUtils.ensureGroup(result, GROUP_ID, filePerms);
+				FileUtils.ensureGroup(result, GROUP_ID, filePerms); // this may always fail in Unix...
 			}
 			catch (Exception e) {
 				log.note(String.format("Failed setting GROUP_ID=%d %s ", GROUP_ID, filePerms));
@@ -1035,6 +1035,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					for (Path path : this.instructions.copies) {
 						try {
+							if (path.startsWith(CACHE_ROOT)){
+								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms, true);
+							}
 							this.copy(this.outputPath, path); // Paths.get(path)
 							log.ok(String.format("Copied: %s", path));
 							// System.out.println("Copy "+path);
@@ -1047,6 +1050,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					for (Path path : this.instructions.links) {
 						try {
+							if (path.startsWith(CACHE_ROOT)){
+								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms, true);
+							}
 							this.link(this.outputPath, path, false); // Paths.get(path)
 							log.ok(String.format("Linked: %s", path));
 						} catch (IOException e) {
@@ -1057,9 +1063,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					if (this.instructions.move != null) {
 						try {
+							if (this.instructions.move.startsWith(CACHE_ROOT)){
+								FileUtils.ensureWritablePath(this.instructions.move, GROUP_ID, dirPerms, true);
+							}
 							this.move(this.outputPath, this.instructions.move);
 							this.result = this.instructions.move;
-							//log.log(HttpLog.HttpStatus.MOVED_PERMANENTLY, String.format("Moved: %s", this.instructions.move));
 							log.log(HttpLog.HttpStatus.OK, String.format("Moved: %s", this.instructions.move));
 						} catch (IOException e) {
 							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Moving failed: %s", this.instructions.move));
@@ -1389,7 +1397,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return tasks;
 		}
 
-		log.note (String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
+		log.note(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 		//log.debug(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 
 		/// Start as threads, if requested
@@ -1407,9 +1415,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 			}
 		}
-
-
-		// wait();
 
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
@@ -1430,44 +1435,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.warn(String.format("Pending file? : ", task.outputPathTmp));
 			}
 			log.info(String.format("Final status: %s", task.log.indexedState));
-			//log.log("test");
-			//task.close(); ?
-
-
-			/*
-			Graph.Node node = null;
-			Graph.Node.Link link = null;
-			//if (parentNode != null) {
-			if (false) {
-
-				node = task.getGraphNode(task.graph);
-				node.attributes.put("fillcolor", "#40ff44"); // ""lightgreen");
-				node.attributes.put("href", String.format(
-						"?instructions=GENERATE,STATUS&amp;product=%s",
-						task.info.getFilename()));
-				node.attributes.put("class", "clickable");
-
-				link = parentNode.addLink(node);
-				//System.err.println("LINK = " + parentNode.getId() + " -> " + node.getId());
-				//System.err.println(parentNode.links);
-				//graph.addLink(node, node);
-				// link.attributes.put("label", key);
-				// link.attributes.put("title", "avain_"+key); // SVG only
-			}
-			 */
 
 			// FIX: check unneeded errors if only INPUTLIST requested
 			if (task.result != null) {
 				String r = task.result.toString();
 				log.note(String.format("Retrieved: %s = %s", key, r));
-				// inputStats.put(key, task.info.getID());
-				/*
-				if (link != null) {
-					if (task.log.indexedState.index > 300) {
-						link.attributes.put("style", "dashed");
-					}
-				}
-				 */
 				if (task.log.indexedState.index > 300) {
 					log.warn("Errors in input generation: " + task.log.indexedState.getMessage());
 				}
@@ -1475,16 +1447,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.warn(task.log.indexedState.getMessage());
 				log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, task));
 				log.reset(); // Forget that anyway...
-				/*
-				if (link != null) {
-					node.attributes.put("fillcolor", "#ffc090"); // ""orange");"#ffb080"
-					link.attributes.put("color", "#800000");
-					link.attributes.put("style", "dashed");
-				}
-
-				 */
 			}
-
 
 		}
 

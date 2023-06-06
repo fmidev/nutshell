@@ -88,7 +88,8 @@ embed {
 
 .error {
     color: darkred;
-    font-size: x-large;
+    foo-font-size: x-large;
+    box-shadow: 5px 10px #888888:
     /* margin: 2px; */
     /* border: 1px solid black; */
 }
