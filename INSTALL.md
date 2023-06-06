@@ -1,33 +1,23 @@
 # ![NutShell cover](./img/nutshell-logo-small.png) NutShell
 
-### Installation
-
+# Installation
 ## Java versions
 
-Plain 'java' and `tomcat` version. The later comes with a WWW servlet.
+Available: plain `java` and `tomcat` version. The later comes with a WWW servlet.
 
 ### TomCat
 
-1. Install tomcat (preferably version 8 or 9)
-
-Example 1:
+1. Install Tomcat web server (preferably version 8 or 9). For example:
 ```
 sudo apt install tomcat8
 ```
 
-Configure local environment.
-
-The most important variables:
-
-- `NUTSHELL_ROOT` - directory
-- `TOMCAT_ROOT` -
-- `CACHE_ROOT` - primary directory for generated products
-- `STORARGE_ROOT` - secondary directory, for frequently requested products 
-
-
+2. Create a config file:
 ```
 util/configure.sh tomcat
 ```
+
+3. Add write permissions to Tomcat. 
 
 In latest versions of Tomcat, you have to add permissions for Tomcat service
 (daemon). The path of the file varies, it can be for example:
@@ -38,15 +28,15 @@ In latest versions of Tomcat, you have to add permissions for Tomcat service
 
 The file can be searched for with:
 ```
-find /etc/systemd/system -iname '*tomca*'
+find /etc/systemd/system -type f -name '*tomcat*'
 ```
 or even
 ```
-find /etc/ -iname '*tomca*'
+find /etc/ -type f -name '*tomcat*'
 ```
 which may take a while. More information: [search](https://www.google.com/search?q=how+to+grant+tomcat+write+access)
 
-The essential settings to add are `CACHE_ROOT` and `STORARGE_ROOT`, for example:
+It is essential to grant write access to directory `CACHE_ROOT`, and optionally `STORARGE_ROOT`. For example as follows:
 ```
 ReadWritePaths=/opt/cache
 ReadWritePaths=/opt/storage

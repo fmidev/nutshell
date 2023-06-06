@@ -63,6 +63,7 @@ echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
 echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
 echo "# HTTP_ROOT=$HTTP_ROOT"
 echo "# NUTSHELL=$NUTSHELL"
+echo "# Primary conf: ${NUTSHELL_DIR}/nutshell.cnf"
 echo
 echo "Usage: nutshell <arguments>"
 echo "Arguments:  those of this $NUTSHELL_VERSION version, listed with: "
