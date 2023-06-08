@@ -135,7 +135,7 @@ class ProductInfo extends ProductParameters {
 		String filename = s[0];
 		//String filenameUncompressed = filename;
 		if (s.length == 2) {
-			setDirectives(s[1], "\\?");
+			setDirectives(s[1], "[&\\?]");
 		}
 		//postProcessingInfo = (s.length==2) ? s[1] : "";
 
@@ -293,7 +293,8 @@ class ProductInfo extends ProductParameters {
 		
 		try {
 			info = new ProductInfo(args[0]);
-			System.out.println(info.toString());
+			System.out.println(info);
+			System.out.println(info.directives);
 			System.out.println(info.getParamEnv(null));
 		}
 		catch (ParseException e) {

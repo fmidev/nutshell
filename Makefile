@@ -4,7 +4,7 @@
 JAVA_CLASS_DIR=out/production/nutshell
 
 # Source dir 
-TOMCAT_SRC=html
+# TOMCAT_SRC=html
 
 # include nutshell.cnf
 
@@ -21,7 +21,7 @@ Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR} nutshell/
 # 
 # ${JAVA_CLASS_DIR}/nutshell/resources/nutshell-logo.png
-	cp $@ ${TOMCAT_SRC}/WEB-INF/lib/
+	@ cp -v $@ html/WEB-INF/lib/
 
 META-INF:
 	@mkdir --parents $@
@@ -30,8 +30,8 @@ META-INF:
 
 
 # Prepare files for export
-prepack: Nutlet.jar ${TOMCAT_SRC}/template
-	for i in ${TOMCAT_SRC}/template/*.HTML; do make $${i%.*}.html; done
+prepack: Nutlet.jar html/template
+	for i in html/template/*.HTML; do make $${i%.*}.html; done
 
 
 # Only validates & re-formats. No variable substitution.

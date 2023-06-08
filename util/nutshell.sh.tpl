@@ -54,6 +54,8 @@ if [ $# != 0 ]; then
     
 fi
 
+
+
 echo "Nutshell (default version: $NUTSHELL_VERSION )"
 echo "Markus Peura 2021 Finnish Meteorological Institute"
 echo

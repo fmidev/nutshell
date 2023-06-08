@@ -1,6 +1,7 @@
 #!/bin/bash
 
 NUTSHELL_VERSION=${1:-'tomcat'}
+ARG=$2
 
 source util/vt100utils.sh
 source util/init-config.sh
@@ -45,17 +46,17 @@ else
 fi
 echo
 
-backup_file ${NUTSHELL_ROOT}/nutshell.cnf
-cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
-
-
-
 
 # if [ "$CMD_SCRIPT_DIR" != '' ]; then
 # fi
 
-if [ $NUTSHELL_VERSION != 'docker-java' ]; then
+if [ $NUTSHELL_VERSION == 'docker-java' ]; then
 
+    NUTSHELL_ROOT="/opt/nutshell"
+    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+
+else
+    
     prepare_dir $PRODUCT_ROOT products
     echo 
 
@@ -64,21 +65,20 @@ if [ $NUTSHELL_VERSION != 'docker-java' ]; then
 
     prepare_dir $CACHE_ROOT cache
     echo
-else
-    
-    NUTSHELL_ROOT="/opt/nutshell"
-    NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
     
 fi
 
 
-if [ $NUTSHELL_VERSION == 'demo' ]; then
+if [ $ARG == 'demo' ]; then
     vt100echo cyan  "# Install demo products (product generators) only"	
     # cp -vaux  demo/products/demo /opt/products/
     cp -vaux  demo/products/demo $PRODUCT_ROOT/
     exit $?
 fi
 
+# Taking back-up
+backup_file ${NUTSHELL_ROOT}/nutshell.cnf
+cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
 
 
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then

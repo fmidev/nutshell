@@ -640,6 +640,7 @@ public class Log implements AutoCloseable {
 			}
 
 			 */
+			this.printStream.print("LÖBU");
 			textOutput.endSection(buffer);
 			this.printStream.print(buffer.toString());
 

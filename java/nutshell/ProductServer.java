@@ -41,13 +41,16 @@ import static java.nio.file.Files.*;
  *  TIMESTAMP, some may have many. Static products like geographical 
  *  map do not have a timestamp. On the other hand, some meteorological products may 
  *  have several timestamps, like computing time and valid time.
- * 
+ *
+ *  Some version history
+ *  3.2 Create dirs automatically under $CACHE_ROOT and  $STORAGE_ROOT
+ *
  *  @author Markus Peura fmi.fi Jan 26, 2011
  */
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 1);
+		super.version = Arrays.asList(3, 2);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -804,40 +807,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 
-					/*
-					Graph.Node inputNode = null;
-					Graph.Node.Link link = null;
-
-					if (node != null) {
-						inputNode = inputTask.getGraphNode(graph);
-						inputNode.attributes.put("fillcolor", "#40ff40"); // ""lightgreen");
-						inputNode.attributes.put("href", String.format(
-								"?instructions=GENERATE,STATUS&amp;product=%s",
-								inputTask.info.getFilename()));
-						inputNode.attributes.put("class", "clickable");
-
-						link = node.addLink(inputNode);
-						//graph.addLink(node, inputNode);
-						// link.attributes.put("label", key);
-						// link.attributes.put("title", "avain_"+key); // SVG only
-					}
-					*/
 					this.inputTasksNEW.put(key, inputTask);
 					// FIX: check unneeded errors if only INPUTLIST requested
 					if (inputTask.result != null) {
-						//String r = inputTask.result.toString();
 						log.note(String.format("Retrieved: %s = %s [%s]",
 								key, inputTask.result, inputTask.result.getClass().getSimpleName()));
-						//this.inputTasksNEW.put(key, inputTask);
-						// inputStats.put(key, inputTask.info.getID());
 
-						/*
-						if (link != null) {
-							if (inputTask.log.indexedState.index > 300) {
-								link.attributes.put("style", "dashed");
-							}
-						}
-						*/
 						if (inputTask.log.indexedState.index > 300) {
 							log.warn(String.format("Errors in generating input of: %s %s", key, inputTask.log.indexedState.getMessage()));
 						}
@@ -846,19 +821,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
 						log.reset(); // Forget that anyway...
 					}
-					//inputTask.log.close(); // close PrintStream
-					//inputTask.close();
 				}
 
 				for (Task inputTask : inputTasks.values()) {
 					inputTask.close();
 				}
-
-				/*
-				if (collectStatistics) {
-					statistics.put(info.getID(), inputStats);
-				}
-				 */
 
 				/// "MAIN"
 				if (instructions.isSet(ActionType.GENERATE)){
