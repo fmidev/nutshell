@@ -69,7 +69,7 @@ else
 fi
 
 
-if [ $ARG == 'demo' ]; then
+if [ "$ARG" == 'demo' ]; then
     vt100echo cyan  "# Install demo products (product generators) only"	
     # cp -vaux  demo/products/demo /opt/products/
     cp -vaux  demo/products/demo $PRODUCT_ROOT/

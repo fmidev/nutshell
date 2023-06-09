@@ -7,6 +7,7 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /** Logging safer than Log4j
@@ -306,12 +307,16 @@ public class Log implements AutoCloseable {
 		String filename = null;
 		String remainingLine = "";
 
+		// static
+		final Pattern filePathRegExp = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
+				Pattern.CASE_INSENSITIVE);
+
 		PathDetector(String remainingLine){
 			this.remainingLine = remainingLine;
 		}
 
 		boolean next(){
-			Matcher m = FileUtils.filePathRe.matcher(remainingLine);
+			Matcher m = filePathRegExp.matcher(remainingLine);
 			if (m.matches()){
 				prefix = m.group(1);
 				dir = m.group(2);

@@ -50,7 +50,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 2);
+		super.version = Arrays.asList(3, 3);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -999,45 +999,51 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						}
 					}
 
-
-					for (Path path : this.instructions.copies) {
+					// Complementary tasks: copying
+					//for (Path path : this.instructions.copies) {
+					for (String path : this.instructions.copies) {
+						Path p = Paths.get(path);
 						try {
-							if (path.startsWith(CACHE_ROOT)){
-								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms, true);
+							if (p.startsWith(CACHE_ROOT)){ // XXX
+								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 							}
-							this.copy(this.outputPath, path); // Paths.get(path)
-							log.ok(String.format("Copied: %s", path));
+							this.copy(this.outputPath, p); // Paths.get(path)
+							log.ok(String.format("Copied: %s", p));
 							// System.out.println("Copy "+path);
 						} catch (IOException e) {
-							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Copying failed: %s", path));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Copying failed: %s", p));
 							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 							//log.error(String.format("Copying failed: %s", path));
 						}
 					}
 
-					for (Path path : this.instructions.links) {
+					// Complementary tasks: linking
+					for (String path : this.instructions.links) {
+						Path p = Paths.get(path);
 						try {
-							if (path.startsWith(CACHE_ROOT)){
-								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms, true);
+							if (p.startsWith(CACHE_ROOT)){
+								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 							}
-							this.link(this.outputPath, path, false); // Paths.get(path)
-							log.ok(String.format("Linked: %s", path));
+							this.link(this.outputPath, p, false); // Paths.get(path)
+							log.ok(String.format("Linked: %s", p));
 						} catch (IOException e) {
-							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking failed: %s", path));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking failed: %s", p));
 							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 						}
 					}
 
+					// Complementary tasks: moving (single-object operation)
 					if (this.instructions.move != null) {
+						Path p = Paths.get(this.instructions.move);
 						try {
-							if (this.instructions.move.startsWith(CACHE_ROOT)){
-								FileUtils.ensureWritablePath(this.instructions.move, GROUP_ID, dirPerms, true);
+							if (p.startsWith(CACHE_ROOT)){
+								FileUtils.ensureWritablePath(this.instructions.move, GROUP_ID, dirPerms);
 							}
-							this.move(this.outputPath, this.instructions.move);
+							this.move(this.outputPath, p);
 							this.result = this.instructions.move;
-							log.log(HttpLog.HttpStatus.OK, String.format("Moved: %s", this.instructions.move));
+							log.log(HttpLog.HttpStatus.OK, String.format("Moved: %s", p));
 						} catch (IOException e) {
-							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Moving failed: %s", this.instructions.move));
+							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Moving failed: %s", p));
 							log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 						}
 					}
@@ -1237,20 +1243,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 */
 
 
-	/** Run a set of tasks in parallel.
-	 *
-	 * @param taskRequests
-	 * @param instructions
-	 * @param directives
-	 * @param log
-	 * @return
-	public Map<String,Task> executeBatch(Map<String,String> taskRequests, Instructions instructions, Map directives, HttpLog log) {
-		Map<String, Task> tasks = prepareTasks(taskRequests, instructions, directives, log);
-		runTasks(tasks, log);
-		return tasks;
-	}
-	 */
-
 	/**
 	 *
 	 * @param batchConfig
@@ -1265,35 +1257,88 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		Map<String, Task> tasks = new HashMap<>();
 
-		final int count = productRequests.size();
+		final int productCount = productRequests.size();
 
-		if (count == 0) {
+		if (productCount == 0) {
 			return tasks;
 		}
 
-		log.info(String.format("Preparing %d tasks: %s", count, productRequests.keySet()));
-
+		log.info(String.format("Preparing %d tasks: %s", productCount, productRequests.keySet()));
 		/*
 		log.info(String.format("Instructions: %s (depth: %d), Directives: %s ",
 				instructions, instructions.regenerateDepth, directives));
 		 */
 
-		/// Check COPY & LINK targets: must be directories, if several tasks (several files produced)
-		if (count > 1) {
+		final boolean MULTIPLE = (productCount > 1);
 
-			for (Path p : instructions.copies) {
+		for (String path : instructions.copies) {
+			Path p = Paths.get(path);
+			if (p.startsWith(CACHE_ROOT)){ // XXX
+				try {
+					FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
+				} catch (IOException e) {
+					log.warn(e.getMessage());
+					//log.warn(String.format("Problems ahead: %s", e.getMessage()));
+					//throw new RuntimeException(e);
+				}
+			}
+			if (MULTIPLE && !p.toFile().isDirectory()) {
+				log.warn(String.format("Several tasks (%d), but single file COPY target: %s", productCount, p));
+			}
+		}
+
+		for (String path : instructions.links) {
+			Path p = Paths.get(path);
+			if (p.startsWith(CACHE_ROOT)){ // XXX
+				try {
+					FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
+				} catch (IOException e) {
+					log.warn(e.getMessage());
+					//log.warn(String.format("Problems ahead: %s", e.getMessage()));
+					//throw new RuntimeException(e);
+				}
+			}
+			if (MULTIPLE && !p.toFile().isDirectory()) {
+				log.warn(String.format("Several tasks (%d), but single file LINK target: %s", productCount, p));
+			}
+		}
+
+		if (instructions.move != null){
+			Path p = Paths.get(instructions.move);
+			if (p.startsWith(CACHE_ROOT)){ // XXX
+				try {
+					FileUtils.ensureWritablePath(instructions.move, GROUP_ID, dirPerms);
+				} catch (IOException e) {
+					log.warn(String.format("Problems ahead: %s", e.getMessage()));
+					//throw new RuntimeException(e);
+				}
+			}
+			if (MULTIPLE && !p.toFile().isDirectory()) {
+				log.warn(String.format("Several tasks (%d), but single file MOVE target: %s", productCount, p));
+			}
+		}
+
+		/// Check COPY & LINK targets: must be directories, if several tasks (several files produced)
+		/*
+		if (productCount > 1) {
+
+			//  TODO: create dirs here!
+			for (String path : instructions.copies) {
+				Path p = Paths.get(path);
 				if (!p.toFile().isDirectory()) {
-					log.warn(String.format("Several tasks (%d), but single COPY file target: %s", count, p));
+					log.warn(String.format("Several tasks (%d), but single COPY file target: %s", productCount, p));
 				}
 			}
 
-			for (Path p : instructions.links) {
+			for (String path : instructions.links) {
+				Path p = Paths.get(path);
 				if (!p.toFile().isDirectory()) {
-					log.warn(String.format("Several tasks (%d), but single LINK file target: %s", count, p));
+					log.warn(String.format("Several tasks (%d), but single LINK file target: %s", productCount, p));
 				}
 			}
 
 		}
+		*/
 
 
 		for (Entry<String, String> entry : productRequests.entrySet()) {

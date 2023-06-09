@@ -167,14 +167,15 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
      * @param filename - target file
      */
     public void addCopy(String filename){
-        copies.add(Paths.get(filename));
+        copies.add(filename);
+        //copies.add(Paths.get(filename));
     }
 
     /** Add specific request to copy the result.
      *
      * @param copies - target files
      */
-    public void addCopies(List<Path> copies){
+    public void addCopies(List<String> copies){
         if (copies != null)
             this.copies.addAll(copies);
     }
@@ -187,7 +188,8 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
      * @param filename
      */
     public void addLink(String filename){
-        links.add(Paths.get(filename));
+        links.add(filename);
+        //links.add(Paths.get(filename));
     }
 
     /** Add specific request to link the result.
@@ -196,7 +198,7 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
      *
      * @param links - filenames pointing to the original result
      */
-    public void addLinks(List<Path> links){
+    public void addLinks(List<String> links){
         if (links != null)
             this.links.addAll(links);
     }
@@ -209,15 +211,23 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
      */
     public void addMove(String path){
         if (path != null)
-            move = Paths.get(path);
+            move = path;
+            //move = Paths.get(path);
     }
 
+    /*
     public void addMove(Path path){
         move = path;
     }
+     */
 
+    /*
     protected List<Path> copies = new ArrayList<>();
     protected List<Path> links  = new ArrayList<>();
     protected Path move = null;
+     */
+    protected List<String> copies = new ArrayList<>();
+    protected List<String> links  = new ArrayList<>();
+    protected String move = null;
 
 }

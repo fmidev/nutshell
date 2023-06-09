@@ -1,7 +1,7 @@
 package nutshell;
 
 
-import java.io.FilePermission;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 //import java.nio.file.attribute.FileAttribute;
@@ -45,14 +45,42 @@ public class FileUtils {
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+)(/[^/]*)$");
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+/)([\\w]+\\.[a-z]{1,4})?(\\W[^/]*)?$",
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)([.\\w]+\\.[a-z]+)?(\\s.*)?$",
+    /**
+     *  Conventionally accepted filename chars (\w, "word characters") complemented with '@', '-', ':', '.' and '='
+     *  1 (leading chars?)
+     *  1 = directory
+     *  2 = filename
+     *  3 = extension (optional)
+     */
     static
-    public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
+    final String validChars = "a-z0-9_@:\\.\\-\\=";
+
+    /// Path that has an optional directory part and an obligatory filename with extension.
+    /**
+     *  1 = optional directory
+     *  2 = full filename (including  extension)
+     *  2 = filename without extension
+     *  3 = extension (without leading '.')
+     */
+    static
+    // public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
+    // +"^([a-z0-9_:\\.\\-]*/)?([a-z0-9_:\\.\\-\\=]+)(\\.[a-z0-9]+)?$"
+    public final Pattern qualifiedFilePathRe = Pattern.compile(
+            String.format("^([%s/]*/)?(([%s]+)\\.([a-z0-9]+))", validChars, validChars),
+            Pattern.CASE_INSENSITIVE);
+
+    /// A path that ends with dir separator '/'.
+    static
+    // public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
+    // +"^([a-z0-9_:\\.\\-]*/)?([a-z0-9_:\\.\\-\\=]+)(\\.[a-z0-9]+)?$"
+    public final Pattern qualifiedDirPathRe = Pattern.compile(
+            String.format("^[%s/]*/", validChars),
             Pattern.CASE_INSENSITIVE);
 
     static
     public Path extractPath(String line){
 
-        Matcher m = filePathRe.matcher(line);
+        Matcher m = qualifiedFilePathRe.matcher(line);
         if (m.matches()){
             //System.out.printf("Matches, %d groups:%n", m.groupCount());
             for (int j = 0; j <= m.groupCount(); j++) {
@@ -60,7 +88,7 @@ public class FileUtils {
             }
             // System.out.println(m);
             // crop leading (0) and trailing (-1)
-            String dir  = m.group(2);
+            String dir  = m.group(1); // 2
             String file = m.group(m.groupCount()-1);
 
             if (file == null)
@@ -76,75 +104,54 @@ public class FileUtils {
      * @param path
      * @param groupId
      * @param permissions
-     * @param  stripFilename - if the leaf resembles a filename, skip creating it as a directory.
      * @throws IOException
      */
     static
-    public int ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
-        return ensureWritablePath(path, groupId, permissions, false);
-    }
-
-
-    /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
-         *
-         * @param path
-         * @param groupId
-         * @param permissions
-         * @param  stripFilename - if the leaf resembles a filename, skip creating it as a directory.
-         * @throws IOException
-         */
-    static
-    public int ensureWritablePath(Path path, int groupId, Set<PosixFilePermission> permissions, boolean stripFilename) throws IOException {
-
-        int experimentalResult = 0;
-
+    public void ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
 
         if ((path == null) || (path.getNameCount()==0)){
-            return experimentalResult;
+            return; // path; //experimentalResult;
         }
 
-        // Consider constructing error string (of GID and perms)
-        if (!Files.exists(path)){
+        // Note: (desired) dir may exist, file not.
+        if (!Files.exists(path)) {
+            // Consider constructing error string (of GID and perms)
 
-            // If looks like a filename, skip creating it as a dir.
-            if (stripFilename) {
-                Matcher m = filePathRe.matcher(path.getFileName().toString());
-                if (m.matches()) {
-                    String file = m.group(m.groupCount()-1);
-                    if (file != null)
-                        return ensureWritablePath(path.getParent(), groupId, permissions, false);
-                }
-            }
+            // Ensure parents, recursively
+            ensureWritableDir(path.getParent(), groupId, permissions);
+            //ensureWritableDir(path, groupId, permissions);
 
-            experimentalResult |= ensureWritablePath(path.getParent(), groupId, permissions, false);
+            Files.createDirectory(path); // potentially throws IOException
+            /*
             try {
                 Files.createDirectory(path); // potentially throws IOException
-            }
-            catch (Exception e){
-                experimentalResult |= Permission.WRITE; // or "ALL" ?
+            } catch (Exception e) {
+                // experimentalResult |= Permission.WRITE; // or "ALL" ?
                 // Exit, because does dir not exist now.
                 throw e;
                 //throw new IOException(String.format("Failed in CREATING dir %s, write=%b, orig:%s",
                 //path, Files.isWritable(path), e.getMessage()));
             }
+            */
 
             try {
                 Files.setAttribute(path, "unix:gid", groupId);
-            }
-            catch (Exception e){
-                experimentalResult |= Owner.GROUP;
+            } catch (Exception e) {
+                // Not strict...
+                //experimentalResult |= Owner.GROUP;
             }
         }
         else if (Files.isWritable(path)){
-            return experimentalResult;
+            // In this case, does not try to change file ownership / permissions.
+            return; // path; // experimentalResult;
         }
-
 
         try {
             Files.setPosixFilePermissions(path, permissions);
         }
         catch (Exception e){
-            experimentalResult |= Permission.WRITE; // or "ALL" ?
+            // Not strict, yet...
+            //experimentalResult |= Permission.WRITE; // or "ALL" ?
         }
 
         /*
@@ -158,13 +165,65 @@ public class FileUtils {
         else {
          */
         if (!Files.isWritable(path)){
-            experimentalResult |= Permission.WRITE;
-            throw new IOException(String.format("Dir %s owned by %s is unwritable by %s: %s",
+            // experimentalResult |= Permission.WRITE;
+            throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by %s: %s",
                     path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }
 
-        return experimentalResult;
+       //return experimentalResult;
+        //return ensureWritablePath(path, groupId, permissions, false);
+    }
 
+
+    /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
+         *
+         * @param path
+         * @param groupId
+         * @param permissions
+         * param  stripFilename - if the leaf resembles a filename, skip creating it as a directory.
+         * @throws IOException
+         */
+    static
+    public Path ensureWritablePath(String path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
+        //int experimentalResult = 0;
+
+        if ((path == null) || (path.isEmpty())){
+            // System.err.println("XX: Empty path");
+            return Paths.get(""); //experimentalResult;
+        }
+
+        /*
+        if ((path == null) || (path.getNameCount()==0)){
+            return path; //experimentalResult;
+        }
+        */
+
+        Matcher filenameMatcher = qualifiedFilePathRe.matcher(path.toString());
+        if (filenameMatcher.matches()) {
+            String dir = filenameMatcher.group(1);
+            if (dir == null) {
+                // System.err.println("XX: No dir");
+                return Paths.get(".").resolve(path);
+            }
+            else {
+                path = dir;
+                //path = Paths.get(dir);
+            }
+        }
+        else {
+            Matcher dirNameMatcher = qualifiedDirPathRe.matcher(path.toString());
+            if (!dirNameMatcher.matches()) {
+                throw new IOException(
+                        String.format("Bad dir/file name: '%s' - use valid chars [%s], and extension or trailing /",
+                                path, validChars));
+            }
+        }
+
+        Path p = Paths.get(path);
+        // System.err.println(String.format("XX: creating dir: %s", p));
+
+        ensureWritableDir(p, groupId, permissions);
+        return p;
     }
 
 
@@ -296,14 +355,21 @@ public class FileUtils {
         if (args.length == 0){
             System.out.println("Tests file ops");
             System.out.println("Usage: ");
+            System.out.println("--prefix <path> : store file path prefix");
+            System.out.println("--mkdir  <dir>/ : make dir <prefix><dir>");
+            System.out.println("--ensuredir <path> : make dir, stripping optional filename from path");
+            //System.out.println("--mk  <dir>  : make dir <prefix><dir>");
             // System.out.println("  argument: <log_level>  #" + statusCodes.entrySet());
             // log.warn("Quitting");
             return;
         }
 
-        Path prefix = Paths.get(".");
+        Path prefix = Paths.get("");
         Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString("rwxr-xr--");
         Set<PosixFilePermission> dirPerms = PosixFilePermissions.fromString("rwxr-xr-x");
+
+        // Posix group ID
+        int groupID = 0;
 
         try {
 
@@ -321,14 +387,27 @@ public class FileUtils {
                     case "--dirPerms":
                         dirPerms = PosixFilePermissions.fromString(args[++i]);
                         break;
+                    case "--group":
+                        groupID = Integer.parseInt(args[++i]);
+                        break;
                     case "--mkdir": {
                         Path p = Paths.get(args[++i]);
-                        ensureDirOLD(prefix, p, dirPerms);
+                        ensureWritableDir(prefix.resolve(p), groupID, dirPerms);
+                        // ensureDirOLD(prefix, p, dirPerms);
                         break;
                     }
                     case "--touch": {
                         Path p = Paths.get(args[++i]);
-                        ensureFileOLD(prefix, p, dirPerms, filePerms);
+                        ensureWritableFile(prefix.resolve(p), groupID, dirPerms, filePerms);
+                        // ensureFileOLD(prefix, p, dirPerms, filePerms);
+                        break;
+                    }
+                    case "--ensuredir": {
+                        //Path p = Paths.get(args[++i]);
+                        String p = prefix.toString() + args[++i];
+                        Path path = ensureWritablePath(p, groupID, dirPerms);
+                        // ensureDirOLD(prefix, p, dirPerms);
+                        System.out.println(String.format("Extracted dir: %s", path));
                         break;
                     }
                     case "--visit": {
@@ -341,21 +420,41 @@ public class FileUtils {
                         System.out.println(String.format("prefix:\t%s", prefix));
                         System.out.println(String.format("dirPerms:\t%s", dirPerms));
                         System.out.println(String.format("filePerms:\t%s", filePerms));
+                        System.out.println(String.format("groupID:\t%d", groupID));
                         //filePerms.
                         //System.out.println(filePerms.toArray());
                         break;
                     default:
-                        Matcher m = filePathRe.matcher(arg);
-                        if (m.matches()){
-                            System.out.printf("Matches, %d groups:%n", m.groupCount());
-                            for (int j = 0; j <= m.groupCount(); j++) {
-                                System.out.printf("  %d: %s %n", j, m.group(j));
-                            }
-                            Path p = extractPath(arg);
-                            System.out.println(p);
-                        }
-                        else
+                        if (arg.startsWith("--")){
                             System.out.println(String.format("No such option: %s", arg));
+                        }
+                        else {
+
+                            File file = new File(arg);
+                            System.out.println(String.format("File: %s", file));
+                            System.out.println(String.format("File: Dir name: %s", file.getParent()));
+                            System.out.println(String.format("File: Filename: %s", file.getName()));
+
+                            Path path = Paths.get(arg);
+                            System.out.println(String.format("Path: %s", path));
+                            System.out.println(String.format("Path: Dir name: %s", path.getParent()));
+                            System.out.println(String.format("Path: Filename: %s", path.getFileName()));
+
+                            Matcher m = qualifiedFilePathRe.matcher(arg);
+                            if (m.matches()){
+                                System.out.printf("Matches, %d groups:%n", m.groupCount());
+                                for (int j = 0; j <= m.groupCount(); j++) {
+                                    System.out.printf("  %d: %s %n", j, m.group(j));
+                                }
+                                System.out.println(String.format("extractPath(%s):", arg));
+                                Path p = extractPath(arg);
+                                System.out.println(p);
+                            }
+                            else {
+                                System.out.println(String.format("Illegal path: %s", arg));
+                            }
+
+                        }
                         break;
                 }
 
