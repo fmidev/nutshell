@@ -1322,7 +1322,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		/*
 		if (productCount > 1) {
 
-			//  TODO: create dirs here!
 			for (String path : instructions.copies) {
 				Path p = Paths.get(path);
 				if (!p.toFile().isDirectory()) {
