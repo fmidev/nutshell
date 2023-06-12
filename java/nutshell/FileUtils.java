@@ -53,7 +53,8 @@ public class FileUtils {
      *  3 = extension (optional)
      */
     static
-    final String validChars = "a-z0-9_@:\\.\\-\\=";
+    final String validChars = "a-z0-9_@,:.=+\\-"; // inside brackets, requiring escaping only for '-' (and '^')
+    // final String validChars = "a-z0-9_@:\\.\\-\\+\\=";
 
     /// Path that has an optional directory part and an obligatory filename with extension.
     /**
