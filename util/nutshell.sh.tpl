@@ -74,7 +74,9 @@ echo "or"
 echo "  $NUTSHELL --help"
 echo
 echo "For debugging, invoke this ($NUTSHELL_VERSION) version directly, for example:"
+echo "  $0 --version"
 echo "  $NUTSHELL --version"
+echo "  $NUTSHELL --conf ${NUTSHELL_DIR}/nutshell.cnf --version"
 echo
 
 exit $RESULT

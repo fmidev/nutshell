@@ -3,7 +3,7 @@
 # Test script for nutshell 
 
 LOG='log/nutshell.log'
-mkdir --parents tests
+mkdir --parents tests log
 
 # RST doc file
 DOC_FILE=sphinx/source/nutshell-tests.rst

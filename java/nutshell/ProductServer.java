@@ -50,7 +50,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 31);
+		super.version = Arrays.asList(3, 32);
 		setup.put("ProductServer-version", version);
 	}
 
@@ -1677,7 +1677,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
         });
 
 		registry.add(new Parameter.Simple<String>("log",
-				String.format("Set log properties: verbosity (%s), format (%s), decoration (%s) ",
+				String.format("Set log properties: verbosity %s, format %s, decoration %s ",
 						Arrays.toString(Log.Status.values()),
 						Arrays.toString(TextOutput.Format.values()),
 						Arrays.toString(TextOutput.Options.values())),
