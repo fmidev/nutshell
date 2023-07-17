@@ -1686,6 +1686,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 
+				serverLog.set(value);
+				/*
 				Flags deco = new Flags(TextOutput.Options.class);
 
 				for (String s: value.split(",")){
@@ -1725,6 +1727,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					// serve rLog.error(String.format("%s: unsupported Log parameter %s, see --help log", getName(), value));
 
 				}
+
+				 */
 				//serverLog.debug(serverLog.textOutput.toString());
 			}
 		});

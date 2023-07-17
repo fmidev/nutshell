@@ -664,7 +664,9 @@ public class Log implements AutoCloseable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			System.err.println("kiuso1");
 			this.fileOutputStream = null;
+			System.err.println("kiuso2");
 		}
 
 		logFile = null;
@@ -704,7 +706,52 @@ public class Log implements AutoCloseable {
 
 	}
 
+	/** Set decoration, verbosity, and format.
+	 *
+	 * @param value – comma-separated string of enum keywords.
+	 */
+	public void set(String value){
 
+		Flags deco = new Flags(TextOutput.Options.class);
+
+		for (String s: value.split(",")){
+
+			if (s.isEmpty()){
+				decoration.clear();
+				continue;
+			}
+
+			try {
+				deco.add(s);
+				setDecoration(deco); // overrides
+				// serverL og.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
+				continue;
+			}
+			catch (Exception e){
+			}
+
+			try {
+				setVerbosity(Log.Status.valueOf(s));
+				// server Log.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
+				continue;
+			}
+			catch (Exception e){
+			}
+
+			try {
+				setFormat(TextOutput.Format.valueOf(s));
+				//server Log.debug(String.format("%s: updated format: %s", getName(), serverLog.getFormat()));
+				continue;
+			}
+			catch (Exception e){
+			}
+
+			//throw new RuntimeException(String.format("%s: unsupported Log parameter %s, see --help log",
+			throw new RuntimeException(String.format("%s: unsupported Log parameter %s", getName(), value));
+			// serve rLog.error(String.format("%s: unsupported Log parameter %s, see --help log", getName(), value));
+
+		}
+	}
 
 
 
@@ -722,23 +769,35 @@ public class Log implements AutoCloseable {
 			log.debug("No arguments, invoking 'help'");
 			System.out.println("Prints log lines until end-of-line");
 
-			System.out.println("Statuses: ");
+			System.out.println("Status levels: ");
 			for (Log.Status s: Status.values()) {
-				System.out.println(String.format("\t%s %s = %d %s", s.colour, s, s.level, TextOutput.Highlight.RESET));
+				// System.out.println(String.format("\t%s %s = %d %s", s.colour, s, s.level, TextOutput.Highlight.RESET));
+				log.log(s, String.format("\t%d = %s (%s)", s.level, s, s.colour));
 			}
 
-			System.out.println("Usage: ");
-			System.out.println("  argument: <log_level>  #" + statusCodes.entrySet());
+			System.out.println("Usage:");
+			System.out.println("  argument: <log_level>  # Any of these: " + statusCodes.entrySet());
+			System.out.println("Example:");
+			System.out.println("\tls | java -cp out/production/nutshell/  nutshell.Log DEBUG");
+			System.out.println("\tjava -cp out/production/nutshell/  nutshell.Log INFO,,VT100");
 			log.warn("Quitting");
 			return;
 		}
 
+		try {
+			log.set(args[0]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		/*
 		try {
 			log.setVerbosity(args[0]);
 		} catch (NoSuchFieldException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		*/
 
 		log.special("Now it starts");
 		log.deprecated(".. nut be careful..");
