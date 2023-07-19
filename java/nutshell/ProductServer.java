@@ -255,7 +255,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			filename = info.getFilename();
 
 			// Accept only word \\w chars and '-'.
-			String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			//String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			String label = String.format("%s-%d-%s", LABEL, getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
 			// final Pattern nonWord = Pattern.compile("\\W");
 			// label.replaceAll("\\W", "_");
 
@@ -301,6 +302,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (parentLog == null){
 				parentLog = serverLog;
 			}
+			//parentLog.special("koe1");
 			log = new HttpLog(parentLog.getName() + "[" + this.info.PRODUCT_ID + "]", parentLog.getVerbosity());
 			//log.setFormat(parentLog.getFormat());
 			log.setFormat(LOG_FORMAT);
@@ -317,12 +319,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 			try {
 				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
+				parentLog.special("koe2");
 				log.setLogFile(logPath);
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: Log GID=%d  file=%s dir=%s, error: %s",
 						logPath, GROUP_ID, filePerms, dirPerms, e));
 				//log.setLogFile(null); ?
 			}
+			parentLog.special("koe3");
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 
 
@@ -1271,6 +1275,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		final boolean MULTIPLE = (productCount > 1);
 
+		/// Check COPY & LINK targets: must be directories, if several tasks (several files produced)
 		for (String path : instructions.copies) {
 			Path p = Paths.get(path);
 			if (p.startsWith(CACHE_ROOT)){ // XXX
@@ -1278,15 +1283,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 				} catch (IOException e) {
 					log.warn(e.getMessage());
-					//log.warn(String.format("Problems ahead: %s", e.getMessage()));
-					//throw new RuntimeException(e);
 				}
 			}
 			if (MULTIPLE && !p.toFile().isDirectory()) {
 				log.warn(String.format("Several tasks (%d), but single file COPY target: %s", productCount, p));
 			}
 		}
-
+		//
 		for (String path : instructions.links) {
 			Path p = Paths.get(path);
 			if (p.startsWith(CACHE_ROOT)){ // XXX
@@ -1294,8 +1297,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 				} catch (IOException e) {
 					log.warn(e.getMessage());
-					//log.warn(String.format("Problems ahead: %s", e.getMessage()));
-					//throw new RuntimeException(e);
 				}
 			}
 			if (MULTIPLE && !p.toFile().isDirectory()) {
@@ -1318,26 +1319,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		}
 
-		/// Check COPY & LINK targets: must be directories, if several tasks (several files produced)
-		/*
-		if (productCount > 1) {
-
-			for (String path : instructions.copies) {
-				Path p = Paths.get(path);
-				if (!p.toFile().isDirectory()) {
-					log.warn(String.format("Several tasks (%d), but single COPY file target: %s", productCount, p));
-				}
-			}
-
-			for (String path : instructions.links) {
-				Path p = Paths.get(path);
-				if (!p.toFile().isDirectory()) {
-					log.warn(String.format("Several tasks (%d), but single LINK file target: %s", productCount, p));
-				}
-			}
-
-		}
-		*/
 
 
 		for (Entry<String, String> entry : productRequests.entrySet()) {
@@ -1349,13 +1330,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 
 				Task task = new Task(value, instructions.value, log);
-
 				//log.debug(String.format("Check: %s = %s", key, value));
-				/*
+				/**
 				if ((directives != null) && !directives.isEmpty())
 					log.special(String.format("Directives: %s = %s [%s]",
 							key, directives, directives.getClass()));
-				 */
+				*/
 
 				task.info.setDirectives(directives);
 
@@ -1977,7 +1957,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						arg = "--help";
 					}
 					else if (arg.charAt(1) != '-') {
-						throw new IllegalArgumentException("Short options (-x) not supported in this Java version");
+						throw new IllegalArgumentException("Short options (-x) not supported in this version (Java)");
 					}
 
 					String opt = arg.substring(2);

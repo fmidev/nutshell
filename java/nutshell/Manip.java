@@ -13,11 +13,26 @@ import java.util.Map;
  */
 public class Manip {
 
+    /** Storage for pairs of type "key=value" and "key[index]=value".
+     *
+     *  Designed for importing assignment strings to Objects; serves as an in-between container.
+     *
+     */
     static
     public class Entry {
         public String key = "";
         public String index = "";
         public Object value = null;
+
+        @Override
+        public String toString() {
+            if (index==null || index.isEmpty()){
+                return key+'='+value;
+            }
+            else {
+                return key+'['+index+']'+'='+value;
+            }
+        }
     }
 
     // protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
@@ -69,8 +84,8 @@ public class Manip {
      *
      * @param value - value to be assigned
      * @param target - object
-     * @param key - member name
-     * @param index – if not null, assume target.key is a Map.
+     * @param key - name of a member of target, assuming that target.key exists
+     * @param index – if not null, assumes that target.key is a Map; value will be assigned to target.key[index]
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      */
@@ -95,7 +110,7 @@ public class Manip {
 
     /** Assignment with explicit class definition
      *
-     *  Designed for generic classes to keep members class specific.
+     *  Designed for generic classes to keep the members class-specific.
      *
      * @param value
      * @param field
@@ -117,7 +132,7 @@ public class Manip {
 
         String s = value.toString(); // value not null here
 
-        if (cls.isPrimitive() && s.isEmpty()){
+        if (cls.isPrimitive() && s.isEmpty()){ // Don't assign "" to number/boolean. Basically, an exception?
             return;
         }
 
@@ -192,9 +207,11 @@ public class Manip {
         return builder.toString();
     }
 
-
+    /** For local demo only.
+     *
+     */
     static
-    public class Example {
+    private class Example {
 
         public enum Values {
           FIRST,
@@ -224,6 +241,7 @@ public class Manip {
     public void main(String[] args) {
 
         Example example = new Example();
+        Map<String,Object> map = new HashMap<>();
 
         if (args.length == 0){
             System.out.println("Usage: \n");
@@ -233,15 +251,18 @@ public class Manip {
             System.exit(0);
         }
 
+        System.out.println("Initial values: ");
         System.out.println(example);
+        System.out.println();
 
-        Map<String,Object> map = new HashMap<>();
 
         Manip.Entry entry = new Entry();
         for (String arg: args) {
 
             try {
                 Config.parseConfigLine(arg, entry);
+                System.out.println(String.format("Read entry: %s", entry));
+                //System.out.println();
             } catch (ParseException e) {
                 //e.printStackTrace();
                 System.out.println(e);
@@ -270,19 +291,30 @@ public class Manip {
             }
         }
 
+        System.out.println();
 
-        //System.out.println(map);
+        System.out.println("Values after assigning entries directly: ");
         System.out.println(example);
 
-        try {
-            assignToObject(map, example);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        if (!map.isEmpty()){ // Conf file has been read
+
+            System.out.print("Map contents: ");
+            System.out.println(map);
+
+            Example example2 = new Example();
+
+            try {
+                assignToObject(map, example2);
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("Values after assigning map: ");
+            System.out.println(example2);
+
         }
-
-        System.out.println(example);
 
     }
 }

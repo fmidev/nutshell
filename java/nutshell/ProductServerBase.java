@@ -46,7 +46,9 @@ public class ProductServerBase extends Program {
     public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString(DIR_PERMS);
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString(FILE_PERMS);
 
-    public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
+    //public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
+    public List<Path> confFiles = new ArrayList<>();
+
     public Path CACHE_ROOT = Paths.get(".");
 
     // NEW
@@ -152,21 +154,21 @@ public class ProductServerBase extends Program {
      */
     protected void readConfig(Path path){
 
-        try {
-            if (path != null) {
-                if (this.confFile == null)
+        if (path != null) {
+            try {
+                if (this.confFiles.isEmpty())
                     serverLog.debug(String.format("Reading setup: %s", path.toString()));
                 else
                     serverLog.note(String.format("Re-reading setup: %s (old: %s)",
-                            path, this.confFile));
+                            path, this.confFiles));
                 Config.readConfig(path.toFile(), setup);
+                this.confFiles.add(path); // null ok??
+                setup.put("confFiles", this.confFiles);
             }
-            this.confFile = path; // null ok??
-            setup.put("confFile", path);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            setup.put("confFileError", e.getLocalizedMessage());
+            catch (Exception e) {
+                e.printStackTrace();
+                setup.put("confFileError", e.getLocalizedMessage());
+            }
         }
 
         //System.err.println(setup);
@@ -177,7 +179,7 @@ public class ProductServerBase extends Program {
             cachePathSyntax = new StringMapper(CACHE_PATH);
         }
         else {
-            cachePathSyntax = new StringMapper(CACHE_ROOT.toString()+"/${TIMESTAMP}/${PRODUCT}/${OUTFILE}");
+            cachePathSyntax = new StringMapper(CACHE_ROOT.toString()+"/${TIMESTAMP_DIR}/${PRODUCT_DIR}/${OUTFILE}");
         }
         setup.put("cacheDirSyntax", cachePathSyntax);
 
@@ -237,7 +239,7 @@ public class ProductServerBase extends Program {
             sb.append(':').append(HTTP_PORT);
         sb.append(HTTP_PREFIX);
         HTTP_BASE = sb.toString();
-        Log.pathMap.put(CACHE_ROOT, HTTP_BASE+"/cache/");  // <- append relative path
+        Log.pathMap.put(CACHE_ROOT,   HTTP_BASE+"/cache/");  // <- append relative path
         Log.pathMap.put(STORAGE_ROOT, HTTP_BASE+"/storage/");
 		Log.pathMap.put(PRODUCT_ROOT, HTTP_BASE+"/products/");
         //System.err.println(Manip.toString(this, '\n'));

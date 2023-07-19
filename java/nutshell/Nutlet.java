@@ -703,11 +703,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
 		String clsName = productServer.getClass().getCanonicalName();
 		String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, HTTP_ROOT, clsName, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, HTTP_ROOT, clsName, productServer.confFiles, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
 		String cp = System.getProperty("java.class.path");
 		String cmdLine2 = "java -cp %s %s  --verbose  --conf %s --instructions %s %s";
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, cp, clsName, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, cp, clsName, productServer.confFiles, batchConfig.instructions, task.info)).setAttribute("class", "code");
 		//html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
 		html.appendTable(task.info.getParamEnv(null), "Product parameters");

@@ -4,8 +4,14 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Text formatter supporting elementary effects (bold, italic) and a limited set of colours.
+ *
+ */
 public class TextOutput {
 
+    /** Encoding
+     *
+     */
     public enum Format {
         DEFAULT,
         TEXT,
@@ -102,9 +108,14 @@ public class TextOutput {
     public void endElem(StringBuffer buffer){
     }
 
+    <E> void append(E text, StringBuffer buffer){
+        buffer.append(text);
+    }
+    /*
     void append(String text, StringBuffer buffer){
         buffer.append(text);
     }
+     */
 
     void appendLink(String label, String url, StringBuffer buffer){
         buffer.append(url);

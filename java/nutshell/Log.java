@@ -125,19 +125,16 @@ public class Log implements AutoCloseable {
 	 *
 	 * @param localName - name
 	 * @param verbosity - log level
-	 * @param minDigits -
+	 * @param minDigits - digits reserved for timestamp, which is seconds, like [17,025]
 	 *
 	 */
 	public Log(String localName, int verbosity, int minDigits) {
-
 		startTime = System.currentTimeMillis();
-
 		if (localName != null)
 			setName(localName);
 		setVerbosity(verbosity);
 		numberFormat.setMinimumIntegerDigits(minDigits);
 		printStream = System.err;
-		// decoration = new Flags();
 	}
 
 	public Log() {
@@ -170,10 +167,7 @@ public class Log implements AutoCloseable {
 	 * @param verbosity
 	 */
 	public Log(int verbosity) {
-		this.verbosity = verbosity;
-		startTime = System.currentTimeMillis();
-		numberFormat.setMinimumIntegerDigits(5);
-		printStream = System.err;
+		this("", verbosity, 5);
 	}
 
 
@@ -516,14 +510,28 @@ public class Log implements AutoCloseable {
 		this.verbosity = verbosity;
 	}
 
-	public void setVerbosity(String verbosity) throws NoSuchFieldException {
-
+	public void setVerbosity(String verbosity, boolean lenient) throws NoSuchFieldException {
 
 		try {
 			int level = Integer.parseInt(verbosity);
 			this.setVerbosity(level);
 		}
 		catch (NumberFormatException e) {
+
+			try {
+				setVerbosity(Log.Status.valueOf(verbosity));
+			}
+			catch (IllegalArgumentException e2){
+				if (lenient){
+					this.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
+					this.fail(String.format("No such verbosity level: %s", verbosity));
+					this.warn(String.format("Retaining level: %s", Log.statusCodes.get(this.getVerbosity())));
+				}
+				else {
+					throw new NoSuchFieldException(verbosity);
+				}
+			}
+			/*
 			for (Log.Status s: Status.values()) {
 				if (s.name().equals(verbosity)){
 					this.setVerbosity(s.level);
@@ -531,20 +539,22 @@ public class Log implements AutoCloseable {
 				}
 				//statusCodes.put(s.level, s);
 			}
-			this.note(String.format("Use numeric levels or keys: %s", Log.statusCodes.entrySet().toString()));
-			this.warn(String.format("No such verbosity level: %s", verbosity));
-			this.warn(String.format("Retaining level: %s", Log.statusCodes.get(this.getVerbosity())));
+
+			 */
 			//return;
-			throw new NoSuchFieldException(verbosity);
 		}
 
 	}
 
+	public void setVerbosity(String verbosity) throws NoSuchFieldException {
+		setVerbosity(verbosity, false);
+	}
 
-	/** Return current level of verbosity
-	 *
-	 * @return
-	 */
+
+		/** Return current level of verbosity
+         *
+         * @return
+         */
 	public int getVerbosity() {
 		return verbosity;
 	}
@@ -638,16 +648,12 @@ public class Log implements AutoCloseable {
 		}
 
 		if (this.printStream != null){
-			/* BUG: this is not fileOutputStream ?
-			if (decoration.involves(OutputFormat.HTML)) {
-				this.printStream.println(SimpleHtml.Tag.PRE.end());
-				this.printStream.println(SimpleHtml.Tag.HTML.end());
+			if (buffer.length() > 0){
+				// Note: matching the section start/end not guaranteed.
+				// Consider skipping this, leaving for user to start and end the tags.
+				textOutput.endSection(buffer);
+				this.printStream.print(buffer);
 			}
-
-			 */
-			// this.printStream.print("LÖBU");
-			textOutput.endSection(buffer);
-			this.printStream.print(buffer.toString());
 
 			if ((this.printStream != System.err) && (this.printStream != System.out)){
 				this.printStream.close();
@@ -664,9 +670,9 @@ public class Log implements AutoCloseable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.err.println("kiuso1");
+			//System.err.println("test1");
 			this.fileOutputStream = null;
-			System.err.println("kiuso2");
+			//System.err.println("test2");
 		}
 
 		logFile = null;
@@ -716,23 +722,28 @@ public class Log implements AutoCloseable {
 
 		for (String s: value.split(",")){
 
+			System.err.println("STr:" + s);
+
 			if (s.isEmpty()){
 				decoration.clear();
 				continue;
 			}
 
 			try {
-				deco.add(s);
-				setDecoration(deco); // overrides
-				// serverL og.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
+				setVerbosity(s);
+				//setVerbosity(Log.Status.valueOf(s));
+				// server Log.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
+				System.err.println("Yeah, verbosity:" + getVerbosity());
 				continue;
 			}
 			catch (Exception e){
 			}
 
+
 			try {
-				setVerbosity(Log.Status.valueOf(s));
-				// server Log.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
+				deco.add(s);
+				setDecoration(deco); // overrides
+				// serverL og.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
 				continue;
 			}
 			catch (Exception e){
