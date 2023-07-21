@@ -77,8 +77,8 @@ if [ "$ARG" == 'demo' ]; then
 fi
 
 # Taking back-up
-backup_file ${NUTSHELL_ROOT}/nutshell.cnf
-cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
+backup_file ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf
+cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf
 
 
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then

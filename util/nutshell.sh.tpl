@@ -41,7 +41,7 @@ if [ $# != 0 ]; then
     # Notice: PYTHON and JAVA have different labels
     # Common ones: ERROR,WARNING,INFO,DEBUG
     # Double quotes are needed to keep excplicit empty '' agruments.
-    ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell.cnf "$@"  # $*
+    ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
     RESULT=$?
     if [ $RESULT != 0 ]; then
 	#echo !!
@@ -65,7 +65,7 @@ echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
 echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
 echo "# HTTP_ROOT=$HTTP_ROOT"
 echo "# NUTSHELL=$NUTSHELL"
-echo "# Primary conf: ${NUTSHELL_DIR}/nutshell.cnf"
+echo "# Primary conf: ${NUTSHELL_DIR}/nutshell-${NUTSHELL_VERSION}.cnf"
 echo
 echo "Usage: nutshell <arguments>"
 echo "Arguments:  those of this $NUTSHELL_VERSION version, listed with: "
@@ -76,7 +76,7 @@ echo
 echo "For debugging, invoke this ($NUTSHELL_VERSION) version directly, for example:"
 echo "  $0 --version"
 echo "  $NUTSHELL --version"
-echo "  $NUTSHELL --conf ${NUTSHELL_DIR}/nutshell.cnf --version"
+echo "  $NUTSHELL --conf ${NUTSHELL_DIR}/nutshell-${NUTSHELL_VERSION}.cnf --version"
 echo
 
 exit $RESULT
