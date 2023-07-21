@@ -85,6 +85,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		setup.putAll(readTomcatParameters()); // from ho
 		*/
 		////httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
+		productServer.serverLog.setFormat(TextOutput.Format.HTML);
+		productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
+
 		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
 
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
@@ -96,16 +99,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			FileUtils.ensureWritableDir(cacheNutShell, productServer.GROUP_ID, productServer.dirPerms);
 			if (!productServer.serverLog.logFileIsSet()) {
 				Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
-				if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
-					productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
-				productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
+				//if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
+				//productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
+				// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
 				FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
 				productServer.setLogFile(p.toString());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			productServer.serverLog.setFormat(TextOutput.Format.TEXT); // + MAP_URLS
-			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log");
+			productServer.serverLog.setFormat(TextOutput.Format.TEXT);
+			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log"); // Also this can fail?
 		}
 
 
@@ -366,11 +369,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			task = productServer.new Task(product, batchConfig.instructions.value, productServer.serverLog);
 			// task = productServer.new Task(product.value, batchConfig.instructions.value, null);
 			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
-			task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
+			task.log.set(productServer.LOG_TASKS);
+			task.log.debug(String.format("Log style: %s", task.log.getConf()));
+			//task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
 			//task.log.setFormat(productServer.LOG_FORMAT);
-			task.log.setFormat(TextOutput.Format.HTML);
-			task.log.setDecoration(productServer.LOG_STYLE);
-			task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
+			//task.log.setFormat(TextOutput.Format.HTML);
+			//task.log.setDecoration(productServer.LOG_STYLE);
+			//task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
 
 			taskMap.put(task.getTaskId(), new Tasklet(task));
 			task.log.special(String.format("taskMap size: %d", taskMap.size()));

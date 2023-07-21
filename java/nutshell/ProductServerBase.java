@@ -23,10 +23,41 @@ import static java.nio.file.FileVisitResult.CONTINUE;
  */
 public class ProductServerBase extends Program {
 
-    //final public HttpLog serverLog = new HttpLog(getClass().getSimpleName());
+    /** Log for the main process receiving tasks, for example product requests.
+     *  For each task, a separate log will be started.
+     *
+     */
     final public HttpLog serverLog = new HttpLog("[NutShell]");
 
     static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    /** Settings for the main log.
+     *
+     *  - verbosity:
+     *  - style:
+     *  - format: TEXT, VT100, HTML
+     *
+     */
+    public String LOG_SERVER = "TEXT,INFO";
+
+    /** Settings for task logs.
+     *
+     *  - verbosity:
+     *  - style:
+     *  - format: TEXT, VT100, HTML
+     *
+     */
+    public String LOG_TASKS = "DEBUG,COLOUR";
+
+    /** Format for the task logs.
+     *
+     */
+    // public TextOutput.Format LOG_FORMAT = TextOutput.Format.DEFAULT;
+
+    /** Format for the tasks.
+     *
+     */
+    // final public Flags LOG_STYLE = serverLog.decoration;
 
     public final Map<String,Object> setup = new HashMap<>();
 
@@ -64,9 +95,6 @@ public class ProductServerBase extends Program {
     public Path STORAGE_ROOT = Paths.get(".");
 
 
-    public TextOutput.Format LOG_FORMAT = TextOutput.Format.DEFAULT;
-
-    final public Flags LOG_STYLE = serverLog.decoration;
 
     public String USER = System.getProperty("user.name");;
 
@@ -77,7 +105,7 @@ public class ProductServerBase extends Program {
      *  and user.
      *
      */
-    public String LABEL = ""; // ""%d-%s"; // USER-counter
+    public String LABEL = "nutshell"; // ""%d-%s"; // USER-counter
 
     final
     public Map<String,String> MAP_URL = new HashMap<>();
@@ -171,9 +199,15 @@ public class ProductServerBase extends Program {
             }
         }
 
+        Manip.assignToObjectLenient(setup, this);
         //System.err.println(setup);
 
-        Manip.assignToObjectLenient(setup, this);
+        // Logging
+        serverLog.set(LOG_SERVER);
+        serverLog.note(String.format("This is NutShell (%s) server log", getVersion()));
+        // serverLog.setFormat(TextOutput.Format.TEXT);
+        // serverLog.setDecoration(); // "None"
+
 
         if (CACHE_PATH != null){
             cachePathSyntax = new StringMapper(CACHE_PATH);
@@ -220,18 +254,6 @@ public class ProductServerBase extends Program {
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
-        // Logging
-        /*
-        if (LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
-            serverLog.setFormat(TextOutput.Format.VT100);
-        else
-            serverLog.setFormat(LOG_FORMAT);
-
-        serverLog.setDecoration(LOG_STYLE);
-        */
-
-        serverLog.setFormat(TextOutput.Format.TEXT);
-        serverLog.setDecoration(); // "None"
 
         StringBuilder sb = new StringBuilder();
         sb.append(HTTP_HOST);

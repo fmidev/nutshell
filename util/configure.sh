@@ -70,11 +70,13 @@ fi
 
 
 echo
-    
-export LOG_STYLE
-#LOG_STYLE=${LOG_FORMAT:-'HTML'}
 
-export LOG_FORMAT
+# NEW
+export LOG_SERVER
+export LOG_TASKS
+# Deprecating
+#export LOG_STYLE
+#export LOG_FORMAT
 
 if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 
@@ -129,9 +131,21 @@ ask_variable DIR_PERMS  "rwxrwxr-x" "Permissions for cache directories created b
 ask_variable FILE_PERMS "rw-rw-r--" "Permissions for cache files created by the system"
 ask_variable UMASK "" "Defines the file permissions created by a product generator. (optional)"
 
-ask_variable LOG_FORMAT "VT100" "Log formatting: (plain) TEXT, VT100 (text), HTML or DEFAULT"
+LOG_FORMAT=${LOG_FORMAT:-'VT100'}
+LOG_STYLE=${LOG_STYLE:-'COLOUR,URLS'}
 
-ask_variable LOG_STYLE "COLOUR,URLS" "Log formatting: (use) COLOUR, (convert) URLS"
+# ask_variable LOG_FORMAT "VT100" "Log formatting: (plain) TEXT, VT100 (text), HTML or DEFAULT"
+
+# ask_variable LOG_STYLE "COLOUR,URLS" "Log formatting: (use) COLOUR, (convert) URLS"
+
+LOG_OLD="$LOG_FORMAT $LOG_STYLE"
+LOG_OLD=( ${LOG_OLD//,/ } )
+LOG_OLD="${LOG_OLD[*]}"
+#LOG=${LOG// /,}
+LOG_OLD=${LOG_OLD// /,}
+
+ask_variable LOG_SERVER "$LOG_OLD" "Log formatting: (use) COLOUR, (convert) URLS"
+ask_variable LOG_TASKS  "$LOG_SERVER" "Log formatting: (use) COLOUR, (convert) URLS"
 
 echo
 vt100echo green "Resulting configuration: "

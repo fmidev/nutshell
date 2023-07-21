@@ -51,7 +51,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
 		super.version = Arrays.asList(3, 32);
-		setup.put("ProductServer-version", version);
+		setup.put("ProductServer", getVersion());
 	}
 
 
@@ -305,9 +305,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//parentLog.special("koe1");
 			log = new HttpLog(parentLog.getName() + "[" + this.info.PRODUCT_ID + "]", parentLog.getVerbosity());
 			//log.setFormat(parentLog.getFormat());
-			log.setFormat(LOG_FORMAT);
-			log.setDecoration(LOG_STYLE);
-			log.setDecoration(parentLog.decoration);
+			// log.setFormat(LOG_FORMAT);
+			// log.setDecoration(LOG_STYLE);
+			log.set(LOG_TASKS);
+			// log.setDecoration(parentLog.decoration);
 
 			// Is this sometimes confusing?
 			// Consider extension in uppercase: .LOG and  .HTML
@@ -319,16 +320,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			Path logPath = CACHE_ROOT.resolve(relativeLogPath);
 			try {
 				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
-				parentLog.special("koe2");
 				log.setLogFile(logPath);
 			} catch (IOException e) {
 				System.err.println(String.format("Opening Log file (%s) failed: Log GID=%d  file=%s dir=%s, error: %s",
 						logPath, GROUP_ID, filePerms, dirPerms, e));
 				//log.setLogFile(null); ?
 			}
-			parentLog.special("koe3");
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
-
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			Path systemPath = CACHE_ROOT.resolve(relativeSystemDir);
@@ -1588,7 +1586,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		*/
 
 
-        registry.add(new Parameter.Simple<String>("conf", "Read configuration", "") {
+        registry.add(new Parameter.Simple<String>("conf", "Read configuration file", "") {
             /// It is recommended to give --conf as the first option, unless default used.
             @Override
             public void exec() {
@@ -1628,10 +1626,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
             @Override
             public void exec() {
-                LOG_FORMAT = value;
-                serverLog.setFormat(LOG_FORMAT); // needed?
+                // LOG_FORMAT = value;
+                serverLog.setFormat(value); // needed?
+				LOG_SERVER = serverLog.getConf();
+						//String.format("%s %s", serverLog.textOutput, serverLog.decoration);
+				LOG_TASKS = LOG_SERVER;
                 // server Log.debug(server Log.textOutput.toString());
-				serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
+				serverLog.special(String.format("New state for all logs: '%s'", LOG_SERVER));
+				//serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
 				//server Log.debug(server Log.textOutput.toString());
             }
         });
@@ -1646,11 +1648,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
                 //super.setParam(key, value);
 				serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
                 String s = value.toString();
-                if (s.isEmpty())
-                    LOG_STYLE.clear();
-                else
-                    LOG_STYLE.set(value.toString());
-                serverLog.decoration.set(LOG_STYLE);
+
+                if (s.isEmpty()){
+					serverLog.decoration.clear();
+					//LOG_STYLE.clear();
+				}
+                else {
+					serverLog.decoration.set(s);
+					// LOG_STYLE.set(value.toString());
+				}
+				LOG_SERVER = serverLog.getConf();
+				LOG_TASKS = LOG_SERVER;
+                //serverLog.decoration.set(LOG_STYLE);
             }
 
 
@@ -1665,51 +1674,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			@Override
 			public void exec() {
-
 				serverLog.set(value);
-				/*
-				Flags deco = new Flags(TextOutput.Options.class);
-
-				for (String s: value.split(",")){
-
-					if (s.isEmpty()){
-						serverLog.decoration.clear();
-						continue;
-					}
-
-					try {
-						deco.add(s);
-						serverLog.setDecoration(deco); // overrides
-						// serverL og.debug(String.format("%s: updated decoration: %s", getName(), serverLog.decoration));
-						continue;
-					}
-					catch (Exception e){
-					}
-
-					try {
-						serverLog.setVerbosity(Log.Status.valueOf(s));
-						// server Log.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
-						continue;
-					}
-					catch (Exception e){
-					}
-
-					try {
-						serverLog.setFormat(TextOutput.Format.valueOf(s));
-						//server Log.debug(String.format("%s: updated format: %s", getName(), serverLog.getFormat()));
-						continue;
-					}
-					catch (Exception e){
-					}
-
-					throw new RuntimeException(String.format("%s: unsupported Log parameter %s, see --help log",
-							getName(), value));
-					// serve rLog.error(String.format("%s: unsupported Log parameter %s, see --help log", getName(), value));
-
-				}
-
-				 */
-				//serverLog.debug(serverLog.textOutput.toString());
 			}
 		});
 
@@ -1718,7 +1683,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
                 this, "GROUP_ID"));
 
         registry.add(new Parameter<ProductServer>("label",
-                "Marker for logs and tmps, supporting %d=task-id [%s=user].",
+                "Marker for logs and tmps", //supporting %d=task-id [%s=user].",
                 this, "LABEL"));
 
         // Consider: to NutLet and @ShellExec
@@ -1793,17 +1758,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	}
 
-	/// Command-line interface for 
+	/** Command-line interface for the NutShell product server
+	 *
+ 	 */
+
 	public static void main(String[] args) {
 
 		final ProductServer server = new ProductServer();
 		server.serverLog.setVerbosity(Log.Status.DEBUG);
-		//server.TIMEOUT = 120;
-		//server.version
 
 		/*
 		if (args.length == 0){
-			server.help();  // An instance, yes. Default values may habve been changed.
+			server.help();  // An instance, yes. Default values may have been changed!
 			return;
 		}
 		*/
@@ -2013,7 +1979,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.warn("Clearing cache");
 			if (batchConfig.instructions.value != ActionType.CLEAR_CACHE){
 				batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
-				log.warn(String.format("Discarding remaining context.instructions: %s", batchConfig.instructions) );
+				log.warn(String.format("Discarding remaining instructions: %s", batchConfig.instructions) );
 			}
 
 			try {
@@ -2038,10 +2004,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.debug("Directives: " + batchConfig.directives);
 		 */
 
-		/// "MAIN"
-		//  Map<String,ProductServer.Task> tasks = server.executeMany(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
-		//  Map<String,ProductServer.Task> tasks = server.executeBatch(batchConfig, log);
-
+		/// MAIN
 		Map<String, Task> tasks = server.prepareTasks(batchConfig, log);
 
 		Graph graph = new Graph("ProductServer");

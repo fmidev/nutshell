@@ -684,6 +684,11 @@ public class Log implements AutoCloseable {
 		return buffer.toString();
 	}
 
+	public String getConf() {
+		return String.format("%s, %s", textOutput, decoration);
+	}
+
+
 	public TextOutput.Format getFormat() {
 		return textOutput.getFormat();
 	}
@@ -722,7 +727,7 @@ public class Log implements AutoCloseable {
 
 		for (String s: value.split(",")){
 
-			System.err.println("STr:" + s);
+			// System.err.println("Log.set()... :" + s);
 
 			if (s.isEmpty()){
 				decoration.clear();
@@ -731,14 +736,11 @@ public class Log implements AutoCloseable {
 
 			try {
 				setVerbosity(s);
-				//setVerbosity(Log.Status.valueOf(s));
-				// server Log.debug(String.format("%s: updated verbosity: %d", getName(), serverLog.getVerbosity()));
-				System.err.println("Yeah, verbosity:" + getVerbosity());
+				// System.err.println("Updated verbosity:" + getVerbosity());
 				continue;
 			}
 			catch (Exception e){
 			}
-
 
 			try {
 				deco.add(s);

@@ -36,11 +36,12 @@ public class ProgramUtils {
         @Override
         public void exec() {
             // Collector<CharSequence, ?, String> c = Collectors.joining(".");
+            /*
             String s = reference.version.stream()
                 .map(i -> i.toString())
                 .collect( Collectors.joining(".") );
-                 //.collect( Collectors.joining(",","(",")") );
-            System.out.println(s);
+                 //.collect( Collectors.joining(",","(",")") );*/
+            System.out.println(reference.getVersion());
         }
 
         // static Collector

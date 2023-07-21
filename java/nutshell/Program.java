@@ -3,11 +3,18 @@ package nutshell;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Program {
 
-    //public int[] version = {1,0};
     List<Integer> version = Arrays.asList(1, 0);
+
+    public String getVersion(){
+        return version.stream()
+            .map(i -> i.toString())
+            .collect( Collectors.joining(".") );
+    }
+
 
     static class Parameter<T> extends BeanLike { // add Program ?E
 
