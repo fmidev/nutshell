@@ -120,6 +120,7 @@ public class Program {
             Manip.assignToObject(value, reference, key);
         }
 
+
         @Override
         public void setParams(String[] args) throws NoSuchFieldException, IllegalAccessException {
             final String[] keys = this.getParamKeys();
@@ -152,29 +153,43 @@ public class Program {
          *
          * @return
          */
+        @Override
         public String toString() {
             // Skip: description
-            String p = hasParams() ? getParams().toString() : "";
-            if (reference == this){
-                return String.format("%s %s", name, p);
-                //return String.format("ProgramOption{%s} %s,", name, Arrays.toString(paramKeys));
+            return valuesToString();
+            /*
+            if (reference == null) {
+                return String.format("%s (simple) %s", name, valuesToString());
             }
-            else if (reference == null) {
-                return String.format("%s(simple) %s", name, p);
+            else if (reference == this){
+                return String.format("%s %s", name, valuesToString());
             }
-            // Externaö reference
             else {
-                /*
-                for (String s: this.paramKeys){
-                    this.ge
-                }
-
-                 */
-                return String.format("%s*%s : %s", name, reference.toString(),p);
+                return String.format("%s -> %s", name, valuesToString());
             }
+
+             */
 
         }
 
+        /** Returns a simple value directly or a map of object values.
+         *
+         *  - value
+         *  -
+         *  - ClassName.{key1=value1,key2=value2,...}
+         *
+         *
+         * @return
+         */
+        public String valuesToString() {
+            String p = hasParams() ? getParams().toString() : "";
+            if ((reference == null) || (reference == this)){
+                return p;
+            }
+            else {
+                return String.format("%s.%s", reference.getClass().getSimpleName(),p);
+            }
+        }
 
 
 

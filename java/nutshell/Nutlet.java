@@ -85,10 +85,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		setup.putAll(readTomcatParameters()); // from ho
 		*/
 		////httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
-		productServer.serverLog.setFormat(TextOutput.Format.HTML);
-		productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
+		// productServer.serverLog.setFormat(TextOutput.Format.HTML);
+		// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
 
-		productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
+		// Note: upon setLogFile() below, this initial log will be dumped?
+		// productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
+		productServer.readConfig(Paths.get(confDir, "nutshell-tomcat.cnf")); // Read two times? Or NutLet?
 
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
 
@@ -96,7 +98,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		//Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
 		try {
-			FileUtils.ensureWritableDir(cacheNutShell, productServer.GROUP_ID, productServer.dirPerms);
+			// FileUtils.ensureWritableDir(cacheNutShell, productServer.GROUP_ID, productServer.dirPerms);
 			if (!productServer.serverLog.logFileIsSet()) {
 				Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
 				//if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
@@ -109,8 +111,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			e.printStackTrace();
 			productServer.serverLog.setFormat(TextOutput.Format.TEXT);
 			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log"); // Also this can fail?
+
 		}
 
+		productServer.serverLog.note(String.format("NutShell (%s) server log",  productServer.getVersion()));
 
 		// Experimental
 		/*
@@ -207,7 +211,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				page = value;
 			}
 			// Interpret some "idioms"
-			else if (key.equals("catalog") || key.equals("status") || key.endsWith(".html")){
+			else if (key.equals("catalog") || key.equals("help") || key.equals("status") || key.endsWith(".html")){
 				page = key;
 			}
 			else if (key.equals("demo")){
@@ -227,8 +231,19 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 		}
 
+		if (page.equals("help")){
+			SimpleHtml html = getHtmlPage();
+
+			html.appendTable(registry.map, "Commands");
+			//html.appendTag(SimpleHtml.Tag.PRE, tracker.generators.toString());
+			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
+			sendToStream(html.document, httpResponse);
+
+			return;
+		}
+
 		// Debug
-		//batchConfig.instructions.add(Instructions.STATUS);
+		// batchConfig.instructions.add(Instructions.STATUS);
 
 		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
 
@@ -249,7 +264,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			return;
 		}
 
-		//if (page.value.equals("catalog")){
+
+			//if (page.value.equals("catalog")){
 		if (page.equals("catalog")){
 
 			// ProductServerBase.GeneratorTracker tracker = productServer.new GeneratorTracker(productServer.productRoot.resolve("radar")); // FIX later
@@ -548,9 +564,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
 				}
 
-				if (task.log.getStatus() > Log.Status.ERROR.level){
+				if (task.log.getStatus() <= Log.Status.ERROR.level){
 					// TODO: draw graph only...
-					html.appendTag(SimpleHtml.Tag.PRE, "See above message. (Less important debugging follows.)");
+					// html.appendTag(SimpleHtml.Tag.PRE, "See above message. (Less important debugging follows.)");
+					html.appendTag(SimpleHtml.Tag.PRE, "Check for debugging info below.");
+					//html.appendTag(SimpleHtml.Tag.PRE, String.format("Success/error status: %d", task.log.getStatus()));
 				}
 
 				if ((task.relativeGraphPath != null)){ //  && (task.graph != null)

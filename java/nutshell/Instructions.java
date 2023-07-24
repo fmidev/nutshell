@@ -115,6 +115,8 @@ interface ActionType {
 
     /// Computation intensive products are computed in the background; return a notification receipt in HTML format.
     //  public static final int BATCH = 4096;
+
+    /// TODO: convert to a separate command?
     int CLEAR_CACHE = MyCounter.getBit(); // 16384;
 
 }

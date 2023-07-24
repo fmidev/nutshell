@@ -8,7 +8,10 @@ import java.util.TreeMap;
 //class ProgramRegistry<E> {
 class ProgramRegistry {
 
-    protected TreeMap<String, Program.Parameter> map = new TreeMap<>();
+    //protected
+    public TreeMap<String, Program.Parameter> map = new TreeMap<>();
+
+
 
     void add(Program.Parameter param){
         add(param.getName(), param);
@@ -77,7 +80,10 @@ class ProgramRegistry {
 
     }
 
-    public void execAll() {
+    /** Only for debugging.
+     *
+     */
+    protected  void execAll() {
         for (Map.Entry<String, Program.Parameter> entry : map.entrySet()) {
             System.out.println("Exec: " + entry.getKey() + ":");
             entry.getValue().exec();

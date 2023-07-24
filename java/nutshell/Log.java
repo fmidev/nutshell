@@ -99,7 +99,13 @@ public class Log implements AutoCloseable {
 	static
 	final protected TextOutput.Html htmlText = new TextOutput.Html();
 
-	public TextOutput textOutput = vt100Text; // plain
+	/** Default or initial layout for output.
+	 *  Note that
+	 *  - vt100Text would be bad for HTML pages.
+	 *  - htmlText  would be bad for text consoles
+	 *
+	 */
+	public TextOutput textOutput = plainText; // Note: vt100Text
 
 
 	// public Flags decorations;
@@ -594,12 +600,12 @@ public class Log implements AutoCloseable {
 		try {
 			this.logFile = path.toFile();
 			this.fileOutputStream = new FileOutputStream(this.logFile);
-			this.debug(String.format("Continuing log in file: %s", this.logFile));
+			// this.debug(String.format("Continuing log in file: %s", this.logFile));
 			this.printStream = new PrintStream(this.fileOutputStream);
 			//this.log.printStream = System.err;
 			//this.setVerbosity(Status.DEBUG); //?
 			textOutput.startSection(buffer);
-			this.debug(String.format("Started this log: %s", this.logFile));
+			this.debug(String.format("Log started: %s", this.logFile));
 		}
 		catch (IOException e) {
 			e.printStackTrace(); //this.log.printStream);

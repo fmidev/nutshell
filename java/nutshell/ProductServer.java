@@ -50,7 +50,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 32);
+		super.version = Arrays.asList(3, 33);
 		setup.put("ProductServer", getVersion());
 	}
 
@@ -401,7 +401,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param dst - link to be created
 		 * @param force - overwrite link or file
 		 * @return successfully generated path
-		 * @throws IOException
+		 * @throws IOException if linking fails
 		 */
 		public Path link(Path src, Path dst, boolean force) throws IOException {
 			log.note(String.format("Link: from: %s ", src));
@@ -1626,7 +1626,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
             @Override
             public void exec() {
-                // LOG_FORMAT = value;
                 serverLog.setFormat(value); // needed?
 				LOG_SERVER = serverLog.getConf();
 						//String.format("%s %s", serverLog.textOutput, serverLog.decoration);
@@ -1711,15 +1710,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 
-		registry.add(new Parameter.Simple<String>("directives",
-				"Set application (env) variables separated with '|'",
-				""){
-			@Override
-			public void exec() {
-				//System.err.print(String.format("Type: %s %s", value.getClass(), value));
-				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
-			}
-		});
 
 		registry.add(new Parameter.Simple<String>("product","Set product filename (repeatable)",
 				""){
@@ -1737,7 +1727,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 
 		registry.add(new Parameter<Instructions>("depth",
-				"Cache clearance depth (0MAKE, 1GENERATE, N...: remake inputs)",
+				"Cache clearance depth (0=EXISTS, 0=MAKE, 1GENERATE, N...: remake inputs)",
 				batchConfig.instructions, "regenerateDepth"));
 
 
@@ -1752,6 +1742,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			public void exec() {
 				serverLog.deprecated("Use --depth instead.");
 				batchConfig.instructions.regenerateDepth = depth;
+			}
+		});
+
+		registry.add(new Parameter.Simple<String>("directives",
+				"Set application (env) variables separated with '|'",
+				""){
+			@Override
+			public void exec() {
+				//System.err.print(String.format("Type: %s %s", value.getClass(), value));
+				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
 			}
 		});
 

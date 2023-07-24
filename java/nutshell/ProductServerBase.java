@@ -184,11 +184,13 @@ public class ProductServerBase extends Program {
 
         if (path != null) {
             try {
+                /*
                 if (this.confFiles.isEmpty())
                     serverLog.debug(String.format("Reading setup: %s", path.toString()));
                 else
                     serverLog.note(String.format("Re-reading setup: %s (old: %s)",
                             path, this.confFiles));
+                 */
                 Config.readConfig(path.toFile(), setup);
                 this.confFiles.add(path); // null ok??
                 setup.put("confFiles", this.confFiles);
@@ -205,11 +207,14 @@ public class ProductServerBase extends Program {
         // Logging
         serverLog.set(LOG_SERVER);
         serverLog.note(String.format("This is NutShell (%s) server log", getVersion()));
-        // serverLog.setFormat(TextOutput.Format.TEXT);
-        // serverLog.setDecoration(); // "None"
+        serverLog.note("Configuration files: ");
+        for (Path p: this.confFiles){
+            serverLog.note(p.toString());
+        }
 
 
-        if (CACHE_PATH != null){
+
+        if (CACHE_PATH != null){ // deprecating?
             cachePathSyntax = new StringMapper(CACHE_PATH);
         }
         else {
