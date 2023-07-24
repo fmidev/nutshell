@@ -1251,7 +1251,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 * @param log
 	 * @return
 	 */
-	public Map<String,Task> prepareTasks(BatchConfig batchConfig, HttpLog log) {
+	public Map<String,Task> prepareTasks(Batch batchConfig, HttpLog log) {
 		return prepareTasks(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
 	}
 
@@ -1553,9 +1553,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	/** A container, a "super task" for generating one or several products.
 	 *
+	 *  Limitation: instructions and directives are shared for all the products.
 	 */
 	static
-	class BatchConfig {
+	class Batch {
 
 		public Map<String,String> products = new TreeMap<>();
 		public Instructions instructions = new Instructions();
@@ -1702,11 +1703,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 	// Note: this turns program registry dynamic. It should be shared, static?
-    public void populate(BatchConfig batchConfig, ProgramRegistry registry){
+    public void populate(Batch batch, ProgramRegistry registry){
 
-		registry.add(new InstructionParameter(batchConfig.instructions));
+		registry.add(new InstructionParameter(batch.instructions));
 		for (String instr: ClassUtils.getConstantKeys(Instructions.class)){ // consider instant .getClass()
-			registry.add(instr.toLowerCase(), new InstructionParameter(batchConfig.instructions, instr));
+			registry.add(instr.toLowerCase(), new InstructionParameter(batch.instructions, instr));
 		}
 
 
@@ -1715,8 +1716,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				int i = batchConfig.products.size();
-				batchConfig.products.put("product" + i, value);
+				int i = batch.products.size();
+				batch.products.put("product" + i, value);
 			}
 		});
 
@@ -1728,7 +1729,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new Parameter<Instructions>("depth",
 				"Cache clearance depth (0=EXISTS, 0=MAKE, 1GENERATE, N...: remake inputs)",
-				batchConfig.instructions, "regenerateDepth"));
+				batch.instructions, "regenerateDepth"));
 
 
 		registry.add(new Parameter.Single("regenerate",
@@ -1741,7 +1742,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				serverLog.deprecated("Use --depth instead.");
-				batchConfig.instructions.regenerateDepth = depth;
+				batch.instructions.regenerateDepth = depth;
 			}
 		});
 
@@ -1751,7 +1752,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				//System.err.print(String.format("Type: %s %s", value.getClass(), value));
-				MapUtils.setEntries(value,"\\|", "true", batchConfig.directives);
+				MapUtils.setEntries(value,"\\|", "true", batch.directives);
 			}
 		});
 
@@ -1781,8 +1782,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
         // NEW global (batch-independent)
 		server.populate(registry);
 
-		BatchConfig batchConfig = new BatchConfig();
-		server.populate(batchConfig, registry);
+		Batch batch = new Batch();
+		server.populate(batch, registry);
 
 		registry.add(new ProgramUtils.Version<>(server));
 
@@ -1819,23 +1820,23 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			@Override
 			public void exec() {
-				String[] p = batchConfig.products.values().toArray(new String[0]);
-				if (batchConfig.products.isEmpty()){
+				String[] p = batch.products.values().toArray(new String[0]);
+				if (batch.products.isEmpty()){
 					log.error("Product not defined yet, try: [--product] <FILE>"  + this.getName());
 				}
 				else {
 
-					if (batchConfig.instructions.isEmpty())
-						batchConfig.instructions.add(ActionType.MAKE);
+					if (batch.instructions.isEmpty())
+						batch.instructions.add(ActionType.MAKE);
 
-					if (batchConfig.products.size() > 1){
+					if (batch.products.size() > 1){
 						log.warn("Several products defined, using last");
 					}
 
-					for (Map.Entry entry: batchConfig.products.entrySet()) {
+					for (Map.Entry entry: batch.products.entrySet()) {
 						try {
 							Task task = server.new Task(entry.getValue().toString(), 0, log);
-							System.out.println(String.format("instructions=%s&product=%s", batchConfig.instructions, task.info.getFilename()));
+							System.out.println(String.format("instructions=%s&product=%s", batch.instructions, task.info.getFilename()));
 						} catch (ParseException e) {
 							log.warn(entry.getValue().toString());
 							log.error(e.getMessage());
@@ -1854,7 +1855,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				batchConfig.instructions.addCopy(value);
+				batch.instructions.addCopy(value);
 			}
 		});
 
@@ -1863,7 +1864,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				batchConfig.instructions.addLink(value);
+				batch.instructions.addLink(value);
 			}
 		});
 
@@ -1872,7 +1873,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				""){
 			@Override
 			public void exec() {
-				batchConfig.instructions.addMove(value);
+				batch.instructions.addMove(value);
 			}
 		});
 
@@ -1951,10 +1952,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				}
 				else {  // Argument does not start with "--"
-					batchConfig.products.put("product" + (batchConfig.products.size()+1), arg);
+					batch.products.put("product" + (batch.products.size()+1), arg);
 				}
 
-				log.info("Instructions: " + batchConfig.instructions);
+				log.info("Instructions: " + batch.instructions);
 			}
 		}
 		catch (Exception e) {
@@ -1966,20 +1967,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			System.exit(1);
 		}
 
-		if (batchConfig.instructions.isEmpty()){
-			batchConfig.instructions.set(ActionType.MAKE);
+		if (batch.instructions.isEmpty()){
+			batch.instructions.set(ActionType.MAKE);
 		}
 
 		int result = 0;
 
-		if (!batchConfig.instructions.isEmpty())
-			log.debug("Instructions: " + batchConfig.instructions);
+		if (!batch.instructions.isEmpty())
+			log.debug("Instructions: " + batch.instructions);
 
-		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
+		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {
 			log.warn("Clearing cache");
-			if (batchConfig.instructions.value != ActionType.CLEAR_CACHE){
-				batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
-				log.warn(String.format("Discarding remaining instructions: %s", batchConfig.instructions) );
+			if (batch.instructions.value != ActionType.CLEAR_CACHE){
+				batch.instructions.remove(ActionType.CLEAR_CACHE);
+				log.warn(String.format("Discarding remaining instructions: %s", batch.instructions) );
 			}
 
 			try {
@@ -1992,12 +1993,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		// Turhia/väärässä paikassa (tässä)
-		if (!batchConfig.instructions.copies.isEmpty())
-			log.note(String.format("   COPY(%d):\t %s", batchConfig.instructions.copies.size(), batchConfig.instructions.copies));
-		if (!batchConfig.instructions.links.isEmpty())
-			log.note(String.format("   LINK(%d):\t %s", batchConfig.instructions.links.size(),  batchConfig.instructions.links));
-		if (batchConfig.instructions.move != null)
-			log.note(String.format("   MOVE: \t %s", batchConfig.instructions.move));
+		if (!batch.instructions.copies.isEmpty())
+			log.note(String.format("   COPY(%d):\t %s", batch.instructions.copies.size(), batch.instructions.copies));
+		if (!batch.instructions.links.isEmpty())
+			log.note(String.format("   LINK(%d):\t %s", batch.instructions.links.size(),  batch.instructions.links));
+		if (batch.instructions.move != null)
+			log.note(String.format("   MOVE: \t %s", batch.instructions.move));
 
 		/*
 		if (!batchConfig.directives.isEmpty())
@@ -2005,10 +2006,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 
 		/// MAIN
-		Map<String, Task> tasks = server.prepareTasks(batchConfig, log);
+		Map<String, Task> tasks = server.prepareTasks(batch, log);
 
 		Graph graph = new Graph("ProductServer");
-		if (batchConfig.instructions.isSet(ActionType.STATUS)){
+		if (batch.instructions.isSet(ActionType.STATUS)){
 
 			for (Entry<String,Task> entry : tasks.entrySet()) {
 				Task task = entry.getValue();
@@ -2098,7 +2099,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			task.close();
 		}
 
-		if (batchConfig.instructions.isSet(ActionType.STATUS)){
+		if (batch.instructions.isSet(ActionType.STATUS)){
 			//
 			System.out.println();
 			for (Entry<String,Object> entry: server.setup.entrySet()) {

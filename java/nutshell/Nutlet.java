@@ -12,7 +12,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jdk.nashorn.internal.parser.JSONParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -150,7 +149,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	{
 
 		// Why not in init() ?
-		ProductServer.BatchConfig batchConfig = new ProductServer.BatchConfig();
+		ProductServer.Batch batch = new ProductServer.Batch();
 
 		// productServer.populate(batchConfig, registry);
 
@@ -184,6 +183,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			final String value = (values.length == 0) ? "" : values[0];
 			if (registry.has(key)){
 				Program.Parameter parameter = registry.get(key);
+				System.err.printf(" Found: %s -> %s  %n", key, parameter);
+
 				if (parameter.hasParams()){
 					try {
 						parameter.setParams(values);
@@ -200,7 +201,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			else if (key.equals("instructions") || key.equals("request") || key.equals("output")){ // +actions?
 				try {
 					//batchConfig.instructions.set(values);
-					batchConfig.instructions.add(values);
+					batch.instructions.add(values);
 				}
 				catch (NoSuchFieldException | IllegalAccessException e) {
 					sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ", e.getMessage(), httpResponse);
@@ -245,7 +246,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// Debug
 		// batchConfig.instructions.add(Instructions.STATUS);
 
-		if (batchConfig.instructions.isSet(ActionType.CLEAR_CACHE)) {
+		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {
 
 			/*
 			batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
@@ -324,7 +325,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			for (int i = 0; i < path.getNameCount(); i++) {
 				if (path.getName(i).toString().equals("cache")){
 					product = path.getFileName().toString();
-					batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
+					batch.instructions.set(Instructions.MAKE | Instructions.STREAM);
 					break;
 				}
 			}
@@ -374,15 +375,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		Task task = null;
 
 			// Default
-		if (batchConfig.instructions.value == 0)
-			batchConfig.instructions.set(Instructions.MAKE | Instructions.STREAM);
+		if (batch.instructions.value == 0)
+			batch.instructions.set(Instructions.MAKE | Instructions.STREAM);
 
 			// problem: parameter ordering may cause  filename != productStr
 			// TODO: -> _link_ equivalent files?
 
 		try {
 			// OutputFormat#HTML
-			task = productServer.new Task(product, batchConfig.instructions.value, productServer.serverLog);
+			task = productServer.new Task(product, batch.instructions.value, productServer.serverLog);
 			// task = productServer.new Task(product.value, batchConfig.instructions.value, null);
 			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
 			task.log.set(productServer.LOG_TASKS);
@@ -546,7 +547,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			Map<String,Object> map = new LinkedHashMap<>();
 
-			map.put("instr", batchConfig.instructions);
+			map.put("instr", batch.instructions);
 			// map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
 			//map.putAll(registry.map);
 
@@ -663,7 +664,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
 			map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 			map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
-			map.put("actions", batchConfig.instructions);
+			map.put("actions", batch.instructions);
 			// task.info.directives.put("TEST", "value");
 			map.put("directives", task.info.directives);
 
@@ -726,11 +727,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
 		String clsName = productServer.getClass().getCanonicalName();
 		String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, HTTP_ROOT, clsName, productServer.confFiles, batchConfig.instructions, task.info)).setAttribute("class", "code");
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, HTTP_ROOT, clsName, productServer.confFiles, batch.instructions, task.info)).setAttribute("class", "code");
 
 		String cp = System.getProperty("java.class.path");
 		String cmdLine2 = "java -cp %s %s  --verbose  --conf %s --instructions %s %s";
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, cp, clsName, productServer.confFiles, batchConfig.instructions, task.info)).setAttribute("class", "code");
+		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, cp, clsName, productServer.confFiles, batch.instructions, task.info)).setAttribute("class", "code");
 		//html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
 		html.appendTable(task.info.getParamEnv(null), "Product parameters");
