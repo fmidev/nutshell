@@ -2,6 +2,7 @@ package nutshell;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -13,19 +14,25 @@ import java.util.*;
 public class ProductParameters { // consider derived classes, like DynamicProductParameters
 
     public enum TimeResolution {
+        INVALID(-1),
+        UNKNOWN(0),
         YEAR(4),
         MONTH(6),
         DAY(8),
         HOUR(10),
         MINUTE(12);
 
-        int length;
+        final int length;
         //String format;
-        DateFormat timeStampFormat;
+        final DateFormat timeStampFormat;
         TimeResolution(int length){
             this.length = length;
             //this.format = fullFormat.substring(0, length); // YYYYmmddHHMM
-            timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm".substring(0, length));
+            // What about zero length?
+            if (length > 0)
+                timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm".substring(0, length));
+            else
+                timeStampFormat = new SimpleDateFormat("");
         }
 
         //protected
@@ -43,8 +50,7 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     /**
      *   Note: in future versions, this may change. Products may have time resolution of days or seconds.
      */
-    static
-    final public DateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm");
+    // static final public DateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm");
 
     /** Time of the product in Unix seconds.
      *
@@ -80,22 +86,60 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     // final
     public String COMPRESSION;
 
+    static
+    protected TimeResolution getTimeResolution(String timestamp) throws ParseException {
+        if (timestamp.isEmpty() || timestamp.equals("LATEST") || timestamp.equals("TIMESTAMP")) {
+            return TimeResolution.UNKNOWN;
+        }
+        else {
+            for (TimeResolution t : TimeResolution.values()) {
+                if (timestamp.length() == t.length) {
+                    // System.err.println(String.format("TimeResolution t=%s %s", t, t.timeStampFormat.toString()));
+                    //return t.timeStampFormat.parse(timestamp).getTime();
+                    return t;
+                }
+            }
+            //final DateFormat timeStampFormat = new SimpleDateFormat("YYYYmmddHHMM");
+            // return timeStampFormat.parse(timestamp).getTime();
+        }
+        return TimeResolution.INVALID; // error!
+    }
 
-    /** Product paramaters as a map.
-     *
-     */
+    static
+    protected long getTime(String timestamp, TimeResolution timeResolution) throws ParseException {
+
+        //TimeResolution timeResolution = getTimeResolution(timestamp);
+        switch (timeResolution){
+            case INVALID: // consider hiding ParseException here?
+                return -1L;
+            case UNKNOWN:
+                return 0L;
+            default:
+                return timeResolution.timeStampFormat.parse(timestamp).getTime();
+        }
+
+    }
+
+    static
+    protected long getTime(String timestamp) throws ParseException {
+           return getTime(timestamp, getTimeResolution(timestamp));
+    }
+
+        /** Product parameters as a map.
+         *
+         */
     public Map<String,Object> getParamEnv(Map<String,Object> map) {
 
         if (map == null)
-            map = new TreeMap<String, Object>();
+            map = new TreeMap<>();
 
         /// STANDARD PARAMETERS (YEAR, MONTH,...)
         Field[] fields = getClass().getFields();
         for (Field field : fields) {
             try {
-                String name = field.getName();
-                if (name.toUpperCase().equals(name)){
-                    map.put(name,field.get(this));
+                String key = field.getName();
+                if (key.toUpperCase().equals(key)){
+                    map.put(key,field.get(this));
                 }
             } catch (Exception e) {
                 //System.err.println("Koe " + e.getMessage());
@@ -119,5 +163,31 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
         return map;
     }
 
+    public static void main(String[] args) {
+
+        if (args.length == 0){
+            System.err.println("Usage: \n 20130817 [...]");
+        }
+        else {
+            final Date date = new Date();
+            for (String arg: args) {
+                try {
+                    TimeResolution timeResolution = getTimeResolution(arg);
+                    System.out.println(String.format("Time resolution: %s", timeResolution));
+                    long time = getTime(arg, timeResolution);
+                    date.setTime(time);
+                }
+                catch (Exception e){
+
+                }
+                System.err.println(date);
+                for (TimeResolution t : TimeResolution.values()) {
+                    System.out.println(String.format("%s:\t %s", t, t.timeStampFormat.format(date)));
+                }
+
+            }
+        }
+
+    }
 
 }

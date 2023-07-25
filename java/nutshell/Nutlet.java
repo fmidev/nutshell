@@ -93,18 +93,26 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
 
-		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell");
+		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);
 
 		//Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
 		try {
 			// FileUtils.ensureWritableDir(cacheNutShell, productServer.GROUP_ID, productServer.dirPerms);
 			if (!productServer.serverLog.logFileIsSet()) {
-				Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
+				String p;
+				if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
+					p = String.format("%s-%s.%d.html", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
+				}
+				else {
+					p = String.format("%s-%s.%d.log", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
+				}
+
+				// Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
 				//if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
 				//productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
 				// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
-				FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
-				productServer.setLogFile(p.toString());
+				FileUtils.ensureWritableFile(Paths.get(p), productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
+				productServer.setLogFile(p);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

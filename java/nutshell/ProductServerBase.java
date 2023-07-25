@@ -271,26 +271,32 @@ public class ProductServerBase extends Program {
      * @param pathFormat - absolute path of a filename, optionally containing '%s' expanded as timestamp.
      * @return
      */
-    public Path setLogFile(String pathFormat) {
+    public Path setLogFile(String path) {
 
-        if (pathFormat == null)
-            pathFormat = "/tmp/nutshell-%s.log";
+        if (path == null)
+            path = String.format("/tmp/nutshell-%s.log",
+                    logFilenameTimeFormat.format(System.currentTimeMillis()));
 
         try {
-            Path p = Paths.get(String.format(pathFormat,
-                    logFilenameTimeFormat.format(System.currentTimeMillis())));
+            Path p = Paths.get(path);
+            FileUtils.ensureWritableFile(p, GROUP_ID, filePerms, dirPerms);
+            //FileUtils.ensureWritableFile();
+            //Path p = Paths.get(String.format(pathFormat,
+            //        logFilenameTimeFormat.format(System.currentTimeMillis())));
             //ensureFile(p.getParent(), p.getFileName());
             serverLog.setLogFile(p);
             // server Log.debug("Setup: " +setup.toString());
+            /*
             try {
                 Files.setPosixFilePermissions(p, filePerms);
             }
             catch (IOException e){
                 serverLog.error(String.format("Could not set permissions: %s", filePerms));
-            }
+            }*/
             return p;
         } catch (Exception e) {
             serverLog.setLogFile(null);
+            serverLog.warn(String.format("Failed in creating log file %s [%s]", path, filePerms));
             return null;
         }
 

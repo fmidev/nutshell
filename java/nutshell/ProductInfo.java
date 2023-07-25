@@ -56,27 +56,6 @@ class ProductInfo extends ProductParameters {
 		return directives;
 	}
 
-	/** Imports map to directives map, converting array values to comma-separated strings.
-	 *
-	 * @param map
-	 */
-	/*
-	public Map<String,String> setDirectives(Map<String,String[]> map){
-
-		if (map != null) {
-			for (Map.Entry<String, String[]> entry : map.entrySet()) { //parameters.entrySet()) {
-				String key = entry.getKey();
-				if (key.equals(key.toUpperCase())) {
-					String[] value = entry.getValue();
-					if ((value != null) && (value.length > 0))
-						directives.put(key, String.join(",", value));
-				}
-			}
-		}
-
-		return directives;
-	}
-	*/
 
 	/** Imports map to directives map, converting array values to comma-separated strings.
 	 *
@@ -111,22 +90,6 @@ class ProductInfo extends ProductParameters {
 		return directives;
 	}
 
-	protected long getTime(String timestamp) throws ParseException {
-		if (timestamp.isEmpty() || timestamp.equals("LATEST") || timestamp.equals("TIMESTAMP")) {
-			return 0L;
-		}
-		else {
-			for (TimeResolution t : TimeResolution.values()) {
-				if (timestamp.length() == t.length) {
-					// System.err.println(String.format("TimeResolution t=%s %s", t, t.timeStampFormat.toString()));
-					return t.timeStampFormat.parse(timestamp).getTime();
-				}
-			}
-			//final DateFormat timeStampFormat = new SimpleDateFormat("YYYYmmddHHMM");
-			// return timeStampFormat.parse(timestamp).getTime();
-		}
-		return -1;
-	}
 
 
 	public ProductInfo(String productStr) throws ParseException { //,Log log){

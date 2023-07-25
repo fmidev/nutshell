@@ -48,6 +48,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	ProductServer() {
 		super.version = Arrays.asList(3, 34);
 		setup.put("ProductServer", getVersion());
+		LABEL = "nutshell-"+getVersion();
 	}
 
 
@@ -62,7 +63,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 *  and user.
 	 *
 	 */
-	public String LABEL = "nutshell-"+getVersion(); // ""%d-%s"; // USER-counter
+	public String LABEL; // "nutshell-"+getVersion(); // ""%d-%s"; // USER-counter
 
 	/// System side settings.
 
@@ -245,6 +246,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			id = getProcessId();
 			info = new ProductInfo(productStr);
 			filename = info.getFilename();
+
+			if (info.time > 0){
+				int year = Integer.parseInt(info.TIMESTAMP.substring(0,4));
+				if (year > 2030){
+					throw new ParseException(
+							String.format("NSH failed in parsing YEAR: %s -> %d", info.TIMESTAMP, year), 0);
+				}
+			}
 
 			// Accept only word \\w chars and '-'.
 			//String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
@@ -788,7 +797,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					this.inputTasksNEW.put(key, inputTask);
 					// FIX: check unneeded errors if only INPUTLIST requested
 					if (inputTask.result != null) {
-						log.note(String.format("Retrieved: %s = %s [%s]",
+						log.ok(String.format("Retrieved: %s = %s [%s]",
 								key, inputTask.result, inputTask.result.getClass().getSimpleName()));
 
 						if (inputTask.log.indexedState.index > 300) {
@@ -1397,7 +1406,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			// FIX: check unneeded errors if only INPUTLIST requested
 			if (task.result != null) {
 				String r = task.result.toString();
-				log.note(String.format("Retrieved: %s = %s", key, r));
+				// log.note(String.format("Retrieved: %s = %s", key, r));
 				if (task.log.indexedState.index > 300) {
 					log.warn("Errors in input generation: " + task.log.indexedState.getMessage());
 				}
