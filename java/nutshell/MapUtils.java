@@ -175,11 +175,14 @@ public class MapUtils {
 				map = new HashMap<>();
 
 			for (String d: entries) {
-				int j = d.indexOf('=');
-				if (j > 0) {
-					map.put(d.substring(0, j).trim(), d.substring(j + 1).trim());
-				} else {
-					map.put(d, defaultValue);
+				if (!d.isEmpty()){
+					int j = d.indexOf('=');
+					if (j > 0) {
+						map.put(d.substring(0, j).trim(), d.substring(j + 1).trim());
+					}
+					else {
+						map.put(d, defaultValue);
+					}
 				}
 			}
 

@@ -1,18 +1,14 @@
 package nutshell;
 
-import sun.misc.Signal;
-
-//import javax.servlet.http.HttpServletResponse;
+import sun.misc.Signal; // For interrupt?
 import java.io.*;
 import java.nio.file.*;
 import java.text.ParseException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
 import static java.nio.file.Files.*;
 
-//import javax.servlet.http.HttpServletResponse;
 
 /* TODO: swallows exceptions in command line use?
  * TODO: separate cache at least for java generators
@@ -50,17 +46,23 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 33);
+		super.version = Arrays.asList(3, 34);
 		setup.put("ProductServer", getVersion());
 	}
 
 
 	/// Experimental: Change MAKE to GENERATE if positive, decrement for each input
 	// TODO: consider general query depth (for inputs etc)
-	public int defaultRemakeDepth = 0;
+	static public int defaultRemakeDepth = 0;
 
-	//public GroupPrincipal fileGroupID;
-	//Files.readAttributes(originalFile.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group();
+	/** Prefix for the marker used in logs and temporary files.
+	 *  To separate different users/processes in shared directories.
+	 *
+	 *  The label will be automatically appended also the counter number
+	 *  and user.
+	 *
+	 */
+	public String LABEL = "nutshell-"+getVersion(); // ""%d-%s"; // USER-counter
 
 	/// System side settings.
 
@@ -84,13 +86,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return id;
 		}
 
-		/// Checked "normalized" filename, with ordered parameters.
+		/// Checked, "normalized" filename, with ordered parameters.
 		final public String filename;
 
 		final public Instructions instructions = new Instructions();
-
-		//public int regenerateDepth = 0;
-		//public boolean parallel = true;
 
 		public Path timeStampDir;
 		public Path productDir;
@@ -121,13 +120,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			if (graph == null) {
 				graph = new Graph(this.info.PRODUCT_ID);
-				graph.attributes.put("label", String.format("NutShell request: %s", this.toString()));
+				graph.attributes.put("label", String.format("NutShell request: %s", this));
 			}
 
 			// Ensure this task (and its descendants) on the Graph.
 			Graph.Node node = getGraphNode(graph);
-			//node.attributes.put("style", "filled");
-			//node.attributes.put("fillcolor", "lightblue");
 
 			return graph;
 		}
@@ -231,12 +228,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return node;
 		};
 
-		/*
-		public Graph graph = null;
-		public void setGraph(Graph graph) {
-			this.graph = graph;
-		}
-		 */
+
 
 		/**
 		 * Product generation task defining a product instance and operations on it.
@@ -256,25 +248,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			// Accept only word \\w chars and '-'.
 			//String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
-			String label = String.format("%s-%d-%s", LABEL, getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			final String label = String.format("%s-%d-%s.%d", LABEL, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
 			// final Pattern nonWord = Pattern.compile("\\W");
 			// label.replaceAll("\\W", "_");
-
-			/*
-			if (parentLog != null){
-				log = new HttpLog(parentLog.name + "[" + this.info.PRODUCT_ID + "]", parentLog.verbosity);
-				log.setFormat(parentLog.getFormat());
-				log.setDecoration(parentLog.decoration);
-			}
-			else {
-				log = new HttpLog("[" + this.info.PRODUCT_ID + "]", server Log.getVerbosity());
-				log.setFormat(LOG_FORMAT);
-				log.setDecoration(LOG_STYLE);
-			}
-			 */
-
-			// final String[] productDef = [productInfo, directives]
-			// in LOG  // this.creationTime = System.currentTimeMillis();
 
 			this.instructions.set(instructions);
 			this.instructions.regenerateDepth = defaultRemakeDepth;
@@ -287,8 +263,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve(String.format("tmp-%s-%d", ) + getTaskId());
 			relativeOutputDirTmp = this.relativeOutputDir.resolve(label); //String.format("tmp-%s-%d", USER, getTaskId()));
 			relativeOutputPath = relativeOutputDir.resolve(filename);
-
-
 
 			//this.relativeLogPath    = relativeOutputDir.resolve(getFilePrefix() + filename + "." + getTaskId() + ".log");
 			// Absolute
@@ -518,6 +492,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * <p>
 		 * Processing is done inside the parent thread  – by default the main thread.
 		 * To invoke this function as a separate thread, use #run().
+		 *
+		 * TODO: reconsider replacing EXISTS/MAKE/GENERATE with MAKE(depth) only
 		 *
 		 * @return
 		 * @throws InterruptedException // Gene
@@ -1328,15 +1304,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 
 				Task task = new Task(value, instructions.value, log);
-				//log.debug(String.format("Check: %s = %s", key, value));
-				/**
-				if ((directives != null) && !directives.isEmpty())
-					log.special(String.format("Directives: %s = %s [%s]",
-							key, directives, directives.getClass()));
-				*/
 
 				task.info.setDirectives(directives);
-
 				task.instructions.addCopies(instructions.copies);
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
@@ -1561,6 +1530,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public Map<String,String> products = new TreeMap<>();
 		public Instructions instructions = new Instructions();
 		public Map<String ,String> directives = new TreeMap<>();
+
+
+
+		/// Future fix: timeout should be adjustable for each batch
+		private int timeOut = 0;
 
 	}
 

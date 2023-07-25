@@ -123,7 +123,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// Here, for future extension dependent on ServletConfig config
 		registry = new ProgramRegistry();
 
-		productServer.populate(registry);
+		// These general commands not needed, or even allowed!
+		// Exception: default timeout (or would it be)
+		// productServer.populate(registry);
 
 		/*
 		Program.Parameter.Simple<String> product = new Program.Parameter.Simple("product",
@@ -147,43 +149,19 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	@Override	
 	public void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException, ServletException
 	{
-
-		// Why not in init() ?
 		ProductServer.Batch batch = new ProductServer.Batch();
 
-		// productServer.populate(batchConfig, registry);
-
-		/*
-		ProductServer.InstructionParameter instructionParameter = productServer.new InstructionParameter(batchConfig.instructions);
-		registry.add(instructionParameter);
-		registry.add("actions", instructionParameter);
-		registry.add("output",  instructionParameter);
-		registry.add("request", instructionParameter); // oldest
-		 */
-
-		/*
-		Program.Parameter.Simple<String> page = new Program.Parameter.Simple("page",
-				"HTML page to be viewed", "menu.html");
-		registry.add(page);
-
-		Program.Parameter.Simple<String> product = new Program.Parameter.Simple("product",
-				"Product to be processed", "");
-		registry.add(product);
-		*/
-
-		// NEW
 		String page = "menu.html";
 		String product = "";
-
 
 		// "Main" command handling loop
 		for (Map.Entry<String,String[]> entry: httpRequest.getParameterMap().entrySet()){
 			final String key = entry.getKey();
 			final String[] values = entry.getValue();
-			final String value = (values.length == 0) ? "" : values[0];
+			final String value = (values.length == 0) ? "" : values[0]; // What about other elems?
 			if (registry.has(key)){
 				Program.Parameter parameter = registry.get(key);
-				System.err.printf(" Found: %s -> %s  %n", key, parameter);
+				System.err.printf(" Still found: %s -> %s  %n", key, parameter);
 
 				if (parameter.hasParams()){
 					try {
@@ -208,11 +186,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					return;
 				}
 			}
+			else if (key.equals("depth")){
+				batch.instructions.regenerateDepth = Integer.parseInt(value);
+			}
 			else if (key.equals("page")){
 				page = value;
 			}
-			// Interpret some "idioms"
-			else if (key.equals("catalog") || key.equals("help") || key.equals("status") || key.endsWith(".html")){
+			// Interpret some "idioms"  || key.equals("help")
+			else if (key.equals("catalog")  || key.equals("status") || key.endsWith(".html")){
 				page = key;
 			}
 			else if (key.equals("demo")){
@@ -232,6 +213,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 		}
 
+		/*
 		if (page.equals("help")){
 			SimpleHtml html = getHtmlPage();
 
@@ -242,6 +224,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			return;
 		}
+		*/
 
 		// Debug
 		// batchConfig.instructions.add(Instructions.STATUS);
@@ -344,7 +327,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		/// Respond with an HTML page, if query contains no product request
-		//if ((productStr == null) || productStr.isEmpty()){
 		if (product.isEmpty()){ // redesign ?
 
 			if (page.isEmpty()){
@@ -354,7 +336,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			/**  TODO: rename main.html to sth like layout.html or template.html
-			 *   Note: main.html is also utilied as index.html -> template/main.html (ie. linked)
+			 *   Note: main.html is also utilized as index.html -> template/main.html (ie. linked)
 			 */
 			SimpleHtml html = includeHtml(page); // fail?
 
@@ -388,6 +370,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
 			task.log.set(productServer.LOG_TASKS);
 			task.log.debug(String.format("Log style: %s", task.log.getConf()));
+			task.instructions.regenerateDepth = batch.instructions.regenerateDepth;
 			//task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
 			//task.log.setFormat(productServer.LOG_FORMAT);
 			//task.log.setFormat(TextOutput.Format.HTML);
@@ -420,17 +403,17 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//task.addGraph("ProductServer.Task" + task.getTaskId());
 		}
 
-		MapUtils.setEntries(httpRequest.getParameterValues("directives"), "True", task.info.directives);
+		String[] directives = httpRequest.getParameterValues("directives");
+		if ((directives != null) && (directives.length > 0)){ // Null check needed
+			MapUtils.setEntries(directives, "True", task.info.directives);
+		}
+		// TODO: check usage / wrong usage
 		task.info.setDirectives(httpRequest.getParameterMap());
-		//task.log.setVerbosity(log.verbosity);
-
 		task.log.note(task.toString());
-
-		// Consider Generator gen =
 
 		try {
 			// track esp. missing inputs
-			//task.log.ok("-------- see separate log --->");
+			// task.log.ok("-------- see separate log --->");
 			productServer.serverLog.debug(String.format("Task: %s", task));
 			productServer.serverLog.info(String.format("See separate log: %s", task.log.logFile));
 			//log.warn(String.format("Executing... %s", task));

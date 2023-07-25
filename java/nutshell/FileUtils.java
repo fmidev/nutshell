@@ -123,23 +123,13 @@ public class FileUtils {
             //ensureWritableDir(path, groupId, permissions);
 
             Files.createDirectory(path); // potentially throws IOException
-            /*
-            try {
-                Files.createDirectory(path); // potentially throws IOException
-            } catch (Exception e) {
-                // experimentalResult |= Permission.WRITE; // or "ALL" ?
-                // Exit, because does dir not exist now.
-                throw e;
-                //throw new IOException(String.format("Failed in CREATING dir %s, write=%b, orig:%s",
-                //path, Files.isWritable(path), e.getMessage()));
-            }
-            */
+
 
             try {
                 Files.setAttribute(path, "unix:gid", groupId);
             } catch (Exception e) {
                 // Not strict...
-                //experimentalResult |= Owner.GROUP;
+                // experimentalResult |= Owner.GROUP;
             }
         }
         else if (Files.isWritable(path)){
@@ -171,8 +161,6 @@ public class FileUtils {
                     path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }
 
-       //return experimentalResult;
-        //return ensureWritablePath(path, groupId, permissions, false);
     }
 
 
@@ -180,24 +168,17 @@ public class FileUtils {
          *
          * @param path
          * @param groupId
-         * @param permissions
-         * param  stripFilename - if the leaf resembles a filename, skip creating it as a directory.
+         * @param dirPermissions
          * @throws IOException
          */
     static
-    public Path ensureWritablePath(String path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
+    public Path ensureWritablePath(String path, int groupId, Set<PosixFilePermission> dirPermissions) throws IOException {
         //int experimentalResult = 0;
 
         if ((path == null) || (path.isEmpty())){
             // System.err.println("XX: Empty path");
             return Paths.get(""); //experimentalResult;
         }
-
-        /*
-        if ((path == null) || (path.getNameCount()==0)){
-            return path; //experimentalResult;
-        }
-        */
 
         Matcher filenameMatcher = qualifiedFilePathRe.matcher(path.toString());
         if (filenameMatcher.matches()) {
@@ -220,10 +201,10 @@ public class FileUtils {
             }
         }
 
+        // By now, path points to a directory
         Path p = Paths.get(path);
         // System.err.println(String.format("XX: creating dir: %s", p));
-
-        ensureWritableDir(p, groupId, permissions);
+        ensureWritableDir(p, groupId, dirPermissions);
         return p;
     }
 

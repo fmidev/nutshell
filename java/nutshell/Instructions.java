@@ -70,6 +70,10 @@ interface OutputType {
 
 }
 
+/**
+ *   TODO: reconsider replacing EXISTS/MAKE/GENERATE with MAKE(depth) only
+ */
+
 interface ActionType {
 
     /** Checks existence of product (used with @MEMORY or @FILE)
@@ -154,6 +158,7 @@ public class Instructions extends Flags implements ActionType, ResultType, Outpu
     }
 
     /**  When generating a product, @regenerateDepth determines how deeply also inputs will be regenerated.
+     *   Reconsider replacing EXISTS/MAKE/GENERATE with this only, ie. MAKE + depth
      */
     public int regenerateDepth = 0;
 

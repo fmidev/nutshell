@@ -65,19 +65,21 @@ public class ProductServerBase extends Program {
 
     /** HTTP protocol and host name */
     public String HTTP_HOST = "";
+
     /** Port for HTTP server */
-    public String HTTP_PORT = null; // "";  // GROUP_ID  *
+    public String HTTP_PORT = null; // "8080" or "8000"
     public String HTTP_PREFIX = "/nutshell";
     protected String HTTP_BASE = "";
 
-    // Read in config, set in constructor
-    public int GROUP_ID = 0;  // GROUP_ID  *
+    /// Numeric group identity. Read in config, set in constructor
+    public int GROUP_ID = 0;
     public String DIR_PERMS  = "rwxrwxr-x";
     public String FILE_PERMS = "rw-rw-r--";
     public Set<PosixFilePermission> dirPerms  = PosixFilePermissions.fromString(DIR_PERMS);
     public Set<PosixFilePermission> filePerms = PosixFilePermissions.fromString(FILE_PERMS);
 
-    //public Path confFile    = null; //Paths.get(".", "nutshell.cnf"); //Paths.get("./nutshell.cnf");
+    /** The list of configuration files read.
+     */
     public List<Path> confFiles = new ArrayList<>();
 
     public Path CACHE_ROOT = Paths.get(".");
@@ -94,22 +96,12 @@ public class ProductServerBase extends Program {
     //protected Path storageRoot = Paths.get(".");
     public Path STORAGE_ROOT = Paths.get(".");
 
-
-
+    /// User name (alphabetical)
     public String USER = System.getProperty("user.name");;
 
-    /** Prefix for the marker used in logs and temporary files.
-     *  To separate different users/processes in shared directories.
-     *
-     *  The label will be automatically appended also the counter number
-     *  and user.
-     *
-     */
-    public String LABEL = "nutshell"; // ""%d-%s"; // USER-counter
 
     final
     public Map<String,String> MAP_URL = new HashMap<>();
-
 
     // Consider
     //final protected List<StringMapper> storagePaths = new LinkedList<>();
@@ -129,7 +121,6 @@ public class ProductServerBase extends Program {
             new SimpleDateFormat("yyyy"+ File.separatorChar+"MM"+File.separatorChar+"dd");
     // = new SimpleDateFormat("yyyyMMddHHmm");
 
-    //protected final List<Path> configFiles = new LinkedList<>();
     static public int counter = 0;
 
     static public int getProcessId(){
@@ -138,7 +129,6 @@ public class ProductServerBase extends Program {
 
     /// Maximum allowed time (in seconds) for product generation (excluding inputs?) FIXME share in two?
     public int TIMEOUT = 60;
-
 
     static
     final public Graph serverGraph = new Graph("Product Server");
