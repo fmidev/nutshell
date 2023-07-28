@@ -157,7 +157,7 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
         MAKE("Generate product, if it does not exist"),
         GENERATE("Generate product"),
         GENERATE_DEEP("Generate product, and its inputs"),
-        GENERATE_FULL("Generate product, and its inputs, recursively");
+        GENERATE_ALL("Generate product, and its inputs, recursively");
 
         final String description;
         MakeLevel(String d){
@@ -222,7 +222,7 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
             return MakeLevel.values()[makeLevel];
         }
         else {
-            return MakeLevel.GENERATE_FULL;
+            return MakeLevel.GENERATE_ALL;
         }
     }
 

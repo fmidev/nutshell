@@ -171,7 +171,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		for (Map.Entry<String,String[]> entry: httpRequest.getParameterMap().entrySet()){
 			final String key = entry.getKey();
 			final String[] values = entry.getValue();
-			final String value = (values.length == 0) ? "" : values[0]; // What about other elems?
+			//final String value = (values.length == 0) ? "" : values[0]; // What about other elems?
+			final String value = String.join(",", values);
+
 			// Global (server) settings
 			if (registry.has(key)){
 				Program.Parameter parameter = registry.get(key);
@@ -189,12 +191,23 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			else if (taskRegistry.has(key)){
 				Program.Parameter parameter = taskRegistry.get(key);
 
-				if (parameter.hasParams()){
+				if (!value.isEmpty() && parameter.hasParams()){
 					try {
 						parameter.setParams(values);
+						//parameter.exec(); // Remember! And TODO: update()
 						parameter.exec(); // Remember! And TODO: update()
-					} catch (NoSuchFieldException | IllegalAccessException e) {
-						productServer.serverLog.fail(entry + " " + e.getMessage());
+					}
+					catch (NoSuchFieldException | IllegalAccessException e) {
+						// productServer.serverLog.fail(entry + " " + e.getMessage());
+						sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ",
+								e.getMessage(), httpResponse);
+						return;
+					}
+					catch (RuntimeException e){
+						sendStatusPage(HttpServletResponse.SC_CONFLICT,
+								String.format("Running '%s' with value '%s' failed ", key, value),
+								e.getMessage(), httpResponse);
+						return;
 					}
 				}
 				System.err.printf(" completed: %s -> %s  %n", key, parameter);
