@@ -649,7 +649,7 @@ public class Log implements AutoCloseable {
 	public void close()  {
 
 		if (logFile != null){
-			info(String.format("Closing logFile: %s", logFile));
+			debug(String.format("Closing logFile: %s", logFile));
 			//this.printStream.close(); // By hazard, can be System.err ?
 		}
 

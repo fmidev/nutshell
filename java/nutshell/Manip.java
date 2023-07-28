@@ -192,19 +192,19 @@ public class Manip {
 
     static public String toString(Object obj, char separator){
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (Field field: obj.getClass().getFields()){
-            builder.append(field.getName()).append('=');
+            sb.append(field.getName()).append('=');
             try {
-                builder.append(field.get(obj));
-                builder.append(" [").append(field.getType().getName()).append("] ");
+                sb.append(field.get(obj));
+                sb.append(" [").append(field.getType().getName()).append("] ");
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
             // builder.append(field.isAccessible());
-            builder.append(separator);
+            sb.append(separator);
         }
-        return builder.toString();
+        return sb.toString();
     }
 
     /** For local demo only.

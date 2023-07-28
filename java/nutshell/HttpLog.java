@@ -80,7 +80,10 @@ public class HttpLog extends Log {
     }
 
     /** Create a log with a name prefixed with the name of a existing log.
-	 *
+     *
+	 *  Converts HTTP error codes (200..., 300..., 400...) to basic Log codes (like NOTE, WARN, ERROR)
+     *  as defined in #handleHttpMsg(int, String)
+     *
 	 *  This constructor is handy when creating a log for a child process.
 	 *
 	 * @param name
@@ -92,6 +95,14 @@ public class HttpLog extends Log {
         reset();
     }
 
+    /** Converts HTTP error code as defined in #handleHttpMsg(int, String)
+     * @see #handleHttpMsg(int, String)
+     *
+     * @param status
+     * @param msg
+     * @return
+     * @param <E>
+     */
     public <E> Log log(HttpStatus status, E msg) {
 
 	    String s = "??";
@@ -108,10 +119,11 @@ public class HttpLog extends Log {
 	    return this;
     }
 
-        //@Override
-    /**
-     *   Store also an exception, if status index exceeds current index.
+    @Override
+    /** Log message using flexibly LOG levels or HTTP error codes.
      *
+     *  Also store the exception, if status index exceeds current index.
+     *  @param status - Log level (under 10) or HTTP error code (over 100)
      */
     public <E> Log log(int status, E msg) {
 

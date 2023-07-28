@@ -15,6 +15,7 @@ case $NUTSHELL in
 	export PYTHONPATH=$PYTHONPATH:$NUTSHELL_ROOT
 	# NUTSHELL="python3.6 -m nutshell.nutshell"
 	NUTSHELL="python3.8 -m nutshell.nutshell"
+	# TODO: python version selection 3.6...3.10
 	;;
     java|docker-java)
 	# Modify this to use a JAR file separate from Tomcat

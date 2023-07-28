@@ -95,31 +95,31 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);
 
-		//Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
-		try {
-			// FileUtils.ensureWritableDir(cacheNutShell, productServer.GROUP_ID, productServer.dirPerms);
-			if (!productServer.serverLog.logFileIsSet()) {
-				String p;
-				if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
-					p = String.format("%s-%s.%d.html", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
-				}
-				else {
-					p = String.format("%s-%s.%d.log", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
-				}
-
-				// Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
-				//if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
-				//productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
-				// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
-				FileUtils.ensureWritableFile(Paths.get(p), productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
-				productServer.setLogFile(p);
+		if (!productServer.serverLog.logFileIsSet()) {
+			String filename;
+			if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
+				filename = String.format("%s-%s.%d.html", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
 			}
+			else {
+				filename = String.format("%s-%s.%d.log", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
+			}
+
+			// Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
+			//if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
+			//productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
+			// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
+			Path p = cacheNutShell.resolve(filename);
+			// FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
+			productServer.setLogFile(p.toString());
+		}
+		/*
 		} catch (IOException e) {
 			e.printStackTrace();
 			productServer.serverLog.setFormat(TextOutput.Format.TEXT);
 			productServer.setLogFile("/tmp/nutshell-tomcat-%s.log"); // Also this can fail?
 
 		}
+		*/
 
 		productServer.serverLog.note(String.format("NutShell (%s) server log",  productServer.getVersion()));
 
@@ -157,16 +157,22 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	@Override	
 	public void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException, ServletException
 	{
-		ProductServer.Batch batch = new ProductServer.Batch();
 
 		String page = "menu.html";
-		String product = "";
+		//String product = "";
+
+		// Yes, create for each httpRequest
+
+		ProgramRegistry taskRegistry = new ProgramRegistry();
+		ProductServer.Batch batch = new ProductServer.Batch();
+		productServer.populate(batch, taskRegistry);
 
 		// "Main" command handling loop
 		for (Map.Entry<String,String[]> entry: httpRequest.getParameterMap().entrySet()){
 			final String key = entry.getKey();
 			final String[] values = entry.getValue();
 			final String value = (values.length == 0) ? "" : values[0]; // What about other elems?
+			// Global (server) settings
 			if (registry.has(key)){
 				Program.Parameter parameter = registry.get(key);
 				System.err.printf(" Still found: %s -> %s  %n", key, parameter);
@@ -180,11 +186,24 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					}
 				}
 			}
-			else if (key.equals("product")){
-				product = value;
-				//batchConfig.products.put("product1", value);
+			else if (taskRegistry.has(key)){
+				Program.Parameter parameter = taskRegistry.get(key);
+
+				if (parameter.hasParams()){
+					try {
+						parameter.setParams(values);
+						parameter.exec(); // Remember! And TODO: update()
+					} catch (NoSuchFieldException | IllegalAccessException e) {
+						productServer.serverLog.fail(entry + " " + e.getMessage());
+					}
+				}
+				System.err.printf(" completed: %s -> %s  %n", key, parameter);
 			}
-			else if (key.equals("instructions") || key.equals("request") || key.equals("output")){ // +actions?
+			else if (key.equals("productX")){
+				//product = value;
+				batch.products.put("product1", value);
+			}
+			else if (key.equals("instructionsX") || key.equals("request") || key.equals("output")){ // +actions?
 				try {
 					//batchConfig.instructions.set(values);
 					batch.instructions.add(values);
@@ -194,9 +213,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					return;
 				}
 			}
-			else if (key.equals("depth")){
-				batch.instructions.regenerateDepth = Integer.parseInt(value);
-			}
+			/* else if (key.equals("depth")){
+				batch.instructions.makeLevel = Integer.parseInt(value);
+			} */
 			else if (key.equals("page")){
 				page = value;
 			}
@@ -237,14 +256,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// Debug
 		// batchConfig.instructions.add(Instructions.STATUS);
 
+					/*
+
 		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {
 
-			/*
 			batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
 			if (!batchConfig.instructions.isEmpty()){
 				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", batchConfig.instructions) );
 			}
-			 */
 
 			try {
 				productServer.clearCache(false);
@@ -255,6 +274,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 			return;
 		}
+			 */
 
 
 			//if (page.value.equals("catalog")){
@@ -299,10 +319,18 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			return;
 		}
 
-		if (product.equals("resolve")){
+		/*
+		String product = "";
+		for (String p: batch.products.values()){
+			product = p;
+		}
+
+		 */
+
+		if (page.equals("resolve")){
 			/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
 
-			product = "";
+			//product = "";
 
 			final Object requestUri = httpRequest.getAttribute("javax.servlet.error.request_uri");
 
@@ -313,15 +341,19 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			Path path = Paths.get(requestUri.toString());
+			String productFile = path.getFileName().toString();
 			for (int i = 0; i < path.getNameCount(); i++) {
 				if (path.getName(i).toString().equals("cache")){
-					product = path.getFileName().toString();
-					batch.instructions.set(Instructions.MAKE | Instructions.STREAM);
+					batch.products.put("prod", productFile);
+					//product = path.getFileName().toString();
+					batch.instructions.setMakeLevel(Instructions.MakeLevel.MAKE);
+					batch.instructions.set(Instructions.STREAM);
+					//batch.instructions.outputHandling = Instructions.OutputHandling.STREAM;
 					break;
 				}
 			}
 
-			if (product.isEmpty()){
+			if (productFile.isEmpty()){
 				Map p = new HashMap();
 				p.put("path", path);
 				p.put("Parent", path.getParent());
@@ -335,7 +367,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		/// Respond with an HTML page, if query contains no product request
-		if (product.isEmpty()){ // redesign ?
+		if (batch.products.isEmpty()){ // redesign ?
 
 			if (page.isEmpty()){
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
@@ -365,28 +397,31 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		Task task = null;
 
 			// Default
-		if (batch.instructions.value == 0)
-			batch.instructions.set(Instructions.MAKE | Instructions.STREAM);
+		if (batch.instructions.value == 0) {
+			batch.instructions.set(Instructions.STREAM);
+			// batch.instructions.setOutputHandling(Instructions.OutputHandling.STREAM);
+		}
 
-			// problem: parameter ordering may cause  filename != productStr
-			// TODO: -> _link_ equivalent files?
+		// problem: parameter ordering may cause  filename != productStr
+		// TODO: -> _link_ equivalent files?
 
 		try {
 			// OutputFormat#HTML
-			task = productServer.new Task(product, batch.instructions.value, productServer.serverLog);
-			// task = productServer.new Task(product.value, batchConfig.instructions.value, null);
-			// task.log.setFormat(TextOutput.Format.HTML); // Conf should be enough?
+			String product = null;
+			for (String p: batch.products.values()) {
+				product = p;
+			}
+
+			if (product != null) {
+
+			}
+
+			task = productServer.new Task(product, batch.instructions, productServer.serverLog);
 			task.log.set(productServer.LOG_TASKS);
 			task.log.debug(String.format("Log style: %s", task.log.getConf()));
-			task.instructions.regenerateDepth = batch.instructions.regenerateDepth;
-			//task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
-			//task.log.setFormat(productServer.LOG_FORMAT);
-			//task.log.setFormat(TextOutput.Format.HTML);
-			//task.log.setDecoration(productServer.LOG_STYLE);
-			//task.log.debug(String.format("Log style: %s %s", task.log.getFormat(), task.log.decoration));
-
 			taskMap.put(task.getTaskId(), new Tasklet(task));
 			task.log.special(String.format("taskMap size: %d", taskMap.size()));
+
 			//task.log.textDecoration.setColour(TextDecoration.Options.COLOUR);
 		}
 		catch (ParseException e) {
@@ -400,7 +435,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				e, httpRequest, httpResponse);
 			return;
 		}
-
 
 		if (task.instructions.isSet(Instructions.LATEST)){
 			task.log.note("Action 'LATEST' not allowed in HTTP interface, discarding it");
@@ -449,39 +483,30 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			//if (task.actions.involves(Actions.MAKE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
-			final boolean statusOK = (task.log.getStatus() >= Log.Status.NOTE.level);
+			// final boolean statusOK = (task.log.getStatus() >= Log.Status.NOTE.level);
 			//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
-			if (statusOK && task.instructions.isSet(Instructions.STREAM)) {
-				// sendToStream(task, response);
-				//Log.Level.NOTE.ordinal();
-				task.log.debug("sendToStream: " + task.outputPath);
-				try {
-					sendToStream(task.outputPath, httpResponse);
+			if (task.log.getStatus() >= Log.Status.NOTE.level) {
+				if (task.instructions.isSet(Instructions.STREAM)) {
+					task.log.debug("sendToStream: " + task.outputPath);
+					try {
+						sendToStream(task.outputPath, httpResponse);
+						taskMap.remove(task.getTaskId());
+						task.close();
+						return;
+					} catch (Exception e) {
+						task.instructions.add(Instructions.STATUS);
+					}
+				} else if (task.instructions.isSet(Instructions.REDIRECT)) {
 					taskMap.remove(task.getTaskId());
 					task.close();
+					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.relativeOutputPath);
+					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
+					httpResponse.sendRedirect(url);
+					// task.close();
 					return;
 				}
-				catch (Exception e){
-					task.instructions.add(Instructions.STATUS);
-				}
 			}
-			else if (statusOK && task.instructions.isSet(Instructions.REDIRECT)) {
-				taskMap.remove(task.getTaskId());
-				task.close();
-				String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.relativeOutputPath);
-				//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
-				httpResponse.sendRedirect(url);
-				// task.close();
-				return;
-			}
-			// if not STATUS
-				/*
-				 * The page isn’t redirecting properly
-				 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
-				 * This problem can sometimes be caused by disabling or refusing to accept cookies.
-				 */
-			//}
 			else {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 
@@ -494,6 +519,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					return;
 				}
 			}
+
+			/* if not STATUS
+				*
+				 * The page isn’t redirecting properly
+				 * Firefox has detected that the server is redirecting the request for this address in a way that will never complete.
+				 * This problem can sometimes be caused by disabling or refusing to accept cookies.
+				 *
+			*/
+
 
 			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
 		}

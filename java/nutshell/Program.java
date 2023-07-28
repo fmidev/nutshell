@@ -67,8 +67,18 @@ public class Program {
                 setReference(this, paramKey);
             }
 
+            Single(String name, String description, String paramKey, Object reference) {
+                super(name, description);
+                // Note: "this" does not exist before super()
+                this.paramKey = paramKey;
+                setReference(reference, paramKey);
+            }
+
             @Override
             public void setParams(String args) throws NoSuchFieldException, IllegalAccessException {
+                // System.err.println(String.format("Debug: %s", reference.getClass()));
+                // System.err.println(String.format("Debug: %s", Manip.toString(reference)));
+                // return;
                 assign(args);
             }
 
@@ -94,11 +104,16 @@ public class Program {
         static
         class Simple<T> extends Single {
 
-            Simple(String name, String description,T initValue){
-                super(name, description, "value");
-                cls = initValue.getClass();
+            protected
+            Simple(String name, String description, T initValue, String paramKey){
+                super(name, description, paramKey);
+                cls = initValue.getClass(); // or from T ?
                 value = initValue;
-                setReference(this, "value");
+                setReference(this, paramKey);
+            }
+
+            Simple(String name, String description, T initValue){
+                this(name, description, initValue, "value");
             }
 
             public T value;
@@ -111,6 +126,16 @@ public class Program {
                 // setField(reference, field, value);
                 Manip.assignToObject(value, reference, field, cls);
             }
+
+        }
+
+        static
+        class Const<T> extends Simple<T> {
+
+            Const(String name, String description, T initValue){
+                super(name, description, initValue, "");
+            }
+
 
         }
 

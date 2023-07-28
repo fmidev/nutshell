@@ -62,12 +62,10 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 		return String.format("%s[%s] @%s",getClass().getSimpleName(), id, dir);
 	}
 
-	//@Override
-	/*
-	public boolean hasInputs() {
-		return this.inputDeclarationCmd.exists();
+	@Override
+	public int getPrimaryMediaType() {
+		return MediaType.FILE;
 	}
- 	*/
 
 	// MAIN
 	@Override

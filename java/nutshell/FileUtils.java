@@ -100,6 +100,17 @@ public class FileUtils {
         return Paths.get("");
     };
 
+    /** Seconds since last modification.
+     *
+     * @param file - target file or directory
+     * @return time [seconds] passed since last modification.
+     */
+    static
+    public long fileModificationAge(File file){
+        return (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
+    }
+
+
     /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
      *
      * @param path

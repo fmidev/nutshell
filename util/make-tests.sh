@@ -401,7 +401,8 @@ done
 
 secho title "Local actions: copy, link and move"
 
-set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
+set_file 201412161845_demo.image.pattern_HEIGHT=250_PATTERN=OCTAGONS_WIDTH=350.png
+#set_file 201012161615_test.ppmforge_DIMENSION=2.5.png
 
 for i in ${LOOP//,/ } ; do
 
