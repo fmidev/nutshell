@@ -70,7 +70,9 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	// MAIN
 	@Override
 	public void generate(ProductServer.Task task) throws IndexedState {
+		task.log.textOutput.startVerbatim(task.log.buffer);  // ugly
 		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
+		task.log.textOutput.endVerbatim(task.log.buffer);  // ugly
 	}
 
 	/// Generates a product and stores it in a file system.

@@ -571,6 +571,8 @@ public class Log implements AutoCloseable {
 
 	final protected StringBuffer buffer = new StringBuffer();
 
+
+
 	public void clearBuffer(){
 		buffer.setLength(0);
 		//buffer.delete(0,buffer.length()-1);

@@ -741,8 +741,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					final Instructions inputInstructions = new Instructions();
 
-					if (instructions.makeLevelEquals(Instructions.MakeLevel.GENERATE_FULL)){
-						inputInstructions.setMakeLevel(Instructions.MakeLevel.GENERATE_FULL);
+					if (instructions.makeLevelEquals(Instructions.MakeLevel.GENERATE_ALL)){
+						inputInstructions.setMakeLevel(Instructions.MakeLevel.GENERATE_ALL);
 					}
 					else {
 						inputInstructions.setMakeLevel(instructions.makeLevel - 1);
@@ -817,7 +817,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					try {
 						/*
-						TODO: StringMapper -based dynamio Path
+						TODO: StringMapper -based dynamic Path
 						TODO: Needs more envs, like TIMESTAMP_DIR
 						log.experimental(relativeOutputPath.toString());
 						Path test = Paths.get(cachePathSyntax.toString(getParamEnv())).normalize();

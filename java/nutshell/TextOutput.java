@@ -101,11 +101,18 @@ public class TextOutput {
     public void endSection(StringBuffer buffer){
     }
 
-
     public void startElem(StringBuffer buffer){
     }
 
     public void endElem(StringBuffer buffer){
+    }
+
+    public void startVerbatim(StringBuffer buffer){
+        buffer.append('\n');
+    }
+
+    public void endVerbatim(StringBuffer buffer){
+        buffer.append('\n');
     }
 
     <E> void append(E text, StringBuffer buffer){
@@ -272,6 +279,17 @@ public class TextOutput {
         void appendLink(String label, String url, StringBuffer buffer){
             buffer.append(String.format("<a href=\"%s\" target=\"_new\">%s</a>", url, label));
         }
+
+        @Override
+        public void startVerbatim(StringBuffer buffer){
+            buffer.append('\n').append("<pre style=\"color:brown; background-color:beige\">").append('\n');
+        }
+
+        @Override
+        public void endVerbatim(StringBuffer buffer){
+            buffer.append('\n').append("</pre>").append('\n');
+        }
+
     }
 
 
