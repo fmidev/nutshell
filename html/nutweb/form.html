@@ -14,7 +14,7 @@
 	  <td class="LEAD">Product </td>
 	  <td>
 	    <input id="product" name="product" list="prods" type="text" size="80" value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png"/>
-	    <select id="product_examples" onchange="this.form.product.value = this[selectedIndex].value">
+	    <select id="product_examples" title="Demo products" onchange="this.form.product.value = this[selectedIndex].value">
 	      <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
 	      <option value="demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png">Image Pattern (error: too large)</option>
 	      <option value="demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png">Image Pattern (error: illegal parameter values)</option>
@@ -35,38 +35,40 @@
         </tr>
         <tr>
           <td class="LEAD">Request</td>
-          <td>
+          <td >
             <!-- NOTE: originally consisted of "request" widgets only /-->
             <!-- input type="hidden" name="instructions" value="FILE" / -->
-            <fieldset class="inline">
-	      <legend>Main action</legend>
-	      <label><input type="radio" name="instructions" value="DELETE" title="Only delete"/>Delete</label><br/>
-	      <label><input type="radio" name="instructions" value="EXISTS" title="Check if exists"/>Exists</label><br/>
-	      <label><input type="radio" name="instructions" value="MAKE" title="Generate only if not existing"  checked="checked" />Make
-		<select name="depth">
-		  <option value="0">0 - Only check if product exists</option>
-		  <option value="1" selected="true">1 - Make (generate product only if missing)</option>
-		  <option value="2">2 - Generate product</option>
-		  <option value="3">3 - Generate product and its inputs</option>
-		  <option value="4">4 - Generate product and its inputs, down to depth=2</option>
-		  <option value="5">5 - Generate product and its inputs, down to depth=3</option>
-		</select>
-	      </label><br/>
-	    </fieldset>	    
-	    <fieldset class="inline">
-              <legend>Return type</legend>
-              <label><input type="radio" name="output" value="STREAM"/>Product, direct stream</label><br/>
-              <label><input type="radio" name="output" value="REDIRECT" checked="checked" />Product, through redirect)</label><br/>
-              <label><input type="radio" name="output" value="STATUS"/>Status/Info page</label>
-              <label><input type="checkbox" name="output" value="INPUTLIST"/>Input list</label>
+            <fieldset class="inline" title="Demo products"  style="vertical-align:top" >
+	      <legend>Action</legend>
+	      <!-- <label><input type="radio" name="instructions" value="DELETE" title="Only delete"/>Delete</label><br/ -->
+  	      <!-- <label><input type="radio" name="instructions" value="EXISTS" title="Check if exists"/>Exists</label><br/ -->
+	      <!-- <label><input type="radio" name="instructions" value="MAKE" title="Generate only if not existing"  checked="checked" / -->
+		<label>
+		  <select name="instructions" title="Product generation" >
+		    <option value="NONE">NONE - do nothing for a product</option>
+		    <option value="DELETE">DELETE - delete file</option>
+		    <option value="EXISTS">EXISTS - only check if file exists</option>
+		    <option value="MAKE" selected="true">MAKE - generate product only if missing</option>
+		    <option value="GENERATE">GENERATE - Generate product</option>
+		    <option value="GENERATE2">Generate product and its inputs</option>
+		    <option value="GENERATE3">Generate product, its inputs, and their inputs</option>
+		  </select>
+		</label><br/>
+	      </fieldset>	    
+	      <fieldset class="inline">
+		<legend>Return type</legend>
+		<label><input type="radio" name="instructions" value="STREAM"/>Product, direct stream</label><br/>
+		<label><input type="radio" name="instructions" value="REDIRECT" checked="checked" />Product, through redirect)</label><br/>
+		<label><input type="radio" name="instructions" value="STATUS"/>Status/Info page</label>
+		<label><input type="checkbox" name="instructions" value="INPUTLIST"/>Input list</label>
               <br/>
-            </fieldset>
-            <!-- label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label -->
-            <fieldset class="inline"><label><input type="submit" value="Submit"/></label>
-	      &#xA0;
-	    </fieldset>
-          </td>
-        </tr>
+              </fieldset>
+              <!-- <label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label> -->
+	      <fieldset class="inline"><label><input type="submit" value="Submit"/></label>
+		&#xA0;
+	      </fieldset>
+	    </td>
+          </tr>
         <tr>
           <td class="LEAD">Directives</td>
           <td>
