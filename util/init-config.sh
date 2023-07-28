@@ -20,19 +20,27 @@ function backup_file(){
     local FILE=$1
 
     vt100echo cyan "Saving back-up:"
-    #local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1 | tr -cd '[0-9]'` &> /dev/null
-    local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1` &> /dev/null
-    # echo $BACKUP_INDEX
-    #show_variable BACKUP_INDEX
-    BACKUP_INDEX=${BACKUP_INDEX%.*}
-    BACKUP_INDEX=${BACKUP_INDEX##*.}
-    #show_variable BACKUP_INDEX
 
-    if [ "$BACKUP_INDEX" == '' ]; then
-	BACKUP_INDEX='01'
-    else
+    # local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1 | tr -cd '[0-9]'` &> /dev/null
+    local BACKUP_INDEX='01'
+    # Previous backup
+    local BACKUP_FILE=`ls -1 $FILE.[0-9]*.bak | tail -1` &> /dev/null
+
+    if [ "$BACKUP_FILE" != '' ]; then
+
+	# Check similarity of current file and previous backup
+	diff --brief  $FILE $BACKUP_FILE
+	if [ $? == 0 ]; then
+	    vt100echo yellow "Skipping backup (Previous backup equal: $BACKUP_FILE)"
+	    return
+	fi
+
+	BACKUP_INDEX=${BACKUP_FILE%.*}
+	BACKUP_INDEX=${BACKUP_INDEX##*.}
 	BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
+	
     fi
+
     # show_variable BACKUP_INDEX
     BACKUP_FILE=$FILE.$BACKUP_INDEX.bak
     cp -vi $FILE $FILE.$BACKUP_INDEX.bak
