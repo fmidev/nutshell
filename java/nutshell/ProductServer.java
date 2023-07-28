@@ -46,7 +46,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
-		super.version = Arrays.asList(3, 34);
+		super.version = Arrays.asList(3, 4);
 		setup.put("ProductServer", getVersion());
 		LABEL = "nutshell-"+getVersion();
 	}
@@ -72,6 +72,38 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return Config.getMap(this).toString() + "\n" + setup.toString();
 	}
 
+	public interface Generator {
+
+		/** Create the product defined in task.
+		 */
+		void generate(Task task) throws IndexedState; // throws IOException, InterruptedException ;
+
+		/** Declare inputs required for this product generation task.
+		 *
+		 * @param task
+		 * @return
+		 */
+		Map<String, String> getInputList(Task task) throws IndexedState;
+
+		/** Natural (native) media type for the generated product.
+		 *
+		 * @return MediaType.FILE or MediaType.MEMORY
+		 */
+		int getPrimaryMediaType();
+
+	}
+
+	/** Searches for shell side (and later, Java) generators
+	 *
+	 * @param productID
+	 * @return
+	 */
+	public Generator getGenerator(String productID) throws IndexedState {
+		Path dir = PRODUCT_ROOT.resolve(getProductDir(productID));
+		Generator generator = new ExternalGenerator(productID, dir.toString());
+		return generator;
+	}
+
 	/**
 	 * A "tray" containing both the product query info and the resulting object if successfully queried.
 	 * Task does not know about the generator. Notice GENERATE and getParamEnv.
@@ -90,7 +122,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		/// Checked, "normalized" filename, with ordered parameters.
 		final public String filename;
 
-		final public Instructions instructions = new Instructions();
+		final public Instructions instructions; // = new Instructions();
 
 		public Path timeStampDir;
 		public Path productDir;
@@ -114,7 +146,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public final Map<String, String> inputs = new HashMap<>();
 
 		// TODO rename inputTasks
-		public final Map<String, Task> inputTasksNEW = new HashMap<>();
+		public final Map<String, Task> inputTasks = new HashMap<>();
 
 		// Consider get node
 		public Graph getGraph(Graph graph) {
@@ -168,7 +200,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			//if (result instanceof Path){
 			Instructions instr = new Instructions();
-			instr.set(ActionType.STATUS, ActionType.INPUTLIST, ActionType.MAKE);
+			instr.set(ActionType.STATUS, ActionType.INPUTLIST); //, ActionType.MAKE);
+			instr.toString();
 			//instr.add(instructions.value & (ActionType.GENERATE | ActionType.MAKE));
 			node.attributes.put("href", String.format(
 					"?instructions=%s&amp;product=%s", instr, info.getFilename()));
@@ -176,7 +209,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//}
 
 
-			for (Map.Entry<String,Task> entry: inputTasksNEW.entrySet()) {
+			for (Map.Entry<String,Task> entry: inputTasks.entrySet()) {
 				Task t = entry.getValue();
 				Graph.Node n = t.getGraphNode(graph);
 				//System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
@@ -204,7 +237,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					else {
 						link.attributes.put("color", "green");
 						String label = ""+t.log.indexedState.getIndex(); // t.result.toString();
-						if (t.instructions.isSet(ActionType.GENERATE)){
+						if (t.instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
 							label = "GENERATE";
 							link.attributes.put("style", "bold");
 						}
@@ -241,11 +274,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param parentLog    - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
 		 */
-		public Task(String productStr, int instructions, HttpLog parentLog) throws ParseException {
+		public Task(String productStr, Instructions instructions, HttpLog parentLog) throws ParseException {
 
 			id = getProcessId();
 			info = new ProductInfo(productStr);
 			filename = info.getFilename();
+			this.instructions = new Instructions(instructions);
 
 			if (info.time > 0){
 				int year = Integer.parseInt(info.TIMESTAMP.substring(0,4));
@@ -256,13 +290,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			// Accept only word \\w chars and '-'.
-			//String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			// String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
 			final String label = String.format("%s-%d-%s.%d", LABEL, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
-			// final Pattern nonWord = Pattern.compile("\\W");
-			// label.replaceAll("\\W", "_");
 
-			this.instructions.set(instructions);
-			this.instructions.regenerateDepth = defaultRemakeDepth;
+			//this.instructions.set(instructions);
+			// this.instructions.makeLevel = defaultRemakeDepth;
 
 			// Relative
 			productDir = getProductDir(this.info.PRODUCT_ID);
@@ -324,12 +356,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			//log.warn("Where am I?");
 			//log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
-			log.debug(String.format("Created Task: %s ", this.toString())); //
+			log.info(String.format("Created Task: %s ", this.toString())); //
 			//log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
 			this.result = null;
 		}
 
-		public Task(String productStr, int instructions) throws ParseException {
+		public Task(String productStr, Instructions instructions) throws ParseException {
 			this(productStr, instructions, null);
 		}
 
@@ -344,9 +376,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.close();
 		}
 		 */
+		@Override
+		public String toString() {
+			if (this.info.directives.isEmpty())
+				return String.format("%s # %s", this.filename, instructions);
+			else
+				return String.format("%s?%s # %s", this.filename, info.directives, instructions);
+		}
 
 		public String getStatus() {
-			return (String.format("%s[%d] %s [%s] %s", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
+			int i = log.getStatus();
+			return String.format("%s(%d)", Log.statusCodes.getOrDefault(i, Log.Status.UNDEFINED), i);
+			// return (String.format("%s[%d] %s [%s] %s", this.getClass().getSimpleName(), this.getTaskId(), this.info, this.instructions, this.info.directives)); //  this.toString()
 		}
 
 		// Consider moving these to @ProductServerBase, with Log param.
@@ -436,6 +477,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * Runs a thread generating and/or otherwise handling a product
 		 *
 		 * @see #execute()
+		 * @see #handleInterrupt(Signal) ()
 		 */
 		@Override // Thread
 		public void run() {
@@ -447,6 +489,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.status
 				log.note(e.toString());
 				log.warn("Interrupted");
+				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.toString()); // ? too strong?
 				//e.printStackTrace(log.printStream);
 			}
 
@@ -462,7 +505,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		private void handleInterrupt(Signal signal) {
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
 			// System.out.println("Interrupted by Ctrl+C: " + this.outputPath.getFileName());
-			if (instructions.involves(ResultType.FILE)) {
+			if (instructions.involves(MediaType.FILE)) {
 				try {
 					delete(this.outputPath);
 					delete(this.outputPathTmp); // what about tmpdir?
@@ -473,38 +516,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		}
 
+		/** For now, not critical. Future option: memory cached products.
+		 *
+		 */
 		public Object result;
 
-		/** Returns a node describing this task. Creates it, if not exists already.
+		/** Execute this task on a single product: delete, load, generate a product, for example.
 		 *
-		 * @param graph
-		 * @return
-		 */
-		/*
-		public Graph.Node getGraphNode(Graph graph) {
-			if (graph.hasNode(info.getID())) {
-				return graph.getNode(info.getID());
-			} else {
-				Graph.Node node = graph.getNode(info.getID());
-				node.attributes.put("label", String.format("%s\\n(%s)", node.getName(), info.FORMAT));
-				node.attributes.put("fillcolor", "lightblue");
-				// node.attributes.put("href", String.format(
-				//		"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
-				return node;
-			}
-		}
-		 */
-
-		// " MAIN "
-
-		/** Execute this task: delete, load, generate a product, for example.
-		 * <p>
+		 *  This is a central function of this software, "MAIN".
+		 *
 		 * Processing is done inside the parent thread  – by default the main thread.
 		 * To invoke this function as a separate thread, use #run().
-		 *
-		 * TODO: reconsider replacing EXISTS/MAKE/GENERATE with MAKE(depth) only
-		 *
-		 * @return
+		 **
 		 * @throws InterruptedException // Gene
 		 * @see #run()
 		 */
@@ -512,89 +535,92 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			Generator generator = null;
 
-			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Preparing %s", this));
+			log.log(HttpLog.HttpStatus.CONTINUE, String.format("Preparing %s", this));
 
 			// Logical corrections
-			if (instructions.isEmpty()){
-				instructions.add(ActionType.MAKE);
+			// Note: STATUS involves Task/product wise and also Server level info.
+			if (instructions.isEmpty()
+					|| !instructions.copies.isEmpty()
+					|| !instructions.links.isEmpty()
+					|| (instructions.move != null)
+					|| instructions.involves(PostProcessing.STORE|PostProcessing.LATEST|PostProcessing.SHORTCUT)) {
+				instructions.ensureMakeLevel(Instructions.MakeLevel.MAKE);  // NEW
 			}
 
-			if (!instructions.copies.isEmpty())
-				instructions.add(ActionType.MAKE);
 
-			if (!instructions.links.isEmpty())
-				instructions.add(ActionType.MAKE);
-
-			if (instructions.move != null)
-				instructions.add(ActionType.MAKE);
-
-			if (instructions.involves(PostProcessing.STORE|PostProcessing.LATEST|PostProcessing.SHORTCUT))
-				instructions.add(ActionType.MAKE);
-
-
-			log.experimental(String.format("Cache depth: %s", instructions.regenerateDepth));
-
-			if (instructions.involves(ActionType.MAKE | ActionType.GENERATE)){
-				// Rest default result type
-				if (! instructions.involves(ResultType.FILE | ResultType.MEMORY)) {
-					// Note: this "type selection" could be also done with Generator?
-					log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
-					instructions.add(ResultType.FILE);
-				}
-
-				if (instructions.regenerateDepth > 0) {
-					log.experimental(String.format("Cache clearance %s > 0, ensuring GENERATE", instructions.regenerateDepth));
-					instructions.add(ActionType.GENERATE);
-				}
+			// Media must be defined in most of the operations (DELETE, EXISTS, MAKE, GENERATE) so define it here.
+			//if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
+			if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
+				// Note: media selection could be also done by Generator?
+				log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
+				instructions.add(MediaType.FILE);
 			}
+			// }
 			log.debug(String.format("Instructions (updated): %s", instructions));
 
-			//log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
-			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting: %s ", getStatus())); //  this.toString()
+			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
+			//log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting: %s - %s ", this, this.getStatus())); //  this.toString()
 
+			// This is a potential path, not committing to a physical file yet.
+			File fileFinal = outputPath.toFile();
 
 			/// Main DELETE operation
-			if (instructions.involves(ActionType.DELETE)) {
+			if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE) || instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) {
 
-				if (instructions.isSet(ResultType.FILE)) {
-					try {
-						this.delete(outputPath);
-					} catch (IOException e) {
-						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", outputPath, e.getMessage()));
-						//return;
+				if (instructions.isSet(MediaType.FILE)) {
+					// if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
+					;
+					if (queryFile(fileFinal, TIMEOUT, log) >= 0){
+
+						long ageSec = FileUtils.fileModificationAge(fileFinal);
+						log.warn(String.format("Deleting...(Age %ss)", ageSec));
+
+						if (ageSec < (2*TIMEOUT)){
+							log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Deleting a freshly (re)generated file? (Age %ss)", ageSec));
+							//log.log(HttpLog.HttpStatus.SEE_OTHER,"Deleting a freshly generated file?");
+						}
+
+						try {
+							// Native log
+							this.delete(outputPath);
+						} catch (IOException e) {
+							log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", outputPath, e.getMessage()));
+							if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
+								return; // STATUS?
+							}
+						}
+					}
+					else {
+						log.log(HttpLog.HttpStatus.CONTINUE, String.format("File does not exist: %s", outputPath));
+						// result = new Boolean(true);
 					}
 				}
-
-				if (instructions.involves(Instructions.GENERATE | Instructions.EXISTS)) {
-					//log.log(HttpLog.HttpStatus.MULTIPLE_CHOICES, String.format("Mutually contradicting instructions: %s ", this.instructions));
-					log.experimental(String.format("Mutually contradicting instructions: %s ", instructions));
-					// TODO: fix, still doesn't work
-					instructions.remove(ActionType.DELETE);
-					instructions.add(Instructions.GENERATE); // | Instructions.INPUTLIST);
-					log.experimental(String.format("Adjusted instructions: %s ", instructions));
-				}
+				// TODO: memory
 
 			}
 
 
 			//  Note: Java Generators do not need disk, unless FILE
 			//  WRONG, ... MAKE will always require FILE
-
+			/*
 			if (instructions.isSet(Instructions.MEMORY)) {
 				// Not implemented yet
 				// this.result = new BufferedImage();
 			}
+			*/
 
-			// This is a potential path, not committing to a physical file yet.
-			File fileFinal = outputPath.toFile();
+
+			final boolean STORED_FILE_EXISTS = storagePath.toFile().exists();
 
 			/// "MAIN"
-			if (instructions.involves(Instructions.EXISTS | ResultType.FILE) && !instructions.isSet(ActionType.DELETE)) {
+			// Consider also semantics: CHECK > EXISTS also actively links stored file or waits for a new file to appear.
+			if ((instructions.involves(MediaType.FILE)) && instructions.makeLevelAtLeast(Instructions.MakeLevel.MAKE)) {
 
-				log.debug(String.format("Checking storage path: %s", storagePath));
+				// if ((instructions.involves(MediaType.FILE)) && !instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)) {
+				log.debug(String.format("Stored file exists? %s : %s", STORED_FILE_EXISTS, storagePath));
 
-				if (storagePath.toFile().exists() && !fileFinal.exists()) {
-					log.log(HttpLog.HttpStatus.OK, String.format("Stored file exists: %s", this.storagePath));
+				if (!fileFinal.exists() && STORED_FILE_EXISTS) {
+					log.log(HttpLog.HttpStatus.OK, String.format("Trying to use (link) stored file: %s", this.storagePath));
 
 					try {
 						FileUtils.ensureWritableDir(outputDir, GROUP_ID, dirPerms);
@@ -613,27 +639,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						//e.printStackTrace();
 					}
 				}
-				// Don't wait (so the other process will "notice" ie fail)
-				else if (queryFile(fileFinal, 90, log)) {
-					// Order? Does it delete immediately?
+				else if (queryFile(fileFinal, TIMEOUT, log) >= 0) {
 					result = outputPath;
 					log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", this.outputPath));
-				} else { // if (this.instructions.isSet(Actions.EXIST)){
-					//log.warn(String.format("File does not exist: %s", this.outputPath));
-					// TODO: ERROR is a contradiction, unless file strictly required?
-					if (this.instructions.isSet(ActionType.MAKE)) {
-						this.instructions.add(Instructions.GENERATE);
-						log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", this.outputPath));
-					} else {
-						log.log(HttpLog.HttpStatus.NOT_FOUND, String.format("File does not exist: %s", this.outputPath));
-					}
 				}
-
+				else {
+					log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", this.outputPath));
+						instructions.ensureMakeLevel(Instructions.MakeLevel.GENERATE);
+				}
 			}
 
-
-			// Retrieve Geneator, if needed
-			if (instructions.involves(Instructions.GENERATE | Instructions.INPUTLIST | Instructions.STATUS)) {
+			// Retrieve Generator, if needed
+			if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE) || instructions.involves(Instructions.INPUTLIST | Instructions.STATUS)) {
 
 				log.log(HttpLog.HttpStatus.OK, String.format("Determining generator for : %s", this.info.PRODUCT_ID));
 				try {
@@ -641,41 +658,39 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					//log.log(HttpLog.HttpStatus.CREATED, String.format("Generator(%s): %s", this.info.PRODUCT_ID, generator));
 					log.log(HttpLog.HttpStatus.CREATED, generator.toString());
 
-					if (instructions.involves(Instructions.GENERATE)) {
+					if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
+						instructions.add(generator.getPrimaryMediaType());
+						/*
+						// if (instructions.involves(Instructions.GENERATE)) {
 						// Consider this.addAction() -> log.debug()
 						if (generator instanceof ExternalGenerator)
-							instructions.add(ResultType.FILE); // PREPARE dir & empty file
+							instructions.add(MediaType.FILE); // PREPARE dir & empty file
 						else
-							instructions.add(ResultType.MEMORY); // Yes, internal should not save?
+							instructions.add(MediaType.MEMORY); // Yes, internal should not save?
+
+						 */
 					}
 
 				}
 				catch (IndexedState e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, "Generator does not exist");
 					log.log(e);
-					instructions.remove(Instructions.GENERATE);
+					// instructions.remove(Instructions.GENERATE);
+					if (instructions.makeLevelAtLeast(Instructions.MakeLevel.MAKE)){
+						instructions.setMakeLevel(Instructions.MakeLevel.EXISTS); //? External file copied in cache?
+					}
 					instructions.remove(Instructions.INPUTLIST);
-					instructions.remove(Instructions.STATUS);
+					// instructions.remove(Instructions.STATUS);
 				}
 
 			}
 
-			if (instructions.isSet(ActionType.DELETE) && !instructions.involves(ActionType.MAKE)) {
-
-				if (fileFinal.exists()) {
-					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting: %s ", this.outputPath));
-				} else {
-					log.log(HttpLog.HttpStatus.NO_CONTENT, String.format("Deleted: %s ", this.outputPath));
-				}
-
-				if (!(instructions.involves(Instructions.GENERATE | Instructions.EXISTS))) {
-					return;
-				}
-			}
 
 
 			// Generate or at least list inputs
-			if (instructions.involves(Instructions.INPUTLIST | Instructions.GENERATE)) { //
+			//if (instructions.involves(Instructions.INPUTLIST | Instructions.GENERATE)) { //
+			if (instructions.involves(Instructions.INPUTLIST) ||
+					instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) { //
 
 				log.debug(String.format("Determining input list for: %s", this.info.PRODUCT_ID));
 
@@ -693,7 +708,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.log(e);
 
 					log.warn("Removing GENERATE from instructions");
-					instructions.remove(Instructions.GENERATE);
+					if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
+						instructions.setMakeLevel(Instructions.MakeLevel.MAKE);
+					}
+					// instructions.remove(Instructions.GENERATE);
 				}
 
 				if (!inputs.isEmpty())
@@ -701,22 +719,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 
-
-			if (instructions.isSet(Instructions.GENERATE)) {
+			if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
 
 				log.reset(); // Forget old sins
 
 				// Mark this task being processed (empty file)
-				// if (this.instructions.isSet(ResultType.FILE) && !fileFinal.exists()){
 				try {
 					FileUtils.ensureWritableDir(outputDirTmp, GROUP_ID, dirPerms);
 					FileUtils.ensureWritableDir(outputDir, GROUP_ID, dirPerms);
-					//ensureDir(cacheRoot, relativeOutputDirTmp);
-					//ensureDir(cacheRoot, relativeOutputDir);
 					FileUtils.ensureWritableFile(outputPath, GROUP_ID, filePerms, dirPerms);
-
-					// ensureFile(cacheRoot, relativeOutputPath);
-					// Path genLogPath =  ensureWritableFile(cacheRoot, relativeOutputDirTmp.resolve(filename+".GEN.log"));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
 					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s", e.getMessage()));
@@ -725,97 +736,81 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				log.debug("Ok, generate...");
 
-			}
-
-			if (instructions.isSet(Instructions.GENERATE) || instructions.isSet(Instructions.INPUTLIST)) {
-
-				// Input generation uses parallel threads only if this product uses.
-				// NEW
-				final Instructions inputInstructions = new Instructions(); //this.instructions.value &
-				//(ResultType.MEMORY | ResultType.FILE | ActionType.PARALLEL | ActionType.INPUTLIST));
-				//inputInstructions.add(Instructions.GENERATE);
-				//inputInstructions.add(ActionType.MAKE);
-
-				if (instructions.isSet(Instructions.GENERATE)){
-					inputInstructions.add(ActionType.MAKE);
-					//inputInstructions.add(Instructions.GENERATE);
-				}
-
-				if (instructions.isSet(Instructions.INPUTLIST)){
-					inputInstructions.add(ActionType.INPUTLIST);
-					//inputInstructions.add(Instructions.GENERATE);
-				}
-
-				if (instructions.isSet(Instructions.PARALLEL)){
-					inputInstructions.add(ActionType.PARALLEL);
-					//inputInstructions.add(Instructions.GENERATE);
-				}
-
-
-				if (instructions.regenerateDepth > 0) {
-					inputInstructions.regenerateDepth = instructions.regenerateDepth - 1;
-				} else {
-					inputInstructions.regenerateDepth = 0;
-				}
-
-
+				/// Retrieve inputs
 				if (!inputs.isEmpty()) {
-					log.experimental(String.format("Input retrieval depth: %d",
-							inputInstructions.regenerateDepth));
+
+					final Instructions inputInstructions = new Instructions();
+
+					if (instructions.makeLevelEquals(Instructions.MakeLevel.GENERATE_FULL)){
+						inputInstructions.setMakeLevel(Instructions.MakeLevel.GENERATE_FULL);
+					}
+					else {
+						inputInstructions.setMakeLevel(instructions.makeLevel - 1);
+					}
+
+
+					/*
+					if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) {
+						inputInstructions.setMakeLevel(instructions.makeLevel - 1);
+					} else {
+						inputInstructions.setMakeLevel(Instructions.MakeLevel.NONE);
+					}
+					 */
+
+					if (instructions.isSet(Instructions.INPUTLIST)) {
+						inputInstructions.add(ActionType.INPUTLIST);
+					}
+
+					// Input generation uses parallel threads only if this product uses - ?
+					if (instructions.isSet(Instructions.PARALLEL)) {
+						inputInstructions.add(ActionType.PARALLEL);
+					}
+
+
+					//log.experimental(String.format("Input retrieval depth: %d",
+					//		inputInstructions.makeLevel));
 
 					log.special(String.format("Input instructions: %s", inputInstructions));
-				}
 
-				// Ok - forwarding directives?
-				Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
+					// Ok - forwarding directives?
+					// FIX: WHY repeated inputTasks <--> this.inputTasks
+					Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
 
-				// Statistics
-				/*
-				Graph.Node node = null;
-				if (graph != null) {
-					node = getGraphNode(graph);
-
-					for (Entry<String,Task> entry : inputTasks.entrySet()) {  // FIX: move, see below?
-						//entry.getValue().setGraph(graph);
-						Task inputTask = entry.getValue();
-						inputTask.setGraph(graph);
-						//inputTask.getGraphNodee(graph); // "reserve"
-					}
-					//node.attributes.put("fillcolor", "lightblue");
-				}
-				 */
-
-				if (!inputTasks.keySet().isEmpty())
 					serverLog.debug("runTasks:" + inputTasks.keySet());
-				runTasks(inputTasks, log);
+					runTasks(inputTasks, log);
 
 
-				for (Entry<String, Task> entry : inputTasks.entrySet()) {
-					String key = entry.getKey();
-					Task inputTask = entry.getValue();
+					for (Entry<String, Task> entry : inputTasks.entrySet()) {
+						String key = entry.getKey();
+						Task inputTask = entry.getValue();
 
-					this.inputTasksNEW.put(key, inputTask);
-					// FIX: check unneeded errors if only INPUTLIST requested
-					if (inputTask.result != null) {
-						log.ok(String.format("Retrieved: %s = %s [%s]",
-								key, inputTask.result, inputTask.result.getClass().getSimpleName()));
+						this.inputTasks.put(key, inputTask);
+						// FIX: check unneeded errors if only INPUTLIST requested
+						if (inputTask.result != null) {
+							log.ok(String.format("Retrieved: %s = %s [%s]",
+									key, inputTask.result, inputTask.result.getClass().getSimpleName()));
 
-						if (inputTask.log.indexedState.index > 300) {
-							log.warn(String.format("Errors in generating input of: %s %s", key, inputTask.log.indexedState.getMessage()));
+							if (inputTask.log.indexedState.index >= 400) {
+								log.warn(String.format("Errors for input of %s: %s", key, inputTask.log.indexedState.getMessage()));
+							} else if (inputTask.log.indexedState.index >= 300) {
+								log.note(String.format("Warnings for input of %s: %s", key, inputTask.log.indexedState.getMessage()));
+							}
+						} else {
+							log.warn(inputTask.log.indexedState.getMessage());
+							log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
+							log.reset(); // Forget that anyway...
 						}
-					} else {
-						log.warn(inputTask.log.indexedState.getMessage());
-						log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
-						log.reset(); // Forget that anyway...
 					}
-				}
 
-				for (Task inputTask : inputTasks.values()) {
-					inputTask.close();
+					for (Task inputTask : inputTasks.values()) {
+						inputTask.close();
+					}
+
 				}
 
 				/// "MAIN"
-				if (instructions.isSet(ActionType.GENERATE)){
+				if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
+				//if (instructions.isSet(ActionType.GENERATE)){
 					log.note("Running Generator: " + info.PRODUCT_ID);
 
 					File fileTmp = outputPathTmp.toFile();
@@ -885,7 +880,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
 						// server Log.fail(info.getFilename());
 						// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
-						if (instructions.isSet(Instructions.GENERATE)) {
+						if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
+						    // if (instructions.isSet(Instructions.GENERATE)) {
 							try {
 								log.warn(String.format("Failed in generating: %s", info));
 								if (outputPathTmp.toFile().exists())
@@ -904,24 +900,41 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 
-			if (instructions.isSet(ActionType.INPUTLIST) && !instructions.involves(ActionType.GENERATE)) {
+			//if (instructions.isSet(ActionType.INPUTLIST) && !instructions.involves(ActionType.GENERATE)) {
+			if (instructions.isSet(ActionType.INPUTLIST) &&
+					instructions.makeLevelBelow(Instructions.MakeLevel.GENERATE)) {
 				log.note("Input list: requested");
 				// result = inputs;
 			}
 
 
-			if (instructions.isSet(ResultType.FILE)) {
+			if (instructions.isSet(MediaType.FILE)) {
 				// TODO: save file (of JavaGenerator)
 				// if (this.result instanceof Path)...
 
-				if (this.instructions.isSet(ActionType.DELETE)) {
+				if (this.instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)) {
 					if (fileFinal.exists())
 						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length()));
 					else {
 						log.reset();
-						log.ok("Deleted.");
+						log.log(HttpLog.HttpStatus.ACCEPTED, String.format("File does not exist: %s", fileFinal)); // Consider storing last messages in LOG? See HttpLog.indexedState
+						//log.ok("Deleted."); // Consider storing last messages in LOG? See HttpLog.indexedState
+						// System.err.println("DELE: " + log.indexedState.getMessage());
 					}
-				} else if (fileFinal.length() == 0) {
+				}
+				else if (this.instructions.makeLevelEquals(Instructions.MakeLevel.EXISTS)) {
+					if (!fileFinal.exists()){
+						log.log(HttpLog.HttpStatus.CONFLICT, String.format("File does not exist: %s ", this.outputPath));
+					}
+					else if (fileFinal.length() == 0){
+						log.log(HttpLog.HttpStatus.CONFLICT, String.format("File exists, but is empty: %s ", this.outputPath));
+					}
+					else {
+						result = fileFinal;
+						log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s ", this.outputPath));
+					}
+				}
+				else if (fileFinal.length() == 0) {
 
 					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
 					try {
@@ -1056,7 +1069,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			} else {
 				if (this.result != null) // Object?
 					log.info("Result: " + this.result.toString());
-				log.note("Task completed: instructions=" + this.instructions);
+				log.note(String.format("Task completed: instructions=%s, status=%s", this.instructions, this.getStatus()));
 				// status page?
 
 			}
@@ -1117,11 +1130,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.special("PATH=" + PATH);
 			}
 
-			if (!this.inputTasksNEW.isEmpty()) {
-				env.put("INPUTKEYS", String.join(",", this.inputTasksNEW.keySet().toArray(new String[0])));
+			if (!this.inputTasks.isEmpty()) {
+				env.put("INPUTKEYS", String.join(",", this.inputTasks.keySet().toArray(new String[0])));
 				// FIX: String.join(",", retrievedInputs.keySet());
 				// env.putAll(this.inputTasksNEW);
-				for (Map.Entry<String,Task> entry: inputTasksNEW.entrySet()){
+				for (Map.Entry<String,Task> entry: inputTasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 					if (inputTask.outputPath != null){
@@ -1137,26 +1150,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 
-		@Override
-		public String toString() {
-			if (this.info.directives.isEmpty())
-				return String.format("%s # %s", this.filename, instructions);
-			else
-				return String.format("%s?%s # %s", this.filename, info.directives, instructions);
-		}
 
-		//final long creationTime;
-		/*
-		public Graph addGraph(String name){
-			this.graph = new Graph(name);
-			Graph.Node nodeDef = graph.addNode("node");
-			nodeDef.attributes.put("shape", "ellipse");
-			nodeDef.attributes.put("style", "filled");
-			return this.graph;
-		}
+		/**
+		 *
+		 * @return
 		 */
-
-
 		public Path writeGraph() {
 			Path graphFile = CACHE_ROOT.resolve(relativeGraphPath);
 			log.special(String.format("Writing graph to file: %s", graphFile));
@@ -1164,7 +1162,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			try {
 				Path graphDir = graphFile.getParent();
 				FileUtils.ensureWritableDir(graphDir, GROUP_ID, dirPerms);
-				graph.dotToFile(graphFile.toString());
+				graph.dotToFile(graphFile.toString()); // svg
 				graph.dotToFile(graphFile.toString()+".dot"); // debugging
 				Files.setPosixFilePermissions(graphFile, filePerms);
 			} catch (IOException | InterruptedException e) {
@@ -1179,67 +1177,25 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	}  // Task
 
 
-	public interface Generator {
 
-		/**
-		 *
-		 */
-		void generate(Task task) throws IndexedState; // throws IOException, InterruptedException ;
-
-		// Semantics? (List or retrieved objects)
-		// boolean hasInputs();
-
-		/**
-		 * Declare inputs required for this product generation task.
-		 *
-		 * @param task
-		 * @return
-		 */
-		Map<String, String> getInputList(Task task) throws IndexedState;
-
-	}
-
-	/** Searches for shell side (and later, Java) generators
+	/** Creates Tasks from product definitions. Ensures directories for copying, linking, and moving.
 	 *
-	 * @param productID
-	 * @return
-	 */
-	public Generator getGenerator(String productID) throws IndexedState {
-		Path dir = PRODUCT_ROOT.resolve(getProductDir(productID));
-		Generator generator = new ExternalGenerator(productID, dir.toString());
-		return generator;
-	};
-
-	/** Run a set of tasks in parallel.
-	 *
-	 * This function is called by
-	 * 1) tasks, to obtain inputs
-	 * 2) demo (main function)
-	 *
-	 * @param taskRequests
-	 * @param instructions
-	 * @param log
-	 * @return - the completed set of tasks, including failed ones.
-	 *
-	 */
-	/*
-	public Map<String,Task> executeMany(Map<String,String> taskRequests, int instructions, Map directives, HttpLog log) {
-		return executeMany(taskRequests, new Actions(instructions), directives, log);
-	}
-
-	 */
-
-
-	/**
-	 *
-	 * @param batchConfig
+	 * @param batch
 	 * @param log
 	 * @return
 	 */
-	public Map<String,Task> prepareTasks(Batch batchConfig, HttpLog log) {
-		return prepareTasks(batchConfig.products, batchConfig.instructions, batchConfig.directives, log);
+	public Map<String,Task> prepareTasks(Batch batch, HttpLog log) {
+		return prepareTasks(batch.products, batch.instructions, batch.directives, log);
 	}
 
+	/** Creates Tasks from product definitions. Ensures directories for copying, linking, and moving.
+	 *
+	 * @param productRequests
+	 * @param instructions – shared product request handling instructions
+	 * @param directives – shared product generation auxiliary instructions.
+	 * @param log – parent log, under which each Task creates a separate log.
+	 * @return
+	 */
 	public Map<String,Task> prepareTasks(Map<String,String> productRequests, Instructions instructions, Map<String,String> directives, HttpLog log) {
 
 		Map<String, Task> tasks = new HashMap<>();
@@ -1251,6 +1207,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		log.info(String.format("Preparing %d tasks: %s", productCount, productRequests.keySet()));
+		log.info(String.format("Instructions: %s, Directives: %s ",
+				instructions, directives));
 		/*
 		log.info(String.format("Instructions: %s (depth: %d), Directives: %s ",
 				instructions, instructions.regenerateDepth, directives));
@@ -1312,16 +1270,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			try {
 
-				Task task = new Task(value, instructions.value, log);
-
+				//Task task = new Task(value, instructions.value, log);
+				Task task = new Task(value, instructions, log);
 				task.info.setDirectives(directives);
+				/*
 				task.instructions.addCopies(instructions.copies);
 				task.instructions.addLinks(instructions.links);
 				task.instructions.addMove(instructions.move); // Thread-safe?
-				task.instructions.regenerateDepth = instructions.regenerateDepth;
-				if (task.instructions.regenerateDepth > 0){
+				task.instructions.makeLevel = instructions.makeLevel;
+				 */
+				/*
+				if (task.instructions.makeLevel > 0){
 					task.instructions.add(ActionType.MAKE);
 				}
+				 */
 
 				log.info(String.format("Prepared task: %s= %s", key, task));  //, task.instructions
 				if ((directives != null) && !directives.isEmpty())
@@ -1357,6 +1319,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return tasks;
 	}
 
+	/** Execute tasks, optionally in parallel threads.
+	 *
+	 * @param tasks
+	 * @param log
+	 * @return
+	 */
 	public Map<String,Task> runTasks(Map<String,Task> tasks, HttpLog log) {
 
 		if (tasks.isEmpty()){
@@ -1371,7 +1339,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
 			Task task = entry.getValue();
-			task.log.debug("Decoration: " + task.log.decoration.toString());
+			// task.log.debug("Decoration: " + task.log.decoration.toString());
 			if (task.instructions.isSet(ActionType.PARALLEL)) {
 				try {
 					log.info(String.format("Starting task[%d] '%s': %s as a thread", task.getTaskId(), key, task));
@@ -1399,20 +1367,24 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			} catch (InterruptedException e) {
 				log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
-				log.warn(String.format("Pending file? : ", task.outputPathTmp));
+				log.warn(String.format("Pending file? : %s", task.outputPathTmp));
 			}
-			log.info(String.format("Final status: %s", task.log.indexedState));
 
-			// FIX: check unneeded errors if only INPUTLIST requested
+			IndexedState state = task.log.indexedState;
+
+			// log.debug(String.format("%s status: %s", key, state.getMessage()));
+
+			// FIX: check/skip unneeded errors if only INPUTLIST requested
 			if (task.result != null) {
-				String r = task.result.toString();
-				// log.note(String.format("Retrieved: %s = %s", key, r));
-				if (task.log.indexedState.index > 300) {
-					log.warn("Errors in input generation: " + task.log.indexedState.getMessage());
+				if (state.index >= 400) { //?
+					log.warn(String.format("Error for %s: %s", key, state.getMessage()));
 				}
-			} else {
-				log.warn(task.log.indexedState.getMessage());
-				log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, task));
+				else if (state.index >= 300) {
+					log.note(String.format("Notes for %s: %s", key, state.getMessage()));
+				}
+			} else if (task.instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
+				log.warn(state.getMessage());
+				log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Task [%s] failed: %s", key, task));
 				log.reset(); // Forget that anyway...
 			}
 
@@ -1422,21 +1394,21 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	}
 
 
-	/// Checks if a file exists in cache or storage, wait for completion if needed.
+	/// Checks if a file exists in cache or storage, wait for completion if needed. Delete if outdated.
 	/**
 	 *
 	 * return immediately if non-empty or nonexistent, else wait for an empty file to complete.
 	 * @param file
 	 * @param maxEmptySec maximum age of empty file in seconds
-	 * @param log
-	 * @return
+	 * @param log - stream to write success of the process
+	 * @return - consider -1 not exists, 0 = exists cold, 1.. hot waited for seconds
 	 * @throws InterruptedException
 	 */
-	public boolean queryFile(File file, int maxEmptySec, Log log) throws InterruptedException {
+	public int queryFile(File file, int maxEmptySec, HttpLog log) throws InterruptedException {
 
 		if (!file.exists()){
 			log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("File does not exist: %s", file));
-			return false;
+			return -1;
 		}
 
 		int remainingSec = this.TIMEOUT;
@@ -1446,32 +1418,33 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		if (fileLength > 0) {
 			//log.note("File found");
 			log.log(HttpLog.HttpStatus.OK, String.format("File found: %s (%d bytes)", file.getName(), fileLength));
-			return true;
+			return 0;
 		}
 		else { // empty file
-			long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
+			// long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
+			long ageSec = FileUtils.fileModificationAge(file);
 			if (ageSec > maxEmptySec){
 				log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Time %d", java.lang.System.currentTimeMillis()));
 				log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("File %d", file.lastModified()));
 				log.log(HttpLog.HttpStatus.NOT_MODIFIED, String.format("Outdated empty file, age=%d min, (max %d s)",(ageSec/60), maxEmptySec));
-				//return false;
 			}
 			else {
 				log.log(HttpLog.HttpStatus.SEE_OTHER, "Empty fresh file exists, waiting for it to complete...");
 				for (int i = 1; i < 10; i++) {
-					int waitSec = i * i;
-					log.warn("Waiting for "+ waitSec + " s...");
+					// int waitSec = i*i;      1, 4, 9, 16, 25, // 1 5 13 29 54
+					int waitSec = 2<<(i-1);//  1, 2, 4, 16, 32, // 1 3 7  31 63
+					//log.warn(String.format("Waiting for %d s...", waitSec));
+					log.log(HttpLog.HttpStatus.CONTINUE,String.format("Waiting for %d s...", waitSec));
 					TimeUnit.SECONDS.sleep(waitSec);
 					if (file.length() > 0){
 						log.log(HttpLog.HttpStatus.CREATED,"File appeared");
-						return true;
+						return (this.TIMEOUT - remainingSec);
 					}
 					remainingSec = remainingSec - waitSec;
 					if (remainingSec <= 0)
 						break;
 				}
-				log.log(HttpLog.HttpStatus.NOT_MODIFIED,"File did not appear (grow), even after waiting");
-				//return false;
+				log.log(HttpLog.HttpStatus.NOT_MODIFIED, String.format("Timeout - file did not appear (grow) in %d s", maxEmptySec));
 			}
 
 			try {
@@ -1484,7 +1457,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
 			}
 
-			return false;
+			return -1;
 		}
 	}
 
@@ -1492,42 +1465,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	/// System side setting.
 	//  public String pythonScriptGenerator = "generate.py";
-
-
-	class InstructionParameter extends Parameter.Simple<String> {
-
-		InstructionParameter(Instructions instructions){
-			super("instructions", "Set actions and properties: " +
-							instructions.getAllFlags().keySet().toString(),
-					instructions.toString());
-			myInstructions = instructions;
-		}
-
-		Instructions myInstructions = null;
-
-		InstructionParameter(Instructions instructions, String fieldName){
-			super(fieldName.toLowerCase(),
-					String.format("Same as --instructions %s,...", fieldName),
-					fieldName.toUpperCase());
-			setReference(this, "");
-			//value = fieldName.toUpperCase();
-			myInstructions = instructions;
-			//System.err.print("Added: ");
-			// System.err.println(this);
-		}
-
-		@Override
-		public void exec() {
-			try {
-				myInstructions.add(value);
-				// System.out.printf("DEBUG: %s %n", myInstructions);
-			}
-			catch (NoSuchFieldException | IllegalAccessException e) {
-				throw new RuntimeException("Unsupoorted Instruction", e);
-			}
-
-		}
-	}
 
 	/** A container, a "super task" for generating one or several products.
 	 *
@@ -1538,12 +1475,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		public Map<String,String> products = new TreeMap<>();
 		public Instructions instructions = new Instructions();
-		public Map<String ,String> directives = new TreeMap<>();
-
-
+		public Map<String,String> directives = new TreeMap<>();
 
 		/// Future fix: timeout should be adjustable for each batch
-		private int timeOut = 0;
+		//  private int timeOut = 0;
 
 	}
 
@@ -1584,7 +1519,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec(){
 
-				String killCmd[] = new String[]{"killall", value};
+				String[] killCmd = new String[]{"killall", value};
 				serverLog.special("Executing KILL command: " + Arrays.toString(killCmd));
 
 				ShellUtils.ProcessReader handler = new ShellUtils.ProcessReader() {
@@ -1606,47 +1541,46 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		});
 
 		registry.add(new Parameter.Simple<TextOutput.Format>("log_format",
-                "Log file format.", TextOutput.Format.VT100) {
+				"Log file format.", TextOutput.Format.VT100) {
 
-            @Override
-            public void exec() {
-                serverLog.setFormat(value); // needed?
+			@Override
+			public void exec() {
+				serverLog.setFormat(value); // needed?
 				LOG_SERVER = serverLog.getConf();
-						//String.format("%s %s", serverLog.textOutput, serverLog.decoration);
+				//String.format("%s %s", serverLog.textOutput, serverLog.decoration);
 				LOG_TASKS = LOG_SERVER;
-                // server Log.debug(server Log.textOutput.toString());
+				// server Log.debug(server Log.textOutput.toString());
 				serverLog.special(String.format("New state for all logs: '%s'", LOG_SERVER));
 				//serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
 				//server Log.debug(server Log.textOutput.toString());
-            }
-        });
+			}
+		});
 
 
         registry.add(new Parameter.Simple<String>("log_style",
-                "Set decoration: " + serverLog.decoration.getAllFlags().keySet(),
+				"Set decoration: " + serverLog.decoration.getAllFlags().keySet(),
 				"") {
 
-            @Override
-            public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
-                //super.setParam(key, value);
+			@Override
+			public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {
+				//super.setParam(key, value);
 				serverLog.deprecated(String.format("Use generalized command --log '%s'", value));
-                String s = value.toString();
+				String s = value.toString();
 
-                if (s.isEmpty()){
+				if (s.isEmpty()) {
 					serverLog.decoration.clear();
 					//LOG_STYLE.clear();
-				}
-                else {
+				} else {
 					serverLog.decoration.set(s);
 					// LOG_STYLE.set(value.toString());
 				}
 				LOG_SERVER = serverLog.getConf();
 				LOG_TASKS = LOG_SERVER;
-                //serverLog.decoration.set(LOG_STYLE);
-            }
+				//serverLog.decoration.set(LOG_STYLE);
+			}
 
 
-        });
+		});
 
 		registry.add(new Parameter.Simple<String>("log",
 				String.format("Set log properties: verbosity %s, format %s, decoration %s ",
@@ -1686,11 +1620,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 	// Note: this turns program registry dynamic. It should be shared, static?
-    public void populate(Batch batch, ProgramRegistry registry){
+	public void populate(Batch batch, ProgramRegistry registry){
 
-		registry.add(new InstructionParameter(batch.instructions));
+		//registry.add(new InstructionParameter(batch.instructions));
+		registry.add(batch.instructions.getProgramParameter());
+
 		for (String instr: ClassUtils.getConstantKeys(Instructions.class)){ // consider instant .getClass()
-			registry.add(instr.toLowerCase(), new InstructionParameter(batch.instructions, instr));
+			registry.add(batch.instructions.getProgramParameter(instr));
+			//registry.add(instr.toLowerCase(), new InstructionParameter(batch.instructions, instr));
+		}
+
+		for (Instructions.MakeLevel level: Instructions.MakeLevel.values()){ // consider instant .getClass()
+			registry.add(batch.instructions.getProgramParameter(level));
+			//registry.add(level.name().toLowerCase(), new InstructionParameter(batch.instructions, level));
+			//.toLowerCase()
 		}
 
 
@@ -1707,12 +1650,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		/*
 		registry.add(new Parameter<Instructions>("regenerate",
 				"Deprecating, use --depth instead.",
-				batchConfig.instructions, "regenerateDepth"));
+				batch.instructions, "regenerateDepth"));
 		 */
 
+		// deprecating
 		registry.add(new Parameter<Instructions>("depth",
-				"Cache clearance depth (0=EXISTS, 0=MAKE, 1GENERATE, N...: remake inputs)",
-				batch.instructions, "regenerateDepth"));
+				"Cache clearance depth (0=EXISTS, 0=MAKE, 1=GENERATE, N...: remake inputs)",
+				batch.instructions, "makeLevel"));
 
 
 		registry.add(new Parameter.Single("regenerate",
@@ -1725,7 +1669,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				serverLog.deprecated("Use --depth instead.");
-				batch.instructions.regenerateDepth = depth;
+				batch.instructions.makeLevel = depth;
 			}
 		});
 
@@ -1778,14 +1722,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				try {
-					Task product = server.new Task(filename, 0, log);
+					Task product = server.new Task(filename, new Instructions(), log);
 					Map<String,Object> map = product.getParamEnv();
 					String[] array = MapUtils.toArray(map);
 					for (String s : array) {
 						System.out.println(s);
 					}
-					System.out.println(String.format("time : %d", product.info.time ));
-					System.out.println(String.format("time2: %d", product.info.time2));
+					//System.out.println(String.format("time : %d", product.info.time ));
+					//System.out.println(String.format("time2: %d", product.info.time2));
 				}
 				catch (ParseException e) {
 					log.fail(e.getMessage());
@@ -1809,8 +1753,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				else {
 
-					if (batch.instructions.isEmpty())
-						batch.instructions.add(ActionType.MAKE);
+					//if (batch.instructions.isEmpty())
+					//	batch.instructions.setMakeLevel(Instructions.MakeLevel.Make);
 
 					if (batch.products.size() > 1){
 						log.warn("Several products defined, using last");
@@ -1818,7 +1762,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					for (Map.Entry entry: batch.products.entrySet()) {
 						try {
-							Task task = server.new Task(entry.getValue().toString(), 0, log);
+							Task task = server.new Task(entry.getValue().toString(), batch.instructions, log);
 							System.out.println(String.format("instructions=%s&product=%s", batch.instructions, task.info.getFilename()));
 						} catch (ParseException e) {
 							log.warn(entry.getValue().toString());
@@ -1833,6 +1777,22 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 		/// Command line only
+		registry.add(new Parameter.Simple<String>("clear_cache",
+				"Clear cache (and exit.)", // reconsider exit
+				""){
+			@Override
+			public void exec() {
+				log.warn("Clearing cache");
+				try {
+					server.clearCache(true);
+					System.exit(0); // reconsider exit
+				} catch (IOException e) {
+					log.log(HttpLog.HttpStatus.CONFLICT, "Clearing cache failed");
+					System.exit(4);
+				}
+			}
+		});
+
 		registry.add(new Parameter.Simple<String>("copy",
 				"Copy generated product(s) to file (dir). Repeatable.",
 				""){
@@ -1893,7 +1853,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			args = new String[]{"--help"};
 		}
 
-		// log.special("Instructions..." + batchConfig.instructions);
+		// log.special("Instructions..." + batch.instructions);
 
 		try {
 			for (int i = 0; i < args.length; i++) {
@@ -1951,7 +1911,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		if (batch.instructions.isEmpty()){
-			batch.instructions.set(ActionType.MAKE);
+			batch.instructions.setMakeLevel(Instructions.MakeLevel.MAKE);
 		}
 
 		int result = 0;
@@ -1959,6 +1919,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		if (!batch.instructions.isEmpty())
 			log.debug("Instructions: " + batch.instructions);
 
+		/*
 		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {
 			log.warn("Clearing cache");
 			if (batch.instructions.value != ActionType.CLEAR_CACHE){
@@ -1975,6 +1936,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			System.exit(result);
 		}
 
+		 */
+
 		// Turhia/väärässä paikassa (tässä)
 		if (!batch.instructions.copies.isEmpty())
 			log.note(String.format("   COPY(%d):\t %s", batch.instructions.copies.size(), batch.instructions.copies));
@@ -1984,27 +1947,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.note(String.format("   MOVE: \t %s", batch.instructions.move));
 
 		/*
-		if (!batchConfig.directives.isEmpty())
-			log.debug("Directives: " + batchConfig.directives);
+		if (!batch.directives.isEmpty())
+			log.debug("Directives: " + batch.directives);
 		 */
 
 		/// MAIN
 		Map<String, Task> tasks = server.prepareTasks(batch, log);
 
-		Graph graph = new Graph("ProductServer");
-		if (batch.instructions.isSet(ActionType.STATUS)){
-
-			for (Entry<String,Task> entry : tasks.entrySet()) {
-				Task task = entry.getValue();
-				/*
-				if (graph == null){
-					graph = task.addGraph("ProductServer");
-				}
-				 */
-				//task.graph = graph;
-			}
-		}
-
+		// Graph graph = new Graph("ProductServer");
 		server.runTasks(tasks, log);
 
 		if (log.getStatus() <= Log.Status.ERROR.level){
@@ -2014,7 +1964,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		for (Entry<String,Task> entry: tasks.entrySet()) {
 
-			String key = entry.getKey();
+			// String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedState.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
 				log.warn(String.format("Generator Exception: %s", task.log.indexedState.getMessage()));
@@ -2028,24 +1978,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			task.getGraphNode(serverGraph);
 
-			/*
-			// log.info(String.format("status: %s %d", task.info.PRODUCT_ID ,task.log.status) );
-			if (task.log.logFile != null) {
-				log.info(String.format("Log:\t %s", task.log.logFile.getAbsolutePath()));
-			}
-
-			if (task.result != null) {
-				String s = String.format("Result [%s]: %s", task.result.getClass(), task.result);
-				log.info(s);
-				//log.info("Log:\t"  + task.log.logFile.getAbsolutePath());
-				task.log.info(s);
-			}
-
-			 */
-
-			if (task.outputPath.toFile().exists())
+			if (task.outputPath.toFile().exists()) {
 				log.ok(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
 				//log.note(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
+			}
 
 			if (task.instructions.isSet(ActionType.INPUTLIST)){
 
@@ -2090,10 +2026,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 		}
-
-
-
-
 
 		// System.err.println("Eksit");
 		log.debug("Exiting..");
