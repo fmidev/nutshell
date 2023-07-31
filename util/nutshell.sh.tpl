@@ -38,11 +38,19 @@ RESULT=0
 
 if [ $# != 0 ]; then
 
+    #ARG1=$1
+    LOG_INIT='--log_level INFO'
+    if [ ${1:0:5} == '--log' ]; then
+	LOG_INIT="$1 $2"
+	# echo "# ! Initial logging cmd: $LOG_INIT"
+    fi
+    
     # --log_level DEBUG
     # Notice: PYTHON and JAVA have different labels
     # Common ones: ERROR,WARNING,INFO,DEBUG
-    # Double quotes are needed to keep excplicit empty '' agruments.
-    ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
+    # Double quotes "" are needed to keep excplicit empty '' agruments.
+    ${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
+    # ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
     RESULT=$?
     if [ $RESULT != 0 ]; then
 	#echo !!
