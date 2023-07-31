@@ -45,10 +45,13 @@ import static java.nio.file.Files.*;
  */
 public class ProductServer extends ProductServerBase { //extends Cache {
 
+	public String getVersion(){
+		return "3.42";
+	}
+
 	ProductServer() {
-		super.version = Arrays.asList(3, 4);
-		setup.put("ProductServer", getVersion());
-		LABEL = "nutshell-"+getVersion();
+		setup.put("ProductServer", this.getVersion());
+		// LABEL = "nutshell-"+getVersion();
 	}
 
 
@@ -63,7 +66,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 *  and user.
 	 *
 	 */
-	public String LABEL; // "nutshell-"+getVersion(); // ""%d-%s"; // USER-counter
+	// public String LABEL; // "nutshell-"+getVersion(); // ""%d-%s"; // USER-counter
 
 	/// System side settings.
 
@@ -200,7 +203,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			//if (result instanceof Path){
 			Instructions instr = new Instructions();
-			instr.set(ActionType.STATUS, ActionType.INPUTLIST); //, ActionType.MAKE);
+			instr.set(OutputType.STATUS, ActionType.INPUTLIST); //, ActionType.MAKE);
 			instr.toString();
 			//instr.add(instructions.value & (ActionType.GENERATE | ActionType.MAKE));
 			node.attributes.put("href", String.format(
@@ -291,7 +294,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			// Accept only word \\w chars and '-'.
 			// String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
-			final String label = String.format("%s-%d-%s.%d", LABEL, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			final String label = String.format("%s-%d-%s.%d", instructions.label, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
 
 			//this.instructions.set(instructions);
 			// this.instructions.makeLevel = defaultRemakeDepth;
@@ -1596,10 +1599,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new Parameter.Simple<String>("log",
 				String.format("Set log properties: verbosity %s, format %s, decoration %s ",
-						Log.statusCodes.keySet(),  // Arrays.toString(Log.Status.values()),
+						Log.statusCodes.values(),  // Arrays.toString(Log.Status.values()),
 						Arrays.toString(TextOutput.Format.values()),
 						Arrays.toString(TextOutput.Options.values())),
-				"") {
+				"INFO,TEXT") {
 
 			@Override
 			public void exec() {
@@ -1611,9 +1614,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
                 "Unix file group id (gid) to use.",
                 this, "GROUP_ID"));
 
-        registry.add(new Parameter<ProductServer>("label",
-                "Marker for logs and tmps", //supporting %d=task-id [%s=user].",
-                this, "LABEL"));
 
         // Consider: to NutLet and @ShellExec
         registry.add(new Parameter<ProductServer>("timeout",
@@ -1690,6 +1690,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
+		registry.add(new Parameter<Instructions>("label",
+				"Marker for logs and tmps", //supporting %d=task-id [%s=user].",
+				batch.instructions, "label"));
+
 		/*
 		registry.add(new Parameter<Instructions>("regenerate",
 				"Deprecating, use --depth instead.",
@@ -1738,16 +1742,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	public static void main(String[] args) {
 
 		final ProductServer server = new ProductServer();
-		server.serverLog.setVerbosity(Log.Status.DEBUG);
-
-		/*
-		if (args.length == 0){
-			server.help();  // An instance, yes. Default values may have been changed!
-			return;
-		}
-		*/
 
 		HttpLog log = server.serverLog;
+		log.setVerbosity(Log.Status.DEBUG);
 		log.decoration.set(TextOutput.Options.COLOUR);
 
 		ProgramRegistry registry = new ProgramRegistry();
@@ -1833,9 +1830,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		});
 
 		/// Command line only
-		registry.add(new Parameter.Simple<String>("clear_cache",
-				"Clear cache (and exit.)", // reconsider exit
-				""){
+		registry.add(new Parameter("clear_cache", // .Simple<String>
+				"Clear cache (and exit.)" // reconsider exit
+				){
 			@Override
 			public void exec() {
 				log.warn("Clearing cache");
@@ -2014,7 +2011,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			}
 
-			if (task.instructions.isSet(ActionType.STATUS)){
+			if (task.instructions.isSet(OutputType.STATUS)){
 				/*
 				Graph g = task.getGraph(null);
 				g.toStream(System.out);
@@ -2040,7 +2037,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			task.close();
 		}
 
-		if (batch.instructions.isSet(ActionType.STATUS)){
+		if (batch.instructions.isSet(OutputType.STATUS)){
 			//
 			System.out.println();
 			for (Entry<String,Object> entry: server.setup.entrySet()) {
