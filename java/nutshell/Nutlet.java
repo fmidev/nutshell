@@ -98,10 +98,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		if (!productServer.serverLog.logFileIsSet()) {
 			String filename;
 			if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
-				filename = String.format("%s-%s.%d.html", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
+				filename = String.format("%s-%s.%d.html", "nutshell", productServer.USER, productServer.GROUP_ID);
 			}
 			else {
-				filename = String.format("%s-%s.%d.log", productServer.LABEL, productServer.USER, productServer.GROUP_ID);
+				filename = String.format("%s-%s.%d.log", "nutshell", productServer.USER, productServer.GROUP_ID);
 			}
 
 			// Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
@@ -268,10 +268,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 		*/
 
-		// Debug
-		// batchConfig.instructions.add(Instructions.STATUS);
 
-					/*
+		/*
 
 		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {
 
@@ -326,7 +324,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 
-		//if (page.equals("status")){
+		// Plain status. (No product handling)
 		if (page.equals("status")){ //|| batchConfig.instructions.isSet(ActionType.STATUS)){
 			setup.put("counter", ProductServer.counter);
 			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
@@ -456,7 +454,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			task.instructions.remove(Instructions.LATEST);
 		}
 
-		if (task.instructions.isSet(Instructions.STATUS)){
+		if (task.instructions.isSet(OutputType.STATUS)){
 			//task.addGraph("ProductServer.Task" + task.getTaskId());
 		}
 
@@ -502,7 +500,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//if (task.actions.involves(Actions.MAKE|Actions.GENERATE) && (task.log.getStatus() >= Log.NOTE)) { // Critical to ORDER!
 
 			if (task.log.getStatus() >= Log.Status.NOTE.level) {
-				if (task.instructions.isSet(Instructions.STREAM)) {
+				if (task.instructions.isSet(OutputType.STREAM)) {
 					task.log.debug("sendToStream: " + task.outputPath);
 					try {
 						sendToStream(task.outputPath, httpResponse);
@@ -510,7 +508,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						task.close();
 						return;
 					} catch (Exception e) {
-						task.instructions.add(Instructions.STATUS);
+						task.instructions.add(OutputType.STATUS);
 					}
 				} else if (task.instructions.isSet(Instructions.REDIRECT)) {
 					taskMap.remove(task.getTaskId());
@@ -525,7 +523,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			else {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-				if (!task.instructions.isSet(Instructions.STATUS)) {
+				if (!task.instructions.isSet(OutputType.STATUS)) {
 					taskMap.remove(task.getTaskId());
 					task.close();
 					sendStatusPage(HttpServletResponse.SC_OK, "Product request completed",
@@ -548,8 +546,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 		catch (IndexedState e) {
 			httpResponse.setStatus(e.index);
-			task.instructions.add(Instructions.STATUS);
-			//task.instructions.add(Instructions.STATUS); // ?
+			task.instructions.add(OutputType.STATUS);
 			task.instructions.add(Instructions.INPUTLIST);
 		}
 
@@ -583,7 +580,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		html.appendElement(elem);
 
 
-		if (task.instructions.isSet(Instructions.STATUS)) {
+		if (task.instructions.isSet(OutputType.STATUS)) {
 
 			Map<String,Object> map = new LinkedHashMap<>();
 

@@ -198,6 +198,8 @@ public class ProductServerBase extends Program {
 
         Manip.assignToObjectLenient(setup, this);
 
+        serverLog.set(LOG_SERVER);
+
         if (!LOG_SERVER_OVERRIDE.isEmpty()){
             serverLog.set(LOG_SERVER_OVERRIDE);
         }

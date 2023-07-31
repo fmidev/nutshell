@@ -58,10 +58,10 @@
     </init-param>
 
 
-    <init-param>
+    <!-- init-param>
       <param-name>buildDate</param-name>
-      <param-value>${DATE}</param-value>
-    </init-param>
+      <param-value>DATE</param-value>
+    </init-param -->
 
     <init-param>
       <param-name>buildBy</param-name>
