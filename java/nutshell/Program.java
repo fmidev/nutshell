@@ -7,13 +7,17 @@ import java.util.stream.Collectors;
 
 public class Program {
 
-    List<Integer> version = Arrays.asList(1, 0);
+
+    // List<Integer> version = Arrays.asList(1, 0);
 
     public String getVersion(){
-        return version.stream()
+        final List<Integer> v = Arrays.asList(1, 0);
+        return v.stream()
             .map(i -> i.toString())
             .collect( Collectors.joining(".") );
     }
+
+
 
 
     static class Parameter<T> extends BeanLike { // add Program ?E
