@@ -27,7 +27,8 @@ public class ProductServerBase extends Program {
      *  For each task, a separate log will be started.
      *
      */
-    final public HttpLog serverLog = new HttpLog("[NutShell]");
+    //final public HttpLog serverLog = new HttpLog("[NutShell]");
+    final public HttpLog serverLog = new HttpLog("[NutShell]", Log.Status.UNDEFINED.getIndex());
 
     static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -38,7 +39,8 @@ public class ProductServerBase extends Program {
      *  - format: TEXT, VT100, HTML
      *
      */
-    public String LOG_SERVER = "TEXT,INFO";
+    //public String LOG_SERVER = "TEXT,INFO";
+    public String LOG_SERVER = "";
 
     /** Settings for task logs.
      *
@@ -191,11 +193,15 @@ public class ProductServerBase extends Program {
             }
         }
 
-        Manip.assignToObjectLenient(setup, this);
-        //System.err.println(setup);
+        // Non-empty, if set on command line.
+        String LOG_SERVER_OVERRIDE = LOG_SERVER;
 
-        // Logging
-        serverLog.set(LOG_SERVER);
+        Manip.assignToObjectLenient(setup, this);
+
+        if (!LOG_SERVER_OVERRIDE.isEmpty()){
+            serverLog.set(LOG_SERVER_OVERRIDE);
+        }
+
         serverLog.note(String.format("This is NutShell (%s) server log", getVersion()));
         serverLog.note("Configuration files: ");
         for (Path p: this.confFiles){

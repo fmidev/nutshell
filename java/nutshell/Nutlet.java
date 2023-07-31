@@ -210,13 +210,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						return;
 					}
 				}
-				System.err.printf(" completed: %s -> %s  %n", key, parameter);
+				// System.err.printf(" completed: %s -> %s  %n", key, parameter);
 			}
+			/*
 			else if (key.equals("productX")){
 				//product = value;
 				batch.products.put("product1", value);
 			}
-			else if (key.equals("instructionsX") || key.equals("request") || key.equals("output")){ // +actions?
+			 */
+			else if (key.equals("request") || key.equals("output")){ // Old alias for instructions
 				try {
 					//batchConfig.instructions.set(values);
 					batch.instructions.add(values);

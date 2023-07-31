@@ -533,9 +533,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 		public void execute() throws InterruptedException {
 
+
 			Generator generator = null;
 
-			log.log(HttpLog.HttpStatus.CONTINUE, String.format("Preparing %s", this));
+			log.log(HttpLog.HttpStatus.OK, String.format("Preparing %s", this));
+
 
 			// Logical corrections
 			// Note: STATUS involves Task/product wise and also Server level info.
@@ -545,21 +547,31 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					|| (instructions.move != null)
 					|| instructions.involves(PostProcessing.STORE|PostProcessing.LATEST|PostProcessing.SHORTCUT)) {
 				instructions.ensureMakeLevel(Instructions.MakeLevel.MAKE);  // NEW
+				log.debug(String.format("Instructions (updated): %s", instructions));
 			}
 
 
 			// Media must be defined in most of the operations (DELETE, EXISTS, MAKE, GENERATE) so define it here.
 			//if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
-			if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
-				// Note: media selection could be also done by Generator?
-				log.log(HttpLog.HttpStatus.OK, "Setting default result type: FILE");
-				instructions.add(MediaType.FILE);
+			if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS) || instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
+				if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
+					// Note: media selection could be also done by Generator?
+					log.log(HttpLog.HttpStatus.OK, "Product requested, media type undefined. Setting default: FILE");
+					instructions.add(MediaType.FILE);
+				}
 			}
 			// }
-			log.debug(String.format("Instructions (updated): %s", instructions));
 
-			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting %s", this));
-			//log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Starting: %s - %s ", this, this.getStatus())); //  this.toString()
+			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Handling %s", this));
+
+			if (instructions.makeLevelEquals(Instructions.MakeLevel.PARSE)){
+				log.log(HttpLog.HttpStatus.CONTINUE, String.format("Parsing requested only"));
+				Map<String,Object> map = getParamEnv();
+				String[] array = MapUtils.toArray(map);
+				for (String s : array) {
+					System.out.println(s); // NutLet: to Server log?
+				}
+			}
 
 			// This is a potential path, not committing to a physical file yet.
 			File fileFinal = outputPath.toFile();
@@ -1344,7 +1356,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				try {
 					log.info(String.format("Starting task[%d] '%s': %s as a thread", task.getTaskId(), key, task));
 					// log.debug(String.format("Starting thread '%s': %s", key, task));
-					task.start();
+					task.start(); // Thread.start() -> (Thread)task.run()
 				} catch (IllegalStateException e) {
 					log.error("Already running? " + e.toString());
 				}
@@ -1584,7 +1596,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new Parameter.Simple<String>("log",
 				String.format("Set log properties: verbosity %s, format %s, decoration %s ",
-						Arrays.toString(Log.Status.values()),
+						Log.statusCodes.keySet(),  // Arrays.toString(Log.Status.values()),
 						Arrays.toString(TextOutput.Format.values()),
 						Arrays.toString(TextOutput.Options.values())),
 				"") {
@@ -1616,10 +1628,41 @@ public class ProductServer extends ProductServerBase { //extends Cache {
         registry.add(new Parameter<ProductServer>("counter",
                 "Initial value of task counter (id).", this));
 
+		registry.add(new Parameter.Single("parseOld",
+				"Debugging (cmd line only): parse product.", "filename"){
+
+			public String filename = "";
+
+			@Override
+			public void exec() {
+				try {
+					Task product = //server.
+						new Task(filename, new Instructions(), serverLog);
+					Map<String,Object> map = product.getParamEnv();
+					String[] array = MapUtils.toArray(map);
+					for (String s : array) {
+						System.out.println(s);
+					}
+					//System.out.println(String.format("time : %d", product.info.time ));
+					//System.out.println(String.format("time2: %d", product.info.time2));
+				}
+				catch (ParseException e) {
+					serverLog.fail(e.getMessage());
+				}
+				catch (Exception e) {
+					e.printStackTrace(System.err);
+					serverLog.fail(e.getMessage());
+				}
+			}
+
+		});
+
+
 	}
 
 
 	// Note: this turns program registry dynamic. It should be shared, static?
+	static
 	public void populate(Batch batch, ProgramRegistry registry){
 
 		//registry.add(new InstructionParameter(batch.instructions));
@@ -1654,6 +1697,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 
 		// deprecating
+		/*
 		registry.add(new Parameter<Instructions>("depth",
 				"Cache clearance depth (0=EXISTS, 0=MAKE, 1=GENERATE, N...: remake inputs)",
 				batch.instructions, "makeLevel"));
@@ -1672,6 +1716,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				batch.instructions.makeLevel = depth;
 			}
 		});
+		 */
 
 		registry.add(new Parameter.Simple<String>("directives",
 				"Set application (env) variables separated with '|'",
@@ -1714,33 +1759,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new ProgramUtils.Version<>(server));
 
-		registry.add(new Parameter.Single("parse",
-				"Debugging (cmd line only): parse product.", "filename"){
-
-			public String filename = "";
-
-			@Override
-			public void exec() {
-				try {
-					Task product = server.new Task(filename, new Instructions(), log);
-					Map<String,Object> map = product.getParamEnv();
-					String[] array = MapUtils.toArray(map);
-					for (String s : array) {
-						System.out.println(s);
-					}
-					//System.out.println(String.format("time : %d", product.info.time ));
-					//System.out.println(String.format("time2: %d", product.info.time2));
-				}
-				catch (ParseException e) {
-					log.fail(e.getMessage());
-				}
-				catch (Exception e) {
-					e.printStackTrace(System.err);
-					log.fail(e.getMessage());
-				}
-			}
-
-		});
 
 
 		registry.add(new Parameter("http_params","Debugging/testing: compose HTTP GET params."){
@@ -1769,29 +1787,23 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							log.error(e.getMessage());
 						}
 					}
+
+					// Do not actually process the request.
+					batch.instructions.setMakeLevel(Instructions.MakeLevel.NONE);
 				}
 			}
 		});
 
 
 
-
-		/// Command line only
-		registry.add(new Parameter.Simple<String>("clear_cache",
-				"Clear cache (and exit.)", // reconsider exit
+		registry.add(new Parameter.Simple<String>("path","Extend PATH variable for product generation",
 				""){
-			@Override
 			public void exec() {
-				log.warn("Clearing cache");
-				try {
-					server.clearCache(true);
-					System.exit(0); // reconsider exit
-				} catch (IOException e) {
-					log.log(HttpLog.HttpStatus.CONFLICT, "Clearing cache failed");
-					System.exit(4);
-				}
+				server.PATH = value;
+				server.setup.put("cmdPath", server.PATH); // consider PARASITER...
 			}
 		});
+
 
 		registry.add(new Parameter.Simple<String>("copy",
 				"Copy generated product(s) to file (dir). Repeatable.",
@@ -1820,13 +1832,23 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 		});
 
-		registry.add(new Parameter.Simple<String>("path","Extend PATH variable for product generation",
+		/// Command line only
+		registry.add(new Parameter.Simple<String>("clear_cache",
+				"Clear cache (and exit.)", // reconsider exit
 				""){
+			@Override
 			public void exec() {
-				server.PATH = value;
-				server.setup.put("cmdPath", server.PATH); // consider PARASITER...
+				log.warn("Clearing cache");
+				try {
+					server.clearCache(true);
+					System.exit(0); // reconsider exit
+				} catch (IOException e) {
+					log.log(HttpLog.HttpStatus.CONFLICT, "Clearing cache failed");
+					System.exit(4);
+				}
 			}
 		});
+
 
 		registry.add(new Parameter.Simple<String>("catalog",
 				"List products found under productRoot",""){
@@ -1884,7 +1906,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								param.setParams(""); // Support "premature" end of cmd line, esp. with --help
 						}
 						param.exec();
-						log.debug(String.format("Handled: %s", param));
+						log.debug(String.format("Handled: %s [%s]", opt, param));
 						//log.special(param.toString());
 						continue;
 					}
@@ -1916,8 +1938,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		int result = 0;
 
-		if (!batch.instructions.isEmpty())
-			log.debug("Instructions: " + batch.instructions);
+		//if (!batch.instructions.isEmpty())
+		//	log.debug("Instructions: " + batch.instructions);
 
 		/*
 		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {

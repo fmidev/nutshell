@@ -69,6 +69,10 @@ public class Log implements AutoCloseable {
 
 		public final int level;
 
+		/** Returns verbosity level
+		 *
+		 * @return
+		 */
 		@Override
 		public int getIndex() {
 			return level;
