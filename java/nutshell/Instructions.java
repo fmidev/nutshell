@@ -64,6 +64,7 @@ interface OutputType {
      */
     int STREAM = MyCounter.getBit(); // 32;  // "OUTPUT=STREAM"
 
+    int STATUS = MyCounter.getBit(); // 4096; consider PostProcessing?
 }
 
 /**
@@ -111,7 +112,7 @@ interface ActionType {
     /** Go through product request handler checking existence of product generator, memory cache and output directory.
      */
     // int INFO = MyCounter.getBit(); // 4096; // | INPUTLIST; // "OUTPUT=INFO"
-    int STATUS = MyCounter.getBit(); // 4096; consider PostProcessing?
+    //int STATUS = MyCounter.getBit(); // 4096; consider PostProcessing?
 
     int PARALLEL = MyCounter.getBit(); // 8192; // use threads
 
@@ -187,8 +188,11 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
         this.outputHandling = OutputHandling.valueOf(value);
     }
     */
+    public
+    String label = "";
 
     public Instructions(){
+        // LABEL = "initValue"; here before super() Flags, if CAPS used!
         super(Instructions.class);
         //makeLevel = MakeLevel.MAKE.ordinal();
         makeLevel = MakeLevel.UNDEFINED.ordinal();
