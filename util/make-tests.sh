@@ -89,11 +89,12 @@ function secho(){
 	    echo $* >> $DOC_FILE
 	    echo ${*//?/-} >> $DOC_FILE
 	    echo    >> $DOC_FILE
-	    vt100echo blue    $*
+	    vt100echo yellow,underline  $*
 	    ;;
 	title3)
 	    echo    >> $DOC_FILE
 	    echo '**'$*'**' >> $DOC_FILE
+	    vt100echo yellow    $*
 	    ;;
 	text)
 	    echo $* >> $DOC_FILE
@@ -174,10 +175,10 @@ function run_http(){
     LOG=`printf 'log/nutshell-%02d-http.log' $counter `
 
     #echo_warn params...
-    local params=`NUTSHELL_VERSION=java nutshell $* --http_params 2> /dev/null`
+    local params=`NUTSHELL_VERSION=java nutshell --log WARNING $* --http_params 2> /dev/null`
     #echo_warn ...end
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
-    echo_cmd $cmd
+    echo_cmd $cmd ' #@ '
     #echo -e "\`\$NUTSHELL?${params} <${HTTP_PREFIX}/NutShell?${params}>\`_\n" >> $DOC_FILE
     #echo -e "  ${HTTP_PREFIX}/NutShell?${params}" >> $DOC_FILE
     echo >> $DOC_FILE
@@ -208,6 +209,7 @@ function parse(){
     LATEST_FILE=${OUTFILE/$TIMESTAMP/LATEST}
 }
 
+# Require exit code, and optionally test file existence or type
 function check(){
 
     local STATUS=$?
@@ -346,9 +348,13 @@ for i in ${LOOP//,/ } ; do
     $cmd --delete $FILE 
     check 0 ! -f $OUTDIR/$FILE
 
-    secho title3 "Now, the product file should not exist"
+    secho title3 "Action: now EXISTS should fail"
     $cmd --exists $FILE 
-    check 1 
+    check 1
+
+    secho title3 "Action: try to DELETE product having illegal filename"
+    $cmd --delete ${FILE}-foo 
+    check 1
 
     secho title3 "Action: MAKE product (generate, if nonexistent)"
     $cmd --make $FILE 
@@ -370,6 +376,7 @@ for i in ${LOOP//,/ } ; do
     #secho title3 "Product error messages"
     set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
     parse $FILE
+    
     secho title3 "Initial check - valid generation"
     $cmd --generate $FILE
     check 0  -f $OUTDIR/$FILE
@@ -377,7 +384,10 @@ for i in ${LOOP//,/ } ; do
     secho title3 "Error test: image too large"
     set_file demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png
     $cmd --generate $FILE
+    # exit 0
     check 1
+
+
     
     secho title3 "Error test: Illegal (negative) arguments"
     set_file demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png
@@ -459,18 +469,29 @@ for i in ${LOOP//,/ } ; do
     
     cmd=run_$i
 
-    secho title3 "Generate on command line, delete through HTTP"
+    secho title2 "Generate on command line, delete through HTTP"
     
-    $cmd --generate $FILE
-    run_http     --delete   $FILE 
+    $cmd       --generate $FILE
+    check 0    -f $OUTDIR/$FILE
 
+    #run_http   --exists   $FILE
+    #check 0
+    
+    run_http   --delete   $FILE 
+    check 0
+    
     check 0 ! -f $OUTDIR/$FILE
 
+    #run_http   --exists   $FILE
+    #check 1
 
-    secho title3 "Generate through HTTP, delete on command line"
+
+    secho title2 "Generate through HTTP, delete on command line"
 
     run_http    --generate $FILE
-    $cmd --delete   $FILE 
+    check 0    -f $OUTDIR/$FILE
+    
+    $cmd        --delete   $FILE 
     check 0 ! -f $OUTDIR/$FILE
 
 done
