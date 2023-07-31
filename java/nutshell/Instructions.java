@@ -148,6 +148,7 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
      *
      */
     public enum MakeLevel {
+        UNDEFINED("Undefined"),
         DELETE("Delete product"),
         NONE("Do nothing"),
         // CHECK(), PEEK()
@@ -189,7 +190,8 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
 
     public Instructions(){
         super(Instructions.class);
-        makeLevel = MakeLevel.MAKE.ordinal();
+        //makeLevel = MakeLevel.MAKE.ordinal();
+        makeLevel = MakeLevel.UNDEFINED.ordinal();
         value = 0;
     }
 
@@ -209,14 +211,14 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
 
 
     public boolean isEmpty() {
-        return (makeLevel == MakeLevel.NONE.ordinal());
+        return (makeLevel == MakeLevel.UNDEFINED.ordinal());
         // return (value == 0); // && makeLevel == 0 ?
     }
 
 
     public MakeLevel getMakeLevel(){
         if (makeLevel < 0){
-            return MakeLevel.NONE;
+            return MakeLevel.UNDEFINED;
         }
         else if (makeLevel < MakeLevel.values().length){
             return MakeLevel.values()[makeLevel];
