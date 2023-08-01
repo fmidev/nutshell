@@ -340,8 +340,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath);
 			} catch (IOException e) {
-				System.err.println(String.format("Opening Log file (%s) failed: Log GID=%d  file=%s dir=%s, error: %s",
-						logPath, GROUP_ID, filePerms, dirPerms, e));
+				System.err.println(String.format("Opening Log file failed: Log GID=%d, file=%s dir=%s",
+						GROUP_ID, filePerms, dirPerms));
+				System.err.println(String.format("Opening Log file failed: Error: %s", e));
+				System.err.println(String.format("Opening Log file failed: File: %s", logPath));
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
@@ -1607,6 +1609,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				serverLog.set(value);
+				LOG_SERVER = serverLog.getConf();
+				LOG_TASKS = LOG_SERVER;
+				serverLog.special(String.format("New state for all logs: '%s'", LOG_SERVER));
+
 			}
 		});
 
