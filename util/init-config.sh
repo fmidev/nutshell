@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+# OLI -e
 
 # Markus.Peura@fmi.fi
 
@@ -33,8 +34,11 @@ function backup_file(){
 	if [ $? == 0 ]; then
 	    vt100echo yellow "Skipping backup (Previous backup equal: $BACKUP_FILE)"
 	    return
+	else
+	    vt100echo cyan "Backup:"
 	fi
 
+	
 	BACKUP_INDEX=${BACKUP_FILE%.*}
 	BACKUP_INDEX=${BACKUP_INDEX##*.}
 	BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
