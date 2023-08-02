@@ -77,7 +77,7 @@
 
   <error-page>
     <error-code>404</error-code>
-    <location>/NutShell?page=resolve&amp;product=resolve</location>
+    <location>/NutShell?page=resolve&amp;oldproduct=resolve</location>
   </error-page>
 
 
