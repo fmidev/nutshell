@@ -10,6 +10,7 @@
 #NUTSHELL_VERSION=${NUTSHELL_VERSION:-'java'}
 NUTSHELL=${NUTSHELL_VERSION:-$NUTSHELL_VERSION}
 NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
+# GROUP_ID=$GROUP_ID
 
 case $NUTSHELL in
     python)
@@ -49,8 +50,15 @@ if [ $# != 0 ]; then
     # --log_level DEBUG
     # Notice: PYTHON and JAVA have different labels
     # Common ones: ERROR,WARNING,INFO,DEBUG
-    # Double quotes "" are needed to keep excplicit empty '' agruments.
-    ${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
+    # Double quotes "" are needed to keep excplicit empty '' arguments.
+    #if [ "$GROUP_ID" == '' ]; then
+    ${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  
+    #else
+    #sg "$GROUP_ID" "${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "
+    #sg "$GROUP_ID" "${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf $@ "  
+    #fi
+    
+
     # ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
     RESULT=$?
     if [ $RESULT != 0 ]; then

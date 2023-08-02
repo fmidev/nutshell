@@ -3,7 +3,9 @@ package nutshell;
 import sun.misc.Signal; // For interrupt?
 import java.io.*;
 import java.nio.file.*;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -117,6 +119,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		final ProductInfo info;
 
 		final public int id;
+
+		//long startTime; //java.lang.System.currentTimeMillis()
+
+		final DateFormat durationFormat = new SimpleDateFormat("mm:ss.S");
 
 		public int getTaskId() {
 			return id;
@@ -283,6 +289,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			info = new ProductInfo(productStr);
 			filename = info.getFilename();
 			this.instructions = new Instructions(instructions);
+
 
 			if (info.time > 0){
 				int year = Integer.parseInt(info.TIMESTAMP.substring(0,4));
@@ -538,6 +545,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 		public void execute() throws InterruptedException {
 
+			long startTime = java.lang.System.currentTimeMillis();
 
 			Generator generator = null;
 
@@ -1090,6 +1098,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				// status page?
 
 			}
+
+			long duration = java.lang.System.currentTimeMillis() - startTime;
+
+			log.info(String.format("Duration %s (Timeout: %d)", durationFormat.format(duration), TIMEOUT));
 
 			if (instructions.isSet(Instructions.RUN)) {
 				ShellExec.OutputReader reader = new ShellExec.OutputReader(log.getPrintStream());

@@ -15,8 +15,6 @@ import java.util.*;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 
-//import org.json.simple.parser.JSONParser;
-
 
 /** Infrastructure for the actual ProductServer
  *
@@ -119,6 +117,7 @@ public class ProductServerBase extends Program {
     //public String generatorCmd = "./generate.sh";  // NOTE: executed in CWD
     //public String generatorCmd = "generate.sh"; // -> ExternalGenerator   // NOTE: executed in CWD
 
+    static
     final DateFormat timeStampDirFormat =
             new SimpleDateFormat("yyyy"+ File.separatorChar+"MM"+File.separatorChar+"dd");
     // = new SimpleDateFormat("yyyyMMddHHmm");
@@ -196,7 +195,12 @@ public class ProductServerBase extends Program {
         // Non-empty, if set on command line.
         String LOG_SERVER_OVERRIDE = LOG_SERVER;
 
-        Manip.assignToObjectLenient(setup, this);
+        try {
+            Manip.assignToObjectLenient(setup, this);
+        }
+        catch (RuntimeException e){
+            serverLog.warn(e.getMessage());
+        }
 
         serverLog.set(LOG_SERVER);
 
@@ -233,12 +237,21 @@ public class ProductServerBase extends Program {
         ShellExec.TIMEOUT_SEC = TIMEOUT;
 
         if (GROUP_ID == 0){
+            String gid = "";
             try {
-                String gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();
+                gid = Files.getAttribute(CACHE_ROOT, "unix:gid").toString();
                 // System.err.println(String.format("# Group id: %s %s ", gid, CACHE_ROOT));
                 this.GROUP_ID = Integer.parseInt(gid);
-            } catch (IOException e) {
-                e.printStackTrace();
+            }
+            catch (IOException e) {
+                serverLog.fail(String.format("Could not retrieve Group id (gid) from '%s'" , CACHE_ROOT));
+                serverLog.error(e.getMessage());
+            }
+            catch (NumberFormatException e) {
+                serverLog.warn(String.format("Consider: getent group '%s'", gid));
+                serverLog.fail(String.format("Group id (gid) = '%' should have a numeric value", gid));
+                // e.printStackTrace();
+                serverLog.error(e.getMessage());
             }
         }
 

@@ -63,14 +63,31 @@ public class Manip {
      */
     static
     public void assignToObjectLenient(Map<String,Object> source, Object target)  {
+        Map<String,String> errorMap = new HashMap<>();
         for (Map.Entry<String,Object> entry: source.entrySet()) {
+            String key   = entry.getKey();
+            Object value = entry.getValue();
             try {
-                assignToObject( entry.getValue(), target, entry.getKey());
-            } catch (NoSuchFieldException e) {
+                assignToObject(value, target, key);
+            }
+            catch (NoSuchFieldException e) {
+                //e.printStackTrace();
+            }
+            catch (Exception e){
+                errorMap.put(key, e.getClass().getSimpleName());
+            }
+            /*
+            catch (NumberFormatException)
+            catch (NoSuchFieldException e) {
+
                 //e.printStackTrace();
             } catch (IllegalAccessException e) {
                 // e.printStackTrace();
             }
+            */
+        }
+        if (!errorMap.isEmpty()){
+            throw new RuntimeException("Errors: " + errorMap.toString());
         }
     }
 

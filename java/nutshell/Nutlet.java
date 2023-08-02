@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -763,12 +764,17 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		 */
 		html.appendTag(SimpleHtml.Tag.H3, "Corresponding command lines:");
 		String clsName = productServer.getClass().getCanonicalName();
-		String cmdLine = "java -cp %s/WEB-INF/lib/Nutlet.jar %s  --verbose  --conf %s --instructions %s %s";
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine, HTTP_ROOT, clsName, productServer.confFiles, batch.instructions, task.info)).setAttribute("class", "code");
-
-		String cp = System.getProperty("java.class.path");
-		String cmdLine2 = "java -cp %s %s  --verbose  --conf %s --instructions %s %s";
-		html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, cp, clsName, productServer.confFiles, batch.instructions, task.info)).setAttribute("class", "code");
+		String confFiles = productServer.confFiles.stream()
+            .map(i -> "--conf "+i)
+            .collect( Collectors.joining("."));
+		for (String cmd: new String[]{"nutshell", String.format("java -cp %s/WEB-INF/lib/Nutlet.jar %s", HTTP_ROOT, clsName)}){
+			html.appendTag(SimpleHtml.Tag.PRE, String.format("%s --verbose %s --instructions %s %s",
+					cmd, confFiles, batch.instructions, task.info)).setAttribute("class", "code");
+		}
+		//String cmdLine = "%s  --verbose  --conf %s --instructions %s %s";
+		//String cp = System.getProperty("java.class.path"); // (TomCat)
+		//String cmdLine2 = "java -cp %s %s  --verbose  --conf %s --instructions %s %s";
+		//html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, cp, clsName, productServer.confFiles, batch.instructions, task.info)).setAttribute("class", "code");
 		//html.appendTag(SimpleHtml.Tag.PRE, String.format(cmdLine2, productServer.confFile, batchConfig.instructions, task.info)).setAttribute("class", "code");
 
 		html.appendTable(task.info.getParamEnv(null), "Product parameters");
