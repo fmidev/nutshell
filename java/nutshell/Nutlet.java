@@ -48,8 +48,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	// static final public String version = "1.5";
-	static final public List<Integer> version = Arrays.asList(1, 6);
+	static final public String version = "1.7";
+	//static final public List<Integer> version = Arrays.asList(1, 6);
 
 	String confDir = "";
 
