@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,14 +52,44 @@ public class JSON { //extends HashMap<String,JSON> {
         return value;
     }
 
+    public Object getValue(Path path) {
+        JSON json = getNode(path);
+        if (json == null){
+            return null;
+        }
+        else {
+            return json.getValue();
+        }
+    }
 
-    /** Overrides existing children
+    public JSON getNode(Path path){
+        int length = path.getNameCount();
+        if (length == 0){
+            return this;
+        }
+        else {
+            JSON child = getChild(path.getName(0).toString());
+            if (child == null){
+                return null;
+            }
+            else {
+                //System.out.printf("testing: %s %n", path);
+                if (length == 1)
+                    return child;
+                else
+                    return child.getNode(path.subpath(1, length));
+            }
+        }
+    }
+
+
+    /** Adds a child, possibly replacing an existing one
      *
      * @param key
      * @return
      */
     public
-    JSON addNode(String key){
+    JSON addChild(String key){
         if (key.isEmpty()){
             return this;
         }
@@ -97,6 +128,48 @@ public class JSON { //extends HashMap<String,JSON> {
         return (MapJSON)value;
     }
 
+    public boolean hasChildren(){
+        return (value instanceof MapJSON);
+    }
+
+    public MapJSON getChildren(){
+        if (hasChildren()){
+            return (MapJSON)value;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public MapJSON getChildren(Path path){
+        JSON json = getNode(path);
+        if (json != null){
+            return json.getChildren();
+        }
+        else {
+            return null;
+        }
+    }
+
+
+    synchronized
+    public boolean hasChild(String key){
+        if (hasChildren()){
+            return ((MapJSON)value).containsKey(key);
+        }
+        else {
+            return false;
+        }
+    }
+
+    synchronized
+    public JSON getChild(String key){
+        if (hasChild(key)){
+            return ((MapJSON)value).get(key);
+        }
+        return null;
+    }
+
 
 
     @Override
@@ -106,26 +179,6 @@ public class JSON { //extends HashMap<String,JSON> {
         return buffer.toString();
     }
 
-    //static
-    //private ArrayList<String> indents = new ArrayList<String>();
-
-    /*
-    static
-    private String getIndent(int i){
-        if (i < 0){
-            return null;
-        } else if (i < indents.size()){
-            return indents.get(i);
-        } else {
-            String s = "";
-            if (i >= indents.size()){
-                s = indents.get(i-1) + "  ";
-            }
-            indents.add(i, s);
-            return s;
-        }
-    }
-    */
 
     public StringBuffer write(StringBuffer buffer, String indent) {
 
@@ -153,9 +206,12 @@ public class JSON { //extends HashMap<String,JSON> {
                     buffer.append(ind);
                     buffer.append('"').append(key).append('"').append(':').append(' ');
                     value.write(buffer, ind);
+
                 }
+                buffer.append('\n');
+                buffer.append(indent);
             }
-            buffer.append('}').append('\n');
+            buffer.append('}'); //.append('\n');
         }
         else if (value instanceof Number){
             buffer.append(value);
@@ -164,8 +220,9 @@ public class JSON { //extends HashMap<String,JSON> {
             buffer.append(value);
         }
         else if (value.getClass().isArray()){
+
             if (value.getClass().getComponentType().isPrimitive()){
-                buffer.append(value);
+                buffer.append(value); // UNDER CONSTRUCTION
                 //buffer.append(Arrays.toString(value));
             }
             else {
@@ -221,7 +278,7 @@ public class JSON { //extends HashMap<String,JSON> {
                     switch (c2){
                         case '"':
                             String key = readString(reader);
-                            System.out.println(String.format("Read key <%s>", key));
+                            // System.out.println(String.format("Read key <%s>", key));
                             JSON json = ensureChild(key);
                             int i3 = json.skipWhitespace(reader);
                             if (i3 == -1){
@@ -229,17 +286,17 @@ public class JSON { //extends HashMap<String,JSON> {
                             }
                             char c3 = (char) i3;
                             if (c3 != ':'){
-                                throw new ParseException(String.format("Illegal text after '%s'", key), 0);
+                                throw new ParseException(String.format("Illegal chars after '%s', expected colon (:)", key), 0);
                             }
                             json.readValue(reader);
-                            System.out.println(String.format("Now '%s' = %s", key, json));
+                            // System.out.println(String.format("Now '%s' = %s", key, json));
                             break;
                         case '}':
-                            if (value == null)
-                                value = "empty-set";
+                            //if (value == null)
+                            //    value = "empty-set";
                             return;
                         case ',': // OPEN?
-                            System.out.printf("What, comma?");
+                            // System.out.printf("What, comma?");
                             break;
                         default:
                             //throw new ParseException(String.format("Illegal entity end after ''", key), 0);
@@ -353,29 +410,57 @@ public class JSON { //extends HashMap<String,JSON> {
         //return buffer.toString();
     }
 
+    //static
+    //private ArrayList<String> indents = new ArrayList<String>();
+
+    /*
+    static
+    private String getIndent(int i){
+        if (i < 0){
+            return null;
+        } else if (i < indents.size()){
+            return indents.get(i);
+        } else {
+            String s = "";
+            if (i >= indents.size()){
+                s = indents.get(i-1) + "  ";
+            }
+            indents.add(i, s);
+            return s;
+        }
+    }
+    */
+
     public static void main(String[] args) {
 
         JSON json = new JSON();
-        json.put("number", 5);
-        json.put("string", "Hello, world!");
-        json.put("boolean", false);
-        json.put("empty", null);
-        json.put("array", new Object[]{1,2,"mika"});
-        json.put("floatArray", new float[]{1.2f, 2.23f, 3.4f});
 
+        if (args.length == 0){
+            System.out.println("JSON reader and writer");
+            System.out.println("Args: <filename>.json");
+            System.out.println();
 
-        JSON node = json.addNode("child");
-        node.put("subValue", 3.121);
-        System.out.println(json);
+            System.out.println("Example of a JSON structure");
+            json.put("number", 5);
+            json.put("string", "Hello, world!");
+            json.put("boolean", false);
+            json.put("empty", null);
+            json.put("array", new Object[]{1,2,"mika"});
+            json.put("floatArray", new float[]{1.2f, 2.23f, 3.4f});
+            JSON node = json.addChild("child");
+            node.put("float", 3.121);
+            System.out.println(json);
+
+            System.exit(1);
+        }
 
         try {
-            JSON json2 = new JSON();
-
-            json2.read("test.json");
+            json.read(args[0]);
             System.out.println("Result: ");
-            System.out.println(json2);
-
-        } catch (Exception e) {
+            System.out.println(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 
