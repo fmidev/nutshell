@@ -1,6 +1,7 @@
 package nutshell;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,6 +95,17 @@ public class TextOutput {
     public String toString() {
         return String.format(" %s, %s, %s", getClass().getName(), colour, highlights);
     }
+
+    /*
+    public String toStatus() {
+        StringBuffer sb = new StringBuffer();
+        ArrayList<String> list = new ArrayList<>();
+        if (colour != Colour.DEFAULT)
+            list.add(colour.name());
+        return String.format(" %s, %s, %s", getClass().getName(), colour, highlights);
+    }
+
+     */
 
     public void startSection(StringBuffer buffer){
     }

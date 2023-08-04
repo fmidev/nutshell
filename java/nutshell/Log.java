@@ -697,7 +697,12 @@ public class Log implements AutoCloseable {
 	}
 
 	public String getConf() {
-		return String.format("%s, %s", textOutput, decoration);
+		if (decoration.value == 0){
+			return textOutput.getFormat().name();
+		}
+		else {
+			return String.format("%s,%s", textOutput.getFormat(), decoration);
+		}
 	}
 
 
@@ -728,6 +733,13 @@ public class Log implements AutoCloseable {
 		}
 
 	}
+
+	/*
+	public TextOutput.Format getFormat() {
+
+		return textOutput.getFormat();
+	}
+	 */
 
 	/** Set decoration, verbosity, and format.
 	 *
