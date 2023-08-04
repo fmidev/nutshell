@@ -41,9 +41,12 @@ RESULT=0
 if [ $# != 0 ]; then
 
     #ARG1=$1
-    LOG_INIT='--log_level INFO'
+    LOG_CMD='--log_level'
+    LOG_ARG='INFO'
     if [ ${1:0:5} == '--log' ]; then
-	LOG_INIT="$1 '$2'"
+	#LOG_INIT="$1 '$2'"
+	LOG_CMD="$1"
+	LOG_ARG="$2"
 	# echo "# ! Initial logging cmd: $LOG_INIT"
     fi
     
@@ -52,7 +55,7 @@ if [ $# != 0 ]; then
     # Common ones: ERROR,WARNING,INFO,DEBUG
     # Double quotes "" are needed to keep excplicit empty '' arguments.
     #if [ "$GROUP_ID" == '' ]; then
-    ${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  
+    ${NUTSHELL} "${LOG_CMD}" "${LOG_ARG}" --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  
     #else
     #sg "$GROUP_ID" "${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "
     #sg "$GROUP_ID" "${NUTSHELL} ${LOG_INIT} --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf $@ "  
