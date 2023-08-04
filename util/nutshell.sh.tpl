@@ -43,7 +43,7 @@ if [ $# != 0 ]; then
     #ARG1=$1
     LOG_INIT='--log_level INFO'
     if [ ${1:0:5} == '--log' ]; then
-	LOG_INIT="$1 $2"
+	LOG_INIT="$1 '$2'"
 	# echo "# ! Initial logging cmd: $LOG_INIT"
     fi
     
