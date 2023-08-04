@@ -10,12 +10,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class JSON { //extends HashMap<String,JSON> {
 
     static
-    public class MapJSON extends HashMap<String,JSON> {
+    public class Map extends HashMap<String,JSON> {
 
     }
 
@@ -106,7 +105,7 @@ public class JSON { //extends HashMap<String,JSON> {
         if (key.isEmpty())
             return this;
 
-        MapJSON children = ensureChildren();
+        Map children = ensureChildren();
         JSON child;
 
         if (children.containsKey(key)){
@@ -121,27 +120,27 @@ public class JSON { //extends HashMap<String,JSON> {
     };
 
 
-    private MapJSON ensureChildren(){
-        if (!(value instanceof MapJSON)){
-            value = new MapJSON();
+    private Map ensureChildren(){
+        if (!(value instanceof Map)){
+            value = new Map();
         }
-        return (MapJSON)value;
+        return (Map)value;
     }
 
     public boolean hasChildren(){
-        return (value instanceof MapJSON);
+        return (value instanceof Map);
     }
 
-    public MapJSON getChildren(){
+    public Map getChildren(){
         if (hasChildren()){
-            return (MapJSON)value;
+            return (Map)value;
         }
         else {
             return null;
         }
     }
 
-    public MapJSON getChildren(Path path){
+    public Map getChildren(Path path){
         JSON json = getNode(path);
         if (json != null){
             return json.getChildren();
@@ -155,7 +154,7 @@ public class JSON { //extends HashMap<String,JSON> {
     synchronized
     public boolean hasChild(String key){
         if (hasChildren()){
-            return ((MapJSON)value).containsKey(key);
+            return ((Map)value).containsKey(key);
         }
         else {
             return false;
@@ -165,7 +164,7 @@ public class JSON { //extends HashMap<String,JSON> {
     synchronized
     public JSON getChild(String key){
         if (hasChild(key)){
-            return ((MapJSON)value).get(key);
+            return ((Map)value).get(key);
         }
         return null;
     }
@@ -185,14 +184,14 @@ public class JSON { //extends HashMap<String,JSON> {
         if (value == null){
             buffer.append("null");
         }
-        else if (value instanceof MapJSON) {
+        else if (value instanceof Map) {
             buffer.append('{');
-            MapJSON nodes = (MapJSON) value;
+            Map nodes = (Map) value;
             if (!nodes.isEmpty()) {
                 //buffer.append('\n');
                 String ind = indent+"  "; // getIndent(indent);
                 boolean CONTINUES = false;
-                for (Map.Entry<String, JSON> entry : nodes.entrySet()) {
+                for (java.util.Map.Entry<String, JSON> entry : nodes.entrySet()) {
                     if (CONTINUES){
                         buffer.append(',');
                     }

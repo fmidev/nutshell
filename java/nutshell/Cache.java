@@ -2,7 +2,6 @@ package nutshell;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -19,20 +18,37 @@ public class Cache {
         final
         public StringMapper path = new StringMapper();
 
-        public Path query(Map<String,?> map){
-            String s = path.toString(map);
-            File file = new File(s);
-            if (file.exists()){
-                if (file.canRead())
-                    return file.toPath();
+        public Path resolve(Map<String,?> env){
+            return Paths.get(path.toString(env)).normalize();
+        }
+
+        public Path query(Path p){
+            File file = p.toFile();
+            // System.out.printf("Path: %s %b %n", p, file.exists());
+            if (file.exists() && file.canRead()){
+                return p;
             }
-            return null;
+            else {
+                return null;
+            }
+        }
+
+        public Path query(Map<String,?> env){
+            Path p = resolve(env);
+            return query(p);
         }
     }
 
     final
     public Map<String,DiskPath> diskPaths = new HashMap<>();
 
+    /**   Read JSON conf file.
+     *
+     *    Supported sections:
+     *    - "dataproxy" : { NAME: { "dir": dirSyntax }}
+     *
+     * @param filename
+     */
     void readConf(String filename){
         try {
             jsonConf.read(filename);
@@ -44,9 +60,9 @@ public class Cache {
         System.out.println(jsonConf);
         //JSON.MapJSON sections = jsonConf.getChildren();
         //JSON dataProxy = jsonConf.getChild("dataproxy");
-        JSON.MapJSON dataProxies = jsonConf.getChildren(Paths.get("dataproxy"));
+        JSON.Map dataProxies = jsonConf.getChildren(Paths.get("dataproxy"));
         if (dataProxies != null){
-            for (JSON.MapJSON.Entry<String,JSON> entry: dataProxies.entrySet()){
+            for (JSON.Map.Entry<String,JSON> entry: dataProxies.entrySet()){
                 String key = entry.getKey();
                 JSON json = entry.getValue();
                 if (json != null){
@@ -75,7 +91,6 @@ public class Cache {
         }
 
         Cache cache = new Cache();
-        Cache.DiskPath diskPath = new DiskPath();
 
         try {
             cache.readConf(args[0]);
@@ -92,10 +107,11 @@ public class Cache {
         env.put("OUTFILE", "test.png");
 
         for (Map.Entry<String,Cache.DiskPath> entry: cache.diskPaths.entrySet()){
-            System.out.printf("Testing: %s %n", entry.getKey());
-            String s = entry.getValue().path.toString(env);
-            System.out.printf("Path: %s %b %n", s, Paths.get(s).toFile().exists());
-            // entry.getValue().path.toString();
+            Cache.DiskPath diskPath = entry.getValue();
+            Path p = diskPath.resolve(env);
+            System.out.printf("Testing: %s %b %s  %n",
+                    entry.getKey(), (diskPath.query(p) != null), p);
+
         }
 
     }
