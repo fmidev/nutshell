@@ -14,6 +14,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** Utilities for reading configuration files using simple KEY=VALUE syntax.
+ *
+ * @see Manip
+ * @see JSON
+ *
+ */
 public class Config {
 
     /** Splits a string at the first percent (%) or hash (#) character.
@@ -187,6 +193,8 @@ public class Config {
 
     /** Retrieve values accessible with getters
      *
+     * @see Manip
+     *
      * @param src
      * @return
      */
@@ -196,6 +204,8 @@ public class Config {
     }
 
     /** Retrieve values accessible with getters
+     *
+     * @see Manip
      *
      * @param src
      * @return

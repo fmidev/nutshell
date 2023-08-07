@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class JSON { //extends HashMap<String,JSON> {
@@ -182,6 +183,8 @@ public class JSON { //extends HashMap<String,JSON> {
     public StringBuffer write(StringBuffer buffer, String indent) {
 
         if (value == null){
+            // Node has neither value nor children.
+            // Note: if node has an empty child map, an empty object {} is written instead.
             buffer.append("null");
         }
         else if (value instanceof Map) {
@@ -200,6 +203,7 @@ public class JSON { //extends HashMap<String,JSON> {
                     }
                     buffer.append('\n');
 
+                    // RECURSION
                     String key = entry.getKey();
                     JSON value = entry.getValue();
                     buffer.append(ind);
@@ -219,20 +223,7 @@ public class JSON { //extends HashMap<String,JSON> {
             buffer.append(value);
         }
         else if (value.getClass().isArray()){
-
-            if (value.getClass().getComponentType().isPrimitive()){
-                buffer.append(value); // UNDER CONSTRUCTION
-                //buffer.append(Arrays.toString(value));
-            }
-            else {
-                Object[] array = (Object[]) value;
-                buffer.append('<').append('\n');
-                for (Object v: array){
-                    buffer.append(indent).append(v).append(',').append('\n');
-                    //write(buffer, indent+"  ");
-                }
-                buffer.append('>');
-            }
+            writeArray(buffer, indent);
         }
         else { // if (value instanceof String){
             buffer.append('"').append(value.toString()).append('"');
@@ -241,11 +232,88 @@ public class JSON { //extends HashMap<String,JSON> {
         return buffer;
     }
 
+    /*
+    public <E> boolean  tryToWriteArray(StringBuffer buffer) {
+        try {
+            buffer.append(Arrays.toString((E[]) value));
+            buffer.append(',').append('"').append(value.getClass().getSimpleName()).append('"');
+            return true;
+        }
+        catch (ClassCastException e) {
+            return false;
+        }
+    }
+     */
+
+    public StringBuffer writeArray(StringBuffer buffer, String indent) {
+
+        Class cls = value.getClass();
+        if (cls.getComponentType().isPrimitive()){
+            // write(buffer, indent+"  ");
+            if (cls.equals(short[].class)){
+                buffer.append(Arrays.toString((short[]) value));
+            }
+            else if (cls.equals(int[].class)){
+                buffer.append(Arrays.toString((int[]) value));
+            }
+            else if (cls.equals(long[].class)){
+                buffer.append(Arrays.toString((long[]) value));
+            }
+            else if (cls.equals(float[].class)){
+                buffer.append(Arrays.toString((float[]) value));
+            }
+            else if (cls.equals(double[].class)){
+                buffer.append(Arrays.toString((double[]) value));
+            }
+            else {
+                buffer.append("[ ]"); // error!
+            }
+            //buffer.append(value); // UNDER CONSTRUCTION
+            //buffer.append(Arrays.toString(value));
+            //buffer.append('§');
+        }
+        else {
+            Object[] array = (Object[]) value;
+            // Basically array of objects, but check if still numeric/boolean, and use flat single row output.
+            boolean ALL_PRIMITIVE = true;
+            for (Object v: array){
+                if (!((v instanceof Number) || (v instanceof Boolean))){
+                    ALL_PRIMITIVE = false;
+                    break;
+                }
+                //write(buffer, indent+"  ");
+            }
+            //
+
+            if (ALL_PRIMITIVE){
+                //buffer.append('[');
+                buffer.append(Arrays.toString((Object[]) value)); //.append(']').append('\n');
+            } else {
+                // UNDER CONSTR! -> print as strings for now
+                buffer.append('[');
+                boolean CONTINUES = false;
+                for (Object v: array){
+                    if (!CONTINUES){
+                        CONTINUES = true;
+                    }
+                    else {
+                        buffer.append(',');
+                    }
+                    buffer.append('\n').append(indent+"  ");
+                    buffer.append('"').append(v).append('"'); // TODO: writeValue v (support JSON recursion)
+                }
+                //buffer.append(']'); //.append('\n');
+            }
+            //buffer.append('>');
+        }
+        return buffer;
+    }
+
     /** Read JSON file
      *
      * @param filename – path of a JSON file
      * @throws IOException
-     */
+     * */
     void read(String filename) throws IOException, ParseException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename),
         Charset.forName("UTF-8")));
@@ -260,7 +328,6 @@ public class JSON { //extends HashMap<String,JSON> {
      */
     void readValue(BufferedReader reader) throws IOException, ParseException {
         int i;
-        //while ((i = reader.read()) != -1) {
         if ((i = skipWhitespace(reader)) != -1) {
             char c = (char) i;
             // System.out.print(c);
@@ -271,35 +338,34 @@ public class JSON { //extends HashMap<String,JSON> {
                 value = readArray(reader);
             }
             else if (c == '{') {
-                int i2;
-                while ((i2 = skipWhitespace(reader)) != -1) {
-                    char c2 = (char) i2;
-                    switch (c2){
+                //int i2;
+                while ((i = skipWhitespace(reader)) != -1) {
+                    c = (char) i;
+                    switch (c){
                         case '"':
                             String key = readString(reader);
                             // System.out.println(String.format("Read key <%s>", key));
                             JSON json = ensureChild(key);
-                            int i3 = json.skipWhitespace(reader);
-                            if (i3 == -1){
-                                throw new ParseException(String.format("Premature end of file after '%s'", key), 0);
+                            i = json.skipWhitespace(reader);
+                            if (i == -1){
+                                throw new ParseException(String.format("Premature end of file after '%s' and char '%s'", key, c), 0);
                             }
-                            char c3 = (char) i3;
-                            if (c3 != ':'){
-                                throw new ParseException(String.format("Illegal chars after '%s', expected colon (:)", key), 0);
+                            c = (char) i;
+                            if (c != ':'){
+                                throw new ParseException(String.format("After key '%s': illegal char '%s' , expected colon (:)", key, c), 0);
                             }
                             json.readValue(reader);
                             // System.out.println(String.format("Now '%s' = %s", key, json));
                             break;
                         case '}':
-                            //if (value == null)
-                            //    value = "empty-set";
+                            // Empty child map results. Value has been assigned childMap upon leading '{'
                             return;
                         case ',': // OPEN?
                             // System.out.printf("What, comma?");
                             break;
                         default:
                             //throw new ParseException(String.format("Illegal entity end after ''", key), 0);
-                            System.out.printf("letter: %s (%d)", c2, i2);
+                            System.out.printf("letter: %s (%d)", c, i);
                     }
                 }
                 /*
@@ -323,16 +389,21 @@ public class JSON { //extends HashMap<String,JSON> {
                     value = false;
                     return;
                 }
-
-                try {
-                    int n = Integer.parseInt(s);
-                    value = n;
-                    double d = Double.parseDouble(s);
-                    value = d;
+                else {
+                    try {
+                        double d = Double.parseDouble(s);
+                        value = d;
+                        System.out.printf("Double %s (int)", value);
+                        int n = Integer.parseInt(s);
+                        value = n;
+                        System.out.printf("Numeral %s (int)", value);
+                    }
+                    catch (Exception e){
+                        throw new ParseException(String.format("Could not parse value '%s' as numeral or boolean", s), 0);
+                        // throw new ParseException(String.format("Could not parse value '%s'", key, c), 0);
+                        // System.out.printf("OK, %s%n", e.getMessage());
+                    };
                 }
-                catch (Exception e){
-                    // System.out.printf("OK, %s%n", e.getMessage());
-                };
 
                 // System.out.printf("Read value starting with '%s...': %s%n", c, value);
                 //return;
@@ -444,7 +515,9 @@ public class JSON { //extends HashMap<String,JSON> {
             json.put("string", "Hello, world!");
             json.put("boolean", false);
             json.put("empty", null);
-            json.put("array", new Object[]{1,2,"mika"});
+            json.put("empty2", null).ensureChildren();
+            json.put("arrayMixed", new Object[]{1,2,"mika"});
+            json.put("arrayNumber", new Object[]{1,2.0f, 3.14, 123456789L});
             json.put("floatArray", new float[]{1.2f, 2.23f, 3.4f});
             JSON node = json.addChild("child");
             node.put("float", 3.121);

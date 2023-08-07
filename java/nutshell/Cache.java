@@ -85,8 +85,6 @@ public class Cache {
             System.out.println("Experimental Disk Cache");
             System.out.println("Args: <filename>");
             System.out.println();
-
-            System.out.println("Example of a JSON structure");
             System.exit(1);
         }
 
