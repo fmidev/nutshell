@@ -2,21 +2,19 @@ package nutshell;
 
 import com.sun.istack.internal.NotNull;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class JSON { //extends HashMap<String,JSON> {
 
     static
     public class Map extends HashMap<String,JSON> {
-
     }
 
     Object value;
@@ -302,7 +300,7 @@ public class JSON { //extends HashMap<String,JSON> {
                     buffer.append('\n').append(indent+"  ");
                     buffer.append('"').append(v).append('"'); // TODO: writeValue v (support JSON recursion)
                 }
-                //buffer.append(']'); //.append('\n');
+                buffer.append(']'); //.append('\n');
             }
             //buffer.append('>');
         }
@@ -315,9 +313,9 @@ public class JSON { //extends HashMap<String,JSON> {
      * @throws IOException
      * */
     void read(String filename) throws IOException, ParseException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename),
+        PushbackReader reader = new PushbackReader(new InputStreamReader(new FileInputStream(filename),
         Charset.forName("UTF-8")));
-        readValue(reader);
+        value = readEntity(reader);
     }
 
     /** Read JSON section of any type, appearing after ':'
@@ -326,99 +324,45 @@ public class JSON { //extends HashMap<String,JSON> {
      * @throws IOException
      * @throws ParseException
      */
-    void readValue(BufferedReader reader) throws IOException, ParseException {
+    static
+    Object readEntity(PushbackReader reader) throws IOException, ParseException {
         int i;
         if ((i = skipWhitespace(reader)) != -1) {
             char c = (char) i;
             // System.out.print(c);
-            if (c == '"'){
-                value = readString(reader);
-            }
-            else if (c == '['){
-                value = readArray(reader);
-            }
-            else if (c == '{') {
-                //int i2;
-                while ((i = skipWhitespace(reader)) != -1) {
-                    c = (char) i;
-                    switch (c){
-                        case '"':
-                            String key = readString(reader);
-                            // System.out.println(String.format("Read key <%s>", key));
-                            JSON json = ensureChild(key);
-                            i = json.skipWhitespace(reader);
-                            if (i == -1){
-                                throw new ParseException(String.format("Premature end of file after '%s' and char '%s'", key, c), 0);
-                            }
-                            c = (char) i;
-                            if (c != ':'){
-                                throw new ParseException(String.format("After key '%s': illegal char '%s' , expected colon (:)", key, c), 0);
-                            }
-                            json.readValue(reader);
-                            // System.out.println(String.format("Now '%s' = %s", key, json));
-                            break;
-                        case '}':
-                            // Empty child map results. Value has been assigned childMap upon leading '{'
-                            return;
-                        case ',': // OPEN?
-                            // System.out.printf("What, comma?");
-                            break;
-                        default:
-                            //throw new ParseException(String.format("Illegal entity end after ''", key), 0);
-                            System.out.printf("letter: %s (%d)", c, i);
-                    }
-                }
-                /*
-                if (i2 == -1){
-                    throw new ParseException("premature end of file", 0);
-                }*/
-            }
-            else {
-                StringBuffer buffer = new StringBuffer();
-                buffer.append(c); // "push back"
-                readUntil(reader,",}", buffer);
-                String s = buffer.toString().trim();
-                value = s;
-
-                // TODO: move to manip
-                if (value.equals("true")){
-                    value = true;
-                    return;
-                }
-                else if (value.equals("false")){
-                    value = false;
-                    return;
-                }
-                else {
-                    try {
-                        double d = Double.parseDouble(s);
-                        value = d;
-                        System.out.printf("Double %s (int)", value);
-                        int n = Integer.parseInt(s);
-                        value = n;
-                        System.out.printf("Numeral %s (int)", value);
-                    }
-                    catch (Exception e){
-                        throw new ParseException(String.format("Could not parse value '%s' as numeral or boolean", s), 0);
-                        // throw new ParseException(String.format("Could not parse value '%s'", key, c), 0);
-                        // System.out.printf("OK, %s%n", e.getMessage());
-                    };
-                }
-
+            switch (c){
+                case '"':
+                  return readString(reader);
+                case '{':
+                    return readObject(reader);
+                case '[':
+                    return readArray(reader);
+                default:
+                    reader.unread(i);
+                    return readPrimitive(reader);
                 // System.out.printf("Read value starting with '%s...': %s%n", c, value);
                 //return;
             }
         }
+        return "???";
+        //return "ODD...";
+        //throw new ParseException(String.format("Could not parse value '%s'", key, c), 0);
     }
 
     static private
-    String WHITESPACE = " \t\r\n";
+    final String WHITESPACE = " \t\r\n";
 
-    int skipWhitespace(BufferedReader reader) throws IOException {
+    // Consider
+    static private
+    final int WHITESPACE_SPACE = (int)' ';
+
+    //enum Mika {A, B, C};
+
+    static
+    int skipWhitespace(PushbackReader reader) throws IOException {
         int i;
         // char c;
         while ((i = reader.read()) != -1) {
-            //c = (char) i;
             if (WHITESPACE.indexOf(i) == -1){
                 // Found non-whitespace char
                 return i;
@@ -431,40 +375,187 @@ public class JSON { //extends HashMap<String,JSON> {
      *
      * @param reader
      * @return String, excluding leading and trailing quotes (").
-     * @throws IOException
+     * @throws ParseException upon syntax error
+     * @throws IOException if end of file encountered
      */
     static
-    String readString(BufferedReader reader) throws IOException {
-        StringBuffer buffer = new StringBuffer();
-        int i = readUntil(reader, "\"", buffer);
-        if (i == -1){
-            // throw new ParseException();
+    String readString(PushbackReader reader) throws IOException, ParseException {
+        StringBuffer sb = new StringBuffer();
+        int i;
+        char c;
+        while ((i = reader.read()) != -1) {
+            c = (char) i;
+            switch (c){
+                case '\\': // Escaping
+                    if ((i = reader.read()) != -1) {
+                        c = (char) i;
+                        switch (c){
+                            case '"':
+                                sb.append('"');
+                                break;
+                            case 'n':
+                                sb.append('\n');
+                                break;
+                            case 't':
+                                sb.append('\t');
+                                break;
+                            case 'r':
+                                sb.append('\r');
+                                break;
+                            default:
+                                sb.append('?');
+                        }
+                    }
+                    break;
+                case '"':
+                    // The only valid end
+                    return sb.toString();
+                default:
+                    sb.append(c);
+            }
         }
-        return buffer.toString();
+        throw new ParseException(String.format(
+                    "Premature end of file, no ending double quote (\") in string:  %s",
+                    sb.toString()), sb.length());
+        //return null;
     }
 
-
-    /** Extract an array (of basetype), assuming that a leading brace ([) has been already read.
+    /** Assumes leading curly brace '{' read and reads key:value pairs until trailing curly brace '}'.
      *
      * @param reader
-     * @return String, excluding leading and trailing quotes (").
+     * @return
      * @throws IOException
+     * @throws ParseException
      */
     static protected
-    Object[] readArray(BufferedReader reader) throws IOException {
-        //String value = readUntil(reader, "]");
-        StringBuffer buffer = new StringBuffer();
-        int i = readUntil(reader, "]", buffer);
-        if (i == -1){
-            // throw new ParseException();
+    Object readObject(PushbackReader reader) throws IOException, ParseException {
+        JSON.Map children = new JSON.Map();
+        int i;
+        char c;
+        while ((i = skipWhitespace(reader)) != -1) {
+            c = (char) i;
+            String key = "?";
+            switch (c){
+                case '"': // KEY
+                    key = readString(reader);
+                    // System.out.println(String.format("Read key <%s>", key));
+                    i = skipWhitespace(reader);
+                    if (i == -1){
+                        throw new ParseException(String.format("Premature end of file after '%s' and char '%s'", key, c), 0);
+                    }
+                    c = (char) i;
+                    if (c != ':'){
+                        throw new ParseException(String.format("After key '%s': illegal char '%s' , expected colon (:)", key, c), 0);
+                    }
+                    JSON json = new JSON();
+                    json.value = readEntity(reader);
+                    children.put(key, json);
+                    // System.out.println(String.format("Added '%s' = %s", key, json.value));
+                    break;
+                case '}':
+                    // Empty child map results. Value has been assigned childMap upon leading '{'
+                    // System.out.println(String.format("Returning {...} (%d items)", children.size()));
+                    return children;
+                case ',': // OPEN?
+                    // System.out.printf("What, comma?");
+                    break;
+                case '[':
+                case ']':
+                    throw new ParseException(String.format("Illegal char %s (after key '%s')", c, key), 0);
+                default:
+                    //throw new ParseException(String.format("Illegal entity end after ''", key), 0);
+                    System.out.printf("letter: %s (%d)", c, i);
+            }
         }
-        return buffer.toString().split(","); // Temporary solution
+        throw new ParseException(String.format("Premature end of file (after reading '%s')", children), 0);
     }
 
 
+        /** Extract an array (of basetype), assuming that a leading brace ([) has been already read.
+         *
+         * @param reader
+         * @return String, excluding leading and trailing quotes (").
+         * @throws IOException
+         */
+    static protected
+    Object[] readArray(PushbackReader reader) throws IOException, ParseException {
+        //String value = readUntil(reader, "]");
+        ArrayList<Object> values = new ArrayList<>();
+        int i;
+        char c;
+        while ((i = skipWhitespace(reader)) != -1) {
+            c = (char) i;
+            switch (c) {
+                case ',':
+                    break;
+                case ']':
+                    // System.out.printf("Completed array: %s %n", values);
+                    return values.toArray();
+                case '}':
+                case ':':
+                    throw new ParseException(String.format("Illegal char '%s' after reading array: ", c, values), 0);
+                default:
+                    //System.out.printf("Push back: %s %n", c);
+                    reader.unread(i); // push back
+                    values.add(readEntity(reader));
+                    // System.out.printf("Current array: %s %n", values);
+                    //readEntity
+            }
+        }
+        throw new ParseException(String.format("Premature end of file in reading array: %s...", values), 0);
+    }
 
     static protected
-    int readUntil(BufferedReader reader, String chars, StringBuffer buffer) throws IOException {
+    Object readPrimitive(PushbackReader reader) throws IOException, ParseException {
+
+        StringBuffer buffer = new StringBuffer();
+        //buffer.append(c); // "push back"
+        int i = readUntil(reader,",]}", buffer);
+        reader.unread(i);
+        String s = buffer.toString().trim();
+
+        // TODO: move to manip
+        //Object result = null;
+        if (s.equals("true")){
+            // value = true;
+            return true;
+        }
+        else if (s.equals("false")){
+            return false;
+        }
+        else if (s.equals("null")){
+            return null;
+        }
+        else {
+
+            try {
+                return Integer.parseInt(s);
+                //System.out.printf("Numeral %s (int)", result);
+            }
+            catch (NumberFormatException e) {}
+
+            try {
+                return Long.parseLong(s);
+                //   System.out.printf("Numeral %s (long)", result);
+            }
+            catch (NumberFormatException e){}
+
+            try {
+                return Double.parseDouble(s);
+            }
+            catch (NumberFormatException e){}
+            //System.out.printf("Numeral %s (double)%n", result);
+
+            throw new ParseException(String.format(
+                "Could not parse value '%s' as numeral or boolean", s), 0);
+                // throw new ParseException(String.format("Could not parse value '%s'", key, c), 0);
+                // System.out.printf("OK, %s%n", e.getMessage());
+        }
+    }
+
+
+    static protected
+    int readUntil(PushbackReader reader, String chars, StringBuffer buffer) throws IOException {
         int i;
         while ((i = reader.read()) != -1) {
             char c = (char) i;
@@ -519,8 +610,8 @@ public class JSON { //extends HashMap<String,JSON> {
             json.put("arrayMixed", new Object[]{1,2,"mika"});
             json.put("arrayNumber", new Object[]{1,2.0f, 3.14, 123456789L});
             json.put("floatArray", new float[]{1.2f, 2.23f, 3.4f});
-            JSON node = json.addChild("child");
-            node.put("float", 3.121);
+            json.addChild("child").put("float", 3.124);
+            json.ensureChild("child").put("int", 312);
             System.out.println(json);
 
             System.exit(1);
@@ -533,6 +624,7 @@ public class JSON { //extends HashMap<String,JSON> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ParseException e) {
+            System.err.println(json);
             throw new RuntimeException(e);
         }
 
