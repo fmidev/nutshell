@@ -177,7 +177,7 @@ public class JSON { //extends HashMap<String,JSON> {
         return buffer.toString();
     }
 
-
+    // TODO: make static, rename to writeEntity, use also for array elems.
     public StringBuffer write(StringBuffer buffer, String indent) {
 
         if (value == null){
@@ -264,7 +264,7 @@ public class JSON { //extends HashMap<String,JSON> {
                 buffer.append(Arrays.toString((double[]) value));
             }
             else {
-                buffer.append("[ ]"); // error!
+                buffer.append("[ null ]"); // error!
             }
             //buffer.append(value); // UNDER CONSTRUCTION
             //buffer.append(Arrays.toString(value));
@@ -332,7 +332,7 @@ public class JSON { //extends HashMap<String,JSON> {
             // System.out.print(c);
             switch (c){
                 case '"':
-                  return readString(reader);
+                    return readString(reader);
                 case '{':
                     return readObject(reader);
                 case '[':
@@ -340,12 +340,9 @@ public class JSON { //extends HashMap<String,JSON> {
                 default:
                     reader.unread(i);
                     return readPrimitive(reader);
-                // System.out.printf("Read value starting with '%s...': %s%n", c, value);
-                //return;
             }
         }
         return "???";
-        //return "ODD...";
         //throw new ParseException(String.format("Could not parse value '%s'", key, c), 0);
     }
 
