@@ -136,6 +136,11 @@ function ask_variable(){
 # Add leading '/' and remove trailing '/'
 function check_dir_syntax(){
     local key=$1
+
+    if [ "$key" == '' ]; then
+	return
+    fi
+    
     eval value=\${$key}
     value=${value/\~/$HOME}
     value_orig=$value

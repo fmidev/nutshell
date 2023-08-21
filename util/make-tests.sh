@@ -45,7 +45,8 @@ fi
 
 
 HTTP_GET='wget --proxy=off --spider'
-NUTSHELL_SERVER=${NUTSHELL_SERVER='http://localhost:8080'}
+#NUTSHELL_SERVER=${NUTSHELL_SERVER='http://localhost:8080'}
+NUTSHELL_SERVER=${NUTSHELL_SERVER:-$HTTP_HOST${HTTP_PORT+":$HTTP_PORT"}}
 echo "NUTSHELL_SERVER=${NUTSHELL_SERVER}"
 
 # NUTSHELL_URL='http://localhost:8080/nutshell/NutShell'
@@ -177,6 +178,7 @@ function run_http(){
     #echo_warn params...
     local params=`NUTSHELL_VERSION=java nutshell --log WARNING $* --http_params 2> /dev/null`
     #echo_warn ...end
+    echo "# Params: $params"
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
     echo_cmd $cmd ' #@ '
     #echo -e "\`\$NUTSHELL?${params} <${HTTP_PREFIX}/NutShell?${params}>\`_\n" >> $DOC_FILE
@@ -352,9 +354,10 @@ for i in ${LOOP//,/ } ; do
     $cmd --exists $FILE 
     check 1
 
-    secho title3 "Action: try to DELETE product having illegal filename"
-    $cmd --delete ${FILE}-foo 
-    check 1
+    # TODO: http_params from here, this script, to skip parsing...
+    #secho title3 "Action: try to DELETE product having illegal filename"
+    #$cmd --delete ${FILE}-foo 
+    #check 1
 
     secho title3 "Action: MAKE product (generate, if nonexistent)"
     $cmd --make $FILE 

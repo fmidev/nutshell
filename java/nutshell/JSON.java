@@ -14,7 +14,7 @@ import java.util.Map;
 public class JSON { //extends HashMap<String,JSON> {
 
     static
-    public class Map extends HashMap<String,JSON> {
+    public class MapJSON extends HashMap<String,JSON> {
     }
 
     Object value;
@@ -104,7 +104,7 @@ public class JSON { //extends HashMap<String,JSON> {
         if (key.isEmpty())
             return this;
 
-        Map children = ensureChildren();
+        MapJSON children = ensureChildren();
         JSON child;
 
         if (children.containsKey(key)){
@@ -119,27 +119,27 @@ public class JSON { //extends HashMap<String,JSON> {
     };
 
 
-    private Map ensureChildren(){
-        if (!(value instanceof Map)){
-            value = new Map();
+    private MapJSON ensureChildren(){
+        if (!(value instanceof MapJSON)){
+            value = new MapJSON();
         }
-        return (Map)value;
+        return (MapJSON)value;
     }
 
     public boolean hasChildren(){
-        return (value instanceof Map);
+        return (value instanceof MapJSON);
     }
 
-    public Map getChildren(){
+    public MapJSON getChildren(){
         if (hasChildren()){
-            return (Map)value;
+            return (MapJSON)value;
         }
         else {
             return null;
         }
     }
 
-    public Map getChildren(Path path){
+    public MapJSON getChildren(Path path){
         JSON json = getNode(path);
         if (json != null){
             return json.getChildren();
@@ -153,19 +153,27 @@ public class JSON { //extends HashMap<String,JSON> {
     synchronized
     public boolean hasChild(String key){
         if (hasChildren()){
-            return ((Map)value).containsKey(key);
+            return ((MapJSON)value).containsKey(key);
         }
         else {
             return false;
         }
     }
 
+    /** Returns child node having the given key. Creates a node, unless exists.
+     *
+     * @param key
+     * @return
+     */
     synchronized
     public JSON getChild(String key){
-        if (hasChild(key)){
-            return ((Map)value).get(key);
+        if (!hasChildren()){
+            ensureChildren();
         }
-        return null;
+        //if (hasChild(key)){
+            return ((MapJSON)value).get(key);
+        //}
+        // return null;
     }
 
 
@@ -173,26 +181,27 @@ public class JSON { //extends HashMap<String,JSON> {
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        write(buffer, "");
+        write(value, buffer, "");
         return buffer.toString();
     }
 
     // TODO: make static, rename to writeEntity, use also for array elems.
-    public StringBuffer write(StringBuffer buffer, String indent) {
+    static
+    public StringBuffer write(Object value, StringBuffer buffer, String indent) {
 
         if (value == null){
             // Node has neither value nor children.
             // Note: if node has an empty child map, an empty object {} is written instead.
             buffer.append("null");
         }
-        else if (value instanceof Map) {
+        else if (value instanceof Map<?,?>) {
             buffer.append('{');
-            Map nodes = (Map) value;
+            Map<?,?> nodes = (Map) value;
             if (!nodes.isEmpty()) {
                 //buffer.append('\n');
-                String ind = indent+"  "; // getIndent(indent);
+                String indentNext = indent+"  "; // getIndent(indent);
                 boolean CONTINUES = false;
-                for (java.util.Map.Entry<String, JSON> entry : nodes.entrySet()) {
+                for (Map.Entry entry : nodes.entrySet()) {
                     if (CONTINUES){
                         buffer.append(',');
                     }
@@ -201,18 +210,24 @@ public class JSON { //extends HashMap<String,JSON> {
                     }
                     buffer.append('\n');
 
-                    // RECURSION
-                    String key = entry.getKey();
-                    JSON value = entry.getValue();
-                    buffer.append(ind);
-                    buffer.append('"').append(key).append('"').append(':').append(' ');
-                    value.write(buffer, ind);
+                    String key = entry.getKey().toString();
+                    Object v = entry.getValue();
+                    if (v instanceof JSON){
+                        v = ((JSON) v).value;
+                    }
 
+                    // RECURSION
+                    buffer.append(indentNext);
+                    buffer.append('"').append(key).append('"').append(':').append(' ');
+                    write(v, buffer, indentNext);
                 }
                 buffer.append('\n');
                 buffer.append(indent);
             }
             buffer.append('}'); //.append('\n');
+        }
+        else if (value.getClass().isArray()){
+            writeArray(value, buffer, indent);
         }
         else if (value instanceof Number){
             buffer.append(value);
@@ -220,11 +235,12 @@ public class JSON { //extends HashMap<String,JSON> {
         else if (value instanceof Boolean){
             buffer.append(value);
         }
-        else if (value.getClass().isArray()){
-            writeArray(buffer, indent);
+        else if ((value instanceof String) || (value instanceof Character)){
+            buffer.append('"').append(value).append('"');
         }
         else { // if (value instanceof String){
-            buffer.append('"').append(value.toString()).append('"');
+            // Consider non-string objects as JSON object with "type" and "value" attribute?
+            buffer.append('"').append(value.getClass().getSimpleName()).append(":").append(value).append('"');
         }
 
         return buffer;
@@ -243,7 +259,8 @@ public class JSON { //extends HashMap<String,JSON> {
     }
      */
 
-    public StringBuffer writeArray(StringBuffer buffer, String indent) {
+    static
+    public StringBuffer writeArray(Object value, StringBuffer buffer, String indent) {
 
         Class cls = value.getClass();
         if (cls.getComponentType().isPrimitive()){
@@ -274,8 +291,13 @@ public class JSON { //extends HashMap<String,JSON> {
             Object[] array = (Object[]) value;
             // Basically array of objects, but check if still numeric/boolean, and use flat single row output.
             boolean ALL_PRIMITIVE = true;
+            // Essenitially, primitive are SHORT values.
             for (Object v: array){
-                if (!((v instanceof Number) || (v instanceof Boolean))){
+                // v.getClass().isPrimitive()
+                //  || (v instanceof Character)
+                if (!(v.getClass().isPrimitive() ||
+                        (v instanceof Number) || (v instanceof Boolean))){
+                //if (!v.getClass().isPrimitive()){
                     ALL_PRIMITIVE = false;
                     break;
                 }
@@ -297,8 +319,9 @@ public class JSON { //extends HashMap<String,JSON> {
                     else {
                         buffer.append(',');
                     }
-                    buffer.append('\n').append(indent+"  ");
-                    buffer.append('"').append(v).append('"'); // TODO: writeValue v (support JSON recursion)
+                    buffer.append('\n').append(indent + "    "); // indent+2
+                    write(v, buffer, indent + "  ");
+                    // buffer.append('"').append(v).append('"'); // TODO: writeValue v (support JSON recursion)
                 }
                 buffer.append(']'); //.append('\n');
             }
@@ -426,7 +449,7 @@ public class JSON { //extends HashMap<String,JSON> {
      */
     static protected
     Object readObject(PushbackReader reader) throws IOException, ParseException {
-        JSON.Map children = new JSON.Map();
+        MapJSON children = new MapJSON();
         int i;
         char c;
         while ((i = skipWhitespace(reader)) != -1) {
@@ -604,8 +627,8 @@ public class JSON { //extends HashMap<String,JSON> {
             json.put("boolean", false);
             json.put("empty", null);
             json.put("empty2", null).ensureChildren();
-            json.put("arrayMixed", new Object[]{1,2,"mika"});
-            json.put("arrayNumber", new Object[]{1,2.0f, 3.14, 123456789L});
+            json.put("arrayMixed", new Object[]{1, false,"mika"});
+            json.put("arrayScalar", new Object[]{true, 1,2.0f, 3.14, 123456789L});
             json.put("floatArray", new float[]{1.2f, 2.23f, 3.4f});
             json.addChild("child").put("float", 3.124);
             json.ensureChild("child").put("int", 312);

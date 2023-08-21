@@ -60,9 +60,9 @@ public class Cache {
         System.out.println(jsonConf);
         //JSON.MapJSON sections = jsonConf.getChildren();
         //JSON dataProxy = jsonConf.getChild("dataproxy");
-        JSON.Map dataProxies = jsonConf.getChildren(Paths.get("dataproxy"));
+        JSON.MapJSON dataProxies = jsonConf.getChildren(Paths.get("dataproxy"));
         if (dataProxies != null){
-            for (JSON.Map.Entry<String,JSON> entry: dataProxies.entrySet()){
+            for (JSON.MapJSON.Entry<String,JSON> entry: dataProxies.entrySet()){
                 String key = entry.getKey();
                 JSON json = entry.getValue();
                 if (json != null){

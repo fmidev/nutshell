@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.42";
+		return "3.44";
 	}
 
 	ProductServer() {
@@ -300,10 +300,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			// Accept only word \\w chars and '-'.
-			// String label = String.format(LABEL+"%d-%s", getTaskId(), USER).replaceAll("[^\\w\\-\\.\\:@]", "-");
-			final String label = String.format("%s-%d-%s.%d", instructions.label, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			//final String label = String.format("%s_%d-%s.%d", instructions.label, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			//StringBuffer sb = new StringBuffer();
+			ArrayList<String> labelArray = new ArrayList<>();
+			labelArray.add(String.valueOf(getTaskId()));
+			if (!instructions.label.isEmpty())
+				labelArray.add(instructions.label);
+			if (!USER.isEmpty()){
+				labelArray.add(USER);
+			}
+			labelArray.add(String.valueOf(GROUP_ID));
+			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "-");
 
-			//this.instructions.set(instructions);
+
+					//this.instructions.set(instructions);
 			// this.instructions.makeLevel = defaultRemakeDepth;
 
 			// Relative
@@ -354,6 +364,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+			log.debug(String.format("Label: %s ",  label));
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			Path systemPath = CACHE_ROOT.resolve(relativeSystemDir);

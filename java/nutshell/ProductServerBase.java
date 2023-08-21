@@ -270,11 +270,11 @@ public class ProductServerBase extends Program {
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
 
-
         StringBuilder sb = new StringBuilder();
         sb.append(HTTP_HOST);
-        if (HTTP_PORT != null)
+        if ((HTTP_PORT != null) && !HTTP_PORT.isEmpty()) {
             sb.append(':').append(HTTP_PORT);
+        }
         sb.append(HTTP_PREFIX);
         HTTP_BASE = sb.toString();
         Log.pathMap.put(CACHE_ROOT,   HTTP_BASE+"/cache/");  // <- append relative path
