@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.44";
+		return "3.45";
 	}
 
 	ProductServer() {
@@ -310,7 +310,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				labelArray.add(USER);
 			}
 			labelArray.add(String.valueOf(GROUP_ID));
-			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "-");
+			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
 
 
 					//this.instructions.set(instructions);
