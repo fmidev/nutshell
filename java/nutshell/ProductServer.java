@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.45.2";
+		return "3.45.3";
 	}
 
 	ProductServer() {
@@ -763,8 +763,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				// Mark this task being processed (empty file)
 				try {
 					FileUtils.ensureWritableDir(outputDirTmp, GROUP_ID, dirPerms);
+					log.info(String.format("Created tmp dir: %s", outputDirTmp));
 					FileUtils.ensureWritableDir(outputDir, GROUP_ID, dirPerms);
 					FileUtils.ensureWritableFile(outputPath, GROUP_ID, filePerms, dirPerms);
+					log.debug(String.format("Created empty file: %s", outputPath));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
 					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s", e.getMessage()));
