@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.45";
+		return "3.46";
 	}
 
 	ProductServer() {
@@ -310,8 +310,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				labelArray.add(USER);
 			}
 			labelArray.add(String.valueOf(GROUP_ID));
-			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
-
+			//final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
+			final String label = String.join("-", labelArray).replaceAll("[^\\w]", "_"); //
 
 					//this.instructions.set(instructions);
 			// this.instructions.makeLevel = defaultRemakeDepth;
