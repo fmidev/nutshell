@@ -265,7 +265,6 @@ public class ProductServerBase extends Program {
         setup.put("filePerms", filePerms);
 
         /// "read-only" variables (for debugging)
-        //this.USER = System.getProperty("user.name"); // $USER
         setup.put("user.name", this.USER);
 
         this.PATH = System.getenv("PATH") + ":" + this.PATH_EXT;
