@@ -303,13 +303,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//final String label = String.format("%s_%d-%s.%d", instructions.label, getTaskId(), USER, GROUP_ID).replaceAll("[^\\w\\-\\.\\:@]", "-");
 			//StringBuffer sb = new StringBuffer();
 			ArrayList<String> labelArray = new ArrayList<>();
-			labelArray.add(String.valueOf(getTaskId()));
 			if (!instructions.label.isEmpty())
 				labelArray.add(instructions.label);
 			if (!USER.isEmpty()){
 				labelArray.add(USER);
 			}
 			labelArray.add(String.valueOf(GROUP_ID));
+			if (getTaskId() > 1){
+				labelArray.add(String.valueOf(getTaskId()));
+			}
+
 			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
 			//final String label = String.join("-", labelArray).replaceAll("[^\\w]", "_"); //
 

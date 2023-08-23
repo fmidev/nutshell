@@ -12,10 +12,8 @@ help:
 	@grep '^[a-z].\+:' Makefile | tr '\n:' ' '
 	@echo
 
-update-pkg: Nutlet.jar
+#update-pkg: Nutlet.jar
 # html/template
-	cp -v Nutlet.jar html/WEB-INF/lib/
-
 
 Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR} nutshell/
@@ -29,9 +27,12 @@ META-INF:
 #cat $< | HTTP_PREFIX=${HTML_PREFIX} envsubst > $@/context.xml 
 
 
-# Prepare files for export
+# Prepare files for Git export
 prepack: Nutlet.jar html/template
 	for i in html/template/*.HTML; do make $${i%.*}.html; done
+	cp -v Nutlet.jar html/WEB-INF/lib/
+	@echo -n "Version: "
+	java -cp Nutlet.jar nutshell.ProductServer --log WARNING  --version
 
 
 # Only validates & re-formats. No variable substitution.
