@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.46";
+		return "3.45";
 	}
 
 	ProductServer() {
@@ -310,8 +310,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				labelArray.add(USER);
 			}
 			labelArray.add(String.valueOf(GROUP_ID));
-			//final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
-			final String label = String.join("-", labelArray).replaceAll("[^\\w]", "_"); //
+			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
+			//final String label = String.join("-", labelArray).replaceAll("[^\\w]", "_"); //
 
 					//this.instructions.set(instructions);
 			// this.instructions.makeLevel = defaultRemakeDepth;
@@ -364,7 +364,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
-			log.debug(String.format("Label: %s ",  label));
+			log.debug(String.format("Label: %s %s",  label, labelArray));
+
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			Path systemPath = CACHE_ROOT.resolve(relativeSystemDir);
