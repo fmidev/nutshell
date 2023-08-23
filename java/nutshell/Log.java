@@ -1,6 +1,7 @@
 package nutshell;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
@@ -303,7 +304,13 @@ public class Log implements AutoCloseable {
 		return flush(s, message);
 	}
 
+	static
 	class PathDetector {
+
+		/*
+		See URL aURL = new URL("http://example.com:80/docs/books/tutorial"
+                           + "/index.html?name=networking#DOWNLOADING");
+		 */
 
 		String prefix = "";
 		Path path = null;
@@ -312,7 +319,7 @@ public class Log implements AutoCloseable {
 		String remainingLine = "";
 
 		// static
-		final Pattern filePathRegExp = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
+		final Pattern filePathRegExp = Pattern.compile("^([^/]*)((/[\\w_\\-\\.:]*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
 				Pattern.CASE_INSENSITIVE);
 
 		PathDetector(String remainingLine){
@@ -344,7 +351,9 @@ public class Log implements AutoCloseable {
 		public String toString() {
 			return "PathDetector{" +
 					"prefix='" + prefix + '\'' +
-					", path=" + path +
+					//", path=" + path +
+					", dir=" + dir +
+					", file=" + filename +
 					", line='" + remainingLine + '\'' +
 					'}';
 		}
@@ -815,8 +824,8 @@ public class Log implements AutoCloseable {
 			System.out.println("Usage:");
 			System.out.println("  argument: <log_level>  # Any of these: " + statusCodes.entrySet());
 			System.out.println("Example:");
-			System.out.println("\tls | java -cp out/production/nutshell/  nutshell.Log DEBUG");
-			System.out.println("\tjava -cp out/production/nutshell/  nutshell.Log INFO,,VT100");
+			System.out.println("\tls | java -cp out/production/nutshell/  nutshell.Log DEBUG  <stdin>");
+			System.out.println("\tjava -cp out/production/nutshell/  nutshell.Log INFO,,VT100  <stdin>");
 			log.warn("Quitting");
 			return;
 		}
@@ -846,7 +855,11 @@ public class Log implements AutoCloseable {
 			String line = null;
 			while (((line = in.readLine()) != null) && (!line.isEmpty())) {
 				int randomKey = (int) (Math.random() * log.getVerbosity()+1);
-				//statusCodes.containsKey(randomKey);
+				PathDetector pd = new PathDetector(line);
+				while (pd.next()) { // (here expecting just one; one per line)
+					System.out.println("Koe: " + pd);
+				}
+			//statusCodes.containsKey(randomKey);
 				//log.log((int) (Math.random() * 5.0), line);
 				log.log(statusCodes.getOrDefault(randomKey, Status.UNDEFINED), line);
 			}
@@ -857,7 +870,6 @@ public class Log implements AutoCloseable {
 
 		// System.out.println(log.buffer.toString()); EMPTY!
 		//System.out.println(log);
-
 		//System.out.println(log.getClass().getCanonicalName());
 
 		//Log test = new Log();
