@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.45.4";
+		return "3.46";
 	}
 
 	ProductServer() {
@@ -247,7 +247,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						link.attributes.put("color", "green");
 						String label = ""+t.log.indexedState.getIndex(); // t.result.toString();
 						if (t.instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
-							label = "GENERATE";
+							// label = "GENERATE"; disturbs, consider line attribs only:
 							link.attributes.put("style", "bold");
 						}
 						else {
@@ -2047,16 +2047,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			if (task.instructions.isSet(OutputType.STATUS)){
-				/*
-				Graph g = task.getGraph(null);
-				g.toStream(System.out);
-				try {
-					g.dotToFile("graph.svg");
-				} catch (IOException | InterruptedException e) {
-					log.experimental(e.getMessage());
-				}
-
-				 */
 				Path p = task.writeGraph();
 				log.experimental(String.format("Wrote graph %s", p));
 			}
