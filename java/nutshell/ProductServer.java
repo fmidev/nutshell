@@ -260,7 +260,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							label = ""+t.log.indexedState.getIndex();
 							link.attributes.put("style", "dotted");
 						}*/
-						link.attributes.put("label", label);
+						// REMOVED link.attributes.put("label", label);
 					}
 					//link.attributes.put("", "");
 				}
