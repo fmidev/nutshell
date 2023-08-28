@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.47";
+		return "3.48";
 	}
 
 	ProductServer() {
@@ -311,6 +311,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			labelArray.add(String.valueOf(GROUP_ID));
 			if (getTaskId() > 1){
 				labelArray.add(String.valueOf(getTaskId()));
+			}
+			else {
+				labelArray.add(Integer.toHexString(Float.floatToIntBits((float)Math.random())));
+				//labelArray.add(Long.toHexString(Double.doubleToLongBits(Math.random())));
 			}
 
 			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
@@ -1638,6 +1642,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				serverLog.set(value);
+				if (serverLog.decoration.isSet(TextOutput.Options.COLOUR) &&
+						(serverLog.getFormat() == TextOutput.Format.TEXT)){
+					serverLog.setFormat(TextOutput.Format.VT100);
+				}
 				LOG_SERVER = serverLog.getConf();
 				LOG_TASKS = LOG_SERVER;
 				serverLog.special(String.format("New state for all logs: '%s'", LOG_SERVER));
