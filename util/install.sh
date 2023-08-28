@@ -6,10 +6,9 @@ ARG=$2
 source util/vt100utils.sh
 source util/init-config.sh
 
-
-#vt100echo green "Main options"
-#ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
-#CONF_FILE="nutshell-$NUTSHELL_VERSION.cnf"
+# vt100echo green "Main options"
+# ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
+# CONF_FILE="nutshell-$NUTSHELL_VERSION.cnf"
 
 if [ -f $CONF_FILE ]; then
     #vt100echo green "Reading CONF_FILE=$CONF_FILE "
@@ -205,13 +204,13 @@ fi
 if [ "$CMD_SCRIPT_DIR" != '' ]; then
 
     NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell
+    vt100echo green "# Installing $NUTSHELL_SH"
     show_variable NUTSHELL_SH
     #DATE=`date --iso-8601=minutes`
     export USER HOSTNAME HTTP_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR # GROUP_ID $GROUP_ID
     cat util/nutshell.sh.tpl | envsubst '$DATE $USER $HOSTNAME $HTTP_ROOT $NUTSHELL_VERSION $NUTSHELL_ROOT $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
     if [ $? == 0 ]; then
 	chmod -v gu+x $NUTSHELL_SH
-	vt100echo green "# Installed $NUTSHELL_SH"
 	vt100echo cyan  "# Test with: $NUTSHELL_SH --help"
     else
 	vt100echo red "# Failed in writing $NUTSHELL_SH"
