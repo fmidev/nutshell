@@ -329,11 +329,27 @@ public class ProductServerBase extends Program {
     }
 
     Path getTimestampDir(long time){ // consider DAY or HOUR dirs?
-        if (time > 0)
+        if (time > 0) {
+            // timeResolution
             return Paths.get(timeStampDirFormat.format(time));
-        else
+        }
+        else {
             return Paths.get("");
+        }
     }
+
+    /*
+    Path getTimestampDir(long time, ProductParameters.TimeResolution resolution){ // consider DAY or HOUR dirs?
+        if (time > 0) {
+            // timeResolution
+            return Paths.get(resolution.timeStampFormat.format(time));
+        }
+        else {
+            return Paths.get("");
+        }
+    }
+
+     */
 
 
     /**

@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.49"; // Handle missing Dot
+		return "3.5"; // Handle missing Dot
 	}
 
 	ProductServer() {
@@ -325,7 +325,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			// Relative
 			productDir = getProductDir(this.info.PRODUCT_ID);
-			timeStampDir = getTimestampDir(this.info.time);
+
+			// timeStampDir = getTimestampDir(this.info.time);
+			timeStampDir = this.info.getTimeStampDir();
+			// this.info.TIMESTAMP
 			relativeOutputDir = timeStampDir.resolve(this.productDir);
 
 			//this.relativeOutputDirTmp = this.timeStampDir.resolve(this.productDir).resolve(String.format("tmp-%s-%d", ) + getTaskId());

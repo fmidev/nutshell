@@ -16,26 +16,40 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     public enum TimeResolution {
         INVALID(-1),
         UNKNOWN(0),
-        YEAR(4),
-        MONTH(6),
-        DAY(8),
-        HOUR(10),
-        MINUTE(12);
+        YEAR("yyyy", "yyyy"),
+        MONTH("yyyyMM", "yyyy"),
+        DAY("yyyyMMdd", "yyyy/MM"),
+        HOUR("yyyyMMddHH", "yyyy/MM/dd"),
+        MINUTE("yyyyMMddHHmm", "yyyy/MM/dd");
 
         final int length;
         //String format;
         final DateFormat timeStampFormat;
+        final DateFormat timeDirFormat;
+
         TimeResolution(int length){
             this.length = length;
-            //this.format = fullFormat.substring(0, length); // YYYYmmddHHMM
-            // What about zero length?
-            if (length > 0)
+            timeStampFormat = new SimpleDateFormat("");
+            timeDirFormat   = new SimpleDateFormat("");
+            /*
+            if (length > 0) {
                 timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm".substring(0, length));
-            else
+                timeDirFormat   = new SimpleDateFormat("");
+            }
+            else {
                 timeStampFormat = new SimpleDateFormat("");
+                timeDirFormat   = new SimpleDateFormat("");
+            }
+            */
         }
 
-        //protected
+        TimeResolution(String tsFmt, String dirFmt){
+            length = tsFmt.length();
+            timeStampFormat = new SimpleDateFormat(tsFmt);
+            timeDirFormat = new SimpleDateFormat(dirFmt);
+        }
+
+            //protected
         //static String fullFormat = "YYYmmddHHmm";
 
     }

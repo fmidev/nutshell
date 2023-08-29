@@ -1,6 +1,8 @@
 package nutshell;
 
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,6 +56,15 @@ class ProductInfo extends ProductParameters {
 	public Map<String,String> setDirectives(String s, String separator){
 		MapUtils.setEntries(s, separator, "true", directives);
 		return directives;
+	}
+
+	public Path getTimeStampDir(){
+		try {
+			TimeResolution tr = getTimeResolution(TIMESTAMP);
+			return Paths.get(tr.timeDirFormat.format(time));
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 
