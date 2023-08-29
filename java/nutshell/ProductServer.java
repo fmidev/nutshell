@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.48";
+		return "3.49"; // Handle missing Dot
 	}
 
 	ProductServer() {

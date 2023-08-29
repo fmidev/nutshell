@@ -621,12 +621,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						try {
 							// TODO logDir
 							ProductServer.serverGraph.dotToFile(graphFileName);
-						} catch (InterruptedException e) {
+						}
+						catch (InterruptedException | IOException e) {
 							task.log.warn(e.getMessage());
 							task.log.fail(String.format("Could not write to %s", graphFileName));
-							//e.printStackTrace();
 						}
-						// graphPath.getParent().resolve("productServer.svg").toString());
+							// graphPath.getParent().resolve("productServer.svg").toString());
 					}
 
 
