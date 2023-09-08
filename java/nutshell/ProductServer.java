@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.5"; // Handle missing Dot
+		return "3.51"; // Handle missing Dot
 	}
 
 	ProductServer() {
@@ -158,6 +158,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public final Map<String, Task> inputTasks = new HashMap<>();
 
 		// Consider get node
+
+		/** Returns the graph describing state of the product server. Ensures that this task is included.
+		 *
+		 * @param graph
+		 * @return
+		 */
 		public Graph getGraph(Graph graph) {
 
 			if (graph == null) {
@@ -166,7 +172,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			// Ensure this task (and its descendants) on the Graph.
-			Graph.Node node = getGraphNode(graph);
+			Graph.Node node = getGraphNode(graph, null);
 
 			return graph;
 		}
@@ -174,13 +180,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		/** Retrieve a node of this task, including all its input tasks.
 		 *
 		 * @param graph
-		 * @return
+		 * @param id – identifier for this node; typically input variable name like $FIKOR, or product id radar.polar.fikor.
+		 * @return – created node.
 		 */
-		public Graph.Node getGraphNode(Graph graph){
+		public Graph.Node getGraphNode(Graph graph, String id){
 			if (graph == null){
 				graph = new Graph("request: " + this.info.PRODUCT_ID);
 			};
-			Graph.Node node = graph.getNode(this.info.PRODUCT_ID);
+			if (id == null)
+				id = this.info.PRODUCT_ID;
+			Graph.Node node = graph.getNode(id);
 			node.attributes.put("style", "filled");
 			// if (result != null){
 			File p = outputPath.toFile();
@@ -220,16 +229,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			for (Map.Entry<String,Task> entry: inputTasks.entrySet()) {
 				Task t = entry.getValue();
-				Graph.Node n = t.getGraphNode(graph);
+				Graph.Node n = t.getGraphNode(graph, entry.getKey()+"\n"+t.info.PRODUCT_ID);
 				//System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
 				Graph.Node.Link link = node.addLink(n);
 				// TODO: Style
 				if (t.log.indexedState.index > 300) {
 					n.attributes.put("style", "filled");
-					n.attributes.put("fillcolor", "#ffc090");
+					//n.attributes.put("fillcolor", "#ffc090");
+					n.attributes.put("fillcolor", "white");
 					link.attributes.put("style", "dashed");
-					link.attributes.put("label", t.log.indexedState.getMessage());
-					link.attributes.put("color", "red");
+					//link.attributes.put("label", t.log.indexedState.getMessage());
+					link.attributes.put("label", t.log.indexedState.getIndex());
+					// link.attributes.put("color", "red");
 				}
 
 
@@ -1204,9 +1215,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 
-		/**
+		/** Write the graph describing this task into a file.
 		 *
-		 * @return
+		 * @return – full path of the created file.
+		 *
 		 */
 		public Path writeGraph() {
 			Path graphFile = CACHE_ROOT.resolve(relativeGraphPath);
@@ -2041,7 +2053,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.info(String.format("Status:\t%s", task.log.indexedState.getMessage()));
 			}
 
-			task.getGraphNode(serverGraph);
+			task.getGraphNode(serverGraph, entry.getKey()+'$');
 
 			if (task.outputPath.toFile().exists()) {
 				log.ok(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));
