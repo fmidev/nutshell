@@ -33,7 +33,7 @@ public class MapUtils {
 	// protected Pattern linePattern = Pattern.compile("^\\s*[\\-]*([\\w\\.:]*)\\s*[\\s=]\\s*((.*[^;\\s])?)[;\\s]*$");
 	protected static final Pattern linePattern = Pattern.compile("^\\s*(\\w+)\\s*=[ \t\"']*([^\"']*)[ \t\"']*$");
 
-
+	// Almost duplicate; see below.
 	static public <K,V> String[] toArray(Map<K,V> map){
 		Set<String> set = new HashSet<>();
 		for (Map.Entry<K,V> entry: map.entrySet()){
@@ -41,7 +41,21 @@ public class MapUtils {
 		}
 		return set.toArray(new String[0]);
 	}
-	
+
+	/** Constructs an array of entries: ["KEY=VALUE", "KEY2=VALUE2", ..., "KEYn=VALUEn"]
+	 *
+	 * @param map
+	 * @return
+	 */
+	static public String[] getEntries(Map<?,?> map){
+		//return map.entrySet().toArray(new String[map.size()]);
+		Set<String> set = new HashSet<>();
+		for (Map.Entry<?,?> s : map.entrySet()) {
+			set.add(s.toString());
+		}
+		return set.toArray(new String[set.size()]);
+	}
+
 	/** Parses and stores an expression containing a command or variable assignment 
 	 * 
 	 * @param line
@@ -136,19 +150,6 @@ public class MapUtils {
 		}
 	}
 
-	/** Constructs an array of entries: ["KEY=VALUE", "KEY2=VALUE2", ..., "KEYn=VALUEn"]
-	 *
-	 * @param map
-	 * @return
-	 */
-	static public String[] getEntries(Map<?,?> map){
-		//return map.entrySet().toArray(new String[map.size()]);
-		Set<String> set = new HashSet<>();
-		for (Map.Entry<?,?> s : map.entrySet()) {
-			set.add(s.toString());
-		}
-		return set.toArray(new String[set.size()]);
-	}
 
 	/** Set values given as a string "KEY=VALUE,KEY2=VALUE2,..."
 	 *

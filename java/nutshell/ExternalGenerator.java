@@ -59,7 +59,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 	@Override
 	public String toString() {
-		return String.format("%s[%s] @%s",getClass().getSimpleName(), id, dir);
+		return String.format("%s[%s] @%s", getClass().getSimpleName(), id, dir);
 	}
 
 	@Override
@@ -70,9 +70,14 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	// MAIN
 	@Override
 	public void generate(ProductServer.Task task) throws IndexedState {
-		task.log.textOutput.startVerbatim(task.log.buffer);  // ugly
+		task.log.textOutput.startVerbatim(task.log.buffer);  // ugly'
+		task.log.debug(String.format("cd %s; %s %s", dir, String.join(" ", MapUtils.getEntries(task.getParamEnv())), cmd.getName()));
 		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 		task.log.textOutput.endVerbatim(task.log.buffer);  // ugly
+	}
+
+	public void toStream(String cmd, String[] envArray, Path dir, PrintStream log){
+		log.printf("cd %s; %s %s", dir, Arrays.toString(envArray), cmd);
 	}
 
 	/// Generates a product and stores it in a file system.
@@ -89,8 +94,8 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 			exitValue = ShellExec.exec(cmd.toString(), envArray, dir, reader);
 		}
 		else {
-			final String[] batch = {"bash", "-c", String.format("umask %s; %s", ExternalGenerator.umask, cmd)};
-			exitValue = exec(batch, envArray, dir, reader);
+			final String[] batch = {"bash", "-c", String.format("umask %s; %s", umask, cmd)}; //??? weird elems
+			exitValue = ShellExec.exec(batch, envArray, dir, reader);
 			//exitValue = exec(cmd.toString(), envArray, dir, reader);
 		}
 

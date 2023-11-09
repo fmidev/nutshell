@@ -585,9 +585,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			Map<String,Object> map = new LinkedHashMap<>();
 
-			map.put("instr", batch.instructions);
-			// map.put(instructionParameter.getName(), Arrays.toString(instructionParameter.getValues()));
-			//map.putAll(registry.map);
 
 
 			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
@@ -691,8 +688,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}
 
-
+				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
+				map.put("Shell cmd request", html.createAnchor(relativePath.getParent().resolve(task.info.getBasename()+".sh"), "basename+'.sh'"));
+				//String basenName = relativePath.getFileName();
 				map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
+
 			}
 			else {
 				map.put("Output file", "???");
@@ -702,8 +702,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
 			map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 			map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
-			map.put("actions", batch.instructions);
+			// map.put("actions", batch.instructions);
 			// task.info.directives.put("TEST", "value");
+			map.put("instructions", batch.instructions);
 			map.put("directives", task.info.directives);
 
 

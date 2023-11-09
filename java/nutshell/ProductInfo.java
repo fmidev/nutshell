@@ -35,11 +35,16 @@ class ProductInfo extends ProductParameters {
 	/// Compression is a "special" filename segment, it is extracted first.
 	protected static final Pattern compressionRe = Pattern.compile("^(.*)\\.(zip|gz)$");
 
-	// Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
+	/// Resolve TIMESTAMP, PRODUCT_ID, PARAMETERS
+	/**
+	 *   1
+	 */
 	protected static final Pattern filenameRe =
 			//Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
+			// GOOD
 			Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
-	// re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
+			// BASENAMED Pattern.compile("^(((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?)\\.([a-z][a-z0-9]*)$");
+			// Python: re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
 
 
 	/** Additional parameters forwarded directly to product generator.
@@ -116,7 +121,7 @@ class ProductInfo extends ProductParameters {
 		/// Parse compression extension, like .gz in .txt.gz)
 		final Matcher cm = compressionRe.matcher(filename);
 		if (cm.matches()) {
-			filename = cm.group(1); // filenameUncompressed
+			filename = cm.group(1); // filename uncompressed
 			COMPRESSION = cm.group(2);
 		} else {
 			COMPRESSION = "";
@@ -126,6 +131,8 @@ class ProductInfo extends ProductParameters {
 		/// Main parsing
 		final Matcher m = filenameRe.matcher(filename);
 		if (m.matches()) {
+
+			//BASENAME = m.group(1);
 
 			TIMESTAMP = m.group(2) == null ? "" : m.group(2);
 
@@ -214,17 +221,24 @@ class ProductInfo extends ProductParameters {
 		return (TIMESTAMP!=null) && !TIMESTAMP.isEmpty();
 	}
 
+	/** Note: Here TIMESTAMP2 not supported yet
+	 *
+	 * @return
+	 */
 	public String getFilename() {
 		return getFilename(TIMESTAMP);
 	}
 
-	public String getFilename(String prefix) {
+	/** Note: Here TIMESTAMP2 not supported yet
+	 *
+	 * @return
+	 */
+	public String getBasename(String prefix, StringBuffer b) {
 
-		StringBuffer b = new StringBuffer();
 		//b.append("Time: ").append("<not implemented>").append('\n');
 		if ((prefix != null) && !prefix.isEmpty())
 			b.append(prefix).append("_");
-		
+
 		b.append(this.PRODUCT_ID);
 
 		//for (Map.Entry<String, Object> entry : toMap(null).entrySet()) {
@@ -237,15 +251,28 @@ class ProductInfo extends ProductParameters {
 		for (Map.Entry<String, Object> entry : PARAMETERS.entrySet()) {
 			b.append("_").append(entry.toString()); // .getKey()).append('=').append(entry.getValue()).append('\n');
 		}
+		//b.append(".").append(this.EXTENSION);
+
+		return b.toString();
+	}
+
+	public String getBasename() {
+		StringBuffer b = new StringBuffer();
+		getBasename(TIMESTAMP, b);
+		return b.toString();
+	}
+
+	public String getFilename(String prefix) {
+		StringBuffer b = new StringBuffer();
+		getBasename(prefix, b);
 		b.append(".").append(this.EXTENSION);
-		
-		return b.toString();		
+		return b.toString();
 	}
 
 
 
 	/** Test
-	 */
+         */
 	public static void main(String[] args) {
 
 		if (args.length == 0){

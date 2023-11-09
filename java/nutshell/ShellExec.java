@@ -143,35 +143,60 @@ public class ShellExec {
 
 		int exitValue = 0;
 
+		Process process = null;
 		try {
 			// System.err.println(String.format("Starting %s ...", cmd));
 			final File d = (dir==null) ? null : dir.toFile();
 
-			final Process process = Runtime.getRuntime().exec(cmd, env, d);
-
+			//final Process
+			process = Runtime.getRuntime().exec(cmd, env, d);
 
 			if(!process.waitFor(TIMEOUT_SEC, TimeUnit.SECONDS)) {
 				//timeout - kill the process.
 				process.destroy(); // consider using destroyForcibly instead
 				throw new InterruptedException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
 			}
-			// process.
 			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
 			// what about waitFor ?
 			// System.err.println(String.format("Exit value: %d", exitValue));
 		}
- 		catch (IOException e){
+ 		/*
+		catch (IOException e){
 			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
 			exitValue = +1;
 			//errorLog.println(e.getLocalizedMessage());
 		}
 		catch (InterruptedException e){
+			if (process != null){
+				try {
+					ShellUtils.read(process, reader);
+				}
+				catch (Exception e2){
+					System.err.println("User interrupt");
+					reader.handleStdErr(String.format("%d Reading output failed %s", 501, e.getLocalizedMessage()));
+					return +10;
+				}
+			}
+
 			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
 			exitValue = -1;
 			//errorLog.println(e.getLocalizedMessage());
-		}
+		}*/
 		catch (Exception e){
+			// TODO: read (save) process output, even when interrupted. Currently it's dumped
+			/*
+			if (process != null){
+				try {
+					ShellUtils.read(process, reader);
+				}
+				catch (Exception e2){
+					System.err.println("User interrupt!");
+					reader.handleStdErr(String.format("%d Reading output failed %s", 501, e2.getLocalizedMessage()));
+					return +10;
+				}
+			}
+			 */
 			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
 			exitValue = +2;
 			//errorLog.println(e.getLocalizedMessage());

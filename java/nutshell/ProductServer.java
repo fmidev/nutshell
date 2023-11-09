@@ -48,7 +48,7 @@ import static java.nio.file.Files.*;
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.51"; // Handle missing Dot
+		return "3.52"; // Handle missing Dot
 	}
 
 	ProductServer() {
@@ -238,7 +238,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					//n.attributes.put("fillcolor", "#ffc090");
 					n.attributes.put("fillcolor", "white");
 					link.attributes.put("style", "dashed");
-					//link.attributes.put("label", t.log.indexedState.getMessage());
+					//link.attributes.put("label", t.log.indexedState.getMessage()); Java.String.replaceAll(VT100)
 					link.attributes.put("label", t.log.indexedState.getIndex());
 					// link.attributes.put("color", "red");
 				}
