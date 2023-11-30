@@ -3,9 +3,7 @@ package nutshell;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,7 +28,17 @@ import java.util.regex.Pattern;
  */
 class ProductInfo extends ProductParameters {
 
+	/// Identifier of this "product line", not a specific instance.
 	final public String PRODUCT_ID; // TODO consider class / interface, also for Generator's
+
+	/// Comma separated list of the keys (variable names) of the input paths.
+	public String INPUTKEYS;
+
+	/// Common prefix for all the successfully retrieved inputs.
+	public String INPUT_PREFIX;
+
+	/// Directory part of #INPUT_PREFIX .
+	public String INPUT_PREFIX_DIR;
 
 	/// Compression is a "special" filename segment, it is extracted first.
 	protected static final Pattern compressionRe = Pattern.compile("^(.*)\\.(zip|gz)$");

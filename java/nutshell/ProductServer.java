@@ -49,8 +49,10 @@ import static java.nio.file.Files.*;
  */
 public class ProductServer extends ProductServerBase { //extends Cache {
 
+	// TODO: Handle missing Dot
+
 	public String getVersion(){
-		return "3.6"; // Handle missing Dot
+		return "3.61";
 	}
 
 	ProductServer() {
@@ -1164,7 +1166,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			// BASE
 			Map<String, Object> env = new TreeMap<String, Object>();
-			this.info.getParamEnv(env);
+			// OLD this.info.getParamEnv(env); (see INPUT_PREFIX_BELOW)
 
 			// EXTENDED
 			if (this.info.TIMESTAMP != null) {
@@ -1196,26 +1198,35 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.special("PATH=" + PATH);
 			}
 
+			this.info.INPUT_PREFIX = null;
+			this.info.INPUT_PREFIX_DIR = null;
+
 			if (!this.inputTasks.isEmpty()) {
-				String inputPrefix = null;
 				int inputPrefixLength = 0;
-				env.put("INPUTKEYS", String.join(",", this.inputTasks.keySet().toArray(new String[0])));
+				int inputDirPrefixLength = 0;
+				//env.put("INPUTKEYS", String.join(",", this.inputTasks.keySet().toArray(new String[0])));
+				//info.INPUT_KEYS =  String.join(",", this.inputTasks.keySet().toArray(new String[0]));
+				ArrayList<String> inputKeys = new ArrayList<>();
+				//info.INPUT_KEYS =  String.join(",", this.inputTasks.keySet().toArray(new String[0]));
 				// FIX: String.join(",", retrievedInputs.keySet());
 				// env.putAll(this.inputTasksNEW);
 				for (Map.Entry<String,Task> entry: inputTasks.entrySet()){
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 					if (inputTask.outputPath != null){
+
 						env.put(key, inputTask.outputPath);
+						inputKeys.add(key);
+
 						Path dir = inputTask.outputPath.getParent();
 						if (dir == null){
 							// At least one input is a plain filename -> skip whole thing.
-							inputPrefix = null;
+							this.info.INPUT_PREFIX = null;
 							break;
 						}
 						String d = dir.toString();
-						if (inputPrefix == null) {
-							inputPrefix = d;
+						if (this.info.INPUT_PREFIX == null) {
+							this.info.INPUT_PREFIX = d;
 							inputPrefixLength = d.length();
 						}
 						else {
@@ -1224,7 +1235,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 									inputPrefixLength = d.length();
 									break;
 								}
-								if (d.charAt(i) != inputPrefix.charAt(i)) {
+								if (d.charAt(i) != this.info.INPUT_PREFIX.charAt(i)) {
 									inputPrefixLength = i;
 									break;
 								}
@@ -1233,11 +1244,24 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 
 				}
-				if (inputPrefix != null){
-					inputPrefix = inputPrefix.substring(0, inputPrefixLength);
-					env.put("INPUT_PREFIX", inputPrefix);
+
+				info.INPUTKEYS =  String.join(",", inputKeys);
+
+				if (this.info.INPUT_PREFIX != null){
+					///
+					// this.info.INPUT_PREFIX =
+					this.info.INPUT_PREFIX = this.info.INPUT_PREFIX.substring(0, inputPrefixLength);
+					// env.put("INPUT_PREFIX", this.info.INPUT_PREFIX);
+
+					int lastDirSepIndex = Math.max(0, this.info.INPUT_PREFIX.lastIndexOf('/'));
+					//env.put("INPUT_PREFIX_DIR", this.info.INPUT_PREFIX.substring(0, lastDirSepIndex));
+					this.info.INPUT_PREFIX_DIR = this.info.INPUT_PREFIX.substring(0, lastDirSepIndex);
+
 				}
 			}
+
+			/// Could warn, if overrides input variables.
+			this.info.getParamEnv(env);
 
 			env.putAll(this.info.directives); // may override input_prefix
 
