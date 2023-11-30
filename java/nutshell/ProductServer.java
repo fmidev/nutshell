@@ -41,14 +41,16 @@ import static java.nio.file.Files.*;
  *  have several timestamps, like computing time and valid time.
  *
  *  Some version history
+ *  3.6 Adds INPUT_PREFIX - the common prefix for all the retrieved input paths.
+ *  3.5 Added *.sh link in NutLet
  *  3.2 Create dirs automatically under $CACHE_ROOT and  $STORAGE_ROOT
  *
- *  @author Markus Peura fmi.fi Jan 26, 2011
+ *  @author Markus Peura fmi.fi Nov 26, 2023
  */
 public class ProductServer extends ProductServerBase { //extends Cache {
 
 	public String getVersion(){
-		return "3.52"; // Handle missing Dot
+		return "3.6"; // Handle missing Dot
 	}
 
 	ProductServer() {
@@ -1195,6 +1197,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			if (!this.inputTasks.isEmpty()) {
+				String inputPrefix = null;
+				int inputPrefixLength = 0;
 				env.put("INPUTKEYS", String.join(",", this.inputTasks.keySet().toArray(new String[0])));
 				// FIX: String.join(",", retrievedInputs.keySet());
 				// env.putAll(this.inputTasksNEW);
@@ -1202,13 +1206,40 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
 					if (inputTask.outputPath != null){
-						env.put(key,inputTask.outputPath);
+						env.put(key, inputTask.outputPath);
+						Path dir = inputTask.outputPath.getParent();
+						if (dir == null){
+							// At least one input is a plain filename -> skip whole thing.
+							inputPrefix = null;
+							break;
+						}
+						String d = dir.toString();
+						if (inputPrefix == null) {
+							inputPrefix = d;
+							inputPrefixLength = d.length();
+						}
+						else {
+							for (int i = 0; i < inputPrefixLength; i++) {
+								if (i == d.length()){
+									inputPrefixLength = d.length();
+									break;
+								}
+								if (d.charAt(i) != inputPrefix.charAt(i)) {
+									inputPrefixLength = i;
+									break;
+								}
+							}
+						}
 					}
 
 				}
+				if (inputPrefix != null){
+					inputPrefix = inputPrefix.substring(0, inputPrefixLength);
+					env.put("INPUT_PREFIX", inputPrefix);
+				}
 			}
 
-			env.putAll(this.info.directives);
+			env.putAll(this.info.directives); // may override input_prefix
 
 			return env;
 		}
