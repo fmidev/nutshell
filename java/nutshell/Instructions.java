@@ -151,6 +151,7 @@ public class Instructions extends Flags implements ActionType, MediaType, Output
     public enum MakeLevel {
         UNDEFINED("Undefined"),
         DELETE("Delete product"),
+        CLEAR_CACHE("Remove all the files in cache"),
         NONE("Do nothing"),
         // CHECK(), PEEK()
         PARSE("Only parse product request"),
