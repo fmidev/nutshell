@@ -288,7 +288,7 @@ public class ProductServerBase extends Program {
 
     /**
      *
-     * @param pathFormat - absolute path of a filename, optionally containing '%s' expanded as timestamp.
+     * @param path - absolute path of a filename, optionally containing '%s' expanded as timestamp.
      * @return
      */
     public Path setLogFile(String path) {
