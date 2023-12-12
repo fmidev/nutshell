@@ -587,7 +587,7 @@ public class ProductServerBase extends Program {
         }
 
         serverLog.note("Setting write privileges to group in dir: " + p);
-        Files.walkFileTree(p, new DeleteFiles());
+        Files.walkFileTree(p, new SetPermissions());
 
         serverLog.note("Clearing cache completed");
         //Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
