@@ -14,6 +14,14 @@ help:
 
 #update-pkg: Nutlet.jar
 # html/template
+install-%:
+	util/install.sh $*
+
+configure-%:
+	util/configure.sh $*
+
+
+
 
 Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR} nutshell/
