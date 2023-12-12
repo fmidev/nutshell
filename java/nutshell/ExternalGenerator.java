@@ -3,12 +3,14 @@ package nutshell;
  *  @author Markus.Peura@fmi.fi
  */
 
+import javax.print.DocFlavor;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -89,14 +91,24 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		//System.err.println(String.format("UMASK=%s", umask));
 
-		if (umask.isEmpty()){
-			//System.err.println(String.format("UMASK empty, ok. ERR: %s"));
-			exitValue = ShellExec.exec(cmd.toString(), envArray, dir, reader);
+		try {
+			if (umask.isEmpty()) {
+				//System.err.println(String.format("UMASK empty, ok. ERR: %s"));
+				exitValue = ShellExec.exec(cmd.toString(), envArray, dir, reader);
+			} else {
+				final String[] batch = {"bash", "-c", String.format("umask %s; %s", umask, cmd)}; //??? weird elems
+				exitValue = ShellExec.exec(batch, envArray, dir, reader);
+				//exitValue = exec(cmd.toString(), envArray, dir, reader);
+			}
 		}
-		else {
-			final String[] batch = {"bash", "-c", String.format("umask %s; %s", umask, cmd)}; //??? weird elems
-			exitValue = ShellExec.exec(batch, envArray, dir, reader);
-			//exitValue = exec(cmd.toString(), envArray, dir, reader);
+		catch (InterruptedException e){
+			throw new IndexedState(HttpLog.HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+		}
+		catch (IOException e){
+			throw new IndexedState(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+		catch (TimeoutException e){
+			throw new IndexedState(HttpLog.HttpStatus.REQUEST_TIMEOUT, e.getMessage());
 		}
 
 		// System.err.println(String.format("FINISHED (%d)", exitValue));
@@ -112,19 +124,20 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	@Override
 	public Map<String,String> getInputList(ProductServer.Task task) throws IndexedState {
 		//return getInputList(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
+		Map<String,Object> env = task.getParamEnv();
+		if (task.info.INPUT_TIMESTAMP != null) {
+			task.log.special(String.format("Changing input timestamp to: %s", task.info.INPUT_TIMESTAMP));
+			env.put("TIMESTAMP", task.info.INPUT_TIMESTAMP);
+		}
 		return getInputList(MapUtils.toArray(task.getParamEnv()), task.log);
 	}
 
 	// public Map<String,String> getInputList(String[] env, final PrintStream errorLog) { //throws InterruptedException {
 	//public Map<String,String> getInputList(String[] env, PrintStream errorLog) throws IndexedException {
 	public Map<String,String> getInputList(String[] env, Log errorLog) throws IndexedState {
-		//public Map<String,String> getInputList(ProductServer.Task task) { //throws InterruptedException {
+
 		final Map<String, String> result = new HashMap<>();
 
-		// String[] env = MapUtils.toArray(parameters.getParamEnv(null));
-		// String[] env = MapUtils.toArray(parameters);
-
-		//OutputReader reader =  new OutputReader(errorLog){ //new ShellUtils.ProcessReader() {
 		OutputReader reader =  new OutputReader(errorLog.getPrintStream()){ //new ShellUtils.ProcessReader() {
 
 			@Override
@@ -140,20 +153,30 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		if (inputDeclarationCmd.exists()){
 			if (inputDeclarationCmd.canExecute()){
-				//int exitValue = exec(inputDeclarationScript, env, reader);
-				int exitValue = exec(inputDeclarationCmd.toString(), env, dir, reader);
-				if (exitValue != 0){
-					throw extractErrorMsg(exitValue, reader);
+				try {
+					int exitValue = exec(inputDeclarationCmd.toString(), env, dir, reader);
+					if (exitValue != 0){
+						throw extractErrorMsg(exitValue, reader);
+					}
 				}
+				catch (InterruptedException e){
+					throw new IndexedState(HttpLog.HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+				}
+				catch (IOException e){
+					throw new IndexedState(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+				}
+				catch (TimeoutException e){
+					throw new IndexedState(HttpLog.HttpStatus.REQUEST_TIMEOUT, e.getMessage());
+				}
+
 			}
 			else {
-				errorLog.warn(String.format("Cannot execute input declarator script: '%s'", inputDeclarationCmd ));
+				errorLog.warn(String.format("input declarator script '%s' exists, but cannot be executed", inputDeclarationCmd ));
 				//errorLog.println("# WARNING: exists, but not executable: " + inputDeclarationCmd.toString());
 			}
 		}
 		else {
 			errorLog.info(String.format("Input declarator script not found: '%s'", inputDeclarationCmd ));
-			// errorLog.println("# INFO: not found: " + inputDeclarationCmd.toString());
 		}
 
 		return result;

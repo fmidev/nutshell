@@ -3,10 +3,13 @@ package nutshell;
  *  @author Markus.Peura@fmi.fi
  */
 
+import sun.misc.Signal;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -133,17 +136,19 @@ public class ShellExec {
 	 * param errorLog
 	 */
 	static
-	int exec(String cmd, String[] env, Path dir, ShellUtils.ProcessReader reader) { //}, final PrintStream errorLog) {
+	int exec(String cmd, String[] env, Path dir, ShellUtils.ProcessReader reader)
+			throws IOException, InterruptedException, TimeoutException { //}, final PrintStream errorLog) {
 		final String[] cmds = {cmd};
 		return exec(cmds, env, dir, reader);
 	}
 
 	static
-	int exec(String[] cmd, String[] env, Path dir, ShellUtils.ProcessReader reader){ //}, final PrintStream errorLog) {
+	int exec(String[] cmd, String[] env, Path dir, ShellUtils.ProcessReader reader)
+			throws IOException, InterruptedException, TimeoutException { //}, final PrintStream errorLog) {
 
-		int exitValue = 0;
+		int exitValue;
 
-		Process process = null;
+		Process process;
 		try {
 			// System.err.println(String.format("Starting %s ...", cmd));
 			final File d = (dir==null) ? null : dir.toFile();
@@ -154,12 +159,16 @@ public class ShellExec {
 			if(!process.waitFor(TIMEOUT_SEC, TimeUnit.SECONDS)) {
 				//timeout - kill the process.
 				process.destroy(); // consider using destroyForcibly instead
-				throw new InterruptedException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
+				//throw new InterruptedException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
+				throw new TimeoutException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
 			}
 			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
 			// what about waitFor ?
 			// System.err.println(String.format("Exit value: %d", exitValue));
+		}
+		catch (IOException | InterruptedException e) {
+			throw e;
 		}
  		/*
 		catch (IOException e){
@@ -197,13 +206,18 @@ public class ShellExec {
 				}
 			}
 			 */
-			reader.handleStdErr(String.format("%d %s", 501, e.getLocalizedMessage()));
+			// System.err.println("Eror");
+			reader.handleStdErr(String.format("%d %s (ShellExec)", 501, e.getLocalizedMessage()));
 			exitValue = +2;
 			//errorLog.println(e.getLocalizedMessage());
 		}
 
 		return exitValue;
 
+	}
+
+	static void handleInterrupt(Signal signal) {
+		System.err.println(String.format("%s : interrupted (by Ctrl+C?) : %s", ShellExec.class.getSimpleName(), signal));
 	}
 
 	public static void main(String[] args) {
@@ -218,11 +232,11 @@ public class ShellExec {
 				dir = args[1];
 			case 1:
 				cmd = args[0].trim().split(" ");
-
 				break;
-			case 0:
-				System.err.println(String.format("Wrong number of args: %d", args.length));
+			//case 0:
 			default:
+				if (args.length != 0)
+					System.err.println(String.format("Wrong number of args: %d", args.length));
 				System.out.println(ShellExec.class.getCanonicalName());
 				System.out.println(String.format("Run shell executable in a given working dir (default: %s)", dir));
 				System.out.println("Usage:  <cmd>  [<dir>] [timeout]");
@@ -231,22 +245,8 @@ public class ShellExec {
 			return;
 		}
 
-		// ?? WHy instance
-		/*
-		ShellExec shellExec = null;
-		try {
-			// ??
-			shellExec = new ShellExec(cmd, dir);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		System.out.println(shellExec.toString());
 
-		 */
-
-
-		OutputReader reader; // = new OutputReader(System.out);
+		//OutputReader reader; // = new OutputReader(System.out);
 
 		final String logname = ShellExec.class.getSimpleName() + ".log";
 		System.out.println("# Writing log :" + logname);
@@ -256,23 +256,19 @@ public class ShellExec {
 		try {
 			logFile.createNewFile();
 			FileOutputStream fw = new FileOutputStream(logFile);
-			reader = new OutputReader(System.out, System.err);
+			OutputReader reader = new OutputReader(new PrintStream(fw), System.err);
+			Signal.handle(new Signal("INT"), ShellExec::handleInterrupt);
 			result = ShellExec.exec(cmd, null, Paths.get(dir), reader);
-			System.err.println("Done");
+			System.err.println(String.format("Done! Result=%d. Wrote '%s'", result, logname));
 		}
-		catch (Exception e) {
-			/*
-			System.err.print("Note: command ");
-			if 	(cmd.startsWith("./")){
-				System.err.print("starts");
-			}
-			else {
-				System.err.print("does not start");
-			}
-			System.err.println(" with './'");
-			*/
-			e.printStackTrace();
-			return;
+		catch (IOException e){
+			System.err.println(String.format("Oops, I/O error: %s", e.getMessage()));
+		}
+		catch (InterruptedException e){
+			System.err.println(String.format("Oops, interrupt: %s", e.getMessage()));
+		}
+		catch (TimeoutException e){
+			System.err.println(String.format("Oops, timeout: %s", e.getMessage()));
 		}
 
 

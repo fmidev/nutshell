@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.CharBuffer;
+import java.util.concurrent.TimeoutException;
 
 public class ShellUtils {
 
@@ -189,8 +190,10 @@ public class ShellUtils {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		
+
+		/**
+		 *  @see  @ShellExec:main
+		 */
 		if (args.length == 0){
 			System.out.println("Usage:   <command> [<params>]");
 			System.out.println("Example: ls . foo.bar");
@@ -220,7 +223,23 @@ public class ShellUtils {
 		};
 
 		//Process process = ShellExec.exec(args, env, directory.toPath(), handler);
-		int value = ShellExec.exec(args, env, directory.toPath(), handler);
+		int value = 0;
+		try {
+			//ShellExec.TIMEOUT_SEC = 5;
+			value = ShellExec.exec(args, env, directory.toPath(), handler);
+		}
+		catch (InterruptedException e) {
+			System.err.println(String.format("Interrupted: %s", e));
+			System.exit(1);
+		}
+		catch (IOException e) {
+			System.err.println(String.format("IO error: %s", e));
+			System.exit(2);
+		}
+		catch (TimeoutException e) {
+			System.err.println(String.format("Timeout: %s", e));
+			System.exit(3);
+		}
 
 		//read(process, handler);
 		// System.out.println("exit value: " + process.exitValue());
