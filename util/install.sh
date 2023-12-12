@@ -42,7 +42,17 @@ if [ -d $NUTSHELL_ROOT ]; then
     ls -dl $NUTSHELL_ROOT
 else
     mkdir -v --parent $NUTSHELL_ROOT
+    if [ $? != 0 ]; then
+	vt100echo red "Failed in creating NUTSHELL_ROOT=$NUTSHELL_ROOT"
+	exit 3
+    fi
 fi
+
+if [ ! -w $NUTSHELL_ROOT ]; then
+    vt100echo red "Cannot write to NUTSHELL_ROOT=$NUTSHELL_ROOT"
+    exit 4
+fi
+
 echo
 
 
