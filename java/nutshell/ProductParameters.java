@@ -13,6 +13,15 @@ import java.util.*;
  */
 public class ProductParameters { // consider derived classes, like DynamicProductParameters
 
+    /** The time resolution of a product (file) can be high, for example 5 minutes. Some products,
+     *  collecting statistics for example, can be generated once a month only.
+     *  Thus, time resolution of the product is important metadata to be stored. It is needed when the filename is
+     *  generated from the actual time.
+     *
+     *  When creating time-stamped directories – like cache and storage directories – the time resolution should
+     *  be lower than that of the products.
+     *
+     */
     public enum TimeResolution {
         INVALID(-1),
         UNKNOWN(0),
@@ -31,16 +40,6 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
             this.length = length;
             timeStampFormat = new SimpleDateFormat("");
             timeDirFormat   = new SimpleDateFormat("");
-            /*
-            if (length > 0) {
-                timeStampFormat = new SimpleDateFormat("yyyyMMddHHmm".substring(0, length));
-                timeDirFormat   = new SimpleDateFormat("");
-            }
-            else {
-                timeStampFormat = new SimpleDateFormat("");
-                timeDirFormat   = new SimpleDateFormat("");
-            }
-            */
         }
 
         TimeResolution(String tsFmt, String dirFmt){
@@ -49,15 +48,15 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
             timeDirFormat = new SimpleDateFormat(dirFmt);
         }
 
-            //protected
-        //static String fullFormat = "YYYmmddHHmm";
-
     }
+
     /** Data and time formatted as @timeStampFormat or "LATEST".
      */
     public String TIMESTAMP;
 
     /** Optional. Secondary time, if applicable.
+     *
+     * TODO: generalize: support multiple timestamps – as far as given as prefix
      */
     public String TIMESTAMP2;
 
@@ -72,9 +71,25 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     protected long time;
 
     /** Secondary time (like end time) of the product in Unix seconds.
-     *
+     *  TODO: generalize: support multiple timestamps – as far as given as prefix
      */
     protected long time2;
+
+    /** Experimental. Groups may be needed in future.
+     *
+     *  Consider: 201708121600_radar.rack.comp.map_CONF=FIN__COLORS=TEST.png
+     *
+     */
+    protected class ParameterContainer extends ArrayList<TreeMap<String,Object>> {
+
+        public TreeMap<String,Object> append(){
+            TreeMap<String,Object> m = new TreeMap<>();
+            super.add(m);
+            return m;
+        }
+    }
+
+    final protected ParameterContainer PARAMETER_CONTAINER = new ParameterContainer();
 
     /// Product-specific parameters
     /**
@@ -82,10 +97,10 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
      *
      * @see #INPUT_PARAMETERS
      */
-    final TreeMap<String,Object> PARAMETERS = new TreeMap<String, Object>();
+    final TreeMap<String,Object> PARAMETERS = PARAMETER_CONTAINER.append();
 
     /// Product-specific parameters that are also forwarded to (automated) input product request
-    final TreeMap<String,Object> INPUT_PARAMETERS = new TreeMap<String, Object>();
+    final TreeMap<String,Object> INPUT_PARAMETERS = PARAMETER_CONTAINER.append();
 
     // unused
     // public String postProcessingInfo;

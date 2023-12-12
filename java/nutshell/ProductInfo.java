@@ -40,6 +40,8 @@ class ProductInfo extends ProductParameters {
 	/// Directory part of #INPUT_PREFIX .
 	public String INPUT_PREFIX_DIR;
 
+	public String INPUT_TIMESTAMP = null;
+
 	/// Compression is a "special" filename segment, it is extracted first.
 	protected static final Pattern compressionRe = Pattern.compile("^(.*)\\.(zip|gz)$");
 
@@ -135,6 +137,14 @@ class ProductInfo extends ProductParameters {
 			COMPRESSION = "";
 		}
 
+		Path path = FileUtils.extractPath(filename);
+		//System.err.println(String.format("Path= %s", path));
+		Path parent = path.getParent();
+		if (parent != null){
+			System.err.println(String.format("Future extenstion: DIR=%s, discarding now...", parent));
+			filename = path.getFileName().toString();
+			System.err.println(String.format("Filename %s", filename));
+		}
 
 		/// Main parsing
 		final Matcher m = filenameRe.matcher(filename);
@@ -149,20 +159,7 @@ class ProductInfo extends ProductParameters {
 			time  = getTime(TIMESTAMP);
 			time2 = getTime(TIMESTAMP2);
 
-
-			/*
-			if (TIMESTAMP.isEmpty() || TIMESTAMP.equals("LATEST") || TIMESTAMP.equals("TIMESTAMP")) {
-				time = 0L;
-			} else {
-				time = timeStampFormat.parse(TIMESTAMP).getTime();
-			}
-
-			for (TimeResolution t: TimeResolution.values()){
-				if (TIMESTAMP.length() == t.length){
-					t.timeStampFormat.parse(TIMESTAMP).getTime();
-				}
-			}
-			 */
+			// INPUT_TIMESTAMP = null;
 
 
 			//PRODUCT_ID = m.group(3).replace('-', '.');
@@ -237,9 +234,10 @@ class ProductInfo extends ProductParameters {
 		return getFilename(TIMESTAMP);
 	}
 
-	/** Note: Here TIMESTAMP2 not supported yet
+	/**  Return filename without trailing extension (format).
+	 *   Note: Here TIMESTAMP2 not supported yet
 	 *
-	 * @return
+	 * @return filename without trailing extension (format).
 	 */
 	public String getBasename(String prefix, StringBuffer b) {
 
