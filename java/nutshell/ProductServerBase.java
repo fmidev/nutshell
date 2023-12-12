@@ -496,6 +496,55 @@ public class ProductServerBase extends Program {
         }
     }
 
+    public class SetPermissions extends SimpleFileVisitor<Path> {
+
+        // Print information about each type of file.
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
+            if (attr.isRegularFile() || attr.isSymbolicLink()) {
+                try {
+                    Files.setPosixFilePermissions(file, filePerms);
+                } catch (IOException e) {
+                    serverLog.warn(e.toString());
+                }
+            }
+            return CONTINUE;
+        }
+
+        // Print each directory visited.
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) {
+
+        //    public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+
+            // Prevent removing cacheRoot
+            // Todo: fix clearCache
+            if (dir.endsWith("cache"))
+                return CONTINUE;
+
+            try {
+                Files.setPosixFilePermissions(dir, dirPerms);
+                // server Log.debug(String.format("Delete dir: %s", dir));
+                // Files.delete(dir);
+            } catch (IOException e) {
+                serverLog.warn(e.toString());
+            }
+            return CONTINUE;
+        }
+
+        // If there is some error accessing
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException e) {
+            serverLog.warn(e.getMessage());
+            return CONTINUE;
+        }
+    }
+
+    /** Removes all the files and directories under $CACHE_ROOT
+     *
+     * @param confirm
+     * @throws IOException
+     */
     public void clearCache(boolean confirm) throws IOException {
 
         if (!this.CACHE_ROOT.endsWith("cache")){
@@ -522,6 +571,22 @@ public class ProductServerBase extends Program {
         }
 
         serverLog.note("Clearing cache: " + p);
+        Files.walkFileTree(p, new DeleteFiles());
+
+        serverLog.note("Clearing cache completed");
+        //Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
+
+    }
+
+    public void releaseCache() throws IOException {
+
+        Path p = this.CACHE_ROOT.toRealPath();
+        if (!p.endsWith("cache")){
+            throw new RuntimeException(String.format("Cache root does not end with 'cache': %s -> %s",
+                    this.CACHE_ROOT, p) );
+        }
+
+        serverLog.note("Setting write privileges to group in dir: " + p);
         Files.walkFileTree(p, new DeleteFiles());
 
         serverLog.note("Clearing cache completed");

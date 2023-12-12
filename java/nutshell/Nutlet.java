@@ -272,7 +272,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 
-		if (batch.instructions.makeLevelEquals(Instructions.MakeLevel.CLEAR_CACHE)) {
+		if (batch.instructions.makeLevelEquals(Instructions.MakeLevel.RELEASE_CACHE)) {
 
 			batch.instructions.setMakeLevel(Instructions.MakeLevel.NONE);
 			if (!batch.instructions.isEmpty()){
@@ -280,14 +280,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			try {
-				productServer.clearCache(false);
-				sendStatusPage(HttpServletResponse.SC_OK, "Cleared cache",
+				productServer.releaseCache();
+				sendStatusPage(HttpServletResponse.SC_OK, "Released cache files",
 						"OK", httpRequest, httpResponse);
 			} catch (IOException e) {
-				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), httpResponse);
+				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Releasing cache failed", e.getMessage(), httpResponse);
 			}
 			return;
-			
+
 		}
 
 
