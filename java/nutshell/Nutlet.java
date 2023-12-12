@@ -270,13 +270,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		*/
 
 
-		/*
 
-		if (batch.instructions.isSet(ActionType.CLEAR_CACHE)) {
 
-			batchConfig.instructions.remove(ActionType.CLEAR_CACHE);
-			if (!batchConfig.instructions.isEmpty()){
-				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", batchConfig.instructions) );
+		if (batch.instructions.makeLevelEquals(Instructions.MakeLevel.CLEAR_CACHE)) {
+
+			batch.instructions.setMakeLevel(Instructions.MakeLevel.NONE);
+			if (!batch.instructions.isEmpty()){
+				productServer.serverLog.warn(String.format("Discarding remaining instructions: %s", batch.instructions) );
 			}
 
 			try {
@@ -287,8 +287,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Clearing cache failed", e.getMessage(), httpResponse);
 			}
 			return;
+			
 		}
-			 */
 
 
 			//if (page.value.equals("catalog")){

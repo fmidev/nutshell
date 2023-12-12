@@ -7,6 +7,7 @@ import java.nio.file.*;
 //import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.text.ParseException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,6 +59,8 @@ public class FileUtils {
 
     /// Path that has an optional directory part and an obligatory filename with extension.
     /**
+     *  Matcher groups
+     *  0 = source string (convention)
      *  1 = optional directory
      *  2 = full filename (including  extension)
      *  2 = filename without extension
@@ -71,6 +74,11 @@ public class FileUtils {
             Pattern.CASE_INSENSITIVE);
 
     /// A path that ends with dir separator '/'.
+    /**
+     *   Matcher groups
+     *   # 0 - source string (convention)
+     *   # 1 -
+     */
     static
     // public final Pattern filePathRe = Pattern.compile("^([^/]*)((/\\w*)+/)(\\S+\\.[a-z0-9]+)?(\\W.*)?$",
     // +"^([a-z0-9_:\\.\\-]*/)?([a-z0-9_:\\.\\-\\=]+)(\\.[a-z0-9]+)?$"
@@ -79,24 +87,40 @@ public class FileUtils {
             Pattern.CASE_INSENSITIVE);
 
     static
-    public Path extractPath(String line){
+    public Path extractPath(String line) throws ParseException {
 
         Matcher m = qualifiedFilePathRe.matcher(line);
         if (m.matches()){
-            //System.out.printf("Matches, %d groups:%n", m.groupCount());
+
+            /*  // below
             for (int j = 0; j <= m.groupCount(); j++) {
                 System.out.printf("  %d ->  %s %n", j, m.group(j));
             }
-            // System.out.println(m);
-            // crop leading (0) and trailing (-1)
-            String dir  = m.group(1); // 2
-            String file = m.group(m.groupCount()-1);
+            */
 
-            if (file == null)
-                return Paths.get(dir);
-            else
+            String dir; // m.group(1); // 2
+            String file = null;
+            switch (m.groupCount()){
+                case 4:
+                case 3:
+                    file = m.group(2);
+                case 2:
+                    dir  = m.group(1); // 2
+                    break;
+                case 1:
+                default:
+                    for (int j = 0; j <= m.groupCount(); j++) {
+                        System.out.printf("  %d ->  %s %n", j, m.group(j));
+                    }
+                    throw new ParseException(String.format("Could not parse %s", line), 2);
+            }
+            if ((dir != null) && (!dir.equals(""))){
                 return Paths.get(dir, file);
-        }
+            }
+            else {
+                return Paths.get(file);
+            }
+       }
         return Paths.get("");
     };
 
@@ -440,7 +464,12 @@ public class FileUtils {
                                     System.out.printf("  %d: %s %n", j, m.group(j));
                                 }
                                 System.out.println(String.format("extractPath(%s):", arg));
-                                Path p = extractPath(arg);
+                                Path p = null;
+                                try {
+                                    p = extractPath(arg);
+                                } catch (ParseException e) {
+                                    System.err.println(String.format("Failed in parsing path: %s", arg));
+                                }
                                 System.out.println(p);
                             }
                             else {

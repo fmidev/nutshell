@@ -499,17 +499,17 @@ public class ProductServerBase extends Program {
     public void clearCache(boolean confirm) throws IOException {
 
         if (!this.CACHE_ROOT.endsWith("cache")){
-            throw new RuntimeException("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
+            throw new RuntimeException(String.format("Cache root does not end with 'cache': %s",  this.CACHE_ROOT) );
             //serverLog.error("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
-            //return;
+            // return;
         }
 
         Path p = this.CACHE_ROOT.toRealPath();
         if (!p.endsWith("cache")){
-            throw new RuntimeException("Cache root does not end with 'cache' : " + this.CACHE_ROOT);
-            // serverLog.error("Cache root does not end with 'cache' : " + p);
-            // return;
+            throw new RuntimeException(String.format("Cache root does not end with 'cache': %s -> %s",
+                    this.CACHE_ROOT, p) );
         }
+
 
         if (confirm){
             System.err.println(String.format("Delete files in %s ? ", p ));

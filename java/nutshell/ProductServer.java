@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import static java.nio.file.Files.*;
 
 
@@ -333,10 +335,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
-			//final String label = String.join("-", labelArray).replaceAll("[^\\w]", "_"); //
-
-					//this.instructions.set(instructions);
-			// this.instructions.makeLevel = defaultRemakeDepth;
 
 			// Relative
 			productDir = getProductDir(this.info.PRODUCT_ID);
@@ -532,6 +530,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public void run() {
 
 			try {
+				log.note("RUN..");
 				Signal.handle(new Signal("INT"), this::handleInterrupt);
 				execute();
 			} catch (InterruptedException e) {
@@ -909,7 +908,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						/// Override
 						log.setStatus(Log.Status.OK);
 						log.debug(String.format("OK, generator produced tmp file: %s", this.outputPathTmp));
-						serverLog.success(info.getFilename());
+						serverLog.success(String.format("generated: %s",  info.getFilename()));
 
 						// Let's take this slowly...
 						try {
@@ -1143,9 +1142,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.info(String.format("Duration %s (Timeout: %d)", durationFormat.format(duration), TIMEOUT));
 
 			if (instructions.isSet(Instructions.RUN)) {
-				ShellExec.OutputReader reader = new ShellExec.OutputReader(log.getPrintStream());
-				//ShellExec shellExec = new ShellExec(Paths.get("run.sh"), this.productDir);
-				ShellExec.exec("./run.sh", null, PRODUCT_ROOT.resolve(productDir), reader);
+				try {
+					ShellExec.OutputReader reader = new ShellExec.OutputReader(log.getPrintStream());
+					ShellExec.exec("./run.sh", null, PRODUCT_ROOT.resolve(productDir), reader);
+				}
+				catch (Exception e){
+					log.error(String.format("Failed: %s", e));
+				}
 
 			}
 
@@ -1327,8 +1330,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		log.info(String.format("Preparing %d tasks: %s", productCount, productRequests.keySet()));
-		log.info(String.format("Instructions: %s, Directives: %s ",
-				instructions, directives));
+		log.debug(String.format("Instructions: %s, Directives: %s ", instructions, directives));
 		/*
 		log.info(String.format("Instructions: %s (depth: %d), Directives: %s ",
 				instructions, instructions.regenerateDepth, directives));
@@ -1407,7 +1409,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				log.info(String.format("Prepared task: %s= %s", key, task));  //, task.instructions
 				if ((directives != null) && !directives.isEmpty())
-					log.info(String.format("Directives: %s = %s", key, directives));
+					log.debug(String.format("Directives (final): %s = %s", key, directives));
 
 				//log.info(task.toString());
 
@@ -1653,7 +1655,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					}
 				};
 
-				int result = ShellExec.exec(killCmd, null, null, handler);
+				int result = 0;
+				try {
+					result = ShellExec.exec(killCmd, null, null, handler);
+				} catch (IOException | InterruptedException | TimeoutException e) {
+					//throw new RuntimeException(e);
+					serverLog.error(String.format("%s failed: %s", getName(), e.getMessage()));
+					return;
+				}
 
 				serverLog.special("Return code: " + result);
 
