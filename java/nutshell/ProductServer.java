@@ -54,7 +54,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	// TODO: Handle missing Dot
 
 	public String getVersion(){
-		return "3.61";
+		return "3.62";
 	}
 
 	ProductServer() {
@@ -811,15 +811,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						inputInstructions.setMakeLevel(instructions.makeLevel - 1);
 					}
 
-
-					/*
-					if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) {
-						inputInstructions.setMakeLevel(instructions.makeLevel - 1);
-					} else {
-						inputInstructions.setMakeLevel(Instructions.MakeLevel.NONE);
-					}
-					 */
-
 					if (instructions.isSet(Instructions.INPUTLIST)) {
 						inputInstructions.add(ActionType.INPUTLIST);
 					}
@@ -829,29 +820,30 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						inputInstructions.add(ActionType.PARALLEL);
 					}
 
-
-					//log.experimental(String.format("Input retrieval depth: %d",
-					//		inputInstructions.makeLevel));
+					// log.experimental(String.format("Input retrieval depth: %d",
+					// inputInstructions.makeLevel));
 
 					log.special(String.format("Input instructions: %s", inputInstructions));
 
 					// Ok - forwarding directives?
 					// FIX: WHY repeated inputTasks <--> this.inputTasks
-					Map<String, Task> inputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
+					Map<String, Task> tentativeInputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
 
-					serverLog.debug("runTasks:" + inputTasks.keySet());
-					runTasks(inputTasks, log);
+					serverLog.debug("runTasks:" + tentativeInputTasks.keySet());
+					runTasks(tentativeInputTasks, log);
 
 
-					for (Entry<String, Task> entry : inputTasks.entrySet()) {
+					for (Entry<String, Task> entry : tentativeInputTasks.entrySet()) {
 						String key = entry.getKey();
 						Task inputTask = entry.getValue();
 
-						this.inputTasks.put(key, inputTask);
+						//this.inputTasks.put(key, inputTask);
 						// FIX: check unneeded errors if only INPUTLIST requested
 						if (inputTask.result != null) {
 							log.ok(String.format("Retrieved: %s = %s [%s]",
 									key, inputTask.result, inputTask.result.getClass().getSimpleName()));
+
+							this.inputTasks.put(key, inputTask);
 
 							if (inputTask.log.indexedState.index >= 400) {
 								log.warn(String.format("Errors for input of %s: %s", key, inputTask.log.indexedState.getMessage()));
@@ -865,7 +857,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						}
 					}
 
-					for (Task inputTask : inputTasks.values()) {
+					for (Task inputTask : tentativeInputTasks.values()) {
 						inputTask.close();
 					}
 
@@ -1457,7 +1449,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		log.note(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 		//log.debug(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 
-		/// Start as threads, if requested
+		/// Start as threads, if PARALLEL requested
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
 			Task task = entry.getValue();
