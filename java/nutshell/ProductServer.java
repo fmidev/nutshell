@@ -475,6 +475,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @throws IOException if linking fails
 		 */
 		public Path link(Path src, Path dst, boolean force) throws IOException {
+
 			log.note(String.format("Link: from: %s ", src));
 			log.note(String.format("        to: %s ", dst));
 
@@ -495,8 +496,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 
 				if (Files.isSameFile(src, dst)) {
-					log.debug(String.format("src (file)", src));
-					log.debug(String.format("dst (link)", src));
+					//log.debug(String.format("src (file)", src));
+					//log.debug(String.format("dst (link)", src));
 					log.note("Link exists, pointing to src");
 					if (!force) {
 						return dst;
@@ -1035,7 +1036,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								this.link(this.outputPath, dir.resolve(this.info.getFilename("LATEST")), true);
 								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
-								log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking to LATEST failed: ", e.getMessage()));
+								log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking to LATEST failed: %s", e.getMessage()));
 							}
 						} else
 							log.debug("Static product (no TIMESTAMP), skipped shortcut");
