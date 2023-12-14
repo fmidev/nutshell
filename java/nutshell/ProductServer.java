@@ -341,6 +341,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			// timeStampDir = getTimestampDir(this.info.time);
 			timeStampDir = this.info.getTimeStampDir();
+			if (this.info.isDynamic()){
+
+			}
 			// this.info.TIMESTAMP
 			relativeOutputDir = timeStampDir.resolve(this.productDir);
 
@@ -425,10 +428,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 */
 		@Override
 		public String toString() {
-			if (this.info.directives.isEmpty())
+			if (this.info.getDirectives().isEmpty())
 				return String.format("%s # %s", this.filename, instructions);
 			else
-				return String.format("%s?%s # %s", this.filename, info.directives, instructions);
+				return String.format("%s?%s # %s", this.filename, info.getDirectives(), instructions);
 		}
 
 		public String getStatus() {
@@ -835,7 +838,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 					// Ok - forwarding directives?
 					// FIX: WHY repeated inputTasks <--> this.inputTasks
-					Map<String, Task> tentativeInputTasks = prepareTasks(this.inputs, inputInstructions, info.directives, log);
+					Map<String, Task> tentativeInputTasks = prepareTasks(
+							this.inputs, inputInstructions, info.getDirectives(), log);
 
 					serverLog.debug("runTasks:" + tentativeInputTasks.keySet());
 					runTasks(tentativeInputTasks, log);
@@ -1266,7 +1270,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			/// Could warn, if overrides input variables.
 			this.info.getParamEnv(env);
 
-			env.putAll(this.info.directives); // may override input_prefix
+			env.putAll(this.info.getDirectives()); // may override input_prefix
 
 			return env;
 		}

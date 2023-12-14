@@ -56,11 +56,14 @@ class ProductInfo extends ProductParameters {
 			// BASENAMED Pattern.compile("^(((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?)\\.([a-z][a-z0-9]*)$");
 			// Python: re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
 
-
 	/** Additional parameters forwarded directly to product generator.
 	 *
 	 */
-	public final Map<String,String> directives = new HashMap<>();
+	private final Map<String,String> directives = new HashMap<>();
+
+	public Map<String, String> getDirectives() {
+		return directives;
+	}
 
 	/**
 	 *

@@ -23,8 +23,9 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
      *
      */
     public enum TimeResolution {
-        INVALID(-1),
-        UNKNOWN(0),
+        // INVALID(0), //-1),
+        //UNKNOWN(0),
+        UNKNOWN(),
         YEAR("yyyy", "yyyy"),
         MONTH("yyyyMM", "yyyy"),
         DAY("yyyyMMdd", "yyyy/MM"),
@@ -36,10 +37,16 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
         final DateFormat timeStampFormat;
         final DateFormat timeDirFormat;
 
+        /*
         TimeResolution(int length){
             this.length = length;
             timeStampFormat = new SimpleDateFormat("");
             timeDirFormat   = new SimpleDateFormat("");
+        }
+        */
+
+        TimeResolution(){
+            this("","");
         }
 
         TimeResolution(String tsFmt, String dirFmt){
@@ -131,7 +138,9 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
             //final DateFormat timeStampFormat = new SimpleDateFormat("YYYYmmddHHMM");
             // return timeStampFormat.parse(timestamp).getTime();
         }
-        return TimeResolution.INVALID; // error!
+        throw new ParseException(String.format("Could not parse timestamp '%s'", timestamp), 0);
+        //return TimeResolution.UNKNOWN; // error!
+        //return TimeResolution.INVALID; // error!
     }
 
     static
@@ -139,8 +148,8 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
 
         //TimeResolution timeResolution = getTimeResolution(timestamp);
         switch (timeResolution){
-            case INVALID: // consider hiding ParseException here?
-                return -1L;
+            // case INVALID: // consider hiding ParseException here?
+            //     return -1L;
             case UNKNOWN:
                 return 0L;
             default:

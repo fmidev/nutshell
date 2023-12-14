@@ -461,7 +461,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		String[] directives = httpRequest.getParameterValues("directives");
 		if ((directives != null) && (directives.length > 0)){ // Null check needed
-			MapUtils.setEntries(directives, "True", task.info.directives);
+			MapUtils.setEntries(directives, "True", task.info.getDirectives());
 		}
 		// TODO: check usage / wrong usage
 		task.info.setDirectives(httpRequest.getParameterMap());
@@ -709,7 +709,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// map.put("actions", batch.instructions);
 			// task.info.directives.put("TEST", "value");
 			map.put("instructions", batch.instructions);
-			map.put("directives", task.info.directives);
+			map.put("directives", task.info.getDirectives());
 
 
 			html.appendTable(map, "Product generator");
@@ -821,7 +821,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 	/**
-	 * @param args
+	 * @param args - command line arguments
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
