@@ -651,7 +651,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						//graphElem.appendChild(graphSvg.getDocumentElement());
 						graphElem.setAttribute("title", task.info.PRODUCT_ID);
 						graphElem.setAttribute("id", "graph");
-						// task.log.warn("Appending SVG element");
+						//   task.log.warn("Appending SVG element");
 						html.appendElement(graphElem);
 					}
 					catch (Exception e){
