@@ -198,6 +198,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 	ls -l   $NUTSHELL_XML
 	vt100echo yellow "# WARNING: writing a draft to:   $NUTSHELL_XML_NEW"
 	vt100echo yellow "# Consider: diff $NUTSHELL_XML  $NUTSHELL_XML_NEW"
+	cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML_NEW
 	NUTSHELL_XML=$NUTSHELL_XML_NEW
     fi
 
