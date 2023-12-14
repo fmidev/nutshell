@@ -636,14 +636,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						graphElem.setAttribute("border", "1");
 						//graphElem.setAttribute("onclick", "alert('Not implemented')");
 						graphElem.setAttribute("title", task.relativeGraphPath.getFileName().toString());
-						//html.appendTag(SimpleHtml.Tag.PRE, graphPath.toString());
 
+						// For some reason, this does not work. Or it was not clickable...
 						// graphElem.setAttribute("src", relativeGraphPath.toString());
+						// html.appendTag(SimpleHtml.Tag.PRE, graphPath.toString());
 
 						task.log.debug(String.format("Reading SVG file %s", graphPath));
 						Document graphSvg = SimpleXML.readDocument(graphPath);
 
-						//SimpleXML.createDocument().
 						task.log.debug("Importing and appending XML elem");
 						Node node = html.document.importNode(graphSvg.getDocumentElement(), true);
 						//task.log.warn("Appending XML (SVG) node to EMBED elem");
@@ -656,31 +656,35 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					}
 					catch (Exception e){
 
-						Element span = html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating CLICKABLE graph: ");
+						//Element span =
+						html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating the process graph: ");
 						html.appendAnchor("cache/"+task.relativeGraphPath, task.relativeGraphPath.getFileName().toString());
-
 						html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
 						// Comments! Consider tail?
+
+						/*  KEEP THIS, for debugging TODO: conditional on debug level?
 						try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 							PrintStream printStream = new PrintStream(os);
 							Graph graph = task.getGraph(null);
 							graph.toStream(printStream);
 							printStream.append("--------------");
-							e.printStackTrace(printStream);
+							// e.printStackTrace(printStream);
 							// html.appendComment(os.toString("UTF8")); ILLEGALS
 							//html.appendComment(" TEST ");
 							html.appendTag(SimpleHtml.Tag.PRE, os.toString("UTF8"));
 							printStream.close();
 							//os.close();
 						}
+						 */
 
 						//Element graphElem = html.createElement(SimpleHtml.Tag.EMBED);
+						/*
 						Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
 						graphElem.setAttribute("type", "image/svg+xml");
 						graphElem.setAttribute("border", "1");
 						graphElem.setAttribute("src", "cache/"+task.relativeGraphPath.toString());
 						html.appendElement(graphElem);
-
+						*/
 					}
 					Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
 					map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
@@ -735,9 +739,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			embed.setAttribute("type", "text/html");
 			embed.setAttribute("src", Paths.get("cache").resolve(task.relativeLogPath).toString());
 			embed.setAttribute("width", "100%");
-			embed.setAttribute("height", "300");
+			embed.setAttribute("height", "400");
 			embed.setAttribute("class", "code"); // Has no effect?
-			embed.setAttribute("style", "outline: 2px dotted"); // Has no effect?
+			embed.setAttribute("style", "outline: 2px"); // Has no effect?
 			/*
 			html.appendTag(SimpleHtml.Tag.H3, "Task log");
 			StringBuilder builder = new StringBuilder();
