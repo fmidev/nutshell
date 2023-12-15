@@ -54,7 +54,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	// TODO: Handle missing Dot
 
 	public String getVersion(){
-		return "3.62";
+		return "3.63";
 	}
 
 	ProductServer() {
@@ -793,7 +793,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
 
-				log.reset(); // Forget old sins
+				log.resetState(); // Forget old sins
 
 				// Mark this task being processed (empty file)
 				try {
@@ -865,13 +865,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						} else {
 							log.warn(inputTask.log.indexedState.getMessage());
 							log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Retrieval failed: %s=%s", key, inputTask));
-							log.reset(); // Forget that anyway...
+							log.resetState(); // Forget that anyway...
+							inputTask.close();
 						}
 					}
 
+					/*
 					for (Task inputTask : tentativeInputTasks.values()) {
 						inputTask.close();
 					}
+					*/
 
 				}
 
@@ -983,7 +986,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					if (fileFinal.exists())
 						log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Deleting failed: %s (%d bytes)", fileFinal, fileFinal.length()));
 					else {
-						log.reset();
+						log.resetState();
 						log.log(HttpLog.HttpStatus.ACCEPTED, String.format("File does not exist: %s", fileFinal)); // Consider storing last messages in LOG? See HttpLog.indexedState
 						//log.ok("Deleted."); // Consider storing last messages in LOG? See HttpLog.indexedState
 						// System.err.println("DELE: " + log.indexedState.getMessage());
@@ -1060,7 +1063,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 								log.experimental(String.format("Stored in: %s", storedFile));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
-								log.reset();
+								log.resetState();
 								log.fail(String.format("Store: %s", storedFile));
 							}
 						}
@@ -1511,7 +1514,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			} else if (task.instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
 				log.warn(state.getMessage());
 				log.log(HttpLog.HttpStatus.PRECONDITION_FAILED, String.format("Task [%s] failed: %s", key, task));
-				log.reset(); // Forget that anyway...
+				log.resetState(); // Forget that anyway...
 			}
 
 		}
@@ -1854,7 +1857,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			@Override
 			public void exec() {
 				//System.err.print(String.format("Type: %s %s", value.getClass(), value));
-				MapUtils.setEntries(value,"\\|", "true", batch.directives);
+				MapUtils.addEntries(value,"\\|", "true", batch.directives);
 			}
 		});
 
@@ -2150,7 +2153,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			 */
 
-			task.close();
+			// task.close(); // Don't close! Task is a reference...
 		}
 
 		if (batch.instructions.isSet(OutputType.STATUS)){

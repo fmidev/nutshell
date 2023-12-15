@@ -1,6 +1,5 @@
 package nutshell;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +75,7 @@ public class HttpLog extends Log {
 
     public HttpLog(String simpleName) {
         super(simpleName);
-        reset();
+        resetState();
     }
 
     /** Create a log with a name prefixed with the name of a existing log.
@@ -92,7 +91,7 @@ public class HttpLog extends Log {
 	public HttpLog(String name, int verbosity) {
         //super(simpleName, mainLog);
         super(name, verbosity, 5);
-        reset();
+        resetState();
     }
 
     /** Converts HTTP error code as defined in #handleHttpMsg(int, String)
@@ -145,7 +144,7 @@ public class HttpLog extends Log {
     //static final IndexedException defaultException = new IndexedException(HttpServletResponse.SC_CONTINUE, "Ok");
     static final IndexedState defaultException = new IndexedState(HttpStatus.CONTINUE, "Ok");
 
-    void reset() {
+    void resetState() {
         this.indexedState = defaultException;
     }
 
