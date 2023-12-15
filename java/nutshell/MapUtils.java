@@ -1,10 +1,7 @@
 package nutshell;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -160,15 +157,15 @@ public class MapUtils {
 	 * @return map
 	 */
 	static
-	public Map<String,String> setEntries(String entries, String separatorRegExp, String defaultValue, Map<String,String> map){
+	public Map<String,String> addEntries(String entries, String separatorRegExp, String defaultValue, Map<String,String> map){
 		if (entries != null)
-			return setEntries(entries.split(separatorRegExp), defaultValue, map);
+			return addEntries(entries.split(separatorRegExp), defaultValue, map);
 		else
 			return map;
 	}
 
-	static
-	public Map<String,String> setEntries(String[] entries, String defaultValue, Map<String,String> map){
+	static //
+	public Map<String,String> addEntries(String[] entries, String defaultValue, Map<String,String> map){
 
 		if (entries != null){
 

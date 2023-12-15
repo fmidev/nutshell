@@ -461,7 +461,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		String[] directives = httpRequest.getParameterValues("directives");
 		if ((directives != null) && (directives.length > 0)){ // Null check needed
-			MapUtils.setEntries(directives, "True", task.info.getDirectives());
+			MapUtils.addEntries(directives, "True", task.info.getDirectives());
 		}
 		// TODO: check usage / wrong usage
 		task.info.setDirectives(httpRequest.getParameterMap());

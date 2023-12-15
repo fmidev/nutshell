@@ -72,7 +72,7 @@ class ProductInfo extends ProductParameters {
 	 * @return
 	 */
 	public Map<String,String> setDirectives(String s, String separator){
-		MapUtils.setEntries(s, separator, "true", directives);
+		MapUtils.addEntries(s, separator, "true", directives);
 		return directives;
 	}
 
@@ -89,8 +89,10 @@ class ProductInfo extends ProductParameters {
 	/** Imports map to directives map, converting array values to comma-separated strings.
 	 *
 	 * @param map
+	 *
+	 * Map<String,String>
 	 */
-	public <T> Map<String,String> setDirectives(Map<String,T> map){
+	public <T> void setDirectives(Map<String,T> map){
 
 		if (map != null) {
 			for (Map.Entry<String, T> entry : map.entrySet()) { //parameters.entrySet()) {
@@ -116,7 +118,7 @@ class ProductInfo extends ProductParameters {
 			}
 		}
 
-		return directives;
+		//return directives;
 	}
 
 
