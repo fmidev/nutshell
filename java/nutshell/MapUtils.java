@@ -57,8 +57,9 @@ public class MapUtils {
 	 * 
 	 * @param line
 	 * @param map
+	 * @return true, if parsing was successful.
 	 */
-	static public <V> void parse(String line, Map<String,V> map){
+	static public <V> boolean parseLine(String line, Map<String,V> map){
 		
 		Matcher matcher = linePattern.matcher(line);
 		
@@ -66,9 +67,10 @@ public class MapUtils {
 			String key = matcher.group(1).trim();
 			String value = matcher.group(2).trim();
 			map.put(key, (V)value);
-
+			return true;
 		}
-		
+		return false;
+
 	}
 
 	/** Parses and stores an expression containing a command or variable assignment 
@@ -76,10 +78,10 @@ public class MapUtils {
 	 * @param lines
 	 * @param map
 	 */
-	static public <V> void parse(String[] lines, Map<String,V> map){
+	static public <V> void parseLine(String[] lines, Map<String,V> map){
 		
 		for (String line : lines) {
-			parse(line, map);
+			parseLine(line, map);
 		}
 		
 	}
@@ -132,7 +134,7 @@ public class MapUtils {
 			if (m.matches())
 				line = m.group(1);
 			
-			parse(line, map);
+			parseLine(line, map);
 			
 		}
 	
@@ -143,7 +145,7 @@ public class MapUtils {
 	 */
 	static public <V> void read(String [] args, Map<String,V> map){
 		for (String s : args) {
-			parse(s, map);
+			parseLine(s, map);
 		}
 	}
 

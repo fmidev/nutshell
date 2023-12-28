@@ -3,7 +3,6 @@ package nutshell;
  *  @author Markus.Peura@fmi.fi
  */
 
-import javax.print.DocFlavor;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Path;
@@ -143,7 +142,10 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 			@Override
 			public void handleStdOut(String line) {
 				this.lastLineOut = line;
-				MapUtils.parse(line, result);
+				if (MapUtils.parseLine(line, result))
+					errorLog.ok(String.format("[input]: %s", line));
+				else
+					errorLog.debug(String.format("[input]: %s", line));
 			}
 
 		};

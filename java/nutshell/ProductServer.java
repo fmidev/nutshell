@@ -1268,6 +1268,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					this.info.INPUT_PREFIX_DIR = this.info.INPUT_PREFIX.substring(0, lastDirSepIndex);
 
 				}
+				else {
+					this.info.INPUT_PREFIX = "";
+				}
 			}
 
 			/// Could warn, if overrides input variables.
@@ -1289,6 +1292,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			Path graphFile = CACHE_ROOT.resolve(relativeGraphPath);
 			log.special(String.format("Writing graph to file: %s", graphFile));
 			Graph graph = this.getGraph(null);
+			//graph.graphProto.attributes.put("size", "24,20");
+			graph.nodeProto.attributes.put("shape", "record");
 			try {
 				Path graphDir = graphFile.getParent();
 				FileUtils.ensureWritableDir(graphDir, GROUP_ID, dirPerms);

@@ -3,6 +3,7 @@ package nutshell;
 
 import com.sun.istack.internal.NotNull;
 
+import javax.xml.bind.Element;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,6 +11,13 @@ import java.util.*;
 
 
 class Entity {
+
+    Entity(){
+    }
+
+    Entity(String name){
+        setName(name);
+    }
 
     // final
     String id; // = "?";
@@ -57,21 +65,36 @@ class Entity {
     void attributesToStream(PrintStream stream){
         if (!attributes.isEmpty()){
             stream.append('[');
+            String separator = "";
             for (Map.Entry<String, Object> entry: attributes.entrySet()) {
+                stream.append(separator);
                 stream.append(entry.getKey()).append('=').append('"').append(entry.getValue().toString()).append('"');
-                stream.append(", ");
+                separator = ", ";
             }
             stream.append(']');
         }
     }
+
+    /// Default implementation.
+    void toStream(PrintStream stream){
+        stream.append("  ").append(getId()).append(' ');
+        attributesToStream(stream);
+        stream.append(';');
+        stream.println();
+    }
+
 
 }
 
 public class Graph extends Entity {
 
     Graph(String name){
-        // System.err.println("TAAS LUOTIIN " + name);
-        setName(name);
+        super(name);
+        // System.err.println("Created: " + name);
+        nodeProto = new Node("node");
+        graphProto = new Entity("graph");
+        graphProto.attributes = attributes;
+        //setName(name);
     }
 
     //String styleSheet = "";
@@ -86,15 +109,18 @@ public class Graph extends Entity {
         */
 
         protected Node(String name){
-            setName(name);
+            super(name);
+            //setName(name);
         }
 
+        /*
         void toStream(PrintStream stream){
             stream.append("  ").append(getId()).append(' ');
             attributesToStream(stream);
             stream.append(';');
             stream.println();
         }
+         */
 
         public class Link extends Entity {
 
@@ -263,12 +289,25 @@ public class Graph extends Entity {
          */
     }
 
+    final public Node nodeProto; // = new Node("node");
+    final public Entity graphProto; // = new Entity("graph");
 
     void toStream(PrintStream stream){
 
         stream.append("digraph ").append(id);
         stream.println(" {");
         stream.println();
+
+        if (this.graphProto != null){
+            graphProto.toStream(stream);
+            stream.println();
+        }
+
+        if (this.nodeProto != null){
+            nodeProto.toStream(stream);
+            stream.println();
+        }
+        // /opt/products/radar/class/graph/target-taxonomy.dot
 
         for (Map.Entry<String,Node> entry: nodes.entrySet()){
             Node n = entry.getValue();
