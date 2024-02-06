@@ -22,6 +22,16 @@ import org.w3c.dom.Node;
 
 public class Nutlet extends NutWeb { //HttpServlet {
 
+	protected SimpleHtml getHtmlPage(){
+		SimpleHtml html = super.getHtmlPage();
+
+		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
+		elem.setTextContent(String.format("NutLet (%s), Java Version (%s) root=%s template=%s",
+				version, getClass().getSimpleName(), HTTP_ROOT, HTML_TEMPLATE));
+		return html;
+	}
+
+
 	//static
 	public class Tasklet implements SimpleHtml.Nodifiable {
 
@@ -159,7 +169,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	public void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException, ServletException
 	{
 
-		String page = "menu.html";
+		//String page = "menu.html";
+		String page = "";
 		//String product = "";
 
 		// Yes, create for each httpRequest
@@ -378,15 +389,20 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				return;
 			}
 
+			//page = "resolve";
 		}
 
 		/// Respond with an HTML page, if query contains no product request
-		if (batch.products.isEmpty()){ // redesign ?
+		if (batch.products.isEmpty()){ // redesign ?  || || !page.isEmpty()
 
 			if (page.isEmpty()){
+				/*
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "NutLet request not understood",
 								String.format("Query: %s", httpRequest.getQueryString()), httpRequest, httpResponse);
-						return;
+				return;
+
+				 */
+				page = "menu.html";
 			}
 
 			/**  TODO: rename main.html to sth like layout.html or template.html

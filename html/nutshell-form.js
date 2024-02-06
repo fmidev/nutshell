@@ -34,7 +34,7 @@ function populateSelect(text, params){
     //console.debug(text)
     var json = JSON.parse(text)
     // console.info(json)
-    //console.warn(params)
+    // console.warn(params)
     console.info("Adding products in menu")
 
     const ARRAY = Array.isArray(json)
@@ -52,9 +52,27 @@ function populateSelect(text, params){
     }
 }
 
+function nutweb_body(){
 
-function nutshell_body(){
-    const filename = "product-examples.json"
-    console.info("Reading " + filename)
-    readFile(filename+'?'+Date.now(), populateSelect, ["test", 1, "test2", 2 ] )
+    // Modern browsers should support
+    if (URLSearchParams){
+	var params = new URLSearchParams(document.location.search)
+	// console.info(params)
+	product.value = params.get('product')
+    }
+
+    if (product.value){
+	//console.info(p)
+	STATUS.checked = true 
+    }
+    else {
+	const filename = "product-examples.json"
+	console.info("Reading " + filename)
+	readFile(filename+'?'+Date.now(), populateSelect, ["test", 1, "test2", 2 ] )
+    }
+    
+    
+    
 }
+
+// console.warn("Completed form.js")

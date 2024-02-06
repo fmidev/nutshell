@@ -53,6 +53,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	// TODO: Handle missing Dot
 
+	//static
 	public String getVersion(){
 		return "3.63";
 	}

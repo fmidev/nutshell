@@ -261,8 +261,12 @@ public class NutWeb extends HttpServlet {
 			html.appendTag(SimpleHtml.Tag.PRE, "Error: could not set 'main' element");
 		}
 
+		/*
 		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
-		elem.setTextContent(String.format("Java Version (%s) root=%s template=%s", getClass().getSimpleName(), HTTP_ROOT, HTML_TEMPLATE));
+		elem.setTextContent(String.format("NutShell (%s), Java Version (%s) root=%s template=%s",
+				getClass().getSimpleName(), HTTP_ROOT, HTML_TEMPLATE));
+
+		 */
 		return html;
 	}
 
