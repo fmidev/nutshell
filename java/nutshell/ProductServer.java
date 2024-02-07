@@ -1342,14 +1342,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			return tasks;
 		}
 
-		log.info(String.format("Preparing %d tasks: %s", productCount, productRequests.keySet()));
-		log.debug(String.format("Instructions: %s, Directives: %s ", instructions, directives));
+		//log.info(String.format("Preparing %d tasks: %s", productCount, productRequests.keySet()));
+		log.info(String.format("Preparing %d tasks, Instructions: %s, Directives: %s ", productCount, instructions, directives));
 		/*
 		log.info(String.format("Instructions: %s (depth: %d), Directives: %s ",
 				instructions, instructions.regenerateDepth, directives));
 		 */
 
 		final boolean MULTIPLE = (productCount > 1);
+		if (MULTIPLE){ // and parallel
+			// log.special("parallel");
+			//
+		}
 
 		/// Check COPY & LINK targets: must be directories, if several tasks (several files produced)
 		for (String path : instructions.copies) {
@@ -1420,16 +1424,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				 */
 
-				log.info(String.format("Prepared task: %s= %s", key, task));  //, task.instructions
+				log.info(String.format("[%s] Task %s", key, task));  //, task.instructions
 				if ((directives != null) && !directives.isEmpty())
-					log.debug(String.format("Directives (final): %s = %s", key, directives));
+					log.debug(String.format("[%s] Directives (final): %s", key, directives));
 
 				//log.info(task.toString());
 
 				task.log.setVerbosity(log.getVerbosity());
 				// task.log.decoration.set(Log.OutputFormat.COLOUR);
 				if (task.log.logFile != null) {
-					log.note(String.format("Log for '%s': %s", key, task.log.logFile));
+					log.note(String.format("[%s] Log: %s", key, task.log.logFile));
 				}
 
 				tasks.put(key, task);
