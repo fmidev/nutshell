@@ -55,7 +55,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	//static
 	public String getVersion(){
-		return "3.63";
+		return "3.7";
 	}
 
 	ProductServer() {
@@ -1126,23 +1126,33 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						if (dir.exists()) {
 							log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
 							// NEW! Empty the dir
+							Files.walkFileTree(this.outputDirTmp, new FileUtils.MoveDir(this.outputDirTmp, this.outputDir));
+							/*
 							for (File file: dir.listFiles()){
 								// if (file.isFile() || file.isDirectory())
 								if (file.isFile()){
 									this.move(file.toPath(), this.outputDir);
 								}
+								else if (file.isDirectory()){
+									log.special("Moving dir " + file.toPath());
+									// In future, if this works, can do the whole thing...
+									//Files.walkFileTree(file.toPath(), new FileUtils.MoveDir(file.toPath(), this.outputDir));
+									// Files.move(file.toPath(), this.outputDir, StandardCopyOption.REPLACE_EXISTING);
+								}
 								else {
-									log.warn("Moving-non-file " + file.toPath());
-
+									log.warn("Not knowing how to handle " + file.toPath());
 								}
 								// Move dirs as well
 								// Consider try-catch block here, and just collect errors?
 
 							}
 							Files.delete(this.outputDirTmp);
+							*/
+
 						}
 					} catch (IOException e) {
-						log.warn(e.getMessage());
+						e.printStackTrace(log.getPrintStream());
+						log.warn("Move failed: " + e.getMessage());
 						log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Failed in removing tmp dir %s", this.outputDirTmp));
 					}
 

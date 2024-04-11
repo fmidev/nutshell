@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 //import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ public class FileUtils {
         int OWNER = USER | GROUP | OTHERS;
     }
 
+    /*  Future extension (explain)
     interface Permission {
         int READ  = getBit();
         int WRITE = getBit();
@@ -42,6 +44,7 @@ public class FileUtils {
     class Status implements Owner, Permission {
         // ..
     }
+     */
 
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+)(/[^/]*)$");
     //public final Pattern filePathRe = Pattern.compile("^([^/]*)((/[\\w]*)+/)([\\w]+\\.[a-z]{1,4})?(\\W[^/]*)?$",
@@ -367,6 +370,79 @@ public class FileUtils {
 
     }
 
+    public static class MoveDir extends SimpleFileVisitor<Path> {
+
+        final public Path src;
+        final public Path dst;
+
+        /**
+         *
+         * @param src - leading part of path that will be stripped (relativized)
+         * @param dst - target dir - will be created in does not exist.
+         * @throws IOException
+         */
+        MoveDir(Path src, Path dst) throws IOException {
+            this.src = src;
+            this.dst = dst;
+            // Files.createDirectory(dst);
+        }
+        @Override
+
+        public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+
+            System.out.println(String.format("Visiting %s ", path));
+
+            //Path dstCurrent = dst.resolve(path.relativize(src).normalize());
+            //Path dstCurrent = dst.resolve(src.relativize(path));
+
+            for (File file: path.toFile().listFiles()){
+                Path p = file.toPath();
+                Path d = dst.resolve(src.relativize(p));
+                if (file.isDirectory()){
+                    //Path dirPath = file.toPath();
+                    System.out.println(String.format("MkDir %s ", d));
+                    Files.createDirectories(d); // Attribs!
+                    //dstCurrent.resolve(file.toPath()).toFile().createNewFile();
+                }
+                else {
+                    System.out.println(String.format("Move %s -> %s", file, d));
+                    //Files.move(file.toPath(), d, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    Files.move(file.toPath(), d, StandardCopyOption.REPLACE_EXISTING);
+                }
+                // Catch STOP
+            }
+
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+
+            System.out.println(String.format("RmDir %s", path));
+            /*
+            System.out.println(String.format("Visiting %s ", path));
+            for (File file: path.toFile().listFiles()) {
+                if (file.isDirectory()) {
+                    // Path dirPath = file.toPath();
+
+                }
+
+            }
+            */
+            Files.deleteIfExists(path);
+            /*
+            try {
+                Files.deleteIfExists(path);
+            }
+            catch (IOException e){
+
+            }
+            */
+
+            return FileVisitResult.CONTINUE;
+        }
+    }
+
     public static void main(String[] args) {
 
         if (args.length == 0){
@@ -431,8 +507,14 @@ public class FileUtils {
                         //Path startingDir = Paths.get(args[++i]);
                         //DeleteFiles pf = new DeleteFiles();
                         //Files.walkFileTree(startingDir, pf);
-                        break;
+                        }
+                    break;
+                    case "--move": {
+                        Path srcDir = Paths.get(args[++i]);
+                        Path dstDir = Paths.get(args[++i]);
+                        Files.walkFileTree(srcDir, new MoveDir(srcDir, dstDir));
                     }
+                    break;
                     case "--status":
                         System.out.println(String.format("prefix:\t%s", prefix));
                         System.out.println(String.format("dirPerms:\t%s", dirPerms));
