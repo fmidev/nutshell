@@ -1125,9 +1125,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							log.debug(String.format("Remove tmp dir: %s", this.outputDirTmp));
 							// NEW! Empty the dir
 							for (File file: dir.listFiles()){
-								if (file.isFile())
-									this.move(file.toPath(), this.outputDir);
-								// Maybe dirs ok as well?
+								// if (file.isFile() || file.isDirectory())
+								// if (file.isFile())
+								// Move dirs as well
+								// Consider try-catch block here, and just collect errors?
+								this.move(file.toPath(), this.outputDir);
 							}
 							Files.delete(this.outputDirTmp);
 						}
