@@ -445,9 +445,11 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public Path move(Path src, Path dst) throws IOException {
 			log.note(String.format("Move: from: %s ", src));
 			log.note(String.format("        to: %s ", dst));
-			if (dst.toFile().isDirectory())
+
+			if (src.toFile().isFile() && dst.toFile().isDirectory())
 				dst = dst.resolve(src.getFileName());
 			//Files.setPosixFilePermissions(dst, filePerms);
+
 			Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
 
 			try {
@@ -1126,10 +1128,16 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							// NEW! Empty the dir
 							for (File file: dir.listFiles()){
 								// if (file.isFile() || file.isDirectory())
-								// if (file.isFile())
+								if (file.isFile()){
+									this.move(file.toPath(), this.outputDir);
+								}
+								else {
+									log.warn("Moving-non-file " + file.toPath());
+
+								}
 								// Move dirs as well
 								// Consider try-catch block here, and just collect errors?
-								this.move(file.toPath(), this.outputDir);
+
 							}
 							Files.delete(this.outputDirTmp);
 						}
