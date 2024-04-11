@@ -1294,7 +1294,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			log.special(String.format("Writing graph to file: %s", graphFile));
 			Graph graph = this.getGraph(null);
 			//graph.graphProto.attributes.put("size", "24,20");
-			graph.nodeProto.attributes.put("shape", "record");
+			// graph.nodeProto.attributes.put("shape", "record");
+			graph.nodeProto.attributes.put("shape", "box");
 			try {
 				Path graphDir = graphFile.getParent();
 				FileUtils.ensureWritableDir(graphDir, GROUP_ID, dirPerms);
