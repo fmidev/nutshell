@@ -339,8 +339,24 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// Plain status. (No product handling)
 		if (page.equals("status")){ //|| batchConfig.instructions.isSet(ActionType.STATUS)){
 			setup.put("counter", ProductServer.counter);
-			sendStatusPage(HttpServletResponse.SC_OK, "Status page",
-					"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
+
+			SimpleHtml html = getHtmlPage();
+
+			addServerStatus(html);
+
+			html.appendTag(SimpleHtml.Tag.H1, "Running tasks");
+
+			if (taskMap.isEmpty()){
+				html.appendTag(SimpleHtml.Tag.DIV, "No tasks running at the moment.");
+			}
+			else {
+				html.appendTable(taskMap, "Tasks");
+			}
+
+			sendToStream(html.document, httpResponse);
+
+			//sendStatusPage(HttpServletResponse.SC_OK, "Status page",
+			//		"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
 			return;
 		}
 
@@ -811,7 +827,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		taskMap.remove(task.getTaskId());
 		task.close();
 
-		html.appendTable(registry.map, "Command set");
+		// html.appendTable(registry.map, "Command set");
 
 		addServerStatus(html);
 
@@ -826,7 +842,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	protected void addServerStatus(SimpleHtml html) throws IOException{
 
 		html.appendTag(SimpleHtml.Tag.H1, "Product Server setup");
+
+		html.appendTag(SimpleHtml.Tag.P, "NutShell Server is running since " + setup.get("startTime"));
+
 		html.appendTable(productServer.setup, null);
+
+				//sendStatusPage(HttpServletResponse.SC_OK, "Status page",
+				//		"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
 
 		super.addServerStatus(html);
 

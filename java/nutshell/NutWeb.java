@@ -458,6 +458,7 @@ public class NutWeb extends HttpServlet {
 		html.appendTag(SimpleHtml.Tag.H1, "Environment variables");
 		html.appendTable(System.getenv(), null);
 
+
 	}
 
 	protected void addRequestStatus(SimpleHtml html, HttpServletRequest request) {
