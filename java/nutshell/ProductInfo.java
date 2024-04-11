@@ -52,7 +52,8 @@ class ProductInfo extends ProductParameters {
 	protected static final Pattern filenameRe =
 			//Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
 			// GOOD
-			Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
+			// Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?\\.([a-z][a-z0-9]*)$");
+			Pattern.compile("^((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?\\.([a-zA-Z][a-zA-Z0-9]*)$");
 			// BASENAMED Pattern.compile("^(((LATEST|TIMESTAMP|[0-9]*)_((LATEST|TIMESTAMP|[0-9]*)_)?)?([^_]+)(_(.*))?)\\.([a-z][a-z0-9]*)$");
 			// Python: re.compile(r"^((LATEST|TIMESTAMP|[0-9]*)_)?([^_]+)(_(.*))?\.([a-z][a-z0-9]*)$")
 
