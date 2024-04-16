@@ -409,7 +409,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		/// Respond with an HTML page, if query contains no product request
-		if (batch.products.isEmpty()){ // redesign ?  || || !page.isEmpty()
+		//if (batch.products.isEmpty()){ // redesign ?  || || !page.isEmpty()
+		if ((!page.isEmpty()) || batch.products.isEmpty()){ // redesign ?  || || !page.isEmpty()
 
 			if (page.isEmpty()){
 				/*
