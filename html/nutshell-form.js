@@ -63,6 +63,7 @@ function nutshell_body(){
 
     if (product.value){
 	//console.info(p)
+	// Option:
 	STATUS.checked = true 
     }
     else {
