@@ -417,7 +417,7 @@ public class FileUtils {
         @Override
         public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
 
-            System.out.println(String.format("RmDir %s", path));
+            // System.out.println(String.format("RmDir %s", path));
             /*
             System.out.println(String.format("Visiting %s ", path));
             for (File file: path.toFile().listFiles()) {
