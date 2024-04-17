@@ -58,7 +58,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static final public String version = "1.7";
+	static final public String version = "1.7.1";
 	//static final public List<Integer> version = Arrays.asList(1, 6);
 
 	String confDir = "";
@@ -186,7 +186,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//final String value = (values.length == 0) ? "" : values[0]; // What about other elems?
 			final String value = String.join(",", values);
 
-			// Global (server) settings
+			// Global (server level) settings
 			if (registry.has(key)){
 				Program.Parameter parameter = registry.get(key);
 				System.err.printf(" Still found: %s -> %s  %n", key, parameter);
@@ -281,8 +281,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		*/
 
 
-
-
 		if (batch.instructions.makeLevelEquals(Instructions.MakeLevel.RELEASE_CACHE)) {
 
 			batch.instructions.setMakeLevel(Instructions.MakeLevel.NONE);
@@ -361,17 +359,17 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		/*
-		String product = "";
-		for (String p: batch.products.values()){
-			product = p;
-		}
-
-		 */
+			String product = "";
+			for (String p: batch.products.values()){
+				product = p;
+			}
+		*/
 
 		if (page.equals("resolve")){
-			/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
 
-			//product = "";
+			/// Error 404 (not found) is handled as redirection in WEB-INF/web.xml
+			/// Expected background: a product has been asked using a path /.../cache/...
+			/// TODO: regexp based, and with instr. 'command' detection: query/  storage/ ...
 
 			final Object requestUri = httpRequest.getAttribute("javax.servlet.error.request_uri");
 
@@ -386,10 +384,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			for (int i = 0; i < path.getNameCount(); i++) {
 				if (path.getName(i).toString().equals("cache")){
 					batch.products.put("prod", productFile);
-					//product = path.getFileName().toString();
 					batch.instructions.setMakeLevel(Instructions.MakeLevel.MAKE);
 					batch.instructions.set(Instructions.STREAM);
-					//batch.instructions.outputHandling = Instructions.OutputHandling.STREAM;
 					break;
 				}
 			}
@@ -406,6 +402,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			//page = "resolve";
+			page = "";
 		}
 
 		/// Respond with an HTML page, if query contains no product request
@@ -457,10 +454,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			String product = null;
 			for (String p: batch.products.values()) {
 				product = p;
-			}
-
-			if (product != null) {
-
 			}
 
 			task = productServer.new Task(product, batch.instructions, productServer.serverLog);
@@ -772,7 +765,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			embed.setAttribute("type", "text/html");
 			embed.setAttribute("src", Paths.get("cache").resolve(task.relativeLogPath).toString());
 			embed.setAttribute("width", "100%");
-			embed.setAttribute("height", "400");
+			embed.setAttribute("height", "500");
 			embed.setAttribute("class", "code"); // Has no effect?
 			embed.setAttribute("style", "outline: 2px"); // Has no effect?
 			/*
@@ -837,7 +830,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		//task.close();
 		// 1
 	}
-
+	public void doGetProduct(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ProductServer.Batch batch) throws IOException  {
+		// DELEGATE here ... but failure should be caught etc.
+	}
 
 	@Override
 	protected void addServerStatus(SimpleHtml html) throws IOException{

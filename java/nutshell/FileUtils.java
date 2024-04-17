@@ -390,22 +390,21 @@ public class FileUtils {
 
         public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
 
-            System.out.println(String.format("Visiting %s ", path));
-
-            //Path dstCurrent = dst.resolve(path.relativize(src).normalize());
-            //Path dstCurrent = dst.resolve(src.relativize(path));
+            // System.out.println(String.format("# Visiting %s ", path));
+            // Path dstCurrent = dst.resolve(path.relativize(src).normalize());
+            // Path dstCurrent = dst.resolve(src.relativize(path));
 
             for (File file: path.toFile().listFiles()){
                 Path p = file.toPath();
                 Path d = dst.resolve(src.relativize(p));
                 if (file.isDirectory()){
-                    //Path dirPath = file.toPath();
-                    System.out.println(String.format("MkDir %s ", d));
+                    // Path dirPath = file.toPath();
+                    // System.out.println(String.format("# MkDir %s ", d));
                     Files.createDirectories(d); // Attribs!
                     //dstCurrent.resolve(file.toPath()).toFile().createNewFile();
                 }
                 else {
-                    System.out.println(String.format("Move %s -> %s", file, d));
+                    // System.out.println(String.format("# Move %s -> %s", file, d));
                     //Files.move(file.toPath(), d, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
                     Files.move(file.toPath(), d, StandardCopyOption.REPLACE_EXISTING);
                 }
