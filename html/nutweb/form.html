@@ -15,7 +15,7 @@
           <td>
             <input id="product" name="product" list="prods" type="text" size="80" value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png"/>
             <select id="product_examples" onchange="this.form.product.value = this[selectedIndex].value">
-              <option/>
+              <option selected="selected"/>
               <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
               <option value="demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png">Image Pattern (error: too large)</option>
               <option value="demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png">Image Pattern (error: illegal parameter values)</option>
@@ -40,17 +40,17 @@
             <!-- NOTE: originally consisted of "request" widgets only /-->
             <!-- input type="hidden" name="instructions" value="FILE" / -->
             <fieldset class="inline"><legend>Main action</legend><label><input type="radio" name="instructions" value="DELETE" title="Only delete"/>Delete</label><br/><label><input type="radio" name="instructions" value="EXISTS" title="Check if exists"/>Exists</label><br/><label><input type="radio" name="instructions" value="MAKE" title="Generate only if not existing" selected="selected"/>Make</label><br/><label><input type="radio" name="instructions" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label>, 
-	      <label>cache depth:
+	      <label>options:
 		<select name="regenerate"><option value="0">0 - Make</option><option value="1" selected="selected">1 - Regenerate product</option><option value="2">2 - Regenerate product + inputs</option><option value="3">3 - Regenerate product + inputs (depth=2)</option><option value="4">4 - Regenerate product + inputs (depth=3)</option><option value="5">5 - Regenerate product + inputs (depth=4)</option></select>
-		</label><br/></fieldset>
+	      </label><br/></fieldset>
             <fieldset class="inline">
               <legend>Return tylpe</legend>
-              <label><input type="radio" name="output" value="STREAM"/>Product, direct stream</label>
+              <label><input type="radio" name="output" value="STREAM" id="STREAM"/>Product, direct stream</label>
               <br/>
-              <label><input type="radio" name="output" value="REDIRECT" selected="selected"/>Product, through redirect)</label>
+              <label><input type="radio" name="output" value="REDIRECT" id="REDIRECT" selected="selected"/>Product, through redirect)</label>
               <br/>
-              <label><input type="radio" name="output" value="STATUS"/>Status/Info page</label>
-              <label><input type="checkbox" name="output" value="INPUTLIST"/>Input list</label>
+              <label><input type="radio" name="output" value="STATUS" id="STATUS"/>Status/Info page</label>
+              <label><input type="checkbox" name="output" value="INPUTLIST" id="INPUTLIST"/>Input list</label>
               <br/>
             </fieldset>
             <!-- label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label -->
