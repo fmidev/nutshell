@@ -36,8 +36,10 @@ function populateSelect(text, params){
     // console.info(json)
     // console.warn(params)
     console.info("Adding products in menu")
+    product_examples.innerHTML = ''
 
     const ARRAY = Array.isArray(json)
+
     for (var i in json){
 	//console.info(i + typeof(i) + ' = ' + json[i])
 	var elem = document.createElement("option")
@@ -59,18 +61,27 @@ function nutshell_body(){
 	var params = new URLSearchParams(document.location.search)
 	console.info(params)
 	product.value = params.get('product')
+
+	if (product.value){
+	    //console.info(p)
+	    // Option:
+	    REDIRECT.checked = true  // esp.for HTML
+	}
+
     }
 
-    if (product.value){
-	//console.info(p)
-	// Option:
-	REDIRECT.checked = true  // esp.for HTML
-    }
+    const filename = "product-examples.json"
+    console.info("Reading " + filename)
+    readFile(filename+'?'+Date.now(), populateSelect, ["test", 1, "test2", 2 ] )
+
+    
+    /*
     else {
 	const filename = "product-examples.json"
 	console.info("Reading " + filename)
 	readFile(filename+'?'+Date.now(), populateSelect, ["test", 1, "test2", 2 ] )
     }
+    */
     
     
     
