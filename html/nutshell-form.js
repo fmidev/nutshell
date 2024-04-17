@@ -64,7 +64,7 @@ function nutshell_body(){
     if (product.value){
 	//console.info(p)
 	// Option:
-	STATUS.checked = true 
+	REDIRECT.checked = true  // esp.for HTML
     }
     else {
 	const filename = "product-examples.json"
