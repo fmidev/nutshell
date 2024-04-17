@@ -52,12 +52,12 @@ function populateSelect(text, params){
     }
 }
 
-function nutweb_body(){
+function nutshell_body(){
 
     // Modern browsers should support
     if (URLSearchParams){
 	var params = new URLSearchParams(document.location.search)
-	// console.info(params)
+	console.info(params)
 	product.value = params.get('product')
     }
 
