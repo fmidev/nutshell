@@ -124,8 +124,12 @@ public class SimpleXML {
 
 		// Say where we want the XML to go
 		// StreamResult result = new StreamResult(streamable);
-
-		// Write the XML to file
+        try {
+            result.getWriter().write("<!DOCTYPE html>");
+        } catch (IOException e) {
+           //  throw new RuntimeException(e);
+        }
+        // Write the XML to file
 		try {
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
@@ -135,12 +139,6 @@ public class SimpleXML {
 		}
 	}
 
-	/*
-	public static <T> void writeDocument(Document document, T file) {
-		System.out.println(file); // OK
-		writeDocument(document,  new StreamResult(file)); // NOT OK
-	}
-	 */
 
 
 	public static void writeDocument(Document document, File file) {

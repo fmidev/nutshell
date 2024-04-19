@@ -58,8 +58,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	static final public String version = "1.7.1";
-	//static final public List<Integer> version = Arrays.asList(1, 6);
+	static final public String version = "1.7.2";
 
 	String confDir = "";
 
@@ -430,7 +429,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
 			elem.setTextContent(String.format(" Page: %s/%s ", HTTP_ROOT, page ));
-			//html.appendElement(SimpleHtml.H2, "Testi");
 
 			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
 			sendToStream(html.document, httpResponse);

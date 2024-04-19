@@ -7,6 +7,9 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -101,8 +104,17 @@ public class SimpleHtml extends SimpleXML{
 			return endStr;
 		}
 
+		public static void writeDocument(Document document, StreamResult result) {
 
+			try {
+				result.getWriter().write("<!DOCTYPE html>\n");
+			} catch (IOException e) {
+				//  throw new RuntimeException(e);
+			}
 
+			SimpleXML.writeDocument(document, result);
+
+		}
 	}
 
 	/** Interface for Objects the state of which can appear as HTML nodes.

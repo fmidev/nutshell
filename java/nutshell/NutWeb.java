@@ -72,14 +72,6 @@ public class NutWeb extends HttpServlet {
 
 		Manip.assignToObjectLenient(setup, this);
 
-
-		/*
-		retrieveInitParameter(config, "httpRoot",    "/undefined");
-		retrieveInitParameter(config, "htmlTemplate","nutweb/template.html");
-		// retrieveInitParameter(config, "docDir",      "");
-		retrieveInitParameter(config, "debug",       "false");
-		*/
-		//setup.putAll(getTomcatParameters());
 	}
 
 	/*
@@ -349,11 +341,10 @@ public class NutWeb extends HttpServlet {
 
 				NodeList headNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.HEAD);
 
-				//html.appendComment(String.format("Read HEAD (%d nodes", headNodes.getLength()));
-				//html.appendTag(SimpleHtml.Tag.PRE, String.format("Read HEAD (%d nodes", headNodes.getLength()));
 				html.body.appendChild(html.document.createComment(String.format("Included %d HEAD nodes", headNodes.getLength())));
 
 				for (int i=0; i< headNodes.getLength(); ++i) {
+
 					Node node = headNodes.item(i);
 
 					if (node instanceof Element){
@@ -478,13 +469,14 @@ public class NutWeb extends HttpServlet {
 	 * @throws IOException
 	 */
 	void sendToStream(Document document, HttpServletResponse response) throws IOException {
-		response.setContentType("text/html");
-		SimpleXML.writeDocument(document, new StreamResult(response.getWriter()));
+		//response.setContentType("text/html");
+		//SimpleXML.writeDocument(document, new StreamResult(response.getWriter()));
+		// Starts with: <!DOCTYPE html>
+		SimpleHtml.writeDocument(document, new StreamResult(response.getWriter()));
 	}
 
 
-	/**
-	 * Sends a file to recipient OutputStream. Guesses Content-Type from the file extension.
+	/** Sends a file to recipient OutputStream. Guesses Content-Type from the file extension
 	 *
 	 * @param filePath - system side path to a file
 	 * @param response - output stream handler
