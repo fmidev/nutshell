@@ -56,6 +56,9 @@ function populateSelect(text, params){
 
 function nutshell_body(){
 
+    // Append server to title (helps bookmarking, for example)
+    document.title += ' – ' + document.location.hostname
+    
     // Modern browsers should support
     if (URLSearchParams){
 	var params = new URLSearchParams(document.location.search)
