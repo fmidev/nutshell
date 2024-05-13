@@ -2117,11 +2117,24 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		 */
 
-		// Turhia/väärässä paikassa (tässä)
-		if (!batch.instructions.copies.isEmpty())
+		// Turhia/väärässä paikassa (tässä) (näin alussa?)
+		for (String copy: batch.instructions.copies) {
+			log.note(String.format("   COPY:\t %s", copy));
+		}
+		/*
+		if (!batch.instructions.copies.isEmpty()) {
 			log.note(String.format("   COPY(%d):\t %s", batch.instructions.copies.size(), batch.instructions.copies));
-		if (!batch.instructions.links.isEmpty())
-			log.note(String.format("   LINK(%d):\t %s", batch.instructions.links.size(),  batch.instructions.links));
+		}*/
+
+		for (String link: batch.instructions.links) {
+			log.note(String.format("   LINK:\t %s", link));
+		}
+		/*
+		if (!batch.instructions.links.isEmpty()) {
+			log.note(String.format("   LINK(%d):\t %s", batch.instructions.links.size(), batch.instructions.links));
+		}
+		*/
+
 		if (batch.instructions.move != null)
 			log.note(String.format("   MOVE: \t %s", batch.instructions.move));
 
