@@ -301,13 +301,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param parentLog    - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
 		 */
-		public Task(String productStr, Instructions instructions, HttpLog parentLog) throws ParseException {
+		public Task(String productStr, Instructions instr, HttpLog parentLog) throws ParseException {
 
 			id = getProcessId();
 			info = new ProductInfo(productStr);
 			filename = info.getFilename();
-			this.instructions = new Instructions(instructions);
-
+			instructions = new Instructions(instr);
 
 			if (info.time > 0){
 				int year = Integer.parseInt(info.TIMESTAMP.substring(0,4));
@@ -338,11 +337,13 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			final String label = String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
 
 			// Relative
-			productDir = getProductDir(this.info.PRODUCT_ID);
+			productDir = getProductDir(info.PRODUCT_ID);
 
 			// timeStampDir = getTimestampDir(this.info.time);
-			timeStampDir = this.info.getTimeStampDir();
-			if (this.info.isDynamic()){
+			timeStampDir = info.getTimeStampDir();
+
+
+			if (info.isDynamic()){
 
 			}
 			// this.info.TIMESTAMP
@@ -392,6 +393,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 			log.debug(String.format("Label: %s %s",  label, labelArray));
+
+			// DEBUGGING!
+			if (timeStampDir.toString().length()==10) {  // Typical format: "2017/08/12".length() = 10
+				if (!timeStampDir.toString().startsWith("20")) {
+					//throw new ParseException(String.format("NSH timeStampDir failed : %s (%s)",timeStampDir, info.TIMESTAMP), 0);
+					System.out.println(String.format("NutShell DEBUG suspicious timeStampDir: ", timeStampDir));
+					System.out.println(String.format("  TIMESTAMP=%s -> %s", info.TIMESTAMP, info.getTimeResolution(info.TIMESTAMP)));
+					System.out.println(String.format("  %s (%s -> %s), see also log: %s", timeStampDir, info.TIMESTAMP, info.getTimeStampDir(), logPath));
+				}
+			}
+			else if (timeStampDir.toString().length() > 10){// "2017/08/12".length() = 10
+				//throw new ParseException(String.format("NSH timeStampDir failed : %s (%s)",timeStampDir, info.TIMESTAMP), 0);
+				System.out.println(String.format("NutShell DEBUG fatal: timeStampDir failed : %s (%s), see also log: %s",timeStampDir, info.TIMESTAMP, logPath));
+			}
 
 
 			this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
@@ -946,20 +961,27 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 							}
 						}
 
-
-						// this.result = this.outputPath;
 					}
 					else {
-						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator failed in producing the file: %s", this.outputPath));
 						// server Log.fail(info.getFilename());
-						// log.error("Generator failed in producing tmp file: " + fileTmp.getName());
+						// serverLog.warn(String.format("Problems: %s", log.indexedState.toString()));
+						if (log.indexedState.getIndex() >= 400){
+							log.debug("Forwarding original error (at least HTTP 400)");
+						}
+						else {
+							log.debug("Generator failed but returned no error code");
+							log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator '' failed in producing the file: %s", this.outputPath));
+						}
+
 						if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
 						    // if (instructions.isSet(Instructions.GENERATE)) {
 							try {
-								log.warn(String.format("Failed in generating: %s", info));
+								log.info(String.format("Failed in generating: %s, removing result file(s)", info));
+
 								if (outputPathTmp.toFile().exists())
 									this.delete(this.outputPathTmp);
-							} catch (Exception e) {
+							}
+							catch (Exception e) {
 								/// TODO: is it a fatal error if a product defines its input wrong?
 								log.error(e.getMessage()); // RETURN?
 								log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in deleting tmp file: %s", this.outputPath));
@@ -1009,7 +1031,17 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 				else if (fileFinal.length() == 0) {
 
-					log.log(HttpLog.HttpStatus.CONFLICT, String.format("Failed in generating: %s ", this.outputPath));
+					log.debug(String.format("Empty file or no file %s", this.outputPath));
+					// TODO: consider method for this:
+					if (log.indexedState.getIndex() >= 400){
+						log.debug("Forwarding original error (at least HTTP 400)");
+					}
+					else {
+						// log.debug("Generator failed but returned no error code");
+						// log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator '' failed in producing the file: %s", this.outputPath));
+						log.log(HttpLog.HttpStatus.CONFLICT, String.format("Yes, failed in generating: %s ", this.outputPath));
+					}
+
 					try {
 						this.delete(this.outputPath);
 					} catch (IOException e) {
@@ -2151,7 +2183,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		server.runTasks(tasks, log);
 
 		if (log.getStatus() <= Log.Status.ERROR.level){
-			log.warn(String.format("Errors: %d ", log.getStatus()));
+			log.warn(String.format("Errors (level: %d)", log.getStatus()));
 			++result;
 		}
 
@@ -2160,7 +2192,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			// String key = entry.getKey();
 			Task  task = entry.getValue();
 			if (task.log.indexedState.index >= HttpLog.HttpStatus.BAD_REQUEST.getIndex()){
-				log.warn(String.format("Generator Exception: %s", task.log.indexedState.getMessage()));
+				//log.warn(String.format("Generator Exception: %s", task.log.indexedState.getMessage()));
+				log.warn(task.log.indexedState.getMessage()); // todo retrieve HTTP str
 				//log.debug(task.log.indexedException);
 				if (result < 20)
 					++result;

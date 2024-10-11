@@ -55,6 +55,10 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
             timeDirFormat = new SimpleDateFormat(dirFmt);
         }
 
+        @Override
+        public String toString() {
+            return String.format("%s[%d] %s %s", this.getClass().getSimpleName(), length, timeDirFormat + " | " + timeStampFormat);
+        }
     }
 
     /** Data and time formatted as @timeStampFormat or "LATEST".
@@ -143,6 +147,17 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
         //return TimeResolution.INVALID; // error!
     }
 
+    /**
+     *
+     * NOTE: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/SimpleDateFormat.html
+     * Date formats are not synchronized. It is recommended to create separate format instances for each thread.
+     * If multiple threads access a format concurrently, it must be synchronized externally.
+     *
+     * @param timestamp
+     * @param timeResolution
+     * @return
+     * @throws ParseException
+     */
     static
     protected long getTime(String timestamp, TimeResolution timeResolution) throws ParseException {
 
@@ -152,8 +167,11 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
             //     return -1L;
             case UNKNOWN:
                 return 0L;
-            default:
-                return timeResolution.timeStampFormat.parse(timestamp).getTime();
+            default: {
+                synchronized (timeResolution.timeStampFormat) { // 2024/10
+                    return timeResolution.timeStampFormat.parse(timestamp).getTime();
+                }
+            }
         }
 
     }

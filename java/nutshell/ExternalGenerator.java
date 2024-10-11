@@ -95,10 +95,12 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		OutputReader reader = new OutputReader(log);
 
-		int exitValue;
+		int exitValue = 0;
 
 		//System.err.println(String.format("UMASK=%s", umask));
 
+		HttpLog.HttpStatus errStatus = HttpLog.HttpStatus.OK;
+		Exception err = null;
 		try {
 			if (umask.isEmpty()) {
 				//log.println("Attention: no UMASK");
@@ -112,24 +114,36 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 			}
 		}
 		catch (InterruptedException e){
-			throw new IndexedState(HttpLog.HttpStatus.SERVICE_UNAVAILABLE, e.getMessage() + " from " + this.getClass().getSimpleName());
+			err = e;
+			errStatus = HttpLog.HttpStatus.GONE;
+			// throw new IndexedState(HttpLog.HttpStatus.SERVICE_UNAVAILABLE, e.getMessage() + " from " + this.getClass().getSimpleName());
 		}
 		catch (IOException e){
-			throw new IndexedState(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage() + " from " + this.getClass().getSimpleName());
+			err = e;
+			errStatus = HttpLog.HttpStatus.INTERNAL_SERVER_ERROR;
+			// throw new IndexedState(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage() + " from " + this.getClass().getSimpleName());
 		}
 		catch (TimeoutException e){
-			throw new IndexedState(HttpLog.HttpStatus.REQUEST_TIMEOUT, e.getMessage() + " from " + this.getClass().getSimpleName());
+			err = e;
+			errStatus = HttpLog.HttpStatus.REQUEST_TIMEOUT;
+			// throw new IndexedState(HttpLog.HttpStatus.REQUEST_TIMEOUT, e.getMessage() + " for: " + this.id + ' ' + cmd.toString()); // + this.getClass().getSimpleName());
 		}
+		/*
 		catch (IllegalFormatConversionException e){
 			throw new IndexedState(HttpLog.HttpStatus.BAD_REQUEST, e.getMessage() + " +CONVERSION+ " +cmd.toString() + " # " + this.getClass().getSimpleName() + " threw " + e.getClass().getSimpleName());
-		}
+		}*/
 		catch (Exception e){
-			throw new IndexedState(HttpLog.HttpStatus.CONFLICT, e.getMessage() + " +CONFLICT+ " + this.getClass().getSimpleName() + " threw " + e.getClass().getSimpleName());
+			err = e;
+			errStatus = HttpLog.HttpStatus.BAD_REQUEST;
+			// throw new IndexedState(HttpLog.HttpStatus.CONFLICT, e.getMessage() + " +CONFLICT+ " + this.getClass().getSimpleName() + " threw " + e.getClass().getSimpleName());
+		}
+
+		if (err != null){
+			throw new IndexedState(errStatus, String.format("%s[%s]: %s (%s %s)", err.getClass().getSimpleName(), id,  err.getMessage(), this.getClass().getSimpleName(), cmd.toString()));
 		}
 
 		// System.err.println(String.format("FINISHED (%d)", exitValue));
 
-		//
 		if (exitValue != 0){
 			throw extractErrorMsg(exitValue, reader);
 		}
