@@ -55,7 +55,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	//static
 	public String getVersion(){
-		return "3.7.3";
+		return "3.7.4";
 	}
 
 	ProductServer() {
@@ -509,7 +509,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						return dst;
 					}
 				}
-
 				// Force!
 				// Destination differs, or explicit deletion is requested
 				Files.delete(dst);
@@ -897,17 +896,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						log.experimental(test.toString());
 						*/
 						generator.generate(this);
-					} catch (IndexedState e) {
+					}
+					catch (IndexedState e) {
 
 						// NOTE: possibly the file has been generated, but with some less significant errors.
-
 						log.log(e);
 
 						try {
-							log.warn("Error was: " + e.getMessage());
+							log.warn(String.format("Error index=%d, msg: %s", e.getIndex(), e.getMessage()));
 							this.delete(this.outputPathTmp);
 							//this.delete(fileFinal);
-						} catch (Exception e2) {
+						}
+						catch (Exception e2) {
 							log.error(e2.getLocalizedMessage());
 						}
 					}
@@ -1226,7 +1226,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			if (!PATH.isEmpty()) {
 				env.put("PATH", PATH);
-				log.special("PATH=" + PATH);
+				log.debug("PATH=" + PATH);
 			}
 
 			this.info.INPUT_PREFIX = null;
@@ -1495,7 +1495,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		log.note(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 		//log.debug(String.format("Starting (%d) tasks, GROUP_ID=%d", tasks.size(), GROUP_ID));
 
-		/// Start as threads, if PARALLEL requested
+		/// Loop 1: if PARALLEL requested, start task as a thread
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
 			Task task = entry.getValue();
@@ -1506,11 +1506,12 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					// log.debug(String.format("Starting thread '%s': %s", key, task));
 					task.start(); // Thread.start() -> (Thread)task.run()
 				} catch (IllegalStateException e) {
-					log.error("Already running? " + e.toString());
+					log.error("Already running? " + e);
 				}
 			}
 		}
 
+		/// Loop 2: run tasks, or if already started above, wait to stop
 		for (Entry<String,Task> entry : tasks.entrySet()){
 			String key = entry.getKey();
 			Task task = entry.getValue();
@@ -2077,7 +2078,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					batch.products.put("product" + (batch.products.size()+1), arg);
 				}
 
-				log.info("Instructions: " + batch.instructions);
+				log.debug("Instructions: " + batch.instructions);
 			}
 		}
 		catch (Exception e) {

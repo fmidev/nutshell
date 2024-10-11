@@ -98,7 +98,7 @@ public class NutWeb extends HttpServlet {
 	}
 
 
-	/** Main hcdler. Returns a requested product in the HTTP stream or dumps an HTML status page.
+	/** Main handler. Returns a requested product in the HTTP stream or dumps an HTML status page.
 	 *
 	 *  The default *action* is to generate a product and return it through stream.
 	 *

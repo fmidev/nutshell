@@ -423,7 +423,6 @@ public class FileUtils {
             for (File file: path.toFile().listFiles()) {
                 if (file.isDirectory()) {
                     // Path dirPath = file.toPath();
-
                 }
 
             }

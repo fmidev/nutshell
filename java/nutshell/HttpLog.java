@@ -61,7 +61,6 @@ public class HttpLog extends Log {
         final int status;
 
 
-
     }
 
 
@@ -142,7 +141,7 @@ public class HttpLog extends Log {
     }
 
     //static final IndexedException defaultException = new IndexedException(HttpServletResponse.SC_CONTINUE, "Ok");
-    static final IndexedState defaultException = new IndexedState(HttpStatus.CONTINUE, "Ok");
+    static final IndexedState defaultException = new IndexedState(HttpStatus.CONTINUE, "Continue/Ok");
 
     void resetState() {
         this.indexedState = defaultException;

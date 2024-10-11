@@ -21,6 +21,8 @@ configure-%:
 	util/configure.sh $*
 
 
+tests-java:
+	LOOP=java util/make-tests.sh
 
 
 Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell

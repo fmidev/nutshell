@@ -68,15 +68,24 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 		return MediaType.FILE;
 	}
 
-	// MAIN
+	/** Compute the product.
+	 *
+	 *  At this stage, all the dependencies (product inputs) have been retrieved or generarated.
+ 	 */
 	@Override
 	public void generate(ProductServer.Task task) throws IndexedState {
+
+		// System.err.println("STOPPED... " + this.getClass().getSimpleName());
+		// System.exit(-2);
+
 		task.log.textOutput.startVerbatim(task.log.buffer);  // ugly'
 		task.log.debug(String.format("cd %s; %s %s", dir, String.join(" ", MapUtils.getEntries(task.getParamEnv())), cmd.getName()));
+		task.log.warn("Generating file with generateFile");
 		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 		task.log.textOutput.endVerbatim(task.log.buffer);  // ugly
 	}
 
+	// Unused?
 	public void toStream(String cmd, String[] envArray, Path dir, PrintStream log){
 		log.printf("cd %s; %s %s", dir, Arrays.toString(envArray), cmd);
 	}
@@ -86,28 +95,36 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 
 		OutputReader reader = new OutputReader(log);
 
-		int exitValue = 0;
+		int exitValue;
 
 		//System.err.println(String.format("UMASK=%s", umask));
 
 		try {
 			if (umask.isEmpty()) {
+				//log.println("Attention: no UMASK");
 				//System.err.println(String.format("UMASK empty, ok. ERR: %s"));
 				exitValue = ShellExec.exec(cmd.toString(), envArray, dir, reader);
 			} else {
-				final String[] batch = {"bash", "-c", String.format("umask %s; %s", umask, cmd)}; //??? weird elems
+				// log.println("Attention: UMASK");
+				final String[] batch = {"bash", "-c", String.format("umask %s; %s", umask, cmd.toString())}; //??? weird elems
 				exitValue = ShellExec.exec(batch, envArray, dir, reader);
 				//exitValue = exec(cmd.toString(), envArray, dir, reader);
 			}
 		}
 		catch (InterruptedException e){
-			throw new IndexedState(HttpLog.HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+			throw new IndexedState(HttpLog.HttpStatus.SERVICE_UNAVAILABLE, e.getMessage() + " from " + this.getClass().getSimpleName());
 		}
 		catch (IOException e){
-			throw new IndexedState(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+			throw new IndexedState(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage() + " from " + this.getClass().getSimpleName());
 		}
 		catch (TimeoutException e){
-			throw new IndexedState(HttpLog.HttpStatus.REQUEST_TIMEOUT, e.getMessage());
+			throw new IndexedState(HttpLog.HttpStatus.REQUEST_TIMEOUT, e.getMessage() + " from " + this.getClass().getSimpleName());
+		}
+		catch (IllegalFormatConversionException e){
+			throw new IndexedState(HttpLog.HttpStatus.BAD_REQUEST, e.getMessage() + " +CONVERSION+ " +cmd.toString() + " # " + this.getClass().getSimpleName() + " threw " + e.getClass().getSimpleName());
+		}
+		catch (Exception e){
+			throw new IndexedState(HttpLog.HttpStatus.CONFLICT, e.getMessage() + " +CONFLICT+ " + this.getClass().getSimpleName() + " threw " + e.getClass().getSimpleName());
 		}
 
 		// System.err.println(String.format("FINISHED (%d)", exitValue));
@@ -206,7 +223,7 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 			System.exit(1);
 		}
 
-		System.out.println(generator.toString());
+		System.out.println(generator);
 
 		ArrayList<String> list = new ArrayList<>();
 		list.add("OUTDIR=.");
@@ -235,10 +252,14 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 		File logFile = new File(logname);
 		System.out.println("Generating...");
 		try {
-			logFile.createNewFile();
-			FileOutputStream fw = new FileOutputStream(logFile);
-			generator.generateFile(env, new PrintStream(fw));
-			System.out.println(String.format("Success! (See log and %s", generator.dir));
+			if (logFile.createNewFile()){
+				FileOutputStream fw = new FileOutputStream(logFile);
+				generator.generateFile(env, new PrintStream(fw));
+				System.out.println(String.format("Success! (See log and %s)", generator.dir));
+			}
+			else {
+				System.out.println(String.format("File existed or creation failed! (See log and dir %s)", generator.dir));
+			}
 		} catch (IOException | IndexedState e) {
 			e.printStackTrace();
 			return;

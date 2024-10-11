@@ -156,18 +156,31 @@ public class ShellExec {
 			//final Process
 			process = Runtime.getRuntime().exec(cmd, env, d);
 
-			if(!process.waitFor(TIMEOUT_SEC, TimeUnit.SECONDS)) {
-				//timeout - kill the process.
-				process.destroy(); // consider using destroyForcibly instead
+			boolean success = process.waitFor(TIMEOUT_SEC, TimeUnit.SECONDS);
+			if (!success) {
+				// timeout - kill the process.
+				// process.destroy(); // consider using destroyForcibly instead
+				process.destroyForcibly();
+				// process.waitFor();
 				//throw new InterruptedException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
-				throw new TimeoutException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
+				//throw new TimeoutException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
+				throw new TimeoutException(String.format("ShellExec timeout (%d) elapsed", TIMEOUT_SEC) );
 			}
-			// System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
+			//System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
 			exitValue = ShellUtils.read(process, reader);
-			// what about waitFor ?
-			// System.err.println(String.format("Exit value: %d", exitValue));
+			//System.err.println(String.format("read exitValue=%d, process alive? %b", exitValue, process.isAlive()));
 		}
-		catch (IOException | InterruptedException e) {
+		catch (InterruptedException e) {
+			reader.handleStdErr(String.format("%d %s (ShellExec INTERRUPTED) ", HttpLog.HttpStatus.SERVICE_UNAVAILABLE.getIndex(), e.getLocalizedMessage()));
+			throw e;
+		}
+		catch (IOException e) {
+			reader.handleStdErr(String.format("%d %s (ShellExec IOEXCEPTION) ", HttpLog.HttpStatus.INTERNAL_SERVER_ERROR.getIndex(), e.getLocalizedMessage()));
+			throw e;
+		}
+		catch (TimeoutException e){
+			reader.handleStdErr(String.format("%d %s (ShellExec TIMEOUT) ", HttpLog.HttpStatus.REQUEST_TIMEOUT.getIndex(), e.getLocalizedMessage()));
+			//exitValue = +3;
 			throw e;
 		}
  		/*
@@ -207,7 +220,7 @@ public class ShellExec {
 			}
 			 */
 			// System.err.println("Eror");
-			reader.handleStdErr(String.format("%d %s (ShellExec)", 501, e.getLocalizedMessage()));
+			reader.handleStdErr(String.format("%s %s (unexpected error from ShellExec)", HttpLog.HttpStatus.CONFLICT, e.getLocalizedMessage()));
 			exitValue = +2;
 			//errorLog.println(e.getLocalizedMessage());
 		}
