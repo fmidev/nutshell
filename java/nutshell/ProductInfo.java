@@ -77,10 +77,23 @@ class ProductInfo extends ProductParameters {
 		return directives;
 	}
 
+	/**
+	 *
+	 * @return - Path
+	 *
+	 * https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/SimpleDateFormat.html
+	 * Date formats are not synchronized. It is recommended to create separate format instances for each thread.
+	 * If multiple threads access a format concurrently, it must be synchronized externally.
+	 *
+	 */
 	public Path getTimeStampDir(){
 		try {
 			TimeResolution tr = getTimeResolution(TIMESTAMP);
-			return Paths.get(tr.timeDirFormat.format(time));
+			String path;
+			synchronized (tr.timeDirFormat){
+				path = tr.timeDirFormat.format(time);
+			}
+			return Paths.get(path);
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		}
