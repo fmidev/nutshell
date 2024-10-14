@@ -203,31 +203,15 @@ public class Graph extends Entity {
 
     public boolean hasNode(String id){
         return nodes.containsKey(id);
-        /*
-        for (Node node: nodes) {
-            if (node.getName().equals(name))
-                return true;
-        }
-        return false;
-
-         */
     }
 
-    /*
-    public boolean hasLink(String name){
-        for (Link link: links) {
-            if (link.getName().equals(name))
-                return true;
-        }
-        return false;
-    }
-
+    /** Add link from node1 to node2
+     *
+     * @param node1
+     * @param node2
+     * @return
      */
-
-
     public Node.Link addLink(Node node1, Node node2){
-        //Link link = new Link(node1, node2);
-        //links.add(link);
         return node1.addLink(node2);
     }
 
@@ -245,30 +229,6 @@ public class Graph extends Entity {
         else {
             n.links.putAll(node.links);
         }
-        /*
-        if (nodes.containsKey(key)){
-            Node n = nodes.get(key);
-            //for (Node.Link link: node.links){
-                if (n.links.contains(link.id)){
-
-                }
-            }
-            return;
-        }
-        else {
-            addNode(node);
-        }
-        */
-        /*
-        for (Node n: nodes) {
-            if (n.getName().equals(name)){
-                // n.links.addAll(node.links);
-                for (Node.Link link: node.links){
-
-                }
-                return;
-            }
-        }*/
     }
 
     /** Combines nodes, appending links of already existing nodes.
@@ -317,47 +277,11 @@ public class Graph extends Entity {
             }
             stream.println();
         }
-        /*
-        for (Node n: nodes) {
-            n.toStream(stream);
-            for (Node.Link l: n.links) {
-                l.toStream(stream);
-            }
-            stream.println();
-        }
-         */
         stream.println();
-
-        /*
-        for (Link l: links) {
-            l.toStream(stream);
-        }
-        */
 
         stream.println("}");
     }
 
-    /*
-    public class Link extends Entity {
-
-        public Link(Node node1, Node node2){
-            this.node1 = node1;
-            this.target = node2;
-        }
-
-        final Node node1;
-        final Node target;
-
-        void toStream(PrintStream stream){
-            stream.append("  ").append(node1.getId()).append(" -> ").append(target.getId()).append(' ');
-            attributesToStream(stream);
-            stream.append(';');
-            stream.println();
-        }
-
-    }
-    */
-    //final public Node root = new Node();
 
     void dotToFile(String outfile) throws IOException, InterruptedException { // }, String styleSheet){ /// todo: IOException
         int i = outfile.lastIndexOf('.');
@@ -398,12 +322,13 @@ public class Graph extends Entity {
         // log.warn("Sending graph to the process");
         toStream(printStream);
         //process.waitFor();
+        // process.waitFor(); // NEW 2024/10
         // log.warn("Closing streams");
         // TODO: handler error stream
         printStream.close();
         outputStream.close();
         // log.warn("Waiting...");
-        process.waitFor();
+        process.waitFor(); // OLD
         // log.warn("Checking file:");
         //process.wait(3000); // milliseconds
         if (file.exists()) {

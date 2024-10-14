@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.xml.transform.stream.StreamResult;
 
+import com.sun.istack.internal.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -433,7 +434,8 @@ public class NutWeb extends HttpServlet {
 		addRequestStatus(html, request);
 		addServerStatus(html);
 
-		SimpleXML.writeDocument(html.document, new StreamResult(response.getWriter()));
+		//SimpleXML.writeDocument(html.document, new StreamResult(response.getWriter()));
+		SimpleHtml.writeDocument(html.document, new StreamResult(response.getWriter()));
 
 		if (status >= HttpServletResponse.SC_BAD_REQUEST){
 			//response.sendError(status, statusStr);
@@ -468,9 +470,7 @@ public class NutWeb extends HttpServlet {
 	 * @param response - response, output stream of which will be written to.
 	 * @throws IOException
 	 */
-	void sendToStream(Document document, HttpServletResponse response) throws IOException {
-		//response.setContentType("text/html");
-		//SimpleXML.writeDocument(document, new StreamResult(response.getWriter()));
+	void sendToStream(Document document, @NotNull HttpServletResponse response) throws IOException {
 		// Starts with: <!DOCTYPE html>
 		SimpleHtml.writeDocument(document, new StreamResult(response.getWriter()));
 	}

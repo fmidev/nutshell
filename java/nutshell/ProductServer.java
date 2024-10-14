@@ -43,6 +43,7 @@ import static java.nio.file.Files.*;
  *  have several timestamps, like computing time and valid time.
  *
  *  Some version history
+ *  3.7.4 Fixed timeformat bug with synchronized
  *  3.6 Adds INPUT_PREFIX - the common prefix for all the retrieved input paths.
  *  3.5 Added *.sh link in NutLet
  *  3.2 Create dirs automatically under $CACHE_ROOT and  $STORAGE_ROOT

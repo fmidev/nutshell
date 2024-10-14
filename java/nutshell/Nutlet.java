@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import nutshell.ProductServer.Task;
 import org.w3c.dom.Node;
 
 
@@ -35,12 +34,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	//static
 	public class Tasklet implements SimpleHtml.Nodifiable {
 
-		Tasklet(Task task){
+		Tasklet(ProductServer.Task task){
 			this.task = task;
 		}
 
 		final
-		protected Task task;
+		protected ProductServer.Task task;
 
 		@Override
 		public Node getNode(Document basedoc) {
@@ -436,7 +435,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 
-		Task task = null;
+		ProductServer.Task task = null;
 
 			// Default
 		if (batch.instructions.value == 0) {
