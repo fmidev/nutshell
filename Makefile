@@ -35,7 +35,7 @@ Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 
 Nutlet.zip: java/nutshell
 	zip $@ -R java/nutshell/*.java
-	. ./.VERSION.sh && ln $@ $@-${VERSION}
+	. ./.VERSION.sh && cp $@ $@-${VERSION}
 # export VERSION=$( java -cp out/production/nutshell/  nutshell.ProductServer --log_level WARNING --version )
 
 META-INF:
