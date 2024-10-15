@@ -329,6 +329,7 @@ public class ProductServerBase extends Program {
         return Paths.get(productID.replace(".", File.separator));
     }
 
+    /*
     Path getTimestampDir(long time){ // consider DAY or HOUR dirs?
         if (time > 0) {
             // timeresolution?
@@ -340,6 +341,8 @@ public class ProductServerBase extends Program {
             return Paths.get("");
         }
     }
+
+     */
 
 
     /**
