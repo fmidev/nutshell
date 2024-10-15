@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.Files.deleteIfExists;
 
 
 /** Infrastructure for the actual ProductServer
@@ -323,10 +324,132 @@ public class ProductServerBase extends Program {
 
     }
 
+    /** Compose label.
+     *
+     * @param prefix
+     * @param index
+     * @return
+     *
+     */
+    protected String getLabel(String prefix, int index){
+
+        ArrayList<String> labelArray = new ArrayList<>();
+
+        if (!prefix.isEmpty()){
+            labelArray.add(prefix);
+        }
+
+        if (!USER.isEmpty()){
+            labelArray.add(USER);
+        }
+
+        labelArray.add(String.valueOf(GROUP_ID));
+
+        if (index > 1){ // getTaskId()
+            labelArray.add(String.valueOf(index));
+        }
+        else {
+            labelArray.add(Integer.toHexString(Float.floatToIntBits((float)Math.random())));
+            //labelArray.add(Long.toHexString(Double.doubleToLongBits(Math.random())));
+        }
+
+        return String.join("-", labelArray).replaceAll("[^\\w\\-\\.\\:@]", "_");
+    }
 
 
     Path getProductDir(String productID){
         return Paths.get(productID.replace(".", File.separator));
+    }
+
+    // Consider moving these to @ProductServerBase, with Log param.
+    public Path move(Path src, Path dst, Log log) throws IOException {
+        log.note(String.format("Move: from: %s ", src));
+        log.note(String.format("        to: %s ", dst));
+
+        if (src.toFile().isFile() && dst.toFile().isDirectory())
+            dst = dst.resolve(src.getFileName());
+        //Files.setPosixFilePermissions(dst, filePerms);
+
+        Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+
+        try {
+            if (!Files.isSymbolicLink(dst))
+                FileUtils.ensureGroup(dst, GROUP_ID, filePerms);
+        }
+        catch (IOException e){
+            // Could be logged?
+        }
+        //Files.setPosixFilePermissions(dst, filePerms);
+        return dst;
+        //return src.renameTo(dst);
+    }
+
+    public Path copy(Path src, Path dst, Log log) throws IOException {
+        log.note(String.format("Copy: from: %s ", src));
+        log.note(String.format("        to: %s ", dst));
+        if (dst.toFile().isDirectory())
+            dst = dst.resolve(src.getFileName());
+        return Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+    }
+
+    /** Creates a soft link pointing to a file.
+     *
+     * @param src - original, physical file
+     * @param dst - link to be created
+     * @param force - overwrite link or file
+     * @return successfully generated path
+     * @throws IOException if linking fails
+     */
+    public Path link(Path src, Path dst, boolean force, Log log) throws IOException {
+
+        log.note(String.format("Link: from: %s ", src));
+        log.note(String.format("        to: %s ", dst));
+
+        if (dst.equals(src)){
+            log.warn(String.format("Link src == dst : %s", dst));
+            return dst;
+        }
+
+        if (dst.toFile().isDirectory())
+            dst = dst.resolve(src.getFileName());
+
+        if (Files.exists(dst)) {
+
+            if (Files.isSymbolicLink(dst)) {
+                log.note(String.format("Link exists (already): %s ", dst));
+            } else {
+                log.note(String.format("Link name exists already as a file: %s ", dst));
+            }
+
+            if (Files.isSameFile(src, dst)) {
+                //log.debug(String.format("src (file)", src));
+                //log.debug(String.format("dst (link)", src));
+                log.note("Link exists, pointing to src");
+                if (!force) {
+                    return dst;
+                }
+            }
+            // Force!
+            // Destination differs, or explicit deletion is requested
+            Files.delete(dst);
+        }
+
+        Path result = Files.createSymbolicLink(dst, src);
+        try {
+            FileUtils.ensureGroup(result, GROUP_ID, filePerms); // this may always fail in Unix...
+        }
+        catch (Exception e) {
+            log.note(String.format("Failed setting GROUP_ID=%d %s ", GROUP_ID, filePerms));
+        }
+
+        return result;
+        //return Files.createLink(src, dst);   //(src, dst, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    public boolean delete(Path dst, Log log) throws IOException {
+        log.note(String.format("Deleting: %s ", dst));
+        return deleteIfExists(dst);
+        //return file.delete();
     }
 
     /*
