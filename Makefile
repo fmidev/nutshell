@@ -7,12 +7,14 @@ JAVA_CLASS_DIR=out/production/nutshell
 # TOMCAT_SRC=html
 
 # include nutshell.cnf
+# VERSION=$(shell .VERSION.sh && echo $VERSION)
 
 help:
-	@grep '^[a-z].\+:' Makefile | tr '\n:' ' '
+	@grep '^[Na-z].\+:' Makefile | cut -d: -f1 | tr '\n' ' '
 	@echo
+#@grep '^[a-z].\+:' Makefile | tr '\n:' ' '
 
-#update-pkg: Nutlet.jar
+# update-pkg: Nutlet.jar
 # html/template
 install-%:
 	util/install.sh $*
@@ -33,7 +35,8 @@ Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 
 Nutlet.zip: java/nutshell
 	zip $@ -R java/nutshell/*.java
-
+	. ./.VERSION.sh && ln $@ $@-${VERSION}
+# export VERSION=$( java -cp out/production/nutshell/  nutshell.ProductServer --log_level WARNING --version )
 
 META-INF:
 	@mkdir --parents $@

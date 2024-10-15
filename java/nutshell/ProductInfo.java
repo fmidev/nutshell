@@ -77,7 +77,7 @@ class ProductInfo extends ProductParameters {
 		return directives;
 	}
 
-	/**
+	/** Returns relative product directory, for example "my/product/name" from my.product.name
 	 *
 	 * @return - Path
 	 *

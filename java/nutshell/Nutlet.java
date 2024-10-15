@@ -529,7 +529,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					productServer.serverLog.warn("pserv.log: sendToStream: " + task.filename);
 					task.log.debug("task.log: sendToStream: " + task.filename);
 					try {
-						sendToStream(task.outputPath, httpResponse);
+						sendToStream(task.paths.outputPath, httpResponse);
 						/*
 						taskMap.remove(task.getTaskId());
 						task.close();
@@ -551,7 +551,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				} else if (task.instructions.isSet(Instructions.REDIRECT)) {
 					taskMap.remove(task.getTaskId());
 					task.close();
-					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.relativeOutputPath);
+					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.paths.relativeOutputPath);
 					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
 					httpResponse.sendRedirect(url);
 					// task.close();
@@ -625,16 +625,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
-			if (task.relativeOutputDir != null) {
+			if (task.paths.relativeOutputDir != null) {
 
-				Path relativePath = productServer.cachePrefix.resolve(task.relativeOutputPath);
-				//task.relativeOutputDir.toString(), task.info.getFilename());
+				Path relativePath = productServer.cachePrefix.resolve(task.paths.relativeOutputPath);
+				//task.paths.relativeOutputDir.toString(), task.info.getFilename());
 				//elem = html.createAnchor(relativePath, relativePath.getFileName());
 				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
 				//elem = html.createAnchor(relativePath.getParent(), null);
 				if ((task.log.logFile!=null) && task.log.logFile.exists()){
-					Path relativeLogPath = productServer.cachePrefix.resolve(task.relativeLogPath);
-					map.put("Log file", html.createAnchor(relativeLogPath, task.relativeLogPath.getFileName()));
+					Path relativeLogPath = productServer.cachePrefix.resolve(task.paths.relativeLogPath);
+					map.put("Log file", html.createAnchor(relativeLogPath, task.paths.relativeLogPath.getFileName()));
 				}
 
 				if (task.log.getStatus() <= Log.Status.ERROR.level){
@@ -644,12 +644,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					//html.appendTag(SimpleHtml.Tag.PRE, String.format("Success/error status: %d", task.log.getStatus()));
 				}
 
-				if ((task.relativeGraphPath != null)){ //  && (task.graph != null)
+				if ((task.paths.relativeGraphPath != null)){ //  && (task.graph != null)
 
 					task.log.debug("Writing graph to SVG file");
 					Path graphPath = task.writeGraph();
 					//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
-					//		task.relativeGraphPath, graphPath.toFile().exists()));
+					//		task.paths.relativeGraphPath, graphPath.toFile().exists()));
 					if (ProductServer.serverGraph != null){
 						String graphFileName = productServer.serverLog.logFile.getParent()+"/NutShell.svg";
 						try {
@@ -672,7 +672,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						graphElem.setAttribute("type", "image/svg+xml");
 						graphElem.setAttribute("border", "1");
 						//graphElem.setAttribute("onclick", "alert('Not implemented')");
-						graphElem.setAttribute("title", task.relativeGraphPath.getFileName().toString());
+						graphElem.setAttribute("title", task.paths.relativeGraphPath.getFileName().toString());
 
 						// For some reason, this does not work. Or it was not clickable...
 						// graphElem.setAttribute("src", relativeGraphPath.toString());
@@ -695,7 +695,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 						//Element span =
 						html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating the process graph: ");
-						html.appendAnchor("cache/"+task.relativeGraphPath, task.relativeGraphPath.getFileName().toString());
+						html.appendAnchor("cache/"+task.paths.relativeGraphPath, task.paths.relativeGraphPath.getFileName().toString());
 						html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
 						// Comments! Consider tail?
 
@@ -719,12 +719,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						Element graphElem = html.createElement(SimpleHtml.Tag.IMG);
 						graphElem.setAttribute("type", "image/svg+xml");
 						graphElem.setAttribute("border", "1");
-						graphElem.setAttribute("src", "cache/"+task.relativeGraphPath.toString());
+						graphElem.setAttribute("src", "cache/"+task.paths.relativeGraphPath.toString());
 						html.appendElement(graphElem);
 						*/
 					}
-					Path relativeGraphPath = productServer.cachePrefix.resolve(task.relativeGraphPath);
-					map.put("Graph", html.createAnchor(relativeGraphPath, task.relativeGraphPath.getFileName()));
+					Path relativeGraphPath = productServer.cachePrefix.resolve(task.paths.relativeGraphPath);
+					map.put("Graph", html.createAnchor(relativeGraphPath, task.paths.relativeGraphPath.getFileName()));
 
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}
@@ -740,7 +740,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			// NOTE: these assume ExternalGenerator?
-			Path gen = Paths.get("products", task.productDir.toString(), ExternalGenerator.scriptName);
+			Path gen = Paths.get("products", task.paths.productDir.toString(), ExternalGenerator.scriptName);
 			map.put("Generator dir", html.createAnchor(gen.getParent(),null));
 			map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
 			// map.put("actions", batch.instructions);
@@ -774,7 +774,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// <embed type="text/html" src="snippet.html" width="500" height="200">
 			Element embed = html.appendTag(SimpleHtml.Tag.EMBED);
 			embed.setAttribute("type", "text/html");
-			embed.setAttribute("src", Paths.get("cache").resolve(task.relativeLogPath).toString());
+			embed.setAttribute("src", Paths.get("cache").resolve(task.paths.relativeLogPath).toString());
 			embed.setAttribute("width", "100%");
 			embed.setAttribute("height", "500");
 			embed.setAttribute("class", "code"); // Has no effect?

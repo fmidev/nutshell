@@ -20,7 +20,7 @@ public class TaskGraphNode {
 
         node.attributes.put("style", "filled");
         // if (result != null){
-        File p = task.outputPath.toFile();
+        File p = task.paths.outputPath.toFile();
         if (p.exists()){
             String color = "orange"; // ripe fruit
             long ageSeconds = (System.currentTimeMillis() - p.lastModified())/1000;

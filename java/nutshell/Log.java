@@ -113,16 +113,28 @@ public class Log implements AutoCloseable {
 	public TextOutput textOutput = plainText; // Note: vt100Text
 
 
-	// public Flags decorations;
 	final
-	public Flags decoration = new Flags(TextOutput.Options.class);
+	protected Flags decoration = new Flags(TextOutput.Options.class);
 
+	/** Set colour and highlighting
+	 *
+	 *
+	 * @param s
+	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 */
 	public void setDecoration(String s) throws NoSuchFieldException, IllegalAccessException {
 		decoration.set(s);
-	};
+	}
+
 	public void setDecoration(TextOutput.Options... dec){
 		decoration.set(dec);
 	}
+
+	public void clearDecoration()  {
+		decoration.clear();
+	}
+
 
 	public void setDecoration(Flags flags)  {
 		decoration.set(flags);
