@@ -43,6 +43,7 @@ import static java.nio.file.Files.*;
  *  have several timestamps, like computing time and valid time.
  *
  *  Some version history
+ *  3.7.5 Fixed double response.getOutputStream() call – STREAM ends silently.
  *  3.7.4 Fixed timeformat bug with synchronized
  *  3.6 Adds INPUT_PREFIX - the common prefix for all the retrieved input paths.
  *  3.5 Added *.sh link in NutLet
@@ -56,7 +57,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	//static
 	public String getVersion(){
-		return "3.7.4";
+		return "3.7.5";
 	}
 
 	ProductServer() {
@@ -121,6 +122,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	 * A "tray" containing both the product query info and the resulting object if successfully queried.
 	 * Task does not know about the generator. Notice GENERATE and getParamEnv.
 	 */
+	// static
 	public class Task extends Thread {
 
 		final HttpLog log;
@@ -172,15 +174,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param graph
 		 * @return
 		 */
-		public Graph getGraph(Graph graph) {
+		public Graph getGraphOld(Graph graph) {
 
 			if (graph == null) {
 				graph = new Graph(this.info.PRODUCT_ID);
-				graph.attributes.put("label", String.format("NutShell request: %s", this));
+				graph.attributes.put("label", String.format("OLDished  NutShell request: %s", this));
 			}
 
 			// Ensure this task (and its descendants) on the Graph.
-			Graph.Node node = getGraphNode(graph, null);
+			//Graph.Node node = getGraphNode(graph, null);
 
 			return graph;
 		}
@@ -191,7 +193,8 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * @param id – identifier for this node; typically input variable name like $FIKOR, or product id radar.polar.fikor.
 		 * @return – created node.
 		 */
-		public Graph.Node getGraphNode(Graph graph, String id){
+
+		public Graph.Node getGraphNodeOld(Graph graph, String id){
 			if (graph == null){
 				graph = new Graph("request: " + this.info.PRODUCT_ID);
 			};
@@ -227,17 +230,18 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//if (result instanceof Path){
 			Instructions instr = new Instructions();
 			instr.set(OutputType.STATUS, ActionType.INPUTLIST); //, ActionType.MAKE);
-			instr.toString();
-			//instr.add(instructions.value & (ActionType.GENERATE | ActionType.MAKE));
+			// instr.toString();
+			// instr.add(instructions.value & (ActionType.GENERATE | ActionType.MAKE));
 			node.attributes.put("href", String.format(
 					"?instructions=%s&amp;product=%s", instr, info.getFilename()));
 					//"?instructions=GENERATE,STATUS&amp;product=%s", info.getFilename()));
 			//}
 
-
 			for (Map.Entry<String,Task> entry: inputTasks.entrySet()) {
 				Task t = entry.getValue();
-				Graph.Node n = t.getGraphNode(graph, entry.getKey()+"\n"+t.info.PRODUCT_ID);
+
+				//Graph.Node n = t.getGraphNode(graph, entry.getKey()+"\n"+t.info.PRODUCT_ID);
+				Graph.Node n = TaskGraphNode.getGraphNode(t, graph);
 				//System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
 				Graph.Node.Link link = node.addLink(n);
 				// TODO: Style
@@ -271,15 +275,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 						}
 						else {
 						}
-						/*
-						else if (t.instructions.isSet(ActionType.MAKE)){
-							label = ""+t.log.indexedState.getIndex(); //"MAKE";
-						}
-						else if (t.instructions.isSet(ActionType.EXISTS)){
-							label = ""+t.log.indexedState.getIndex();
-							link.attributes.put("style", "dotted");
-						}*/
-						// REMOVED link.attributes.put("label", label);
+
 					}
 					//link.attributes.put("", "");
 				}
@@ -292,13 +288,14 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 
 
+
 		/**
 		 * Product generation task defining a product instance and operations on it.
 		 * <p>
 		 * In this version, directives can be set but only through '?'
 		 *
 		 * @param productStr
-		 * @param instructions - definition how a product is retrieved and handled thereafter - @see #Actions
+		 * @param instr - definition how a product is retrieved and handled thereafter - @see #Actions
 		 * @param parentLog    - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
 		 */
@@ -1345,8 +1342,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		public Path writeGraph() {
 			Path graphFile = CACHE_ROOT.resolve(relativeGraphPath);
 			log.special(String.format("Writing graph to file: %s", graphFile));
-			Graph graph = this.getGraph(null);
-			//graph.graphProto.attributes.put("size", "24,20");
+
+			// Graph graph = this.getGraph(null);
+			// Graph graph = this.getGraph();
+			Graph graph = new Graph(this.info.PRODUCT_ID);
+			graph.attributes.put("label", String.format("NutShell request: %s", this));
+
+			TaskGraphNode.getGraphNode(this, graph);
+
+			// graph.graphProto.attributes.put("size", "24,20");
 			// graph.nodeProto.attributes.put("shape", "record");
 			graph.nodeProto.attributes.put("shape", "box");
 			try {
@@ -2203,7 +2207,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.info(String.format("Status:\t%s", task.log.indexedState.getMessage()));
 			}
 
-			task.getGraphNode(serverGraph, entry.getKey()+'$');
+			// Collect information on overall dependencies ("product flow").
+			TaskGraphNode.getGraphNode(task, serverGraph);
+			// task.getGraphNode(serverGraph, entry.getKey()+'$');
 
 			if (task.outputPath.toFile().exists()) {
 				log.ok(String.format("File exists:\t %s (%d bytes)", task.outputPath.toString(), task.outputPath.toFile().length()));

@@ -147,6 +147,7 @@ if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'tomcat' ] || [ $NU
 
     show_variable NUTSHELL_JAR_DIR
     mkdir -v --parents $NUTSHELL_JAR_DIR/
+    backup_file $NUTSHELL_JAR_DIR//Nutlet.jar '%1d'  # <- BACKUP INDEX (one digit)
     cp -v html/WEB-INF/lib/Nutlet.jar $NUTSHELL_JAR_DIR/
     #NUTSHELL_CP=$NUTSHELL_JAR_DIR/Nutlet.jar
     

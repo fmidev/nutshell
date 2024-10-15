@@ -14,7 +14,7 @@ public class TaskGraphNode {
     static
     public Graph.Node getGraphNode(ProductServer.Task task, Graph graph){
         //if (graph == null){
-        graph = new Graph("request: " + task.info.PRODUCT_ID);
+        // graph = new Graph("request: " + task.info.PRODUCT_ID);
 
         Graph.Node node = graph.getNode(task.info.getID());
 
@@ -54,8 +54,9 @@ public class TaskGraphNode {
 
         for (Map.Entry<String, ProductServer.Task> entry: task.inputTasks.entrySet()) {
             ProductServer.Task t = entry.getValue();
-            Graph.Node n = t.getGraphNode(graph, entry.getKey()+"\n"+t.info.PRODUCT_ID);
-            //System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
+            Graph.Node n = getGraphNode(t, graph);
+            // t.getGraphNode(graph, entry.getKey()+"\n"+t.info.PRODUCT_ID);
+            // System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
             Graph.Node.Link link = node.addLink(n);
             // TODO: Style
             if (t.log.indexedState.index > 300) {

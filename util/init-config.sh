@@ -19,6 +19,8 @@ trap goodbye EXIT
 function backup_file(){
 
     local FILE=$1
+    local INDEX_FMT=${2:-'%02d'}
+    # local INDEX_FMT='%02d'
 
     vt100echo cyan "Saving back-up:"
 
@@ -41,7 +43,13 @@ function backup_file(){
 	
 	BACKUP_INDEX=${BACKUP_FILE%.*}
 	BACKUP_INDEX=${BACKUP_INDEX##*.}
-	BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
+	vt100echo green "Current backup index: ${BACKUP_INDEX}"
+	#BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
+	BACKUP_INDEX=`printf "$INDEX_FMT" $(( 1 + 10#$BACKUP_INDEX ))`
+	if (( $BACKUP_INDEX == 0 )); then
+	    vt100echo red "Failed in formatting index: ${BACKUP_INDEX}"
+	    return
+	fi
 	
     fi
 

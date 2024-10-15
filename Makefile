@@ -31,6 +31,10 @@ Nutlet.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 # ${JAVA_CLASS_DIR}/nutshell/resources/nutshell-logo.png
 	@ cp -v $@ html/WEB-INF/lib/
 
+Nutlet.zip: java/nutshell
+	zip $@ -R java/nutshell/*.java
+
+
 META-INF:
 	@mkdir --parents $@
 	echo 'Main-Class: nutshell.Nutlet' > $@/MANIFEST.MF

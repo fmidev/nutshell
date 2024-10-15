@@ -124,7 +124,8 @@ public class ProductServerBase extends Program {
 
     static public int counter = 0;
 
-    static public int getProcessId(){
+    static synchronized
+    public int getProcessId(){
         return  ++counter;
     };
 
@@ -330,26 +331,15 @@ public class ProductServerBase extends Program {
 
     Path getTimestampDir(long time){ // consider DAY or HOUR dirs?
         if (time > 0) {
-            // timeResolution
-            return Paths.get(timeStampDirFormat.format(time));
+            // timeresolution?
+            synchronized (timeStampDirFormat){
+                return Paths.get(timeStampDirFormat.format(time));
+            }
         }
         else {
             return Paths.get("");
         }
     }
-
-    /*
-    Path getTimestampDir(long time, ProductParameters.TimeResolution resolution){ // consider DAY or HOUR dirs?
-        if (time > 0) {
-            // timeResolution
-            return Paths.get(resolution.timeStampFormat.format(time));
-        }
-        else {
-            return Paths.get("");
-        }
-    }
-
-     */
 
 
     /**

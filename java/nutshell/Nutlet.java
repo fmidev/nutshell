@@ -77,6 +77,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		setup.put("Nutlet-version", version);  // TODO
 		productServer = new ProductServer();
 		productServer.serverLog.setVerbosity(Log.Status.DEBUG);
+		productServer.serverLog.decoration.clear();
 		productServer.serverLog.note("Nutlet started");
 	}
 
@@ -525,15 +526,28 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			if (task.log.getStatus() >= Log.Status.NOTE.level) {
 				if (task.instructions.isSet(OutputType.STREAM)) {
-					task.log.debug("sendToStream: " + task.outputPath);
+					productServer.serverLog.warn("pserv.log: sendToStream: " + task.filename);
+					task.log.debug("task.log: sendToStream: " + task.filename);
 					try {
 						sendToStream(task.outputPath, httpResponse);
+						/*
 						taskMap.remove(task.getTaskId());
 						task.close();
 						return;
+						 */
 					} catch (Exception e) {
-						task.instructions.add(OutputType.STATUS);
+						task.log.warn("sendToStream failed for " + task);
+						task.log.warn("exception " + e.getMessage());
+						productServer.serverLog.warn("sendToStream failed for " + task);
+						productServer.serverLog.error("exception " + e.getMessage()); // clean html tags?
+						// productServer.serverLog.error("mika");
+						// task.log.warn("expecting: 'java.lang.IllegalStateException: getOutputStream() has already been called for this response'" );
+						// productServer.serverLog.warn("expecting: 'java.lang.IllegalStateException: getOutputStream() has already been called for this response'" );
+						// task.instructions.add(OutputType.STATUS);
 					}
+					taskMap.remove(task.getTaskId());
+					task.close();
+					return;
 				} else if (task.instructions.isSet(Instructions.REDIRECT)) {
 					taskMap.remove(task.getTaskId());
 					task.close();
