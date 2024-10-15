@@ -12,7 +12,7 @@ public class TaskGraphNode {
      * @return – created node.
      */
     static
-    public Graph.Node getGraphNode(ProductServer.Task task, Graph graph){
+    public Graph.Node drawGraph(ProductServer.Task task, Graph graph){
         //if (graph == null){
         // graph = new Graph("request: " + task.info.PRODUCT_ID);
 
@@ -54,7 +54,7 @@ public class TaskGraphNode {
 
         for (Map.Entry<String, ProductServer.Task> entry: task.inputTasks.entrySet()) {
             ProductServer.Task t = entry.getValue();
-            Graph.Node n = getGraphNode(t, graph);
+            Graph.Node n = drawGraph(t, graph);
             // t.getGraphNode(graph, entry.getKey()+"\n"+t.info.PRODUCT_ID);
             // System.out.println(String.format("%s:\t %s", ec.getKey(), ec.getValue()));
             Graph.Node.Link link = node.addLink(n);

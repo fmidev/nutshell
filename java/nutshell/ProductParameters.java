@@ -86,7 +86,7 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
      */
     protected long time2;
 
-    /** Experimental. Groups may be needed in future.
+    /** Experimental. Groups may be needed in the future.
      *
      *  Consider: 201708121600_radar.rack.comp.map_CONF=FIN__COLORS=TEST.png
      *

@@ -140,7 +140,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		/// Checked, "normalized" filename, with ordered parameters.
-		final public String filename;
+		// final public String filename;
 
 		final public Instructions instructions; // = new Instructions();
 
@@ -192,7 +192,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			id = getProcessId();
 			info = new ProductInfo(productStr);
-			filename = info.getFilename();
+			// filename = info.getFilename();
 			instructions = new Instructions(instr);
 
 			if (info.time > 0){
@@ -253,7 +253,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 			//parentLog.special("koe1");
 			log = new HttpLog(parentLog.getName() + "[" + this.info.PRODUCT_ID + "]", parentLog.getVerbosity());
-			//log.setFormat(parentLog.getFormat());
+			// log.setFormat(parentLog.getFormat());
 			// log.setFormat(LOG_FORMAT);
 			// log.setDecoration(LOG_STYLE);
 			log.set(LOG_TASKS);
@@ -263,15 +263,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (log.textOutput.getFormat() == TextOutput.Format.HTML) {
 				// Is this sometimes confusing?
 				// Consider extension in uppercase: .LOG and  .HTML
-				logPath = CACHE_ROOT.resolve(paths.relativeOutputDir).resolve(filename + "." + label + ".log.html");
+				logPath = CACHE_ROOT.resolve(paths.relativeOutputDir).resolve(paths.filename + "." + label + ".log.html");
 			}
 			else {
-				logPath = CACHE_ROOT.resolve(paths.relativeOutputDir).resolve(filename + "." + label + ".log");
+				logPath = CACHE_ROOT.resolve(paths.relativeOutputDir).resolve(paths.filename + "." + label + ".log");
 			}
 			/*
-				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log.html");
+				this.relativeLogPath = relativeOutputDir.resolve(paths.filename + "." + label + ".log.html");
 			else
-				this.relativeLogPath = relativeOutputDir.resolve(filename + "." + label + ".log");
+				this.relativeLogPath = relativeOutputDir.resolve(paths.filename + "." + label + ".log");
 			 */
 
 			try {
@@ -320,7 +320,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			//log.warn("Where am I?");
 			//log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 			log.info(String.format("Created Task: %s ", this.toString())); //
-			//log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
+			//log.debug(String.format("Created TASK %s [%d] [%s] %s ", this.paths.filename, this.getTaskId(), this.instructions, this.info.directives)); //  this.toString()
 			this.result = null;
 		}
 
@@ -342,9 +342,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		@Override
 		public String toString() {
 			if (this.info.getDirectives().isEmpty())
-				return String.format("%s # %s", this.filename, instructions);
+				return String.format("%s # %s", paths.filename, instructions);
 			else
-				return String.format("%s?%s # %s", this.filename, info.getDirectives(), instructions);
+				return String.format("%s?%s # %s", paths.filename, info.getDirectives(), instructions);
 		}
 
 		public String getStatus() {
@@ -1248,7 +1248,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			Graph graph = new Graph(this.info.PRODUCT_ID);
 			graph.attributes.put("label", String.format("NutShell request: %s", this));
 
-			TaskGraphNode.getGraphNode(this, graph);
+			TaskGraphNode.drawGraph(this, graph);
 
 			// graph.graphProto.attributes.put("size", "24,20");
 			// graph.nodeProto.attributes.put("shape", "record");
@@ -2108,7 +2108,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			}
 
 			// Collect information on overall dependencies ("product flow").
-			TaskGraphNode.getGraphNode(task, serverGraph);
+			TaskGraphNode.drawGraph(task, serverGraph);
 			// task.getGraphNode(serverGraph, entry.getKey()+'$');
 
 			if (task.paths.outputPath.toFile().exists()) {

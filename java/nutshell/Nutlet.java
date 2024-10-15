@@ -45,7 +45,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		public Node getNode(Document basedoc) {
 			Element elem = basedoc.createElement(SimpleHtml.Tag.A.toString());
 			elem.setAttribute("href", String.format("%s/NutShell?product=%s&instructions=MAKE,STATUS",
-					productServer.HTTP_BASE, task.filename)); // , task.instructions
+					productServer.HTTP_BASE, task.paths.filename)); // , task.instructions
 			elem.setAttribute("target", "_new");
 			elem.setTextContent(task.toString());
 			return elem;
@@ -526,8 +526,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			if (task.log.getStatus() >= Log.Status.NOTE.level) {
 				if (task.instructions.isSet(OutputType.STREAM)) {
-					productServer.serverLog.warn("pserv.log: sendToStream: " + task.filename);
-					task.log.debug("task.log: sendToStream: " + task.filename);
+					productServer.serverLog.warn("pserv.log: sendToStream: " + task.paths.filename);
+					task.log.debug("task.log: sendToStream: " + task.paths.filename);
 					try {
 						sendToStream(task.paths.outputPath, httpResponse);
 						/*

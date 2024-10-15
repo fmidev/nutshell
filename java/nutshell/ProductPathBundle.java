@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 public class ProductPathBundle {
 
+    /// Checked, "normalized" filename, with ordered parameters.
     final public String filename;
     final public Path timeStampDir;
     final public Path productDir;
