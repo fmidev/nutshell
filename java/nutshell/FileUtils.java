@@ -247,7 +247,7 @@ public class FileUtils {
     }
 
 
-    static
+    synchronized static
     public void ensureWritableFile(Path path, int groupId, Set<PosixFilePermission> filePerms, Set<PosixFilePermission> dirPerms) throws IOException {
 
         if (!exists(path)) {
