@@ -383,8 +383,7 @@ public class Log implements AutoCloseable {
 		// TODO: design control for buffer size.
 		// TODO: consider: if (size > 1M), clear(), and only light warning in stderr...
 		getPrintStream();
-
-		printStream.print(buffer.toString());
+		printStream.print(buffer);
 		buffer.setLength(0);  // TODO CLEAR?
 
 	}
@@ -577,15 +576,19 @@ public class Log implements AutoCloseable {
 
 	}
 
+	/** Set logging threshold
+	 *
+	 * @param verbosity
+	 * @throws NoSuchFieldException
+	 */
 	public void setVerbosity(String verbosity) throws NoSuchFieldException {
 		setVerbosity(verbosity, false);
 	}
 
-
-		/** Return current level of verbosity
-         *
-         * @return
-         */
+	/** Return current level of verbosity
+	 *
+	 * @return
+	 */
 	public int getVerbosity() {
 		return verbosity;
 	}
@@ -609,6 +612,7 @@ public class Log implements AutoCloseable {
 		return (this.logFile != null);
 	}
 
+	synchronized
 	public void setLogFile(Path path){
 
 		close();
@@ -628,37 +632,44 @@ public class Log implements AutoCloseable {
 			this.logFile = path.toFile();
 			this.fileOutputStream = new FileOutputStream(this.logFile);
 			// this.debug(String.format("Continuing log in file: %s", this.logFile));
-			this.printStream = new PrintStream(this.fileOutputStream);
-			//this.log.printStream = System.err;
-			//this.setVerbosity(Status.DEBUG); //?
-			textOutput.startSection(buffer);
-			this.debug(String.format("Log started: %s", this.logFile));
+			try {
+				this.printStream = new PrintStream(this.fileOutputStream);
+				//this.log.printStream = System.err;
+				//this.setVerbosity(Status.DEBUG); //?
+				textOutput.startSection(buffer);
+				this.debug(String.format("Log started: %s", this.logFile));
+				return;
+			}
+			catch (Exception e) {
+				e.printStackTrace(); //this.log.printStream);
+				System.err.println(String.format("Failed in creating log FILE: %s", path));
+			}
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			e.printStackTrace(); //this.log.printStream);
-			//this.log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-			//this.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR,
-			this.error(String.format("Failed in creating log file: %s", path));
+			System.err.println(String.format("Failed in creating STREAM to log file: %s", path));
 		}
 
-		// oldPrintStream.close();
+		this.logFile = null;
+		this.fileOutputStream = null;
+		this.printStream = System.err;
+
 		/*
-		catch (IndexedException e) {
-			//e.printStackTrace(); //this.log.printStream);
-			this.log(e);
+		catch (IOException e) {
+			e.printStackTrace(); //this.log.printStream);
+			//this.error(String.format("Failed in creating log file: %s", path));
+			System.err.println(String.format("Failed in creating log file: %s", path));
 		}
+
 		 */
 
 	};
 
-	private PrintStream printStream;
-
-	private FileOutputStream fileOutputStream;
-
+	synchronized
 	public PrintStream getPrintStream() {
 		if (printStream == null){
 			printStream = System.err;
-			printStream.print(buffer.toString()); // "Copy" the prefix (Do not clear it, yet!)
+			printStream.print(buffer); // WHY?? "Copy" the prefix (Do not clear it, yet!)
 			printStream.append("NOTE: printStream undefined, using standard error.\n");
 		}
 		return printStream;
@@ -673,6 +684,7 @@ public class Log implements AutoCloseable {
 	 * @throws Throwable
 	 */
 	@Override
+	synchronized
 	public void close()  {
 
 		if (logFile != null){
@@ -685,7 +697,8 @@ public class Log implements AutoCloseable {
 				// Note: matching the section start/end not guaranteed.
 				// Consider skipping this, leaving for user to start and end the tags.
 				textOutput.endSection(buffer);
-				this.printStream.print(buffer);
+				// this.printStream.print(buffer);
+				flushBuffer();
 			}
 
 			if ((this.printStream != System.err) && (this.printStream != System.out)){
@@ -694,7 +707,8 @@ public class Log implements AutoCloseable {
 			}
 		}
 		else {
-			warn(String.format("Closing log (unknown output PrintStream)"));
+			System.err.println(String.format("Closing log (unknown output PrintStream)"));
+			//warn(String.format("Closing log (unknown output PrintStream)"));
 		}
 
 		if (this.fileOutputStream != null){
@@ -810,6 +824,10 @@ public class Log implements AutoCloseable {
 
 		}
 	}
+
+	private PrintStream printStream;
+
+	private FileOutputStream fileOutputStream;
 
 
 

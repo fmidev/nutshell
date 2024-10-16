@@ -212,7 +212,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			final String label = getLabel(instructions.label, getTaskId());
 
-			paths = new nutshell.ProductPathBundle(ProductServer.this, info, "koe");
+			paths = new nutshell.ProductPathBundle(ProductServer.this, info, label);
 
 			if (info.isDynamic()){
 			}
@@ -249,7 +249,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
-			log.debug(String.format("Label: %s %s",  label)); // , labelArray
+			log.debug(String.format("Label: %s",  label)); // , labelArray
 
 			/*
 			// DEBUGGING!
