@@ -86,7 +86,7 @@ if [ "$ARG" == 'demo' ]; then
 fi
 
 # Taking back-up
-backup_file ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf
+backup_file ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf '10' # rotate 10 backups
 cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf
 
 
@@ -105,12 +105,13 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     export HTTP_PREFIX  # Others?
     for i in html/nutweb/*.html; do
 	#DIR=$HTTP_ROOT/
-	vt100echo cyan  "# ... $i"	
-	if [ ${i##*/} == 'template.html' ]; then
-	    cat $i | envsubst > $HTTP_ROOT/nutweb/${i##*/}
+	FILENAME=${i##*/}
+	vt100echo cyan  "# ... $i"
+	if [ $FILENAME == 'template.html' ]; then
+	    cat $i | envsubst > $HTTP_ROOT/nutweb/${FILENAME}
 	    #cp -v $i $HTTP_ROOT/nutweb/
 	else
-	    cat $i | envsubst > $HTTP_ROOT/${i##*/}
+	    cat $i | envsubst > $HTTP_ROOT/${FILENAME}
 	    #cp -v $i $HTTP_ROOT/
 	fi
     done
@@ -118,7 +119,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     vt100echo cyan  "# Copying images"	
     cp -v html/favicon.ico $HTTP_ROOT/
     mkdir -v --parents $HTTP_ROOT/img
-    cp -v html/img/* $HTTP_ROOT/img
+    cp -v html/img/*   $HTTP_ROOT/img
     
     #for i in html/nutweb/*.HTML; do	
     #done
@@ -147,7 +148,8 @@ if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'tomcat' ] || [ $NU
 
     show_variable NUTSHELL_JAR_DIR
     mkdir -v --parents $NUTSHELL_JAR_DIR/
-    backup_file $NUTSHELL_JAR_DIR//Nutlet.jar '%1d'  # <- BACKUP INDEX (one digit)
+    backup_file $NUTSHELL_JAR_DIR//Nutlet.jar '10' # rotate 10 backups
+    # '%1d'  # <- BACKUP INDEX (one digit)
     cp -v html/WEB-INF/lib/Nutlet.jar $NUTSHELL_JAR_DIR/
     #NUTSHELL_CP=$NUTSHELL_JAR_DIR/Nutlet.jar
     
@@ -165,7 +167,7 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     show_variable WEB_XML
     if [ -f $WEB_XML ]; then
 	#cp -va $WEB_XML{,.old}
-	backup_file $WEB_XML
+	backup_file $WEB_XML '5' # rotate 5 backups
 	cp -v $WEB_XML{,.old}
 	pushd $HTTP_ROOT/WEB-INF/ &> /dev/null
 	diff web.xml.old web.xml.new

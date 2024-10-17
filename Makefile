@@ -45,8 +45,10 @@ META-INF:
 
 
 # Prepare files for Git export
-prepack: Nutlet.jar html/template
-	for i in html/template/*.HTML; do make $${i%.*}.html; done
+prepack: Nutlet.jar html/nutweb
+# @ mkdir --parents log # Same as for testing
+# for i in html/template/*.HTML; do make $${i%.*}.html; done
+	for i in html/nutweb/*.html; do xmllint --noout $${i}; done
 	cp -v Nutlet.jar html/WEB-INF/lib/
 	@echo -n "Version: "
 	java -cp Nutlet.jar nutshell.ProductServer --log WARNING  --version
