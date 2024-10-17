@@ -123,6 +123,12 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
     
     #for i in html/nutweb/*.HTML; do	
     #done
+    PRODUCT_EXAMPLES="product-examples-$HOSTNAME.json"
+    if [ -f $PRODUCT_EXAMPLES ]; then
+	vt100echo cyan  "# Updating product menu from '$PRODUCT_EXAMPLES':"
+	cp -viu ${PRODUCT_EXAMPLES} $HTTP_ROOT/product-examples.json
+    fi
+
 
     
     NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-"$HTTP_ROOT/WEB-INF/lib"}
