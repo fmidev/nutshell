@@ -40,11 +40,11 @@ function backup_file(){
 	    vt100echo red "Failed in formatting index: ${BACKUP_INDEX}"
 	    return
 	fi
-	vt100echo green "New backup index: ${BACKUP_INDEX}"
+	vt100echo green,dim "New backup index: ${BACKUP_INDEX}"
 	
 	BACKUP_FILE=${FILE}.${BACKUP_INDEX}.bak
 	
-	vt100echo green "New backup index: ${BACKUP_INDEX}"
+	# vt100echo green "New backup index: ${BACKUP_INDEX}"
     else
 	# Full backup file set exists, overwrite the oldest:
 	# Latest backup (whatever index).
@@ -54,7 +54,7 @@ function backup_file(){
     # Check similarity of current file and previous backup
     # Note: file with derived $BACKUP_INDEX may exist (if indexed files missing)
     if [ -f $BACKUP_FILE ]; then
-	diff --brief $FILE $BACKUP_FILE
+	diff --brief $FILE $BACKUP_FILE &> /dev/null
 	if [ $? == 0 ]; then
 	    vt100echo green "Latest backup is equal: $BACKUP_FILE - skipping backup"
 	    return
