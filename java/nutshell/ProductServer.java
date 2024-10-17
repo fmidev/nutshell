@@ -120,6 +120,31 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return generator;
 	}
 
+	static
+	protected void completeInstructions(Instructions instructions){
+
+		// Logical corrections
+		// Note: STATUS involves Task/product wise and also Server level info.
+		if (instructions.isEmpty()
+				|| !instructions.copies.isEmpty()
+				|| !instructions.links.isEmpty()
+				|| (instructions.move != null)
+				|| instructions.involves(PostProcessing.STORE|PostProcessing.LATEST|PostProcessing.SHORTCUT)) {
+			instructions.ensureMakeLevel(Instructions.MakeLevel.MAKE);  // NEW
+			//log.debug(String.format("Instructions (updated): %s", instructions));
+		}
+
+		// Media must be defined in most of the operations (DELETE, EXISTS, MAKE, GENERATE) so define it here.
+		// if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
+		if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS) || instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
+			if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
+				// Note: media selection could be also done by Generator?
+				// log.log(HttpLog.HttpStatus.OK, "Product requested, media type undefined. Setting default: FILE");
+				instructions.add(MediaType.FILE);
+			}
+		}
+
+	}
 
 	/**
 	 * A "tray" containing both the product query info and the resulting object if successfully queried.
@@ -148,25 +173,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		final public Instructions instructions; // = new Instructions();
 
-		/*
-		public Path timeStampDir;
-		public Path productDir;
 
-		public Path relativeOutputDir;
-		public Path relativeOutputDirTmp;
-		public Path relativeOutputPath;
-
-		// Logging & diagnostics
-		private final Path relativeSystemDir;
-		public Path relativeLogPath;
-		public Path relativeGraphPath;
-
-		public Path outputDir;
-		public Path outputDirTmp;
-		public Path outputPath;ss
-		public Path outputPathTmp;
-		public Path storagePath;
-		 */
 		final public nutshell.ProductPathBundle paths;
 
 		// final public ProductTask test = new ProductTask();
@@ -381,29 +388,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 			log.log(HttpLog.HttpStatus.OK, String.format("Preparing %s", this));
 
-
-			// Logical corrections
-			// Note: STATUS involves Task/product wise and also Server level info.
-			if (instructions.isEmpty()
-					|| !instructions.copies.isEmpty()
-					|| !instructions.links.isEmpty()
-					|| (instructions.move != null)
-					|| instructions.involves(PostProcessing.STORE|PostProcessing.LATEST|PostProcessing.SHORTCUT)) {
-				instructions.ensureMakeLevel(Instructions.MakeLevel.MAKE);  // NEW
-				log.debug(String.format("Instructions (updated): %s", instructions));
-			}
-
-
-			// Media must be defined in most of the operations (DELETE, EXISTS, MAKE, GENERATE) so define it here.
-			//if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
-			if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS) || instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
-				if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
-					// Note: media selection could be also done by Generator?
-					log.log(HttpLog.HttpStatus.OK, "Product requested, media type undefined. Setting default: FILE");
-					instructions.add(MediaType.FILE);
-				}
-			}
-			// }
+			ProductServer.completeInstructions(instructions);
 
 			log.log(HttpLog.HttpStatus.ACCEPTED, String.format("Handling %s", this));
 
@@ -423,8 +408,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE) || instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) {
 
 				if (instructions.isSet(MediaType.FILE)) {
-					// if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
-					;
+
 					if (queryFile(fileFinal, TIMEOUT, log) >= 0){
 
 						long ageSec = FileUtils.fileModificationAge(fileFinal);
@@ -432,7 +416,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 						if (ageSec < (2*TIMEOUT)){
 							log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Deleting a freshly (re)generated file? (Age %ss)", ageSec));
-							//log.log(HttpLog.HttpStatus.SEE_OTHER,"Deleting a freshly generated file?");
 						}
 
 						try {
@@ -514,16 +497,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.log(HttpLog.HttpStatus.CREATED, generator.toString());
 
 					if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)){
-						instructions.add(generator.getPrimaryMediaType());
-						/*
-						// if (instructions.involves(Instructions.GENERATE)) {
-						// Consider this.addAction() -> log.debug()
-						if (generator instanceof ExternalGenerator)
-							instructions.add(MediaType.FILE); // PREPARE dir & empty file
-						else
-							instructions.add(MediaType.MEMORY); // Yes, internal should not save?
-
-						 */
+						instructions.add(generator.getPrimaryMediaType()); // FILE or MEMORY
 					}
 
 				}
@@ -553,7 +527,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				try {
 					inputs.putAll(generator.getInputList(this));
-					for (Entry<String,String> s: this.inputs.entrySet()){
+					for (Entry<String,String> s: inputs.entrySet()){
 						log.debug(String.format("%s = '%s'", s.getKey(), s.getValue()));
 					}
 					//statistics.put(info.PRODUCT_ID, inputs.keySet());
@@ -570,7 +544,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				}
 
 				if (!inputs.isEmpty())
-					log.info(String.format("Collected (%d) input requests for: %s", this.inputs.size(), this.info.PRODUCT_ID));
+					log.info(String.format("Collected (%d) input requests for: %s", inputs.size(), info.PRODUCT_ID));
 
 			}
 
