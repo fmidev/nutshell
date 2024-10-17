@@ -20,43 +20,59 @@ function backup_file(){
 
     local FILE=$1
     local INDEX_FMT=${2:-'%02d'}
-    # local INDEX_FMT='%02d'
+    local BACKUP_COUNT=${3:-'12'}
+    
+    local BACKUP_FILE
+    #local BACKUP_INDEX='01'
+    
+    local C=`ls -1 $FILE.[0-9]*.bak | wc -l` &> /dev/null
 
-    vt100echo cyan "Saving back-up:"
+    if (( $C < $BACKUP_COUNT )); then
 
-    # local BACKUP_INDEX=`ls -1 $FILE.[0-9]*.bak | tail -1 | tr -cd '[0-9]'` &> /dev/null
-    local BACKUP_INDEX='01'
-    # Previous backup
-    local BACKUP_FILE=`ls -1 $FILE.[0-9]*.bak | tail -1` &> /dev/null
-
-    if [ "$BACKUP_FILE" != '' ]; then
-
-	# Check similarity of current file and previous backup
-	diff --brief  $FILE $BACKUP_FILE
-	if [ $? == 0 ]; then
-	    vt100echo yellow "Skipping backup (Previous backup equal: $BACKUP_FILE)"
-	    return
-	else
-	    vt100echo cyan "Backup:"
-	fi
-
-	
-	BACKUP_INDEX=${BACKUP_FILE%.*}
-	BACKUP_INDEX=${BACKUP_INDEX##*.}
-	vt100echo green "Current backup index: ${BACKUP_INDEX}"
-	#BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$BACKUP_INDEX ))`
-	BACKUP_INDEX=`printf "$INDEX_FMT" $(( 1 + 10#$BACKUP_INDEX ))`
-	if (( $BACKUP_INDEX == 0 )); then
+	# Compute new index
+	# BACKUP_FILE=`ls -1 $FILE.[0-9]*.bak | tail -1`
+	# BACKUP_INDEX=${BACKUP_FILE%.*}
+	# BACKUP_INDEX=${BACKUP_INDEX##*.}
+	# BACKUP_INDEX=`printf "$INDEX_FMT" $(( 1 + 10#$BACKUP_INDEX ))`
+	#if (( $BACKUP_INDEX == 0 )); then
+	local BACKUP_INDEX=`printf '%02d' $(( 1 + 10#$C ))`
+	if [ $? != 0 ] ; then
 	    vt100echo red "Failed in formatting index: ${BACKUP_INDEX}"
 	    return
 	fi
+	vt100echo green "New backup index: ${BACKUP_INDEX}"
 	
+	BACKUP_FILE=${FILE}.${BACKUP_INDEX}.bak
+	
+	vt100echo green "New backup index: ${BACKUP_INDEX}"
+    else
+	# Full backup file set exists, overwrite the oldest:
+	# Latest backup (whatever index).
+	BACKUP_FILE=`ls -1t $FILE.[0-9]*.bak | tail -1` 	
     fi
 
-    # show_variable BACKUP_INDEX
-    BACKUP_FILE=$FILE.$BACKUP_INDEX.bak
-    cp -vi $FILE $FILE.$BACKUP_INDEX.bak
-    if [ ! -e $BACKUP_FILE ]; then
+    # Check similarity of current file and previous backup
+    # Note: file with derived $BACKUP_INDEX may exist (if indexed files missing)
+    if [ -f $BACKUP_FILE ]; then
+	diff --brief $FILE $BACKUP_FILE
+	if [ $? == 0 ]; then
+	    vt100echo green "Latest backup is equal: $BACKUP_FILE - skipping backup"
+	    return
+	fi
+    fi
+
+    
+    vt100echo cyan "Saving Backup:" #  $BACKUP_FILE"	    
+    # BACKUP_FILE=`ls -1 $FILE.[0-9]*.bak | tail -1` &> /dev/null
+    # Counter of many
+    # local BACKUP_INDEX='01'
+    
+    cp -vi $FILE $BACKUP_FILE
+    # $FILE.$BACKUP_INDEX.bak
+  
+    if [ $? == 0 ]; then # && [ ! -e $BACKUP_FILE ]; then
+	vt100echo green "Saved $BACKUP_FILE"
+    else
 	vt100echo yellow "Warning: could not save: $BACKUP_FILE "
     fi
 
