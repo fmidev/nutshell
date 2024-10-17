@@ -3,10 +3,13 @@
   <head>
     <meta charset="utf-8"/>
     <script type="text/js">
-      var loc = document.location
+      var loc = document.location 
+      function nutshell_body(){
+	  document.title += ' &#x2013; ' + document.location.hostname
+      }
     </script>
   </head>
-  <body>
+  <body onload="nutshell_body()">
     <h3>Menu</h3>
     <ul>
       <li>

@@ -6,7 +6,11 @@
     <link rel="shortcut icon" href="/nutshell/favicon.ico"/>
     <title>Nutshell Product Server</title>
     <link rel="stylesheet" type="text/css" href="/nutshell/nutshell.css"/>
-    <script type="text/javascript">function nutshell_body(){}</script>
+    <script type="text/javascript" id="nutshell_body_script" >
+      function nutshell_body(){
+	  document.title += ' &#x2013; ' + document.location.hostname
+      }
+    </script>
   </head>
   <body onload="nutshell_body()">
     <h1 id="greeting" style="">
