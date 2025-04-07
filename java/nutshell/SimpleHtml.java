@@ -199,6 +199,7 @@ public class SimpleHtml extends SimpleXML{
 			addAutoAnchorSupport();
 
 		// Search for BODY element (should be unique)
+		// ToDO: if BODY was not found at this point, move everything in HTML under BODY
 		this.body = getUniqueElement(this.root, Tag.BODY);
 
 		// Default element to append content with append<ELEMENT>() commands

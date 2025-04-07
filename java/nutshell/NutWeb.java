@@ -373,17 +373,30 @@ public class NutWeb extends HttpServlet {
 
 			/// Notice: not appended to the end of BODY (html.body), but embedded in its SPAN "main".
 			// TODO: lenient. Read HTML contents, if BODY not found.
-			NodeList bodyNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.BODY);
-			// html.appendComment(String.format("Read BODY (%d nodes", bodyNodes.getLength()));
-			//html.appendTag(SimpleHtml.Tag.PRE, String.format("Read BODY ( nodes", bodyNodes.getLength()));
-			html.body.appendChild(html.document.createComment(String.format("Included %d BODY nodes", bodyNodes.getLength())));
-
-			for (int i=0; i< bodyNodes.getLength(); ++i) {
-
-				Node node = bodyNodes.item(i);
-
-				html.main.appendChild(html.document.importNode(bodyNodes.item(i), true));
+			NodeList bodyNodes = null;
+			try {
+				bodyNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.BODY);
+			} catch (Exception e) {
+				html.body.appendChild(html.document.createComment("Input file contained no BODY element, using HTML contents as BODY"));
+				bodyNodes = SimpleHtml.getChildNodes(doc, SimpleHtml.Tag.HTML);
 			}
+
+			if (bodyNodes == null){
+				html.appendTag(SimpleHtml.Tag.PRE, "Failed in reading template doc: no BODY or even HTML element found");
+			}
+			else {
+				// html.appendComment(String.format("Read BODY (%d nodes", bodyNodes.getLength()));
+				// html.appendTag(SimpleHtml.Tag.PRE, String.format("Read BODY ( nodes", bodyNodes.getLength()));
+				html.body.appendChild(html.document.createComment(String.format("Included %d BODY nodes", bodyNodes.getLength())));
+
+				for (int i=0; i< bodyNodes.getLength(); ++i) {
+
+					Node node = bodyNodes.item(i);
+
+					html.main.appendChild(html.document.importNode(bodyNodes.item(i), true));
+				}
+			}
+
 		}
 		catch (Exception e){
 			html.appendTag(SimpleHtml.Tag.H2, "Failed in creating HTML doc ");
