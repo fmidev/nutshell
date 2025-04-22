@@ -62,7 +62,7 @@ function vt100style(){
 
     case $1 in
 	bright)
-	    # Blue prompt
+	    # White prompt
 	    echo 39
 	    ;;
 	dim)

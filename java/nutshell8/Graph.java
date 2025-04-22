@@ -1,15 +1,13 @@
 package nutshell;
 
 
-//import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.NotNull;
 
-// import jakarta..bind.Element;
+import javax.xml.bind.Element;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-
-import jakarta.annotation.Nonnull;
 
 
 class Entity {
@@ -47,7 +45,7 @@ class Entity {
     // Uses String.intern, so accessible only with setter and getter.
     private String name = "?";
 
-    @Nonnull
+    @NotNull
     public void setName(String name) {
         this.name = name.intern();
         // TODO: setID only ig unset?

@@ -8,10 +8,10 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +26,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
 		elem.setTextContent(String.format("NutLet (%s), Java Version (%s) root=%s template=%s",
-				version, getClass().getSimpleName(), HTML_ROOT, HTML_TEMPLATE));
+				version, getClass().getSimpleName(), HTTP_ROOT, HTML_TEMPLATE));
 		return html;
 	}
 
@@ -57,12 +57,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		serialVersionUID = 1293000393642243650L;
 	}
 
-	/// Version history below.
-	/**
-	 *  2.0 – TomCat 10.1 compatibility
-	 *   
-	 */
-	static final public String version = "2.0";
+	static final public String version = "1.7.2";
 
 	String confDir = "";
 
@@ -375,8 +370,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			/// Expected background: a product has been asked using a path /.../cache/...
 			/// TODO: regexp based, and with instr. 'command' detection: query/  storage/ ...
 
-			//final Object requestUri = httpRequest.getAttribute("javax.servlet.error.request_uri");
-			final Object requestUri = httpRequest.getAttribute("jakarta.servlet.error.request_uri");
+			final Object requestUri = httpRequest.getAttribute("javax.servlet.error.request_uri");
 
 			if (requestUri == null){
 				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Product redirection error",
@@ -396,7 +390,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			if (productFile.isEmpty()){
-				Map<String,Path> p = new HashMap<>();
+				Map p = new HashMap();
 				p.put("path", path);
 				p.put("Parent", path.getParent());
 				p.put("FileName", path.getFileName());
@@ -434,7 +428,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "pageName");
-			elem.setTextContent(String.format(" Page: %s/%s ", HTML_ROOT, page ));
+			elem.setTextContent(String.format(" Page: %s/%s ", HTTP_ROOT, page ));
 
 			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
 			sendToStream(html.document, httpResponse);
@@ -815,7 +809,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		String confFiles = productServer.confFiles.stream()
             .map(i -> "--conf "+i)
             .collect( Collectors.joining("."));
-		for (String cmd: new String[]{"nutshell", String.format("java -cp %s/WEB-INF/lib/Nutlet.jar %s", HTML_ROOT, clsName)}){
+		for (String cmd: new String[]{"nutshell", String.format("java -cp %s/WEB-INF/lib/Nutlet.jar %s", HTTP_ROOT, clsName)}){
 			html.appendTag(SimpleHtml.Tag.PRE, String.format("%s --verbose %s --instructions %s %s",
 					cmd, confFiles, batch.instructions, task.info)).setAttribute("class", "code");
 		}

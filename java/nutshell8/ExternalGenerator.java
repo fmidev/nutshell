@@ -3,7 +3,7 @@ package nutshell;
  *  @author Markus.Peura@fmi.fi
  */
 
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;

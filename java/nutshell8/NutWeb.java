@@ -8,15 +8,14 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import jakarta.annotation.Nonnull;
 /*
 import javax.servlet.ServletConfig;
  */
 import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.stream.StreamResult;
 
 // import com.sun.istack.internal.NotNull;
@@ -31,7 +30,7 @@ public class NutWeb extends HttpServlet {
 	/**  System side directory for this HttpServlet
 	 *   Example:
 	 */
-	public String HTML_ROOT = null; //"";
+	public String HTTP_ROOT = null; //"";
 
 
 	/** Name of the HTML document in which the other HTML doc will be embedded.
@@ -72,18 +71,10 @@ public class NutWeb extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
-		// 
-		/** Read settings from WEB-INF/web.xml 
-		 *  Especially HTTP_ROOT
-		 */
 		getTomcatParameters(setup);
 
 		Manip.assignToObjectLenient(setup, this);
 
-		if (HTML_ROOT == null) {
-			System.err.println(setup);
-			throw new ServletException("Required parameter 'HTML_ROOT' undefined (in web.xml)");
-		}
 	}
 
 	/*
@@ -153,8 +144,7 @@ public class NutWeb extends HttpServlet {
 
 			if (fileName.equals("resolve")){
 
-				// final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
-				final Object requestUri = request.getAttribute("jakarta.servlet.error.request_uri");
+				final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
 
 				if (requestUri == null){
 					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "No request_uri for resolving URL", null, response);
@@ -228,7 +218,7 @@ public class NutWeb extends HttpServlet {
 		SimpleHtml html = null;
 		try {
 			//Path path = Paths.get(httpRoot,"template", "main.html");
-			Path path = Paths.get(HTML_ROOT, HTML_TEMPLATE);
+			Path path = Paths.get(HTTP_ROOT, HTML_TEMPLATE);
 			html = new SimpleHtml(path);
 		}
 		catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
@@ -236,7 +226,7 @@ public class NutWeb extends HttpServlet {
 			html = new SimpleHtml(this.getClass().getCanonicalName() + " Exception");
 
 			Element ul = html.getUniqueElement(html.body, SimpleHtml.Tag.UL, "list");
-			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpRoot: %s", HTML_ROOT) );
+			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpRoot: %s", HTTP_ROOT) );
 			html.appendElement(ul, SimpleHtml.Tag.LI, String.format("httpTemplate: %s", HTML_TEMPLATE) );
 
 			//html.appendElement(ul, SimpleHtml.Tag.LI, e.getMessage());
@@ -284,10 +274,10 @@ public class NutWeb extends HttpServlet {
 	 * @param html
 	 * @param filename
 	 */
-	protected SimpleHtml includeHtml(@Nonnull String  filename, @Nonnull SimpleHtml html) {
+	protected SimpleHtml includeHtml(String filename, SimpleHtml html) {
 
 		// Consider data security?
-		Path path = Paths.get(HTML_ROOT, filename);
+		Path path = Paths.get(HTTP_ROOT, filename);
 
 		try {
 			Document doc = SimpleXML.readDocument(path);
@@ -423,13 +413,13 @@ public class NutWeb extends HttpServlet {
 
 
 	protected void sendStatusPage(int status, String statusStr, Object description,
-								  @Nonnull HttpServletResponse response) throws IOException{
+								  HttpServletResponse response) throws IOException{
 		sendStatusPage(status, statusStr, description, null, response);
 	}
 
 	protected void sendStatusPage(int status, String statusStr, Object description,
 								  HttpServletRequest request,
-								  @Nonnull HttpServletResponse response) throws IOException{
+								  HttpServletResponse response) throws IOException{
 
 		response.setStatus(status);
 		response.setContentType("text/html");
@@ -438,12 +428,7 @@ public class NutWeb extends HttpServlet {
 		html.appendTag(SimpleHtml.Tag.H1, statusStr);
 		html.appendTag(SimpleHtml.Tag.TT, "HttpResponse: " );
 		html.appendTag(SimpleHtml.Tag.CODE, status + " " + MapUtils.getConstantFieldName(HttpServletResponse.class, status));
-		
-		if (description == null){
-			html.appendTag(SimpleHtml.Tag.PRE, "Unknown error"); 
-			// html.appendTable((Map) description, "Diagnostics");
-		}
-		else if (description instanceof Exception){
+		if (description instanceof Exception){
 			html.appendTag(SimpleHtml.Tag.H2, ((Exception)description).getMessage());
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
@@ -459,6 +444,7 @@ public class NutWeb extends HttpServlet {
 			//html.appendTag(SimpleHtml.Tag.H2, "Error"); (only if error...)
 			html.appendTag(SimpleHtml.Tag.PRE, description.toString());
 		}
+
 
 		addRequestStatus(html, request);
 		addServerStatus(html);
@@ -499,7 +485,7 @@ public class NutWeb extends HttpServlet {
 	 * @param response - response, output stream of which will be written to.
 	 * @throws IOException
 	 */
-	void sendToStream(Document document, @Nonnull HttpServletResponse response) throws IOException {
+	void sendToStream(Document document, @NotNull HttpServletResponse response) throws IOException {
 		// Starts with: <!DOCTYPE html>
 		SimpleHtml.writeDocument(document, new StreamResult(response.getWriter()));
 	}
@@ -566,9 +552,8 @@ public class NutWeb extends HttpServlet {
 	 */
 	private Map<String,Object> getTomcatParameters(Map<String,Object> map){
 
-		if (map == null) {
+		if (map == null)
 			map = new HashMap<>();
-		}
 
 		try {
 			Enumeration<String> names = getInitParameterNames();

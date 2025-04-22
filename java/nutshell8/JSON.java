@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.annotation.Nonnull;
-
 public class JSON { //extends HashMap<String,JSON> {
 
     static
@@ -101,7 +99,7 @@ public class JSON { //extends HashMap<String,JSON> {
 
 
     public
-    JSON ensureChild(@Nonnull String key){
+    JSON ensureChild(@NotNull String key){
 
         if (key.isEmpty())
             return this;
