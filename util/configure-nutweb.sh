@@ -11,7 +11,10 @@ source util/utils.sh
 CONF_FILE="nutweb-${HOSTNAME}.cnf"
 #read_and_backup_file  $CONF_FILE
 
-backup_file  $CONF_FILE 
+vt100echo green,dim "This is $0"
+read_config $CONF_FILE 
+
+backup_file $CONF_FILE 
 
 
 echo "# Conf by $USER@$HOSTNAME on $DATE " > $CONF_FILE

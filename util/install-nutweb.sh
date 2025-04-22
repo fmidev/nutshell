@@ -7,7 +7,9 @@ source util/utils.sh
 
 vt100echo green,dim "This is $0"
 
-read_config nutweb-$HOSTNAME.cnf
+CONF_FILE="nutweb-${HOSTNAME}.cnf"
+read_config $CONF_FILE
+# read_config nutweb-$HOSTNAME.cnf
 # note: all vars exported
 
 vt100echo green "# Creating HTML_ROOT=${HTML_ROOT}"
