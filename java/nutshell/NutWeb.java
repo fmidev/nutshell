@@ -131,27 +131,46 @@ public class NutWeb extends HttpServlet {
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
+		
 		if (parameterMap.isEmpty()) {
+			
+			// Simple file request, no '?' followed by GET parameter string
+			
+			String requestUri = request.getRequestURI();
 
-			String uri = request.getRequestURI();
-
-			fileName = uri.replace(request.getContextPath(), "");
+			fileName = requestUri.replace(request.getContextPath(), ""); // = /nutweb
 
 			if (fileName.equals("/")){
 				fileName = "index.html"; // could be "/index.html";
 			}
+			else if (fileName.equals(request.getServletPath())){  // = /NutWeb
+				fileName = ""; 
+			}
 
-			if (! fileName.endsWith(".html")) {  // TXT, PNG, JPG...
-				super.doGet(request, response);
+			
+			/*
+			if (! fileName.endsWith(".html")) {  // TXT,  PNG, JPG...
+				super.doGet(request, response); 
 				return;
 			}
+			*/
 
 		}
 		else {
 
 			fileName = request.getParameter("page");
+			if (fileName == null) {
+				if (request.getParameterMap().size() == 1) { // and value empty...
+					fileName = request.getQueryString();
+					//sendStatusPage(HttpServletResponse.SC_OK, "Parameter 'page' not given", request.getParameterMap(), request, response);										
+				}
+				else {
+					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parameter 'page' not given", request.getParameterMap(), request, response);					
+					return;
+				}
+			}
 
-			if (fileName.equals("resolve")){
+			if (fileName.equals("resolve") || fileName.equals("handleNotFound")){
 
 				// final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
 				final Object requestUri = request.getAttribute("jakarta.servlet.error.request_uri");
@@ -164,8 +183,8 @@ public class NutWeb extends HttpServlet {
 					fileName = requestUri.toString();
 					// Trunc to filename only
 					// Path path = Paths.get(requestUri.toString());
-					//pageName = path.getFileName().toString();
-					sendStatusPage(HttpServletResponse.SC_OK, "Resolving URL: ", fileName, response);
+					// pageName = path.getFileName().toString();
+					sendStatusPage(HttpServletResponse.SC_OK, "Page not found", fileName, response);
 					return;
 				}
 
@@ -178,6 +197,19 @@ public class NutWeb extends HttpServlet {
 			}
 
 		}
+
+		if (fileName.isEmpty()) {  // TXT,  PNG, JPG...
+			sendStatusPage(HttpServletResponse.SC_OK, "Hello!", "Status:", request, response);			
+			return;
+		}
+
+		
+		if (! fileName.endsWith(".html")) {  // TXT,  PNG, JPG...
+			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, String.format("File type of '%s' is not known", fileName), fileName, request, response);			
+			// super.doGet(request, response); 
+			return;
+		}
+		
 
 		SimpleHtml html = includeHtml(fileName); // what if fail?
 

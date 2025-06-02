@@ -36,7 +36,7 @@ function backup_file(){
     if [ -f "$BACKUP_FILE" ]; then
 	diff --brief $FILE $BACKUP_FILE &> /dev/null
 	if [ $? == 0 ]; then
-	    vt100echo green,dim "Latest backup seem equal: $BACKUP_FILE - skipping backup"
+	    vt100echo green,dim "Skipping backup - the latest is equal: $BACKUP_FILE"
 	    return
 	fi
     fi
