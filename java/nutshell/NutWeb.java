@@ -205,11 +205,11 @@ public class NutWeb extends HttpServlet {
 				return;
 			}
 			else {
-				fileName = requestUri.toString();
+				// fileName = requestUri.toString();
 				// Trunc to filename only
 				// Path path = Paths.get(requestUri.toString());
 				// pageName = path.getFileName().toString();
-				sendStatusPage(HttpServletResponse.SC_OK, "Page not found", fileName, response);
+				sendStatusPage(HttpServletResponse.SC_NOT_FOUND, String.format("Page '%s' not found [%s]", requestUri, fileName), fileName, response);
 				return;
 			}
 
@@ -557,7 +557,7 @@ public class NutWeb extends HttpServlet {
 			html.appendTable(Config.getValues(request, new HashMap<String, Object>()), null);
 		}
 		else {
-			html.appendTag(SimpleHtml.Tag.PRE, "Request was null"); 
+			html.appendTag(SimpleHtml.Tag.PRE, "Request was null."); 
 			//html.body.appendChild(html.document.createComment("request == null"));
 		}
 	}
