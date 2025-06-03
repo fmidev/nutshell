@@ -56,6 +56,8 @@ public class NutWeb extends HttpServlet {
 
 	final Map<String,Object> setup;
 
+	private	ServletConfig servletConfig;
+	
 	/**
 	 *
 	 */
@@ -72,6 +74,8 @@ public class NutWeb extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
+		servletConfig = config;
+		
 		// 
 		/** Read settings from WEB-INF/web.xml 
 		 *  Especially HTTP_ROOT
@@ -140,14 +144,23 @@ public class NutWeb extends HttpServlet {
 
 			fileName = requestUri.replace(request.getContextPath(), ""); // = /nutweb
 
+			if (fileName.equals(request.getServletPath())){  // = /NutWeb
+				// This happens if a single question mark is appended: "/nutweb/NutWeb?"
+				fileName = "";
+			}
+			// The path starts with a "/" character but does not end with a "/" character.
+			/*
 			if (fileName.equals("/")){
 				fileName = "index.html"; // could be "/index.html";
 			}
-			else if (fileName.equals(request.getServletPath())){  // = /NutWeb
-				fileName = ""; 
-			}
-
+			*/
 			
+			//else if (fileName.equals(request.getServletPath())){  // = /NutWeb
+			// else if (fileName.equals("/NutWeb")){  // = /NutWeb
+			//	fileName = "nutweb/error.html"; 
+			// }
+
+			//Object obj = org.apache.catalina.servlets.DefaultServlet.class;
 			/*
 			if (! fileName.endsWith(".html")) {  // TXT,  PNG, JPG...
 				super.doGet(request, response); 
@@ -170,43 +183,50 @@ public class NutWeb extends HttpServlet {
 				}
 			}
 
-			if (fileName.equals("resolve") || fileName.equals("handleNotFound")){
+		}
+		
+		/*
+		if (fileName.isEmpty()) {  // TXT,  PNG, JPG...
+			sendStatusPage(HttpServletResponse.SC_OK, "Empty fileName", "Dumping status...", request, response);			
+			return;
+		}
+		*/
 
-				// final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
-				final Object requestUri = request.getAttribute("jakarta.servlet.error.request_uri");
+		if (fileName.isEmpty() || fileName.equals("/")){
+			fileName = "index.html"; // could be "/index.html";
+		} 
+		else if (fileName.equals("handleNotFound") || fileName.equals("404") || fileName.equals("resolve")){
 
-				if (requestUri == null){
-					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "No request_uri for resolving URL", null, response);
-					return;
-				}
-				else {
-					fileName = requestUri.toString();
-					// Trunc to filename only
-					// Path path = Paths.get(requestUri.toString());
-					// pageName = path.getFileName().toString();
-					sendStatusPage(HttpServletResponse.SC_OK, "Page not found", fileName, response);
-					return;
-				}
+			// final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
+			final Object requestUri = request.getAttribute("jakarta.servlet.error.request_uri");
 
-				//sendStatusPage(HttpServletResponse.SC_OK, "Yes!", requestUri, response);
-				//return;
+			if (requestUri == null){
+				sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "No request_uri for resolving URL", null, response);
+				return;
 			}
-			else if (fileName.equals("status")){
-				sendStatusPage(HttpServletResponse.SC_OK, "Yes", "Well done", request, response);
+			else {
+				fileName = requestUri.toString();
+				// Trunc to filename only
+				// Path path = Paths.get(requestUri.toString());
+				// pageName = path.getFileName().toString();
+				sendStatusPage(HttpServletResponse.SC_OK, "Page not found", fileName, response);
 				return;
 			}
 
+			//sendStatusPage(HttpServletResponse.SC_OK, "Yes!", requestUri, response);
+			//return;
 		}
-
-		if (fileName.isEmpty()) {  // TXT,  PNG, JPG...
-			sendStatusPage(HttpServletResponse.SC_OK, "Hello!", "Status:", request, response);			
+		else if (fileName.equals("status")){
+			sendStatusPage(HttpServletResponse.SC_OK, "Yes", "Well done", request, response);
 			return;
 		}
 
 		
+		
+		
 		if (! fileName.endsWith(".html")) {  // TXT,  PNG, JPG...
-			sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, String.format("File type of '%s' is not known", fileName), fileName, request, response);			
-			// super.doGet(request, response); 
+			// sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, String.format("File type of '%s' is not known", fileName), fileName, request, response);			
+			super.doGet(request, response); 
 			return;
 		}
 		
@@ -511,17 +531,34 @@ public class NutWeb extends HttpServlet {
 
 		html.appendTag(SimpleHtml.Tag.H1, "Environment variables");
 		html.appendTable(System.getenv(), null);
-
+		
+		if (servletConfig != null) {
+			html.appendTag(SimpleHtml.Tag.H1, "ServletConfig");
+			html.appendTable(Config.getValues(servletConfig, new HashMap<String, Object>()), null);			
+		}
+		
 
 	}
 
 	protected void addRequestStatus(SimpleHtml html, HttpServletRequest request) {
 		if (request != null) {
-			html.appendTag(SimpleHtml.Tag.H1, "Query string");
-			html.appendTable(request.getParameterMap(), null);
+			html.appendTag(SimpleHtml.Tag.H1, "Query parameters");
+			Map<String, String[]> params = request.getParameterMap();
+			if (params == null) {
+				html.appendTag(SimpleHtml.Tag.PRE, "(null) ???");		
+			}
+			else if (params.isEmpty()) {
+				html.appendTag(SimpleHtml.Tag.PRE, "(empty)");				
+			}
+			else {
+				html.appendTable(params, null);				
+			}
 			html.appendTag(SimpleHtml.Tag.H1, "HttpServletRequest");
-			//html.appendTable(getConf(request), null);
-			html.appendTable(Config.getValues(request), null);
+			html.appendTable(Config.getValues(request, new HashMap<String, Object>()), null);
+		}
+		else {
+			html.appendTag(SimpleHtml.Tag.PRE, "Request was null"); 
+			//html.body.appendChild(html.document.createComment("request == null"));
 		}
 	}
 

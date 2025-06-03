@@ -43,6 +43,7 @@ import static java.nio.file.Files.*;
  *  have several timestamps, like computing time and valid time.
  *
  *  Some version history
+ *  4.0 Fixed web.xml rules, simplified doGet()
  *  3.7.7 Methods moved to enclosing class.
  *  3.7.6 External path container: {@link ProductPathBundle}
  *  3.7.5 Fixed double response.getOutputStream() call – STREAM ends silently.
@@ -60,7 +61,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 	//static
 	public String getVersion(){
 		//return "3.7.7";
-		return "4.0";  // TomCat 10.1
+		return "4.1";  // TomCat 10.1
 	}
 
 	ProductServer() {
