@@ -8,7 +8,8 @@
 export DATE=`date +'%Y-%m-%d %H:%M'`
 
 
-source ./utils.sh
+#source ./utils.sh
+source util/utils.sh
 
 # Bash special
 trap goodbye EXIT
