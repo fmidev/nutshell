@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TomCat 10 syntax -->
+<Context path="$HTTP_PREFIX" docBase="$HTML_ROOT" >
+  <!-- Enable symbolic links -->
+  <Resources allowLinking="true"/>
+</Context>

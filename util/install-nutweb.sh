@@ -1,23 +1,24 @@
 #!/bin/bash
 
-#TOMCAT=${TOMCAT:-'tomcat8'}
+# TOMCAT=${TOMCAT:-'tomcat8'}
+# consider renaming  
 
 source util/vt100utils.sh
 source util/utils.sh
 
 vt100echo green,dim "This is $0"
 
-CONF_FILE="nutweb-${HOSTNAME}.cnf"
+# For NutShell, use that of nutshell...
+CONF_FILE=${CONF_FILE:-"nutweb-${HOSTNAME}.cnf"}
 read_config $CONF_FILE
+
 # read_config nutweb-$HOSTNAME.cnf
 # note: all vars exported
 
 vt100echo green "# Creating HTML_ROOT=${HTML_ROOT}"
-# mkdir -v --parents --mode gu+rwx $HTML_ROOT
 mkdir -v --parents --mode g+rwx ${HTML_ROOT}
 
 vt100echo green "# Creating \$HTML_ROOT/nutweb/ for templates etc."
-# --parents means here: ok-if-exists-already
 mkdir -v --parents --mode g+rwx ${HTML_ROOT}/nutweb 
 
 # Fixed
@@ -93,9 +94,7 @@ vt100echo green  "# Success"
 vt100echo yellow "# TomCat restart required, for example: "
 vt100echo cyan   "systemctl restart ${TOMCAT}"
 
-
-
-exit 0
+vt100echo green,dim "End of $0"
 
 # These variables must be visible for `envsubst`
 # export USER HOSTNAME 
