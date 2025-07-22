@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	 version="2.5" > 
+
+  <!-- Conf saved by $USER@$HOSTNAME  -->
+  
+  <description>NutWeb - $NAME</description>
+
+  <display-name>NutWeb [$NAME]</display-name>
+
+  <!-- Allow directory listings /-->
+  <servlet>
+    <servlet-name>tomcat_default</servlet-name>
+    <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+    <init-param>
+      <param-name>debug</param-name>
+      <param-value>0</param-value>
+    </init-param>
+    <init-param>
+      <param-name>listings</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+    
+  <!-- servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/nutweb/raw/</url-pattern>
+  </servlet-mapping -->
+
+
+
+
+  
+  <!-- NutWeb conf saved by $USER@$HOSTNAME  /-->
+
+  <servlet>
+
+    <servlet-name>NutWeb</servlet-name>
+    <servlet-class>nutshell.NutWeb</servlet-class>
+    <load-on-startup>1</load-on-startup>
+
+    <!-- init-param>
+      <param-name>listings</param-name>
+      <param-value>true</param-value>
+    </init-param -->
+    
+    <init-param>
+      <param-name>HTML_ROOT</param-name>
+      <param-value>${HTML_ROOT}</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>HTML_TEMPLATE</param-name>
+      <!-- Note: variable now contains the prefix -->
+      <param-value>${HTML_TEMPLATE}</param-value>
+      <!-- param-value>nutweb/${HTML_TEMPLATE}</param-value -->
+    </init-param>
+
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>NutWeb</servlet-name>
+    <url-pattern>/NutWeb</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>NutWeb</servlet-name>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+
+  <!--servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping -->
+
+  <error-page>
+    <error-code>404</error-code>
+    <!-- location>/NutWeb?page=resolve&amp;key2=value2</location -->
+    <location>/NutWeb?page=404</location>
+  </error-page>
+
+  <servlet-mapping>
+    <servlet-name>tomcat_default</servlet-name>
+    <url-pattern>/raw/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>tomcat_default</servlet-name>
+    <url-pattern>/cache/*</url-pattern>
+  </servlet-mapping>
+
+  <!--servlet-mapping>
+    <servlet-name>tomcat_default</servlet-name>
+    <url-pattern>*/</url-pattern>
+  </servlet-mapping -->
+
+  
+  <!-- servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>${HTTP_EXCLUDES}</url-pattern>
+  </servlet-mapping -->
+
+  <!-- servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/nutweb/raw</url-pattern>
+  </servlet-mapping -->
+
+  <!-- NutWeb conf END /-->
+
+</web-app>
