@@ -181,7 +181,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		ProgramRegistry taskRegistry = new ProgramRegistry();
 		ProductServer.Batch batch = new ProductServer.Batch();
-		productServer.populate(batch, taskRegistry);
+		ProductServer.populate(batch, taskRegistry);
 
 		// "Main" command handling loop
 		for (Map.Entry<String,String[]> entry: httpRequest.getParameterMap().entrySet()){
@@ -507,7 +507,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			try {
 				task.execute();
-			} catch (InterruptedException e) {
+			} 
+			catch (InterruptedException e) {
 				taskMap.remove(task.getTaskId());
 				task.close();
 				sendStatusPage(HttpServletResponse.SC_CONFLICT, "Product request interrupted.",
@@ -633,13 +634,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
 			if (task.paths.relativeOutputDir != null) {
 
-				Path relativePath = productServer.cachePrefix.resolve(task.paths.relativeOutputPath);
+				Path relativePath = ProductServer.cachePrefix.resolve(task.paths.relativeOutputPath);
 				//task.paths.relativeOutputDir.toString(), task.info.getFilename());
 				//elem = html.createAnchor(relativePath, relativePath.getFileName());
 				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
 				//elem = html.createAnchor(relativePath.getParent(), null);
 				if ((task.log.logFile!=null) && task.log.logFile.exists()){
-					Path relativeLogPath = productServer.cachePrefix.resolve(task.paths.relativeLogPath);
+					Path relativeLogPath = ProductServer.cachePrefix.resolve(task.paths.relativeLogPath);
 					map.put("Log file", html.createAnchor(relativeLogPath, task.paths.relativeLogPath.getFileName()));
 				}
 
@@ -729,7 +730,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						html.appendElement(graphElem);
 						*/
 					}
-					Path relativeGraphPath = productServer.cachePrefix.resolve(task.paths.relativeGraphPath);
+					Path relativeGraphPath = ProductServer.cachePrefix.resolve(task.paths.relativeGraphPath);
 					map.put("Graph", html.createAnchor(relativeGraphPath, task.paths.relativeGraphPath.getFileName()));
 
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */

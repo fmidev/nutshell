@@ -7,15 +7,12 @@
 source util/vt100utils.sh
 source util/utils.sh
 
-#NICK=
-CONF_FILE="nutweb-${HOSTNAME}.cnf"
-#read_and_backup_file  $CONF_FILE
-
 vt100echo green,dim "This is $0"
+
+CONF_FILE="nutweb-${HOSTNAME}.cnf"
+
 read_config $CONF_FILE 
-
 backup_file $CONF_FILE 
-
 
 echo "# Conf by $USER@$HOSTNAME on $DATE " > $CONF_FILE
 echo >> $CONF_FILE
@@ -36,8 +33,18 @@ ask_variable HTTP_PORT '8080'  "Port for HTTP server"
 # /etc/tomcat10/Catalina/localhost
 # /var/lib/tomcat10/conf -> /etc/tomcat10
 ask_variable CATALINA_DIR '/etc/tomcat10/Catalina/localhost'  "Directory for deployment descriptor nutweb.xml"
+if [ -d $CATALINA_DIR ]; then
+    if [ -w $CATALINA_DIR ]; then
+	vt100echo green,dim   "OK - directory exists and is writable: $CATALINA_DIR"
+    else
+	vt100echo yellow,dim  "Directory exists but is not writable: $CATALINA_DIR"
+	vt100echo cyan  "Consider contacting your admin. You can also reconfigure or edit $CONF_FILE later"
+    fi
+else
+    vt100echo yellow,dim  "Directory does not exist: $CATALINA_DIR"
+fi
 
-ask_variable HTTP_PREFIX "/$NAME" 'Appearing in URL, starting the server path'
+ask_variable HTTP_PREFIX "/$NAME" 'Path prefix appearing in URLs '
 
 ask_variable HTTP_EXCLUDES '/nutweb,/raw,/data,/cache' 'Comma-separated prefixes bypassing NutWeb and directed to default HTML handler'
 
@@ -46,9 +53,10 @@ ask_variable HTTP_EXCLUDES '/nutweb,/raw,/data,/cache' 'Comma-separated prefixes
 ask_variable HTML_ROOT "/opt${HTTP_PREFIX}"  'Directory for web documents'
 
 
-ask_variable  HTML_TEMPLATE 'template.html' "Layout file stored under ./nutweb/"
+ask_variable  HTML_TEMPLATE 'nutweb/template.html' "Layout file that embeds any HTML page requested"
+
 # Store full path of the source
-ask_variable  HTML_TEMPLATE_SRC "./nutweb/tpl/$HTML_TEMPLATE"  'Source file for layout template'
+# ask_variable  HTML_TEMPLATE_SRC "./nutweb/tpl/$HTML_TEMPLATE"  'Source file for layout template'
 
 # Leave basename
 # HTML_TEMPLATE=${HTML_TEMPLATE##*/}

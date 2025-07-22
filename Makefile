@@ -18,6 +18,13 @@ help:
 
 # update-pkg: Nutlet.jar
 # html/template
+configure-nutweb:
+	util/configure-nutweb.sh
+
+install-nutweb:
+	util/install-nutweb.sh
+
+
 install-%:
 	util/install.sh $*
 
