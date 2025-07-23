@@ -63,7 +63,7 @@ function backup_file(){
 	    vt100echo red "Failed in formatting index: ${BACKUP_INDEX}"
 	    return
 	fi
-	vt100echo green,dim "# New back-up index: ${BACKUP_INDEX}"
+	# vt100echo green,dim "# New back-up index: ${BACKUP_INDEX}"
 	
 	BACKUP_FILE=${FILE}.${BACKUP_INDEX}.bak
 	
@@ -73,7 +73,7 @@ function backup_file(){
     fi
 
     
-    vt100echo cyan "Saving Backup:" #  $BACKUP_FILE"	    
+    vt100echo cyan "Saving back-up:" #  $BACKUP_FILE"	    
     #cp -vi $FILE $BACKUP_FILE
     cp -v $FILE $BACKUP_FILE
   

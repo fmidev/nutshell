@@ -658,14 +658,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					//html.appendTag(SimpleHtml.Tag.H4, String.format("%s Exists=%b",
 					//		task.paths.relativeGraphPath, graphPath.toFile().exists()));
 					if (ProductServer.serverGraph != null){
-						String graphFileName = productServer.serverLog.logFile.getParent()+"/NutShell.svg";
+						String graphFileName = null;
 						try {
+							graphFileName = productServer.serverLog.logFile.getParent()+"/NutShell.svg";
 							// TODO logDir
-							ProductServer.serverGraph.dotToFile(graphFileName);
+								ProductServer.serverGraph.dotToFile(graphFileName);
 						}
-						catch (InterruptedException | IOException e) {
+						//catch (InterruptedException e) { // 2025 // | IOException e)
+						catch (Exception e) {
 							task.log.warn(e.getMessage());
-							task.log.fail(String.format("Could not write to %s", graphFileName));
+							task.log.fail(String.format("Could not write to %s", graphFileName));								
 						}
 							// graphPath.getParent().resolve("productServer.svg").toString());
 					}

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<html>
+  <head>
+    <title>Query form</title>
+    <script src="nutshell-form.js" type="text/javascript" ></script>
+  </head>
+  <body style="plain">
+    <form id="form" method="GET" target="product" action="/nutshell/NutShell">
+      <table>
+        <tr>
+          <th class="LEAD" colspan="2">Request</th>
+        </tr>
+        <tr>
+          <td class="LEAD">Product </td>
+          <td>
+            <input id="product" name="product" list="prods" type="text" size="80" value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png"/>
+            <select id="product_examples" onchange="this.form.product.value = this[selectedIndex].value">
+              <option selected="selected"> </option>
+              <option value="demo.image.pattern_WIDTH=300_HEIGHT=200_PATTERN=OCTAGONS.png">Image Pattern</option>
+              <option value="demo.image.pattern_WIDTH=1200_HEIGHT=1200_PATTERN=OCTAGONS.png">Image Pattern (error: too large)</option>
+              <option value="demo.image.pattern_WIDTH=-300_HEIGHT=-200_PATTERN=OCTAGONS.png">Image Pattern (error: illegal parameter values)</option>
+              <option value="demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=SQUARE.png">Image Pattern (error: unsupported parameter values)</option>
+              <option value="demo.image.pattern_WIDTH=200_HEIGHT=200_PATTERN=OCTAGONS.pdf">Image Pattern (error: unsupported format)</option>
+              <option value="demo.map_BBOX=19,59,32,71_SIZE=300,500_CONF=geoserver_PROJ=4326.png">Geoserver</option>
+              <option value="202005080000_demo.cloudy_SIZE=800,600.jpg">Cloudy</option>
+              <option value="201012170840_test.ppmforge.png">Fractal Image (PPMFORGE)</option>
+              <option value="201012170840_test.ppmforge_DIMENSION=2.5_INCLINATION=22.5_POWER=1.0_ICE=0.1_GLACIERS=0.5_WIDTH=400.png">Fractal Image, several parameters</option>
+              <option value="maps.wms_PROJ=4326_BBOX=20,57,25,62_SIZE=512,512_CONF=geoserver_LAYERS=world-map-combo-en.png">Map</option>
+              <option value="201708121600_radar.rack_SIZE=500_ENCODING=S_PROJ=AEQD_SITE=fikor_PALETTE=default.png">Radar image</option>
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64.png">Radar Composite</option>
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default.png">Radar Composite (color)</option>
+              <option value="201708121600_radar.rack.comp_SIZE=800,800_CTARGET=C_SITES=fikor,fiika,fivan_BBOX=18,58,28,64_PALETTE=default_TRANSP2=0.1,0.8.png">Radar Composite (color, transp)</option>
+              <option value="201708121600_radar.rack.doppler.vis_SITE=fikor_COORD=C_STEP=20__COLORS=white,blue,dark-blue:0_SCALE=2_LINEWIDTH=1_BGCOLOR=white.png">Doppler</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Request</td>
+          <td>
+            <!-- NOTE: originally consisted of "request" widgets only /-->
+            <!-- input type="hidden" name="instructions" value="FILE" / -->
+            <fieldset class="inline"><legend>Main action</legend><label><input type="radio" name="instructions" value="DELETE" title="Only delete"/>Delete</label><br/><label><input type="radio" name="instructions" value="EXISTS" title="Check if exists"/>Exists</label><br/><label><input type="radio" name="instructions" value="MAKE" title="Generate only if not existing" selected="selected"/>Make</label><br/><label><input type="radio" name="instructions" value="GENERATE" checked="true" title="Always (re)generate"/>Generate</label>, 
+	      <label>options:
+		<select name="regenerate"><option value="0">0 - Make</option><option value="1" selected="selected">1 - Regenerate product</option><option value="2">2 - Regenerate product + inputs</option><option value="3">3 - Regenerate product + inputs (depth=2)</option><option value="4">4 - Regenerate product + inputs (depth=3)</option><option value="5">5 - Regenerate product + inputs (depth=4)</option></select>
+	      </label><br/></fieldset>
+            <fieldset class="inline">
+              <legend>Return type</legend>
+              <label><input type="radio" name="output" value="STREAM" id="STREAM"/>Product, direct stream</label>
+              <br/>
+              <label><input type="radio" name="output" value="REDIRECT" id="REDIRECT" selected="selected"/>Product, through redirect)</label>
+              <br/>
+              <label><input type="radio" name="output" value="STATUS" id="STATUS"/>Status/Info page</label>
+              <label><input type="checkbox" name="output" value="INPUTLIST" id="INPUTLIST"/>Input list</label>
+              <br/>
+            </fieldset>
+            <!-- label><input type="checkbox" name="request" value="EROR"/>ERR&#x152;E&#xDC;R</label -->
+            <fieldset class="inline"><label><input type="submit" value="Submit"/></label>
+	      &#xA0;
+	    </fieldset>
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Directives</td>
+          <td>
+            <label>
+              <input type="text" name="directives" title="Application specific parameters" value="" size="40"/>
+            </label>
+            <label><input type="checkbox" name="directives" value="DEBUG=true"/>Debug</label>
+          </td>
+        </tr>
+        <tr>
+          <td class="LEAD">Clear cache</td>
+          <td>
+            <button type="button" onclick="if (confirm('Clear cache?')) window.open('NutShell?instructions=CLEAR_CACHE','_cache')">Clear cache</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>
