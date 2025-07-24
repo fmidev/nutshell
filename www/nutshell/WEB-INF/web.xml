@@ -13,7 +13,7 @@
 
   <!-- allow directory listings /-->
   <servlet>
-    <servlet-name>listing</servlet-name>
+    <servlet-name>tomcat_default</servlet-name>
     <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
     <init-param>
       <param-name>debug</param-name>
@@ -27,7 +27,7 @@
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>listing</servlet-name>
+    <servlet-name>tomcat_default</servlet-name>
     <!-- TO DO: selective /-->
     <url-pattern>/</url-pattern>
   </servlet-mapping>
@@ -82,10 +82,23 @@
     <url-pattern>/NutShell</url-pattern>
   </servlet-mapping>
 
+
+  
   <error-page>
     <error-code>404</error-code>
     <location>/NutShell?page=resolve&amp;oldproduct=resolve</location>
   </error-page>
+
+  <servlet-mapping>
+    <servlet-name>tomcat_default</servlet-name>
+    <url-pattern>/cache/*</url-pattern>
+  </servlet-mapping>
+
+
+  <servlet-mapping>
+    <servlet-name>NutShell</servlet-name>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
 
 
   <!-- NutShell conf END /-->
