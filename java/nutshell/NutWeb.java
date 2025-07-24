@@ -136,11 +136,35 @@ public class NutWeb extends HttpServlet {
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
+		// Temporary
+		Map<String, Object> debugMap = new HashMap<String, Object>();
+		debugMap.put("request.getContextPath()", request.getContextPath());
+		debugMap.put("request.getRequestURI()", request.getRequestURI());
+		debugMap.put("request.getServletPath()", request.getServletPath());
+		debugMap.put("request.getPathInfo()", request.getPathInfo());
+		debugMap.put("request.getPathTranslated()", request.getPathTranslated());
+
+		/* IMPORTANT:
+		   request.getRequestURI()	/nutweb/example/test.html
+		   request.getServletPath()	/example/test.html
+		   request.getContextPath()	/nutweb
+		   
+		   Looks like: RequestURI = ContextPath+ServletPath (where "Servlet" does not have to be a Servlet, but can be...?!)
+		   
+		 */
+		
 		
 		if (parameterMap.isEmpty()) {
-			
+
+			fileName = request.getServletPath();
+			if (fileName.equals("/NutWeb")){
+				// This happens (also?) if a single question mark is appended: "/nutweb/NutWeb?"
+				fileName = "";
+			}
+
 			// Simple file request, no '?' followed by GET parameter string
-			
+
+			/*
 			String requestUri = request.getRequestURI();
 
 			fileName = requestUri.replace(request.getContextPath(), ""); // = /nutweb
@@ -149,6 +173,9 @@ public class NutWeb extends HttpServlet {
 				// This happens if a single question mark is appended: "/nutweb/NutWeb?"
 				fileName = "";
 			}
+			*/
+			
+			
 			// The path starts with a "/" character but does not end with a "/" character.
 			/*
 			if (fileName.equals("/")){
@@ -168,18 +195,20 @@ public class NutWeb extends HttpServlet {
 				return;
 			}
 			*/
-
+			
+			// debugMap.put("", );
+			
+			
 		}
 		else {
 
 			fileName = request.getParameter("page");
 			if (fileName == null) {
 				if (request.getParameterMap().size() == 1) { // and value empty...
-					fileName = request.getQueryString();
-					//sendStatusPage(HttpServletResponse.SC_OK, "Parameter 'page' not given", request.getParameterMap(), request, response);										
+					fileName = request.getQueryString();										
 				}
 				else {
-					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Parameter 'page' not given", request.getParameterMap(), request, response);					
+					sendStatusPage(HttpServletResponse.SC_BAD_REQUEST, "Several parameters issued, but 'page' not given", request.getParameterMap(), request, response);					
 					return;
 				}
 			}
@@ -196,7 +225,7 @@ public class NutWeb extends HttpServlet {
 		if (fileName.isEmpty() || fileName.equals("/")){
 			fileName = "index.html"; // could be "/index.html";
 		} 
-		else if (fileName.equals("handleNotFound") || fileName.equals("404") || fileName.equals("resolve")){
+		else if (fileName.equals("404") || fileName.equals("handleNotFound") || fileName.equals("resolve")){
 
 			// final Object requestUri = request.getAttribute("javax.servlet.error.request_uri");
 			final Object requestUri = request.getAttribute("jakarta.servlet.error.request_uri");
@@ -244,6 +273,9 @@ public class NutWeb extends HttpServlet {
 			//html.appendTag(SimpleHtml.Tag.PRE, "Special");
 		}
 
+		html.appendTable(parameterMap, "parameterMap (debugging)");
+		html.appendTable(debugMap, "debugMap");
+		
 		/*
 		NodeList nodeList = SimpleHtml.getChildNodes(html.document, SimpleHtml.Tag.BODY);
 		final int N = nodeList.getLength(); // appending will modify :-E

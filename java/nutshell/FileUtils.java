@@ -195,6 +195,7 @@ public class FileUtils {
          */
         if (!Files.isWritable(path)){
             // experimentalResult |= Permission.WRITE;
+        	// Consider ...
         	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by %s: %s",
                     path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }

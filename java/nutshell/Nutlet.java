@@ -188,10 +188,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		//String page = "menu.html";
 		String page = "";
-		//String product = "";
 
 		// Yes, create for each httpRequest
-
 		ProgramRegistry taskRegistry = new ProgramRegistry();
 		ProductServer.Batch batch = new ProductServer.Batch();
 		ProductServer.populate(batch, taskRegistry);
@@ -223,7 +221,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				if (!value.isEmpty() && parameter.hasParams()){
 					try {
 						parameter.setParams(values);
-						//parameter.exec(); // Remember! And TODO: update()
 						parameter.exec(); // Remember! And TODO: update()
 					}
 					catch (NoSuchFieldException | IllegalAccessException e) {

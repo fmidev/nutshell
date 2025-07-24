@@ -37,8 +37,8 @@ function backup_file(){
     fi
     
     # Check similarity of current file and previous backup (-r)
-    # BACKUP_FILE=`ls -1tr $FILE.[0-9]*.bak | tail -1` &> /dev/null
-    BACKUP_FILE=( `ls -1tr $FILE.[0-9]*.bak &> /dev/null | tail -1` )
+    BACKUP_FILE=`ls -1tr $FILE.[0-9]*.bak | tail -1` &> /dev/null
+    # BACKUP_FILE=( `ls -1tr $FILE.[0-9]*.bak &> /dev/null | tail -1` ) # this fails, always 1
 
     #if [ "$BACKUP_FILE" == '' ]; then
     #	    vt100echo green,dim "First version, skipping back-up"
