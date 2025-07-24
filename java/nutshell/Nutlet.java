@@ -4,6 +4,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -93,6 +94,18 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+
+		/*
+		System.err.println("Trying /tmp/foox ");
+		try {
+			FileUtils.ensureWritableDir(Paths.get("/tmp", "foox"), 998, PosixFilePermissions.fromString("rwxrwxr-x"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.err.println("Trying /tmp/foox END");
+		*/
+		
 		confDir  = config.getInitParameter("confDir");
 		/** **
 		confDir  = config.getInitParameter("confDir");

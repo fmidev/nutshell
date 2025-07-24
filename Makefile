@@ -41,9 +41,10 @@ Nutlet8.jar: META-INF  ${JAVA_CLASS_DIR_OLD}/nutshell8
 
 Nutlet10.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR} nutshell/
+	@java -cp Nutlet10.jar nutshell.ProductServer --log WARNING  --version
 # 
 # ${JAVA_CLASS_DIR}/nutshell/resources/nutshell-logo.png
-	@ cp -v $@ html/WEB-INF/lib/
+	@cp -v $@ html/WEB-INF/lib/
 
 Nutlet10.zip: java/nutshell
 	zip $@ -R java/nutshell/*.java

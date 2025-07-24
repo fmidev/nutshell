@@ -26,9 +26,9 @@ public class FileUtils {
      *  Could be based on {@link PosixFilePermission}
      */
     interface Owner {
-        int USER   = getBit();
-        int GROUP  = getBit();
-        int OTHERS = getBit();
+        int USER   = FileUtils.getBit();
+        int GROUP  = FileUtils.getBit();
+        int OTHERS = FileUtils.getBit();
         int OWNER = USER | GROUP | OTHERS;
     }
 
@@ -195,7 +195,7 @@ public class FileUtils {
          */
         if (!Files.isWritable(path)){
             // experimentalResult |= Permission.WRITE;
-            throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by %s: %s",
+        	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by %s: %s",
                     path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }
 
