@@ -1,30 +1,9 @@
-#!/bin/bash
 
-if [ $# == 0 ]; then
-    echo "NutWeb installation script"
-    # Markus Peura fmi.fi
-    echo "Usage: $0 <conf-name> [<conf-file> <conf-file2> ...]"
-    exit 0
+if [ "$CONF_NAME" == '' ]; then
+    vt100echo yellow "This file should be source'd, not invoked directly"
+    vt100echo red "No '$CONF_NAME' defined, exiting"
+    exit 1
 fi
-
-
-source util/vt100utils.sh
-source util/utils.sh
-
-vt100echo green,dim "This is $0"
-
-vt100echo green "# Reading conf file(s)"
-# Default: NutWeb. For NutShell, use that of nutshell.
-CONF_NAME=${CONF_NAME:-$1}
-CONF_NAME=${CONF_NAME:-'nutweb'}
-shift
-CONF_FILE=${CONF_FILE:-"${CONF_NAME}-${HOSTNAME}.cnf"} # tomcat version?
-for i in $* $CONF_FILE; do
-    read_config $i
-done
-# set
-# exit 1
-echo
 
 DIR_START="www/$CONF_NAME"
 vt100echo green "# Source: ${DIR_START}"
@@ -34,8 +13,8 @@ if [ ! -d "$DIR_START" ]; then
 fi
 
 
-# TODO: add to conf
-TOMCAT=${TOMCAT:-'tomcat10'}
+# TODO: add to conf?
+# TOMCAT=${TOMCAT:-'tomcat10'}
 
 vt100echo green "# Creating directories under HTML_ROOT=${HTML_ROOT}"
 echo
@@ -112,8 +91,6 @@ done
 vt100echo green "# Configuring:"
 echo
 
-# export HTTP_ROOT
-# export HTML_ROOT
 
 vt100echo green "# Writing Deployment Descriptor"
 SRC="$DIR_START/conf/${TOMCAT}-${CONF_NAME}.xml"
@@ -123,31 +100,7 @@ xmllint --noout "$SRC"
 critical_check
 backup_file $DST '5' # rotate 5 backups
 cat ${SRC} | envsubst > ${DST}
-# Note: does not check syntax AFTER variable expansion
+# Note: does not check syntax AFTER variable expansion -> todo?
 echo
-
-# echo HTTP_ROOT=$HTTP_ROOT
-# echo HTML_ROOT=$HTML_ROOT
-
-exit 0
-
-
-vt100echo green  "# Success"
-vt100echo yellow "# TomCat restart required, for example: "
-vt100echo cyan   "systemctl restart ${TOMCAT}"
-
-vt100echo green,dim "End of $0"
-
-# These variables must be visible for `envsubst`
-# export USER HOSTNAME 
-# export NAME HTTP_PREFIX HTML_ROOT HTML_TEMPLATE
-
-
-
-
-
-
-
-
 
 
