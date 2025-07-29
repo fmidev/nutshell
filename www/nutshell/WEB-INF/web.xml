@@ -41,6 +41,7 @@
     <servlet-name>NutShell</servlet-name>
     <servlet-class>nutshell.Nutlet</servlet-class>
 
+    <!-- CHECK -->
     <init-param>
       <param-name>NUTSHELL_CONF</param-name>
       <param-value>${NUTSHELL_CONF}</param-value>

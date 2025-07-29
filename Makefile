@@ -18,6 +18,15 @@ help:
 
 # update-pkg: Nutlet.jar
 # html/template
+
+NUTSHELL_VERSION=tomcat10
+
+configure-nutshell:
+	util/configure-nutshell.sh ${NUTSHELL_VERSION}
+
+install-nutshell:
+	util/install-nutshell.sh ${NUTSHELL_VERSION}
+
 configure-nutweb:
 	util/configure-nutweb.sh
 
@@ -25,11 +34,11 @@ install-nutweb:
 	util/install-nutweb.sh
 
 
-install-%:
-	util/install.sh $*
+#install-%:
+#	util/install.sh $*
 
-configure-%:
-	util/configure.sh $*
+#configure-%:
+#	util/configure.sh $*
 
 
 tests-java:

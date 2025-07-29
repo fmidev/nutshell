@@ -182,7 +182,6 @@ function write_variable(){
 # Utility to change default variables (above)
 # ARGS: <variable-name> <prompt-text>
 function ask_variable(){
-    echo
     local key=$1
     local default=$2
     local value
@@ -192,6 +191,8 @@ function ask_variable(){
     read -e  -i "$X" -p "  $key=" $key
     eval value=\$$key
     write_variable $key "$value"  $*
+    echo
+
     # if [ "$CONF_FILE" != '' ]; then 
     #	echo "# $*" >> $CONF_FILE
     #	echo "$key='$X'" >> $CONF_FILE
@@ -245,14 +246,21 @@ function prepare_dir {
 
     local src_dir=$1
     local dst_subdir=$2
-    local dst_dir=$NUTSHELL_ROOT/$dst_subdir
-    local dst_DIR=\$NUTSHELL_ROOT/$dst_subdir
 
     if [ -d $src_dir ]; then
 	vt100echo green,dim "# Directory exists: $src_dir"
     else
 	mkdir -v --parents $src_dir
     fi
+
+    chmod gu+rwx --changes $src_dir
+
+    return
+    
+    
+    local dst_dir=$NUTSHELL_ROOT/$dst_subdir
+    local dst_DIR=\$NUTSHELL_ROOT/$dst_subdir
+
     
     if [ $dst_dir -ef $src_dir ]; then
 	vt100echo green,dim "# Directory/link exists already: $dst_DIR"
