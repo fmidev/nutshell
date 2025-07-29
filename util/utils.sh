@@ -162,7 +162,7 @@ function read_and_backup_file(){
 function show_variable(){
     local value
     eval value=\$$1
-    vt100echo cyan "# $1=$value"
+    vt100echo cyan,dim "# $1=$value"
 }
 
 # write_variable <key> <value>  <comment>
@@ -239,6 +239,8 @@ function warn_if_unfound(){
 #    fi
 #}
 
+
+# Explain $2
 function prepare_dir {
 
     local src_dir=$1
@@ -247,13 +249,13 @@ function prepare_dir {
     local dst_DIR=\$NUTSHELL_ROOT/$dst_subdir
 
     if [ -d $src_dir ]; then
-	vt100echo green "# Directory exists: $src_dir"
+	vt100echo green,dim "# Directory exists: $src_dir"
     else
 	mkdir -v --parents $src_dir
     fi
     
     if [ $dst_dir -ef $src_dir ]; then
-	vt100echo green "# Directory/link exists already: $dst_DIR"
+	vt100echo green,dim "# Directory/link exists already: $dst_DIR"
 	return
     fi
     

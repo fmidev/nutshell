@@ -44,7 +44,7 @@ Nutlet10.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 	@java -cp Nutlet10.jar nutshell.ProductServer --log WARNING  --version
 # 
 # ${JAVA_CLASS_DIR}/nutshell/resources/nutshell-logo.png
-	@cp -v $@ html/WEB-INF/lib/
+#@cp -v $@ html/WEB-INF/lib/
 
 Nutlet10.zip: java/nutshell
 	zip $@ -R java/nutshell/*.java
@@ -58,11 +58,11 @@ META-INF:
 
 
 # Prepare files for Git export
-prepack: Nutlet10.jar html/nutweb
+prepack: Nutlet10.jar #html/nutweb
 # @ mkdir --parents log # Same as for testing
 # for i in html/template/*.HTML; do make $${i%.*}.html; done
-	for i in html/nutweb/*.html; do xmllint --noout $${i}; done
-	cp -v Nutlet10.jar html/WEB-INF/lib/
+	for i in www/nut*/*.html; do xmllint --noout $${i}; done
+#cp -v Nutlet10.jar html/WEB-INF/lib/
 	@echo -n "Version: "
 	java -cp Nutlet10.jar nutshell.ProductServer --log WARNING  --version
 
@@ -75,6 +75,6 @@ prepack: Nutlet10.jar html/nutweb
 # (Ignore error)
 #	-diff -q $? $@.tmp || mv -v $@.tmp $@
 	-diff -q $? $@
-	cp -vu $@ ./html/nutweb
+	echo "DEPRECATED: cp -vu $@ ./html/nutweb"
 
 

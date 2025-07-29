@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUTSHELL_VERSION=${1:-'tomcat'}
+NUTSHELL_VERSION=${1:-'tomcat10'}
 ARG=$2
 
 source util/vt100utils.sh
@@ -8,19 +8,19 @@ source util/init-config.sh
 
 # vt100echo green "Main options"
 # ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
-# CONF_FILE="nutshell-$NUTSHELL_VERSION.cnf"
+CONF_FILE="nutshell-${NUTSHELL_VERSION}-${HOSTNAME}.cnf"
+show_variable CONF_FILE
 
 if [ -f $CONF_FILE ]; then
     #vt100echo green "Reading CONF_FILE=$CONF_FILE "
     vt100echo green "Reading conf file"
-    show_variable CONF_FILE
     source $CONF_FILE
-    show_variable CONF_FILE
 else
     vt100echo yellow "Conf file does not exist"
-    show_variable CONF_FILE
-    vt100echo yellow "Run first: util/configure.sh $NUTSHELL_VERSION"
+    vt100echo red    "Run first: util/configure.sh $NUTSHELL_VERSION"
+    exit 1
 fi
+
 
 
 vt100echo green "Checking Nutshell root directory"
@@ -86,40 +86,16 @@ if [ "$ARG" == 'demo' ]; then
 fi
 
 # Taking back-up
-backup_file ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf '10' # rotate 10 backups
+backup_file ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf 10 # rotate 10 backups
 cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell-$NUTSHELL_VERSION.cnf
 
 
-if [ $NUTSHELL_VERSION == 'tomcat' ]; then
+#if [ $NUTSHELL_VERSION == 'tomcat' ]; then
+if [ "$TOMCAT" != '' ]; then
 
     show_variable HTTP_ROOT
-    mkdir -v --parents $HTTP_ROOT
-    #mkdir -v --parents $HTTP_ROOT/template # OBSOLETE!
-    mkdir -v --parents $HTTP_ROOT/nutweb
-
-    for i in html/*.{css,js}; do
-	cp -v $i $HTTP_ROOT/
-    done
-
-    vt100echo cyan  "# Copying HTML files"	
-    export HTTP_PREFIX  # Others?
-    for i in html/nutweb/*.html; do
-	#DIR=$HTTP_ROOT/
-	FILENAME=${i##*/}
-	vt100echo cyan  "# ... $i"
-	if [ $FILENAME == 'template.html' ]; then
-	    cat $i | envsubst > $HTTP_ROOT/nutweb/${FILENAME}
-	    #cp -v $i $HTTP_ROOT/nutweb/
-	else
-	    cat $i | envsubst > $HTTP_ROOT/${FILENAME}
-	    #cp -v $i $HTTP_ROOT/
-	fi
-    done
-
-    vt100echo cyan  "# Copying images"	
-    cp -v html/favicon.ico $HTTP_ROOT/
-    mkdir -v --parents $HTTP_ROOT/img
-    cp -v html/img/*   $HTTP_ROOT/img
+    
+    util/install-nutweb.sh nutshell
     
     #for i in html/nutweb/*.HTML; do	
     #done
@@ -129,13 +105,24 @@ if [ $NUTSHELL_VERSION == 'tomcat' ]; then
 	cp -viu ${PRODUCT_EXAMPLES} $HTTP_ROOT/product-examples.json
     fi
 
-
-    
-    NUTSHELL_JAR_DIR=${NUTSHELL_JAR_DIR:-"$HTTP_ROOT/WEB-INF/lib"}
-
 fi
 
 #vt100echo green "# Setting WEB-INF/web.xml"
+
+
+
+if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'docker-java' ]; then
+
+    #cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
+
+    show_variable NUTSHELL_JAR_DIR
+    mkdir -v --parents $NUTSHELL_JAR_DIR/
+    backup_file $NUTSHELL_JAR_DIR/Nutlet.jar '10' # rotate 10 backups
+    # '%1d'  # <- BACKUP INDEX (one digit)
+    cp -v Nutlet10.jar $NUTSHELL_JAR_DIR/
+    #NUTSHELL_CP=$NUTSHELL_JAR_DIR/Nutlet.jar
+    
+fi
 
 if [ $NUTSHELL_VERSION == 'python' ]; then
 
@@ -148,82 +135,9 @@ if [ $NUTSHELL_VERSION == 'python' ]; then
 fi
 
 
-if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'tomcat' ] || [ $NUTSHELL_VERSION == 'docker-java' ]; then
-
-    #cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
-
-    show_variable NUTSHELL_JAR_DIR
-    mkdir -v --parents $NUTSHELL_JAR_DIR/
-    backup_file $NUTSHELL_JAR_DIR//Nutlet.jar '10' # rotate 10 backups
-    # '%1d'  # <- BACKUP INDEX (one digit)
-    cp -v html/WEB-INF/lib/Nutlet.jar $NUTSHELL_JAR_DIR/
-    #NUTSHELL_CP=$NUTSHELL_JAR_DIR/Nutlet.jar
-    
-fi
-
-if [ $NUTSHELL_VERSION == 'tomcat' ]; then
-
-    vt100echo green "# Setting WEB-INF/web.xml"
-    WEB_XML=$HTTP_ROOT/WEB-INF/web.xml
-    export NUTSHELL_ROOT
-    export HTTP_ROOT
-    export HOSTNAME    
-    cat html/WEB-INF/web.xml.tpl | envsubst > $WEB_XML.new
-
-    show_variable WEB_XML
-    if [ -f $WEB_XML ]; then
-	#cp -va $WEB_XML{,.old}
-	backup_file $WEB_XML '5' # rotate 5 backups
-	cp -v $WEB_XML{,.old}
-	pushd $HTTP_ROOT/WEB-INF/ &> /dev/null
-	diff web.xml.old web.xml.new
-	if [ $? != 0 ]; then
-	    vt100echo yellow "Notice above changes in $WEB_XML"
-	fi
-	#mv -v web.xml.new web.xml
-	popd &> /dev/null
-	mv -v $WEB_XML.new $WEB_XML
-    else
-	mv -v $WEB_XML.new $WEB_XML
-    fi
-
-    #<!-- Tomcat 7: -->
-    #<Context allowLinking="true" />
-
-    #<!-- Tomcat 8: -->
-    #<Context>
-    #<Resources allowLinking="true" />
-    #</Context>
-    show_variable TOMCAT_CONF_DIR
-   
-    NUTSHELL_XML=$TOMCAT_CONF_DIR/nutshell.xml
-    show_variable NUTSHELL_XML
-    if [ -w $NUTSHELL_XML ]; then
-	cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML
-    else
-	NUTSHELL_XML_NEW=./html/nutshell.xml.new
-	vt100echo yellow "# WARNING: cannot write directly to: $NUTSHELL_XML"
-	ls -ld  ${NUTSHELL_XML%/*}
-	ls -l   $NUTSHELL_XML
-	vt100echo yellow "# WARNING: writing a draft to:   $NUTSHELL_XML_NEW"
-	vt100echo yellow "# Consider: diff $NUTSHELL_XML  $NUTSHELL_XML_NEW"
-	cat ./html/nutshell.xml.tpl | envsubst > $NUTSHELL_XML_NEW
-	NUTSHELL_XML=$NUTSHELL_XML_NEW
-    fi
-
-    vt100echo green "OK! Now restart Tomcat. E.g. using one of the following commands: "
-    echo "#   sudo /etc/init.d/tomcat8 restart"
-    echo "#   sudo systemctl restart httpd"
-    echo "#   sudo systemctl restart tomcat9"
-    echo
-    #echo "# For local (script) installation: "
-    #echo "#   [sudo] NUTSHELL_VERSION=java util/install-local.sh"
-    
-fi
-
 if [ "$CMD_SCRIPT_DIR" != '' ]; then
 
-    NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell
+    NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell-${NUTSHELL_VERSION}
     vt100echo green "# Installing $NUTSHELL_SH"
     show_variable NUTSHELL_SH
     #DATE=`date --iso-8601=minutes`
@@ -231,6 +145,7 @@ if [ "$CMD_SCRIPT_DIR" != '' ]; then
     cat util/nutshell.sh.tpl | envsubst '$DATE $USER $HOSTNAME $HTTP_ROOT $NUTSHELL_VERSION $NUTSHELL_ROOT $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
     if [ $? == 0 ]; then
 	chmod -v gu+x $NUTSHELL_SH
+	ln -svf $NUTSHELL_SH $CMD_SCRIPT_DIR/nutshell
 	vt100echo cyan  "# Test with: $NUTSHELL_SH --help"
     else
 	vt100echo red "# Failed in writing $NUTSHELL_SH"

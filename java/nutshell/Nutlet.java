@@ -22,6 +22,11 @@ import org.w3c.dom.Node;
 
 public class Nutlet extends NutWeb { //HttpServlet {
 
+	/**  Full system side path to configuration file. Given as servlet-parameter in web.xml
+	 *   Example:
+	 */
+	public String NUTSHELL_CONF = null;
+
 	protected SimpleHtml getHtmlPage(){
 		SimpleHtml html = super.getHtmlPage();
 
@@ -65,7 +70,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	 */
 	static final public String version = "2.0";
 
-	String confDir = "";
+	// String confDir = "";
+	// String NUTSHELL_CONF = "";
 
 
 	//final Map<String,Object> setup;
@@ -106,7 +112,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		System.err.println("Trying /tmp/foox END");
 		*/
 		
-		confDir  = config.getInitParameter("confDir");
+		//NUTSHELL_CONF  = config.getInitParameter("confDir");
 		/** **
 		confDir  = config.getInitParameter("confDir");
 		setup.putAll(readTomcatParameters()); // from ho
@@ -114,11 +120,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		////httpRoot = productServer.setup.getOrDefault("HTTP_ROOT", ".").toString();
 		// productServer.serverLog.setFormat(TextOutput.Format.HTML);
 		// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
-
 		// Note: upon setLogFile() below, this initial log will be dumped?
 		// productServer.readConfig(Paths.get(confDir, "nutshell.cnf")); // Read two times? Or NutLet?
-		productServer.readConfig(Paths.get(confDir, "nutshell-tomcat.cnf")); // Read two times? Or NutLet?
+		// productServer.readConfig(Paths.get(confDir, "nutshell-tomcat.cnf")); // Read two times? Or NutLet?
+		// productServer.readConfig(Paths.get(NUTSHELL_CONF, "nutshell-tomcat.cnf")); // Read two times? Or NutLet?
 
+		productServer.readConfig(Paths.get(NUTSHELL_CONF)); // Read two times? Or NutLet?
+		
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
 
 		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);

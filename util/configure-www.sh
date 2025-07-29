@@ -5,9 +5,9 @@
 
 vt100echo green,dim "WWW server configuration"
 
-if [ "$CONF_NAME" == '' ]; then
+if [ "$CONF_FILE" == '' ]; then
     vt100echo yellow "This file should be source'd, not invoked directly"
-    vt100echo red "No '$CONF_NAME' defined, exiting"
+    vt100echo red "No \$CONF_FILE defined, exiting"
     exit 1
 fi
 
@@ -17,13 +17,13 @@ if [ "$NUTWEB_NAME" == '' ]; then
 fi
 
 if [ "$TOMCAT" == '' ]; then
-    ask_variable TOMCAT 'TOMCAT10'  "TomCat (major) version: 8,9,10"
+    ask_variable TOMCAT 'tomcat10'  "TomCat (major) version: 8,9,10"
 fi
 
 
 # /etc/tomcat10/Catalina/localhost
 # /var/lib/tomcat10/conf -> /etc/tomcat10
-ask_variable CATALINA_DIR '/etc/tomcat10/Catalina/localhost'  "Directory for deployment descriptor *.xml"
+ask_variable CATALINA_DIR "/etc/$TOMCAT/Catalina/localhost"  "Directory for deployment descriptor *.xml"
 if [ -d $CATALINA_DIR ]; then
     if [ -w $CATALINA_DIR ]; then
 	vt100echo green,dim   "OK - directory exists and is writable: $CATALINA_DIR"

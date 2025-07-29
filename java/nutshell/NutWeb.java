@@ -40,6 +40,7 @@ public class NutWeb extends HttpServlet {
 	 */
 	public String HTML_TEMPLATE = null; //"nutweb/template.html";
 
+	
 	/**  Director for HTML documents to be processed (decorated, populated)
 	 *   Example: /html or /docs
 	 *
@@ -141,8 +142,8 @@ public class NutWeb extends HttpServlet {
 		debugMap.put("request.getContextPath()", request.getContextPath());
 		debugMap.put("request.getRequestURI()", request.getRequestURI());
 		debugMap.put("request.getServletPath()", request.getServletPath());
-		debugMap.put("request.getPathInfo()", request.getPathInfo());
-		debugMap.put("request.getPathTranslated()", request.getPathTranslated());
+		// debugMap.put("request.getPathInfo()", request.getPathInfo());
+		// debugMap.put("request.getPathTranslated()", request.getPathTranslated());
 
 		/* IMPORTANT:
 		   request.getRequestURI()	/nutweb/example/test.html
@@ -354,7 +355,7 @@ public class NutWeb extends HttpServlet {
 		/*
 		Element elem = html.getUniqueElement(html.body, SimpleHtml.Tag.SPAN, "version");
 		elem.setTextContent(String.format("NutShell (%s), Java Version (%s) root=%s template=%s",
-				getClass().getSimpleName(), HTTP_ROOT, HTML_TEMPLATE));
+				getClass().getSimpleName(), HT T P_RO OT, HTML_TEMPLATE));
 
 		 */
 		return html;

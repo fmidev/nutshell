@@ -1,17 +1,18 @@
 #!/bin/bash
 
-if [ $# == 0 ]; then
-    echo "NutWeb installation script"
+#if [ $# == 0 ]; then
+#    echo "NutWeb installation script"
     # Markus Peura fmi.fi
-    echo "Usage: $0 <conf-name> [<conf-file> <conf-file2> ...]"
-    exit 0
-fi
+ #   echo "Usage: $0 <conf-name> [<conf-file> <conf-file2> ...]"
+#    exit 0
+#fi
 
 
 source util/vt100utils.sh
 source util/utils.sh
 
-vt100echo green,dim "This is $0"
+vt100echo green,dim "# This is $0"
+vt100echo green "# NutWeb installation script"
 
 vt100echo green "# Reading conf file(s)"
 # Default: NutWeb. For NutShell, use that of nutshell.
@@ -21,10 +22,9 @@ shift
 CONF_FILE=${CONF_FILE:-"${CONF_NAME}-${HOSTNAME}.cnf"} # tomcat version?
 
 read_config $CONF_FILE
-
-for i in $* $CONF_FILE; do
-    read_config $i
-done
+#for i in $* $CONF_FILE; do
+#    read_config $i
+#done
 # set
 # exit 1
 echo

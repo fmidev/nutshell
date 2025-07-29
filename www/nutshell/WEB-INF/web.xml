@@ -5,9 +5,9 @@
 	 version="2.5" > 
 
 
-  <description>NutWeb - experimental </description>
+  <description>NutShell - product server</description>
 
-  <display-name>NutWeb</display-name>
+  <display-name>NutShell</display-name>
 
 
 
@@ -42,8 +42,8 @@
     <servlet-class>nutshell.Nutlet</servlet-class>
 
     <init-param>
-      <param-name>confDir</param-name>
-      <param-value>${NUTSHELL_ROOT}</param-value>
+      <param-name>NUTSHELL_CONF</param-name>
+      <param-value>${NUTSHELL_CONF}</param-value>
     </init-param>
 
     <!-- NEW -->

@@ -24,7 +24,7 @@ case $NUTSHELL in
 	NUTSHELL_JAR=${NUTSHELL_JAR:-$NUTSHELL_JAR_DIR/Nutlet.jar}
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
 	;;
-    tomcat)
+    tomcat*)
 	# This may be same as above
 	NUTSHELL_JAR=${NUTSHELL_JAR:-"$HTTP_ROOT/WEB-INF/lib/Nutlet.jar"}
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
