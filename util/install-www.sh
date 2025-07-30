@@ -21,6 +21,11 @@ echo
 
 # %P without starting-point directory
 for i in `find "www/$CONF_NAME" -type d -printf '%P\n'`; do
+
+    if [ "$i" == 'conf' ]; then
+	continue
+    fi
+
     vt100echo green,dim "# ${HTML_ROOT}/$i"
     #mkdir --parents --mode ug=rwx ${HTML_ROOT}/$i
     mkdir --parents ${HTML_ROOT}/$i
