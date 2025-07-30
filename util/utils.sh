@@ -256,24 +256,30 @@ function prepare_dir {
     chmod gu+rwx --changes $src_dir
 
     if [ $# = 3 ]; then
-	vt100echo green,dim "# Adding links"
+
+	vt100echo green,dim "# Linking: $dst_dir -> $src_dir"
 
 	local dst_dir=$2/$3
 
 	if [ $dst_dir -ef $src_dir ]; then
-	    vt100echo green,dim "# OK, exists already: $dst_dir -> $src_dir"
+	    vt100echo green,dim "# OK, exists already"
 	    return
 	fi
 
 	if [ -d $dst_dir ]; then
-	    vt100echo yellow "# Another directory exists: $dst_dir"
+	    vt100echo yellow "# Target exists, and is a directory: $dst_dir , skipping..."
 	    return
 	fi
 
 	if [ -L $dst_dir ]; then
-	    vt100echo yellow "# Another link exists: $dst_dir"
-
+	    vt100echo yellow "# Another link exists: $dst_dir . Replace?"
+	    rm -vi $dst_dir
+	    if [ $? == 1]; then
+		return
+	    fi
 	fi
+
+	ln -sv $src_dir $dst_dir
 
     fi
 
