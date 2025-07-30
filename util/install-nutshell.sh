@@ -30,25 +30,6 @@ fi
 
 
 
-if [ $NUTSHELL_VERSION == 'docker-java' ]; then
-
-    echo 
-    # NUTSHELL_ROOT="/opt/nutshell"
-    # NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
-
-else
-    
-    prepare_dir $PRODUCT_ROOT $HTML_ROOT products
-    echo 
-
-    prepare_dir $STORAGE_ROOT $HTML_ROOT storage
-    echo
-
-    prepare_dir $CACHE_ROOT $HTML_ROOT cache
-    echo
-    
-fi
-
 
 if [ "$ARG" == 'demo' ]; then
     vt100echo cyan  "# Install demo products (product generators) only"	
@@ -81,6 +62,27 @@ fi
 
 backup_file ${NUTSHELL_CONF} 10 # rotate 10 backups
 cp -v ${CONF_FILE} ${NUTSHELL_CONF}
+
+
+if [ $NUTSHELL_VERSION == 'docker-java' ]; then
+
+    echo 
+    # NUTSHELL_ROOT="/opt/nutshell"
+    # NUTSHELL_JAR_DIR=$NUTSHELL_ROOT
+
+else
+    
+    prepare_dir $PRODUCT_ROOT $HTML_ROOT products
+    echo 
+
+    prepare_dir $STORAGE_ROOT $HTML_ROOT storage
+    echo
+
+    prepare_dir $CACHE_ROOT $HTML_ROOT cache
+    echo
+    
+fi
+
 
 # exit 1
 
