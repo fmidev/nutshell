@@ -38,13 +38,13 @@ if [ $NUTSHELL_VERSION == 'docker-java' ]; then
 
 else
     
-    prepare_dir $PRODUCT_ROOT products
+    prepare_dir $PRODUCT_ROOT $HTML_ROOT products
     echo 
 
-    prepare_dir $STORAGE_ROOT storage
+    prepare_dir $STORAGE_ROOT $HTML_ROOT storage
     echo
 
-    prepare_dir $CACHE_ROOT cache
+    prepare_dir $CACHE_ROOT $HTML_ROOT cache
     echo
     
 fi
@@ -82,15 +82,13 @@ fi
 backup_file ${NUTSHELL_CONF} 10 # rotate 10 backups
 cp -v ${CONF_FILE} ${NUTSHELL_CONF}
 
-exit 1
+# exit 1
 
 #vt100echo green "# Setting WEB-INF/web.xml"
 
 
 
 if [ $NUTSHELL_VERSION == 'java' ] || [ $NUTSHELL_VERSION == 'docker-java' ]; then
-
-    #cp -v $CONF_FILE ${NUTSHELL_ROOT}/nutshell.cnf
 
     show_variable NUTSHELL_JAR_DIR
     mkdir -v --parents $NUTSHELL_JAR_DIR/
@@ -106,7 +104,6 @@ if [ $NUTSHELL_VERSION == 'python' ]; then
     # This ensures python naming for nutshell.nutshell -> nutshell/nutshell.py
     mkdir -v --parents $NUTSHELL_ROOT/nutshell/
     cp -v python/*.py  $NUTSHELL_ROOT/nutshell/
-    
     # unset NUTSHELL_JAR_DIR
     
 fi

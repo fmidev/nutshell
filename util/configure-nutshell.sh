@@ -99,7 +99,7 @@ if [ "$NUTSHELL_VERSION" != 'docker-java' ]; then
     show_variable PATH
     ask_variable PATH_EXT "" "Command path extension 'dir:dir2:dir3...'"
 
-    ask_variable CMD_SCRIPT_DIR '/usr/local/bin' "Directory for 'nutshell' executable script"
+    ask_variable CMD_SCRIPT_DIR '/usr/local/bin' "Directory for 'nutshell' executable script. (Leave empty if not used.)"
     check_dir_syntax CMD_SCRIPT_DIR
 
     LOG_FORMAT=${LOG_FORMAT:-'VT100'}

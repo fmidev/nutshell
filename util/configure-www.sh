@@ -28,8 +28,8 @@ if [ -d $CATALINA_DIR ]; then
     if [ -w $CATALINA_DIR ]; then
 	vt100echo green,dim   "OK - directory exists and is writable: $CATALINA_DIR"
     else
-	vt100echo yellow,dim  "Directory exists but is not writable: $CATALINA_DIR"
-	vt100echo cyan  "Consider contacting your admin. You can also reconfigure or edit $CONF_FILE later"
+	vt100echo yellow  "Directory exists but is not writable: $CATALINA_DIR . You may need to contact your admin."
+	vt100echo yellow  "Note: you can reconfigure or edit $CONF_FILE also later"
     fi
 else
     vt100echo yellow,dim  "Directory does not exist: $CATALINA_DIR"

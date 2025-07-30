@@ -245,7 +245,7 @@ function warn_if_unfound(){
 function prepare_dir {
 
     local src_dir=$1
-    local dst_subdir=$2
+
 
     if [ -d $src_dir ]; then
 	vt100echo green,dim "# Directory exists: $src_dir"
@@ -255,17 +255,37 @@ function prepare_dir {
 
     chmod gu+rwx --changes $src_dir
 
+    if [ $# = 3 ]; then
+	vt100echo green,dim "# Adding links"
+
+	local dst_dir=$2/$3
+
+	if [ $dst_dir -ef $src_dir ]; then
+	    vt100echo green,dim "# OK, exists already: $dst_dir -> $src_dir"
+	    return
+	fi
+
+	if [ -d $dst_dir ]; then
+	    vt100echo yellow "# Another directory exists: $dst_dir"
+	    return
+	fi
+
+	if [ -L $dst_dir ]; then
+	    vt100echo yellow "# Another link exists: $dst_dir"
+
+	fi
+
+    fi
+
+
+    
     return
     
-    
+    local dst_subdir=$2    
     local dst_dir=$NUTSHELL_ROOT/$dst_subdir
     local dst_DIR=\$NUTSHELL_ROOT/$dst_subdir
 
     
-    if [ $dst_dir -ef $src_dir ]; then
-	vt100echo green,dim "# Directory/link exists already: $dst_DIR"
-	return
-    fi
     
     if [ -d $dst_dir ]; then
 	vt100echo cyan "# ! Another directory exists: $dst_DIR"
