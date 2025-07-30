@@ -257,9 +257,9 @@ function prepare_dir {
 
     if [ $# = 3 ]; then
 
-	vt100echo green,dim "# Linking: $dst_dir -> $src_dir"
-
 	local dst_dir=$2/$3
+
+	vt100echo green,dim "# Linking: $dst_dir -> $src_dir"
 
 	if [ $dst_dir -ef $src_dir ]; then
 	    vt100echo green,dim "# OK, exists already"
