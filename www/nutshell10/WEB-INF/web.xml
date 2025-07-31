@@ -39,7 +39,8 @@
   <servlet>
 
     <servlet-name>NutShell</servlet-name>
-    <servlet-class>nutshell.Nutlet</servlet-class>
+    <servlet-class>nutshell10.Nutlet</servlet-class>
+    <!-- servlet-class>nutshell.Nutlet</servlet-class -->
 
     <!-- CHECK -->
     <init-param>

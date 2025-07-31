@@ -48,6 +48,7 @@ if [ "$TOMCAT" != '' ]; then
     export HTML_TEMPLATE
     export HTML_ROOT
     CONF_NAME=nutshell${TOMCAT//tomcat/}
+    show_variable CONF_NAME
     source util/install-www.sh
     
     #for i in html/nutweb/*.HTML; do	
