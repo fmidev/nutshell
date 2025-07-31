@@ -2,7 +2,8 @@
 # Markus.Peura@fmi.fi
 
 #
-JAVA_CLASS_DIR_OLD=out/production/nutshell
+#JAVA_CLASS_DIR_OLD=out/production/nutshell
+JAVA_CLASS_DIR_OLD=build9/classes
 JAVA_CLASS_DIR=build/classes
 
 # Source dir 
@@ -44,13 +45,25 @@ install-nutweb:
 tests-java:
 	LOOP=java util/make-tests.sh
 
+NutSo%.jar:
+	echo $? ${*} $*
+	echo $@
+	echo $%
 
-java/Nutlet8.jar: META-INF  ${JAVA_CLASS_DIR_OLD}/nutshell8
-	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR_OLD} nutshell8/
+#java/Nutlet8.jar: META-INF  ${JAVA_CLASS_DIR_OLD}/nutshell8
+#	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR_OLD} nutshell8/
 
-java/Nutlet10.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
+java/Nutlet%.jar: # META-INF  #build%/classes/nutshell%
+	@mkdir --parents META-INF/
+	@echo 'Main-Class: nutshell'${*}'.Nutlet' >  META-INF/MANIFEST.MF
+	@cat META-INF/MANIFEST.MF
+	jar cvfm $@ META-INF/*.* -C build${*}/classes nutshell${*}/
+	@java -cp $@  nutshell${*}.ProductServer --log WARNING  --version
+	@rm -v META-INF/MANIFEST.MF
+
+java/NutXXXXlet10.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell
 	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR} nutshell/
-	@java -cp Nutlet10.jar nutshell.ProductServer --log WARNING  --version
+	@java -cp $@  nutshell.ProductServer --log WARNING  --version
 # 
 # ${JAVA_CLASS_DIR}/nutshell/resources/nutshell-logo.png
 #@cp -v $@ html/WEB-INF/lib/
