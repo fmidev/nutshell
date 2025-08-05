@@ -37,7 +37,7 @@ function backup_file(){
     fi
     
     # Check similarity of current file and previous backup (-r)
-    BACKUP_FILE=`ls -1tr $FILE.[0-9]*.bak | tail -1` &> /dev/null
+    BACKUP_FILE=`ls -1tr $FILE.[0-9]*.bak | tail -1` # &> /dev/null
     # BACKUP_FILE=( `ls -1tr $FILE.[0-9]*.bak &> /dev/null | tail -1` ) # this fails, always 1
 
     #if [ "$BACKUP_FILE" == '' ]; then
@@ -53,8 +53,8 @@ function backup_file(){
     fi
     
     #local BACKUP_FILE    
-    #local C=`ls -1 $FILE.[0-9]*.bak | wc -l` &> /dev/null
-    local C=`ls -1 $FILE.[0-9]*.bak &> /dev/null | wc -l` 
+    local C=`ls -1 $FILE.[0-9]*.bak | wc -l` # &> /dev/null
+    #local C=`ls -1 $FILE.[0-9]*.bak &> /dev/null | wc -l` 
 
     if (( $C < $BACKUP_COUNT )); then
 	# Compute new index
