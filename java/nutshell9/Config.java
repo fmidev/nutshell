@@ -53,9 +53,14 @@ public class Config {
      */
     static
     public <T> void readConfig(File file, T target) throws Exception {
-        BufferedReader input = new BufferedReader(new FileReader(file));
-		readConfig(input, target);
-		input.close();
+    	BufferedReader input = new BufferedReader(new FileReader(file));
+    	readConfig(input, target);
+    	input.close();			
+    	/*
+    	try {
+    	} catch (IOException e) {
+    	}
+    	*/
     }
 
     /**

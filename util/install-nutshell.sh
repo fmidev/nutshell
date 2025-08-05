@@ -122,7 +122,20 @@ if [ "$CMD_SCRIPT_DIR" != '' ]; then
     cat util/nutshell.sh.tpl | envsubst '$DATE $USER $HOSTNAME $HTML_ROOT $NUTSHELL_VERSION $NUTSHELL_CONF $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
     if [ $? == 0 ]; then
 	chmod -v gu+x $NUTSHELL_SH
-	ln -svf $NUTSHELL_SH $CMD_SCRIPT_DIR/nutshell
+	
+	
+	if [ ! -e $CMD_SCRIPT_DIR/nutshell ]; then
+	    ln -svf $NUTSHELL_SH $CMD_SCRIPT_DIR/nutshell
+	else
+	    if [ $NUTSHELL_SH -ef $CMD_SCRIPT_DIR/nutshell ]; then
+		vt100echo green,dim "# Link exists already: nutshell -> nutshell-${NUTSHELL_VERSION}"
+	    else
+		LINK_OLD=`readlink $CMD_SCRIPT_DIR/nutshell`
+		vt100echo yellow "# Overwriting existing link: nutshell -> ${LINK_OLD##*/}"
+		ln -svi $NUTSHELL_SH $CMD_SCRIPT_DIR/nutshell
+	    fi
+	fi
+
 	vt100echo cyan  "# Test with: $NUTSHELL_SH --help"
     else
 	vt100echo red "# Failed in writing $NUTSHELL_SH"

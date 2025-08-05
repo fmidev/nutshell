@@ -42,7 +42,9 @@ import static java.nio.file.Files.*;
  *  map do not have a timestamp. On the other hand, some meteorological products may 
  *  have several timestamps, like computing time and valid time.
  *
- *  Some version history
+ *  Some version history 
+ *  4.4 TomCat 10+9 via downgrade-code.sh
+ *  4.3 TomCat 10.1
  *  4.0 Fixed web.xml rules, simplified doGet()
  *  3.7.7 Methods moved to enclosing class.
  *  3.7.6 External path container: {@link ProductPathBundle}
@@ -60,8 +62,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	//static
 	public String getVersion(){
-		//return "3.7.7";
-		return "4.3";  // TomCat 10.1
+		return "4.4";  // TomCat 10.1
 	}
 
 	ProductServer() {
