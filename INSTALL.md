@@ -1,25 +1,44 @@
 # ![NutShell cover](./img/nutshell-logo-small.png) NutShell
 
 # Installation
+
 ## Java versions
 
-Available: plain `java` and `tomcat` version. The later comes with a WWW servlet.
+Available: plain Java version and TomCat version, which also provides a WWW interface.
 
 ### TomCat
 
-1. Install Tomcat web server (preferably version 8 or 9). For example:
+1. Install TomCat web server (preferably version 10, at least 9). For example:
 ```
-sudo apt install tomcat8
+sudo apt install tomcat10
 ```
 
 2. Create a config file:
 ```
-util/configure.sh tomcat
+util/configure-nutshell.sh tomcat10
 ```
 
-3. Add write permissions to Tomcat. 
 
-In latest versions of Tomcat, you have to add permissions for Tomcat service
+3. 
+Install 
+
+```
+util/install-nutshell.sh tomcat10
+```
+
+4. 
+Test 
+
+```
+/usr/local/bin/nutshell-tomcat10
+```
+
+
+
+#### Note on TomCat 9 permission management
+
+
+In versions 9.xx of TomCat, you have to add permissions for Tomcat service
 (daemon). The path of the file varies, it can be for example:
 
 ```
@@ -45,8 +64,3 @@ ReadWritePaths=/opt/storage
 You may have to run `systemctl daemon-reload` after editing the file.
 
 
-Install 
-
-```
-util/install.sh tomcat
-```
