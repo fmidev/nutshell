@@ -118,8 +118,8 @@ if [ "$CMD_SCRIPT_DIR" != '' ]; then
     vt100echo green "# Installing $NUTSHELL_SH"
     show_variable NUTSHELL_SH
     #DATE=`date --iso-8601=minutes`
-    export USER HOSTNAME HTTP_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR # GROUP_ID $GROUP_ID
-    cat util/nutshell.sh.tpl | envsubst '$DATE $USER $HOSTNAME $HTTP_ROOT $NUTSHELL_VERSION $NUTSHELL_ROOT $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
+    export USER HOSTNAME HTML_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR # GROUP_ID $GROUP_ID
+    cat util/nutshell.sh.tpl | envsubst '$DATE $USER $HOSTNAME $HTML_ROOT $NUTSHELL_VERSION $NUTSHELL_CONF $NUTSHELL_JAR_DIR' > $NUTSHELL_SH
     if [ $? == 0 ]; then
 	chmod -v gu+x $NUTSHELL_SH
 	ln -svf $NUTSHELL_SH $CMD_SCRIPT_DIR/nutshell

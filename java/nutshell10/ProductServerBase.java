@@ -189,7 +189,8 @@ public class ProductServerBase extends Program {
                 setup.put("confFiles", this.confFiles);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(String.format("Failed in reading: %s", path));
+            	e.printStackTrace();
                 setup.put("confFileError", e.getLocalizedMessage());
             }
         }

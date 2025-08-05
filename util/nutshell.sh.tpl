@@ -9,7 +9,8 @@
 # Workarounds for envsubst
 #NUTSHELL_VERSION=${NUTSHELL_VERSION:-'java'}
 NUTSHELL=${NUTSHELL_VERSION:-$NUTSHELL_VERSION}
-NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
+# NUTSHELL_DIR=${NUTSHELL_DIR:-$NUTSHELL_ROOT}
+# NUTSHELL_CONF=${NUTSHELL_CONF:-''}
 # GROUP_ID=$GROUP_ID
 
 case $NUTSHELL in
@@ -25,9 +26,9 @@ case $NUTSHELL in
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
 	;;
     tomcat*)
-	# This may be same as above
-	NUTSHELL_JAR=${NUTSHELL_JAR:-"$HTTP_ROOT/WEB-INF/lib/Nutlet.jar"}
-	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
+	VERSION=${NUTSHELL/tomcat/}
+	NUTSHELL_JAR=${NUTSHELL_JAR:-"$HTML_ROOT/WEB-INF/lib/Nutlet${VERSION}.jar"}
+	NUTSHELL="java -cp $NUTSHELL_JAR nutshell${VERSION}.ProductServer"
 	;;
     *)
 	echo "NUTSHELL must be 'java', 'tomcat' or 'python'"
@@ -51,13 +52,13 @@ if [ $# != 0 ]; then
     # --log_level DEBUG
     # Notice: PYTHON and JAVA have different labels. Common ones: ERROR,WARNING,INFO,DEBUG
     # Double quotes "" are needed to keep explicit empty '' arguments.
-    ${NUTSHELL} "${LOG_CMD}" "${LOG_ARG}" --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  
+    ${NUTSHELL} "${LOG_CMD}" "${LOG_ARG}" --conf "${NUTSHELL_CONF}" "$@"  
    
     # ${NUTSHELL} --log_level INFO --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"  # $*
     RESULT=$?
     if [ $RESULT != 0 ]; then
 	#echo !!
-	echo '#' ${NUTSHELL} "${LOG_CMD}" "${LOG_ARG}" --conf ${NUTSHELL_DIR}/nutshell-$NUTSHELL_VERSION.cnf "$@"
+	echo '#' ${NUTSHELL} "${LOG_CMD}" "${LOG_ARG}" --conf "${NUTSHELL_CONF}" "$@"
 	echo "# Error: something went wrong, return code: $RESULT "
 	echo "# Rerun '$0' without arguments for help. "
 	exit $RESULT
