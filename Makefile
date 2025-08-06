@@ -54,7 +54,7 @@ NutSo%.jar:
 #	jar cvfm $@ META-INF/*.* -C ${JAVA_CLASS_DIR_OLD} nutshell8/
 
 convert10to9:
-	pushd java && ./downgrade-code.sh nutshell10/*.java
+	cd ./java && ./downgrade-code.sh nutshell10/*.java || echo
 
 java/Nutlet%.jar: # META-INF  #build%/classes/nutshell%
 	@mkdir --parents META-INF/
