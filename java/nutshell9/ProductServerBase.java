@@ -302,13 +302,9 @@ public class ProductServerBase extends Program {
 
         try {
             Path p = Paths.get(path);
+            setup.put("serverLog",  p.toString()); // works or not...
             FileUtils.ensureWritableFile(p, GROUP_ID, filePerms, dirPerms);
-            //FileUtils.ensureWritableFile();
-            //Path p = Paths.get(String.format(pathFormat,
-            //        logFilenameTimeFormat.format(System.currentTimeMillis())));
-            //ensureFile(p.getParent(), p.getFileName());
             serverLog.setLogFile(p);
-            setup.put("serverLog",  p.toString());
             // server Log.debug("Setup: " +setup.toString());
             /*
             try {
