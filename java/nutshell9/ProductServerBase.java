@@ -308,6 +308,7 @@ public class ProductServerBase extends Program {
             //        logFilenameTimeFormat.format(System.currentTimeMillis())));
             //ensureFile(p.getParent(), p.getFileName());
             serverLog.setLogFile(p);
+            setup.put("serverLog",  p.toString());
             // server Log.debug("Setup: " +setup.toString());
             /*
             try {
