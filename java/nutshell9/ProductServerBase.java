@@ -362,7 +362,16 @@ public class ProductServerBase extends Program {
         return Paths.get(productID.replace(".", File.separator));
     }
 
-    // Consider moving these to @ProductServerBase, with Log param.
+    /** Move a file, typically temporary, to a final location.
+     * 
+     *  This method is used in moving the product from a temporary file to a final location.
+     * 
+     * @param src
+     * @param dst
+     * @param log
+     * @return
+     * @throws IOException
+     */
     public Path move(Path src, Path dst, Log log) throws IOException {
         log.note(String.format("Move: from: %s ", src));
         log.note(String.format("        to: %s ", dst));
@@ -385,6 +394,16 @@ public class ProductServerBase extends Program {
         //return src.renameTo(dst);
     }
 
+    /** Copy a file.
+     * 
+     *  This method typically in creating a copy of a product in a local directory of the user.
+     * 
+     * @param src
+     * @param dst
+     * @param log
+     * @return
+     * @throws IOException
+     */
     public Path copy(Path src, Path dst, Log log) throws IOException {
         log.note(String.format("Copy: from: %s ", src));
         log.note(String.format("        to: %s ", dst));
@@ -395,6 +414,10 @@ public class ProductServerBase extends Program {
 
     /** Creates a soft link pointing to a file.
      *
+     *  This method typically used in 
+     *  - linking the product to an online directory of latest products generated.
+     *  - linking the product to a local directory of the user.
+     * 
      * @param src - original, physical file
      * @param dst - link to be created
      * @param force - overwrite link or file
@@ -453,21 +476,7 @@ public class ProductServerBase extends Program {
         //return file.delete();
     }
 
-    /*
-    Path getTimestampDir(long time){ // consider DAY or HOUR dirs?
-        if (time > 0) {
-            // timeresolution?
-            synchronized (timeStampDirFormat){
-                return Paths.get(timeStampDirFormat.format(time));
-            }
-        }
-        else {
-            return Paths.get("");
-        }
-    }
-
-     */
-
+   
 
     /**
      *   For constructing catalog

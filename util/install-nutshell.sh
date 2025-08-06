@@ -115,7 +115,7 @@ fi
 if [ "$CMD_SCRIPT_DIR" != '' ]; then
 
     NUTSHELL_SH=$CMD_SCRIPT_DIR/nutshell-${NUTSHELL_VERSION}
-    vt100echo green "# Installing $NUTSHELL_SH"
+    vt100echo green "# Installing script $NUTSHELL_SH"
     show_variable NUTSHELL_SH
     #DATE=`date --iso-8601=minutes`
     export USER HOSTNAME HTML_ROOT NUTSHELL_VERSION NUTSHELL_ROOT NUTSHELL_JAR_DIR # GROUP_ID $GROUP_ID

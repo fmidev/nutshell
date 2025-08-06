@@ -70,14 +70,14 @@ fi
 
 
 
-echo "Nutshell (default version: $NUTSHELL_VERSION )"
-echo "Markus Peura 2021 Finnish Meteorological Institute"
+echo "Nutshell (version: $NUTSHELL_VERSION )"
+echo "Markus Peura 2025 Finnish Meteorological Institute"
 echo
 echo "# This script: $0"
 echo "# Invoked by $USER@$HOSTNAME"
-echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
+#echo "# NUTSHELL_DIR=$NUTSHELL_DIR"
 echo "# NUTSHELL_JAR=$NUTSHELL_JAR"
-echo "# HTTP_ROOT=$HTTP_ROOT"
+#echo "# HTTP_ROOT=$HTTP_ROOT"
 echo "# NUTSHELL=$NUTSHELL"
 echo "# Primary conf: ${NUTSHELL_DIR}/nutshell-${NUTSHELL_VERSION}.cnf"
 echo

@@ -555,16 +555,20 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 				log.resetState(); // Forget old sins
 
+				// Debugging
+				Path p = null;
+				
 				// Mark this task being processed (empty file)
 				try {
-					FileUtils.ensureWritableDir(paths.outputDirTmp, GROUP_ID, dirPerms);
+					FileUtils.ensureWritableDir(p = paths.outputDirTmp, GROUP_ID, dirPerms);
 					log.info(String.format("Created tmp dir: %s", paths.outputDirTmp));
-					FileUtils.ensureWritableDir(paths.outputDir, GROUP_ID, dirPerms);
-					FileUtils.ensureWritableFile(paths.outputPath, GROUP_ID, filePerms, dirPerms);
+					FileUtils.ensureWritableDir(p = paths.outputDir, GROUP_ID, dirPerms);
+					log.info(String.format("Created dir: %s", paths.outputDirTmp));
+					FileUtils.ensureWritableFile(p = paths.outputPath, GROUP_ID, filePerms, dirPerms);
 					log.debug(String.format("Created empty file: %s", paths.outputPath));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
-					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s", e.getMessage()));
+					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s = %s, %s", p, e.getStackTrace(), e.getMessage()));
 					return;
 				}
 
