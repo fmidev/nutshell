@@ -62,7 +62,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	//static
 	public String getVersion(){
-		return "4.4";  // TomCat 10.1
+		return "4.4.1";  // TomCat 10.1
 	}
 
 	ProductServer() {
