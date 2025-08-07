@@ -38,7 +38,7 @@ echo
 
 vt100echo green "# Installing files..."
 echo
-
+export TOMCAT_VERSION=${TOMCAT_VERSION:-${TOMCAT/tomcat}}
 
 for i in `find $DIR_START \( -type f -or -type l \) -printf '%P\n'`; do
 
@@ -76,7 +76,7 @@ for i in `find $DIR_START \( -type f -or -type l \) -printf '%P\n'`; do
 	    cat ${SRC} | envsubst > ${DST}
 	    
 	    ;;
-	*~)
+	ico|*~)
 	    vt100echo cyan,dim "# Skip: ${SRC}"
 	    ;;
 	*)
@@ -99,7 +99,9 @@ echo
 
 vt100echo green "# Writing Deployment Descriptor"
 SRC="$DIR_START/conf/${TOMCAT}-${CONF_NAME}.xml"
-DST="${CATALINA_DIR}/${CONF_NAME}.xml"
+#DST="${CATALINA_DIR}/${CONF_NAME}.xml"
+# todo: what if several versions (varying numbers)
+DST="${CATALINA_DIR}/${CONF_NAME//[0-9]/}.xml"
 vt100echo green "# ${SRC} -> ${DST}"
 xmllint --noout "$SRC"
 critical_check

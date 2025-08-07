@@ -24,6 +24,7 @@ fi
 # /etc/tomcat10/Catalina/localhost
 # /var/lib/tomcat10/conf -> /etc/tomcat10
 ask_variable CATALINA_DIR "/etc/$TOMCAT/Catalina/localhost"  'Directory for deployment descriptor *.xml'
+check_dir_syntax CATALINA_DIR
 if [ -d $CATALINA_DIR ]; then
     if [ -w $CATALINA_DIR ]; then
 	vt100echo green,dim   "OK - directory exists and is writable: $CATALINA_DIR"
@@ -36,10 +37,12 @@ else
 fi
 
 ask_variable HTTP_PREFIX "/$NUTWEB_NAME" 'Path prefix appearing in URLs '
+check_dir_syntax HTTP_PREFIX
 
 #  /var/lib/tomcat10/webapps/ROOT/index.html
 # Used to be HTML_ROOT also ...
 ask_variable HTML_ROOT "/opt${HTTP_PREFIX}"  'Directory for web documents'
+check_dir_syntax HTML_ROOT
 
 ask_variable  HTML_TEMPLATE 'style/template.html' "Layout file that embeds any HTML page requested"
 

@@ -33,6 +33,12 @@ Test
 /usr/local/bin/nutshell-tomcat10
 ```
 
+5.
+Debugging
+
+Check for error messages in the log directory of TomCat, for example ``/var/log/tomcat10`` .
+There files like ``localhost.2025-08-07.log``.
+
 
 
 #### Note on TomCat 9 permission management

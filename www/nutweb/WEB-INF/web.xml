@@ -39,8 +39,10 @@
 
   <servlet>
 
+    <!-- TOMCAT_VERSION = ${TOMCAT_VERSION} -->
+    <!-- TOMCAT = ${TOMCAT} -->
     <servlet-name>NutWeb</servlet-name>
-    <servlet-class>nutshell.NutWeb</servlet-class>
+    <servlet-class>nutshell${TOMCAT_VERSION}.NutWeb</servlet-class>
     <load-on-startup>1</load-on-startup>
 
     <!-- init-param>

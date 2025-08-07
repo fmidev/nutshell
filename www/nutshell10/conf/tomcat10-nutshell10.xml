@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- TomCat 8..10 syntax? -->
-<!-- Context path="$HTTP_PREFIX" docBase="$HTML_ROOT" -->
-<!-- TomCat 8..10 syntax? -->
+<!-- TomCat 10 syntax? -->
 <Context docBase="$HTML_ROOT" >
   <!-- Enable symbolic links -->
   <Resources allowLinking="true"/>
 </Context>
-
-<!-- TomCat 6 -->
-<!-- Context path="/venison" docBase="${HTML_ROOT}" allowLinking="true" -->
-
