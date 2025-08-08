@@ -8,29 +8,25 @@ Available: plain Java version and TomCat version, which also provides a WWW inte
 
 ### TomCat
 
-1. Install TomCat web server (preferably version 10, at least 9). For example:
+First, install TomCat web server (preferably version 10, at least 9). For example:
 ```
 sudo apt install tomcat10
 ```
 
-2. Create a config file:
+For NutShell installation, create a config file:
 ```
 util/configure-nutshell.sh tomcat10
 ```
+The file can be edited later.
 
-
-3. 
-Install 
-
+Install program code and WWW page support:
 ```
 util/install-nutshell.sh tomcat10
 ```
 
-4. File write permission management
+Set file write permissions (TomCat 9 & 10)
 
-#### TomCat 9 & 10 
-
-In this version, file permissions are managed "externally", by the operating system (e.g. Ubuntu Linux),
+In these versions, file permissions are managed "externally", by the operating system (e.g. Ubuntu Linux),
 not by TomCat or Java security policies. (This is sometimes called *sandboxing* .)
 
 At least in Ubuntu 24.0, the permissions are granted as follows.
