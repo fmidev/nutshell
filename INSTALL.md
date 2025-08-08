@@ -6,33 +6,46 @@
 
 Available: plain Java version and TomCat version, which also provides a WWW interface.
 
-### TomCat
+In the following instructions, variable $NUTSHELL_VERSION` has one of the following values:
 
-First, install TomCat web server (preferably version 10, at least 9). For example:
+* `java` – plain Java version, to be used on command line
+* `tomcat10` – version with TomCat 10 www interface and command line support
+* `tomcat9` – as above, but with TomCat 9
+
+If you are selecting a TomCat version, install TomCat web server first. For example:
 ```
 sudo apt install tomcat10
 ```
 
+
+### Configuration
+
 For NutShell installation, create a config file:
 ```
-util/configure-nutshell.sh tomcat10
+util/configure-nutshell.sh $NUTSHELL_VERSION
 ```
 The file can be edited later.
 
-Install program code and WWW page support:
+### Installation
+
+Install program code (and WWW page support, if TomCat version)
 ```
-util/install-nutshell.sh tomcat10
+util/install-nutshell.sh $NUTSHELL_VERSION
 ```
 
-You can test the system-side operation simply with 
+### Quick check
+
+After installation, you can test the command line operation simply with following commands
 ```
-/usr/local/bin/nutshell-tomcat10
+nutshell
+nutshell --version
+nutshell --help
 ```
-which is linked $CMD_SCRIPT_DIR/to either `$CMD_SCRIPT_DIR/nutshell-tomcat10` or `$CMD_SCRIPT_DIR/nutshell-tomcat9` .
+
+Note that `nutshell` command linked to a bash script `$CMD_SCRIPT_DIR/nutshell-$NUTSHELL_VERSION` .
 If $CMD_SCRIPT_DIR is not in your $PATH variable, consider adding it or use `$CMD_SCRIPT_DIR/nutshell` 
 
-
-Set file write permissions (TomCat 9 & 10)
+#### Adjusting file write permissions (TomCat 9 & 10)
 
 In these versions, file permissions are managed "externally", by the operating system (e.g. Ubuntu Linux),
 not by TomCat or Java security policies. (This is sometimes called *sandboxing* .)
