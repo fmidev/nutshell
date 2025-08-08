@@ -129,24 +129,25 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
 
-		Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);
 
 		if (!productServer.serverLog.logFileIsSet()) {
-			String filename;
-			if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
-				filename = String.format("%s-%s.%d.html", "nutshell", productServer.USER, productServer.GROUP_ID);
-			}
-			else {
-				filename = String.format("%s-%s.%d.log", "nutshell", productServer.USER, productServer.GROUP_ID);
+			// productServer.LOG_SERVER_PATH = 
+			// 
+			if (productServer.LOG_SERVER_PATH == null) {
+				Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);
+				String filename;
+				if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
+					filename = String.format("%s-%s.%d.html", "nutshell", productServer.USER, productServer.GROUP_ID);
+				}
+				else {
+					filename = String.format("%s-%s.%d.log", "nutshell", productServer.USER, productServer.GROUP_ID);
+				}
+				productServer.LOG_SERVER_PATH = cacheNutShell.resolve(filename);
 			}
 
-			// Path p = cacheNutShell.resolve("nutshell-tomcat-%s.html");
-			//if (productServer.LOG_FORMAT.equals(TextOutput.Format.DEFAULT))
-			//productServer.serverLog.setFormat(TextOutput.Format.HTML); // + MAP_URLS
-			// productServer.serverLog.setDecoration(TextOutput.Options.COLOUR, TextOutput.Options.URLS);
-			Path p = cacheNutShell.resolve(filename);
-			// FileUtils.ensureWritableFile(p, productServer.GROUP_ID, productServer.filePerms, productServer.dirPerms);
-			productServer.setLogFile(p.toString());
+			//Path p = cacheNutShell.resolve(filename);
+			// productServer.setLogFile(p.toString());
+			productServer.setLogFile(productServer.LOG_SERVER_PATH);
 		}
 		/*
 		} catch (IOException e) {

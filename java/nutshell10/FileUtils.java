@@ -17,6 +17,24 @@ import static java.nio.file.Files.exists;
 
 public class FileUtils {
 
+
+	/** For initializing a path.
+	 *  
+	 */
+	static public Path getEmptyPath() {
+		return Paths.get("");
+	}
+
+	/** For initializing a path or testing, if a path is empty.
+	 *  
+	 */
+	final private static Path emptyPath = getEmptyPath();
+
+	
+	static public boolean isEmpty(Path path) {
+		return path.equals(emptyPath); 
+	}
+	
     static private int getBit() {
         int counter = 0;
         return (1 << counter++);

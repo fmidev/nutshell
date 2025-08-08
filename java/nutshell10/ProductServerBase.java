@@ -31,6 +31,11 @@ public class ProductServerBase extends Program {
 
     static final DateFormat logFilenameTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    /** Location of the main log.
+    *
+    */
+    public Path LOG_SERVER_PATH = null; // Paths.get("");
+
     /** Settings for the main log.
      *
      *  - verbosity:
@@ -49,6 +54,7 @@ public class ProductServerBase extends Program {
      *
      */
     public String LOG_TASKS = "DEBUG,COLOUR";
+
 
     /** Format for the task logs.
      *
@@ -99,6 +105,7 @@ public class ProductServerBase extends Program {
 
     /// User name (alphabetical)
     public String USER = System.getProperty("user.name");;
+
 
 
     final
@@ -199,12 +206,14 @@ public class ProductServerBase extends Program {
         String LOG_SERVER_OVERRIDE = LOG_SERVER;
 
         try {
+        	// Also above LOG_SERVER may be rewritten here.
             Manip.assignToObjectLenient(setup, this);
         }
         catch (RuntimeException e){
             serverLog.warn(e.getMessage());
         }
 
+        // Set params (format and verbosity).
         serverLog.set(LOG_SERVER);
 
         if (!LOG_SERVER_OVERRIDE.isEmpty()){
@@ -295,16 +304,32 @@ public class ProductServerBase extends Program {
      * @return
      */
     public Path setLogFile(String path) {
+        if (path != null) {
+           	return setLogFile(Paths.get(path));       	        	
+        }
+        else {
+           	return setLogFile(Paths.get(String.format("/tmp/nutshell-%s.log",
+                    logFilenameTimeFormat.format(System.currentTimeMillis()))));       	
+        }
+    }
+    
+    /**
+    *
+    * @param path - absolute path of a filename, optionally containing '%s' expanded as timestamp.
+    * @return
+    */
+   public Path setLogFile(Path path) {
 
+	   /*
         if (path == null)
             path = String.format("/tmp/nutshell-%s.log",
                     logFilenameTimeFormat.format(System.currentTimeMillis()));
-
+	    */
         try {
-            Path p = Paths.get(path);
-            setup.put("serverLog",  p.toString()); // works or not...
-            FileUtils.ensureWritableFile(p, GROUP_ID, filePerms, dirPerms);
-            serverLog.setLogFile(p);
+        	// Path p = Paths.get(path);
+            setup.put("serverLog",  path.toString()); // works or not...
+            FileUtils.ensureWritableFile(path, GROUP_ID, filePerms, dirPerms);
+            serverLog.setLogFile(path);
             // server Log.debug("Setup: " +setup.toString());
             /*
             try {
@@ -313,10 +338,12 @@ public class ProductServerBase extends Program {
             catch (IOException e){
                 serverLog.error(String.format("Could not set permissions: %s", filePerms));
             }*/
-            return p;
+            serverLog.warn(String.format("OK! Started server log file %s [%s]", path, filePerms));
+            System.err.println(String.format("OK2! Started server log file %s %s [%s]", path, filePerms, dirPerms));
+            return path;
         } catch (Exception e) {
             serverLog.setLogFile(null);
-            serverLog.warn(String.format("Failed in creating log file %s [%s]", path, filePerms));
+            serverLog.warn(String.format("Failed in creating server log file %s [%s]", path, filePerms));
             return null;
         }
 

@@ -615,6 +615,10 @@ public class Log implements AutoCloseable {
 	synchronized
 	public void setLogFile(Path path){
 
+		if (this.logFile != null) {
+			System.err.println(String.format("Closing log file: ", this.logFile));
+		}
+		
 		close();
 		/*
 		 	Todo: there is a chance that something is written no to the log

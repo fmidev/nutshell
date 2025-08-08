@@ -43,6 +43,7 @@ import static java.nio.file.Files.*;
  *  have several timestamps, like computing time and valid time.
  *
  *  Some version history 
+ *  4.4.1 LOG_SERVER_PATH
  *  4.4 TomCat 10+9 via downgrade-code.sh
  *  4.3 TomCat 10.1
  *  4.0 Fixed web.xml rules, simplified doGet()
@@ -67,7 +68,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
 		setup.put("ProductServer", this.getVersion());
-		// LABEL = "nutshell-"+getVersion();
 	}
 
 
@@ -123,6 +123,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return generator;
 	}
 
+	/** Make logical checks and complementing of flags.
+	 * 
+	 * @param instructions
+	 */
 	static
 	protected void completeInstructions(Instructions instructions){
 
@@ -138,7 +142,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		// Media must be defined in most of the operations (DELETE, EXISTS, MAKE, GENERATE) so define it here.
-		// if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
 		if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS) || instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
 			if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
 				// Note: media selection could be also done by Generator?
@@ -302,12 +305,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.log.close();
 		}
 
-		/*
-		@Override
-		protected void finalize() throws Throwable {
-			this.close();
-		}
-		 */
 		@Override
 		public String toString() {
 			if (this.info.getDirectives().isEmpty())
@@ -1704,8 +1701,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new ProgramUtils.Version<>(server));
 
-
-
+		/** This is for standard tests. Given a command line, 
+		 *  construct corresponding GET parameters for an URL.
+		 * 
+		 */
 		registry.add(new Parameter("http_params","Debugging/testing: compose HTTP GET params."){
 
 			@Override

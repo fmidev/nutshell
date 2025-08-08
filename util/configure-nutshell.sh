@@ -108,6 +108,7 @@ if [ "$NUTSHELL_VERSION" != 'docker-java' ]; then
     LOG_OLD=( ${LOG_OLD//,/ } )
     LOG_OLD="${LOG_OLD[*]}"
     LOG_OLD=${LOG_OLD// /,}
+    ask_variable LOG_SERVER_PATH "" "Top-level log file. (empty = automatic)."
     ask_variable LOG_SERVER "$LOG_OLD" "Log formatting: (use) COLOUR, (convert) URLS"
     ask_variable LOG_TASKS  "$LOG_SERVER" "Log formatting: (use) COLOUR, (convert) URLS"
 
