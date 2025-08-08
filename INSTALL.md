@@ -24,6 +24,14 @@ Install program code and WWW page support:
 util/install-nutshell.sh tomcat10
 ```
 
+You can test the system-side operation simply with 
+```
+/usr/local/bin/nutshell-tomcat10
+```
+which is linked $CMD_SCRIPT_DIR/to either `$CMD_SCRIPT_DIR/nutshell-tomcat10` or `$CMD_SCRIPT_DIR/nutshell-tomcat9` .
+If $CMD_SCRIPT_DIR is not in your $PATH variable, consider adding it or use `$CMD_SCRIPT_DIR/nutshell` 
+
+
 Set file write permissions (TomCat 9 & 10)
 
 In these versions, file permissions are managed "externally", by the operating system (e.g. Ubuntu Linux),
@@ -75,14 +83,6 @@ Make sure that all the mentioned directories exist. Then restart the server:
 sudo systemctl start tomcat10
 ```
 
-
-
-4. 
-Test 
-
-```
-/usr/local/bin/nutshell-tomcat10
-```
 
 5.
 Debugging
