@@ -90,7 +90,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		productServer = new ProductServer();
 		productServer.serverLog.setVerbosity(Log.Status.DEBUG);
 		productServer.serverLog.decoration.clear();
-		productServer.serverLog.note("Nutlet started");
+		productServer.serverLog.note("Nutlet started with productServer");
 	}
 
 	//// String confDir = "";
@@ -128,27 +128,44 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		productServer.readConfig(Paths.get(NUTSHELL_CONF)); // Read two times? Or NutLet?
 		
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
-
+		if (productServer.LOG_SERVER_PATH == null) {
+			productServer.LOG_SERVER_PATH = FileUtils.getEmptyPath();
+		}
 
 		if (!productServer.serverLog.logFileIsSet()) {
-			// productServer.LOG_SERVER_PATH = 
-			// 
-			if (productServer.LOG_SERVER_PATH == null) {
+			
+			if (FileUtils.isEmpty(productServer.LOG_SERVER_PATH)) {
+				
 				Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);
-				String filename;
+
+				System.err.println("productServer.LOG_SERVER_PATH(0) is NULL");
+				
+				String filenameExtension;
+				
 				if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
-					filename = String.format("%s-%s.%d.html", "nutshell", productServer.USER, productServer.GROUP_ID);
+					filenameExtension = "html";
 				}
 				else {
-					filename = String.format("%s-%s.%d.log", "nutshell", productServer.USER, productServer.GROUP_ID);
+					filenameExtension = "log";
 				}
-				productServer.LOG_SERVER_PATH = cacheNutShell.resolve(filename);
+				
+				productServer.LOG_SERVER_PATH = cacheNutShell.resolve(String.format("%s-%s.%d.%s", 
+						"nutshell", productServer.USER, productServer.GROUP_ID, filenameExtension));
+			}
+			else {
+				System.err.println(String.format("productServer.LOG_SERVER_PATH init: %s", productServer.LOG_SERVER_PATH));
+				// productServer.LOG_SERVER_PATH = cacheNutShell.resolve(productServer.LOG_SERVER_PATH);				
+				System.err.println(String.format("productServer.LOG_SERVER_PATH end:  %s", productServer.LOG_SERVER_PATH));
 			}
 
+			System.err.println(String.format("productServer.LOG_SERVER_PATH = %s", productServer.LOG_SERVER_PATH));
 			//Path p = cacheNutShell.resolve(filename);
 			// productServer.setLogFile(p.toString());
 			productServer.setLogFile(productServer.LOG_SERVER_PATH);
+			productServer.serverLog.warn("Starts!!");
 		}
+		System.err.println(String.format("productServer.LOG_SERVER_PATH(2) = %s", productServer.serverLog.getName()));
+
 		/*
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -68,7 +68,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 	ProductServer() {
 		setup.put("ProductServer", this.getVersion());
-		// LABEL = "nutshell-"+getVersion();
 	}
 
 
@@ -124,6 +123,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		return generator;
 	}
 
+	/** Make logical checks and complementing of flags.
+	 * 
+	 * @param instructions
+	 */
 	static
 	protected void completeInstructions(Instructions instructions){
 
@@ -139,7 +142,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		}
 
 		// Media must be defined in most of the operations (DELETE, EXISTS, MAKE, GENERATE) so define it here.
-		// if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS)){
 		if (instructions.makeLevelAtLeast(Instructions.MakeLevel.EXISTS) || instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)){
 			if (! instructions.involves(MediaType.FILE | MediaType.MEMORY)) {
 				// Note: media selection could be also done by Generator?
@@ -303,12 +305,6 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 			this.log.close();
 		}
 
-		/*
-		@Override
-		protected void finalize() throws Throwable {
-			this.close();
-		}
-		 */
 		@Override
 		public String toString() {
 			if (this.info.getDirectives().isEmpty())
@@ -345,7 +341,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.toString()); // ? too strong?
 				//e.printStackTrace(log.printStream);
 			}
-
+			/*
+			catch (IOException e) {
+				//log.status
+				log.note(e.toString());
+				log.warn("Internal problem");
+				e.printStackTrace(log.getPrintStream());
+				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.toString()); // ? too strong?
+			}
+			*/
 		}
 
 
@@ -382,6 +386,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * To invoke this function as a separate thread, use #run().
 		 **
 		 * @throws InterruptedException // Gene
+		 * @throws IOException 
 		 * @see #run()
 		 */
 		public void execute() throws InterruptedException {
@@ -569,8 +574,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.debug(String.format("Created empty file: %s", paths.outputPath));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
-					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s = %s, %s", p, e.getStackTrace(), e.getMessage()));
-					return;
+					e.printStackTrace(log.getPrintStream());
+					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s, %s", p, e.getMessage()));
+					// return;
 				}
 
 				log.debug("Ok, generate...");
@@ -1705,8 +1711,10 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 
 		registry.add(new ProgramUtils.Version<>(server));
 
-
-
+		/** This is for standard tests. Given a command line, 
+		 *  construct corresponding GET parameters for an URL.
+		 * 
+		 */
 		registry.add(new Parameter("http_params","Debugging/testing: compose HTTP GET params."){
 
 			@Override

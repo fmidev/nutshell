@@ -338,10 +338,12 @@ public class ProductServerBase extends Program {
             catch (IOException e){
                 serverLog.error(String.format("Could not set permissions: %s", filePerms));
             }*/
+            serverLog.warn(String.format("OK! Started server log file %s [%s]", path, filePerms));
+            System.err.println(String.format("OK2! Started server log file %s %s [%s]", path, filePerms, dirPerms));
             return path;
         } catch (Exception e) {
             serverLog.setLogFile(null);
-            serverLog.warn(String.format("Failed in creating log file %s [%s]", path, filePerms));
+            serverLog.warn(String.format("Failed in creating server log file %s [%s]", path, filePerms));
             return null;
         }
 

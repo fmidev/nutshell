@@ -341,7 +341,15 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.toString()); // ? too strong?
 				//e.printStackTrace(log.printStream);
 			}
-
+			/*
+			catch (IOException e) {
+				//log.status
+				log.note(e.toString());
+				log.warn("Internal problem");
+				e.printStackTrace(log.getPrintStream());
+				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.toString()); // ? too strong?
+			}
+			*/
 		}
 
 
@@ -378,6 +386,7 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 		 * To invoke this function as a separate thread, use #run().
 		 **
 		 * @throws InterruptedException // Gene
+		 * @throws IOException 
 		 * @see #run()
 		 */
 		public void execute() throws InterruptedException {
@@ -565,8 +574,9 @@ public class ProductServer extends ProductServerBase { //extends Cache {
 					log.debug(String.format("Created empty file: %s", paths.outputPath));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
-					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s = %s, %s", p, e.getStackTrace(), e.getMessage()));
-					return;
+					e.printStackTrace(log.getPrintStream());
+					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, String.format("Failed in creating:: %s, %s", p, e.getMessage()));
+					// return;
 				}
 
 				log.debug("Ok, generate...");
