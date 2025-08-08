@@ -85,36 +85,21 @@ Invoke the editing tool, with argument matching the configuratiib file found abo
 sudo systemctl edit tomcat10
 ```
 
-Edit permissions, adding lines like
+Look for `[Service]` section. It is essential to grant write access to directory `CACHE_ROOT`,
+and optionally `STORARGE_ROOT`. For example as follows:
 ```
 ReadWritePaths=/opt/cache
+ReadWritePaths=/opt/storage
 ```
-in the `[Service]` section.
 
 Make sure that all the mentioned directories exist. Then restart the server:
 ```
 sudo systemctl start tomcat10
 ```
 
-
-5.
-Debugging
-
-Check for error messages in the log directory of TomCat, for example ``/var/log/tomcat10`` .
+Debugging: check for error messages in the log directory of TomCat, for example ``/var/log/tomcat10`` .
 There files like ``localhost.2025-08-07.log``.
 
-
-
-#### Note on TomCat 9 permission management
-
-
-
-
-It is essential to grant write access to directory `CACHE_ROOT`, and optionally `STORARGE_ROOT`. For example as follows:
-```
-ReadWritePaths=/opt/cache
-ReadWritePaths=/opt/storage
-```
 
 
 
