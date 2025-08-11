@@ -815,6 +815,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		html.appendTag(SimpleHtml.Tag.H2, "Log");
+		
+		html.appendTag(SimpleHtml.Tag.PRE, task.log.logFile);
+		
+		
 		if ((task.log.logFile!=null) && task.log.logFile.exists()){
 			// <embed type="text/html" src="snippet.html" width="500" height="200">
 			Element embed = html.appendTag(SimpleHtml.Tag.EMBED);
