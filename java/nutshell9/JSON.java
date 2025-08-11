@@ -1,7 +1,5 @@
 package nutshell9;
 
-// import com.sun.istack.internal.NotNull;
-
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -11,7 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 public class JSON { //extends HashMap<String,JSON> {
 
@@ -101,7 +99,7 @@ public class JSON { //extends HashMap<String,JSON> {
 
 
     public
-    JSON ensureChild(@Nonnull String key){
+    JSON ensureChild(@NotNull String key){
 
         if (key.isEmpty())
             return this;

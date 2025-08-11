@@ -1,17 +1,12 @@
 package nutshell9;
 
 
-//import com.sun.istack.internal.NotNull;
-
-// import javax..bind.Element;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 import javax.validation.constraints.NotNull;
-
-// import javax.annotation.Nonnull;
 
 
 class Entity {
