@@ -816,7 +816,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		html.appendTag(SimpleHtml.Tag.H2, "Log");
 		
-		html.appendTag(SimpleHtml.Tag.PRE, task.log.logFile);
+		if (task.log.logFile != null) {// elem.setAttribute("class", "error");
+			html.appendTag(SimpleHtml.Tag.PRE, task.log.logFile.getAbsolutePath());			
+		}
+		else {
+			Element e = html.appendTag(SimpleHtml.Tag.PRE, "No log file (?)");
+			e.setAttribute("class", "error");
+		}
 		
 		
 		if ((task.log.logFile!=null) && task.log.logFile.exists()){
