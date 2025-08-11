@@ -486,7 +486,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// batch.instructions.setOutputHandling(Instructions.OutputHandling.STREAM);
 		}
 
-		// problem: parameter ordering may cause  filename != productStr
+		// problem: parameter order may cause  filename != productStr
 		// TODO: -> _link_ equivalent files?
 
 		try {
@@ -816,7 +816,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		html.appendTag(SimpleHtml.Tag.H2, "Log");
 		
-		if (task.log.logFile != null) {// elem.setAttribute("class", "error");
+		if (task.log.logFile != null) {
 			html.appendTag(SimpleHtml.Tag.PRE, task.log.logFile.getAbsolutePath());			
 		}
 		else {
