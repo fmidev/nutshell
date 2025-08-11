@@ -342,6 +342,7 @@ public class ProductServerBase extends Program {
             System.err.println(String.format("OK2! Started server log file %s %s [%s]", path, filePerms, dirPerms));
             return path;
         } catch (Exception e) {
+        	System.out.println(String.format("Failed in creating server log file %s [%s]", path, filePerms));
             serverLog.setLogFile(null);
             serverLog.warn(String.format("Failed in creating server log file %s [%s]", path, filePerms));
             return null;
