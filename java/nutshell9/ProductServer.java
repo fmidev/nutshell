@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static java.nio.file.Files.*;
+// import static java.nio.file.Files.*;
 
 /* TODO: swallows exceptions in command line use?
  * TODO: separate cache at least for java generators
@@ -41,14 +41,19 @@ import static java.nio.file.Files.*;
  * meteorological products may have several timestamps, like computing time and
  * valid time.
  *
- * Some version history 4.4.1 LOG_SERVER_PATH 4.4 TomCat 10+9 via
- * downgrade-code.sh 4.3 TomCat 10.1 4.0 Fixed web.xml rules, simplified doGet()
- * 3.7.7 Methods moved to enclosing class. 3.7.6 External path container:
- * {@link ProductPathBundle} 3.7.5 Fixed double response.getOutputStream() call
- * – STREAM ends silently. 3.7.4 Fixed timeformat bug with synchronized 3.6 Adds
- * INPUT_PREFIX - the common prefix for all the retrieved input paths. 3.5 Added
- * *.sh link in NutLet 3.2 Create dirs automatically under $CACHE_ROOT and
- * $STORAGE_ROOT
+ * Some version history 
+ * 4.5 Revised path bundle
+ * 4.4.1 LOG_SERVER_PATH 
+ * 4.4 TomCat 10+9 via util/downgrade-code.sh 
+ * 4.3 TomCat 10.1 
+ * 4.0 Fixed web.xml rules, simplified doGet()
+ * 3.7.7 Methods moved to enclosing class. 
+ * 3.7.6 External path container: {@link ProductPathBundle} 
+ * 3.7.5 Fixed double response.getOutputStream() call – STREAM ends silently. 
+ * 3.7.4 Fixed timeformat bug with synchronized 
+ * 3.6 Adds INPUT_PREFIX - the common prefix for all the retrieved input paths. 
+ * 3.5 Added *.sh link in NutLet 
+ * 3.2 Create dirs automatically under $CACHE_ROOT and $STORAGE_ROOT
  *
  * @author Markus Peura fmi.fi Nov 26, 2023
  */
@@ -58,7 +63,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	// static
 	public String getVersion() {
-		return "4.4.1"; // TomCat 10.1
+		return "4.5"; 
 	}
 
 	ProductServer() {
@@ -151,6 +156,109 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		}
 
 	}
+	
+	/*
+	public Path getProductFilePath(ProductInfo product) {
+		return product.getTimeStampDir().resolve(getProductDir(product.PRODUCT_ID)).resolve(product.getFilename());
+	}
+
+	static public Path getTmpFilePath(Path productPath) {
+		return FileUtils.getEmptyPath().resolve(productPath.getParent()).resolve("tmp").resolve(productPath.getFileName());
+	}
+
+	static public Path getLogFilePath(Path productPath, TextOutput.Format logFormat) {
+		if (logFormat.equals(TextOutput.Format.HTML)) {
+			return FileUtils.getEmptyPath().resolve(productPath.getParent()).resolve(String.format("%s.html", productPath.getFileName()));			
+		}
+		else {
+			return FileUtils.getEmptyPath().resolve(productPath.getParent()).resolve(String.format("%s.log", productPath.getFileName()));
+		}
+	}
+
+	public Path getAbsolutePath(Path path) {
+		return CACHE_ROOT.resolve(path);
+	}
+	*/
+
+	public class PBundle {
+		
+		public Path getFileName() {
+			return relativePath.getFileName();
+		}
+
+		public Path getRelativePath() {
+			return relativePath;
+		}
+
+		public Path getRelativeDir() {
+			return relativePath.getParent();
+		}
+
+		public Path getAbsolutePath() {
+			return absolutePath;
+		}
+
+		public Path getAbsoluteDir() {
+			return absolutePath.getParent();
+		}
+
+		// --------------------------------------
+		
+		final private Path relativePath;
+		final private Path absolutePath;
+		
+		protected PBundle(Path rootDir, Path path){
+			this.relativePath = path;
+			this.absolutePath = rootDir.resolve(path);
+		}	
+
+		protected PBundle(Path path){
+			this(CACHE_ROOT, path);
+		}	
+	
+	
+	}
+
+	PBundle getStorageBundle(ProductInfo product){
+		return new PBundle(STORAGE_ROOT,
+				product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
+	}
+
+	PBundle getBundle(ProductInfo product){
+		return new PBundle(product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
+	}
+
+	PBundle getTmpBundle(PBundle bundle){
+		return new PBundle(bundle.getRelativeDir().resolve("tmp").resolve(bundle.relativePath.getFileName()));
+	}
+
+	PBundle getSystemBundle(PBundle bundle){
+		return new PBundle(Paths.get("nutshell").resolve(bundle.getRelativeDir()).resolve(bundle.relativePath.getFileName()));
+	}
+
+	/**
+	 * 
+	 * @param bundle
+	 * @param suffix - file extension without period, for example "log" or "svg"
+	 * @return
+	 */
+	PBundle getSystemBundle(PBundle bundle, String suffix){
+		return new PBundle(bundle.getRelativeDir().resolve("nutshell").resolve(
+				String.format("%s.%s", bundle.getFileName(), suffix)));
+	}
+
+	PBundle getLogBundle(PBundle bundle, TextOutput.Format logFormat){
+		if (logFormat.equals(TextOutput.Format.HTML)) {
+			return getSystemBundle(bundle, "html");				
+		} 
+		else {
+			return getSystemBundle(bundle, "log");			
+		}
+	}
+
+	PBundle getGraphBundle(PBundle bundle){
+		return getSystemBundle(bundle, "svg");			
+	}
 
 	/**
 	 * A "tray" containing both the product query info and the resulting object if
@@ -180,8 +288,15 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 		final public Instructions instructions; // = new Instructions();
 
-		final public nutshell9.ProductPathBundle paths;
+		// final public ProductPathBundle paths;
 
+		final public PBundle productPaths;
+		final public PBundle productPathTmp;
+		final public PBundle logPath;
+		final public PBundle storagePath;
+
+		final public PBundle graphPath;
+		
 		// final public ProductTask test = new ProductTask();
 
 		// public final Map<String,String> directives = new HashMap<>();
@@ -192,6 +307,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 		// Consider get node
 
+
+		
 		/**
 		 * Product generation task defining a product instance and operations on it.
 		 * <p>
@@ -219,10 +336,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				}
 			}
 			 */
-
+			
+			
 			final String label = getLabel(instructions.label, getTaskId());
-
-			paths = new nutshell9.ProductPathBundle(ProductServer.this, info, label);
 
 			if (info.isDynamic()){
 			}
@@ -230,34 +346,29 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			if (parentLog == null){
 				parentLog = serverLog;
 			}
-			//parentLog.special("koe1");
+
 			log = new HttpLog(parentLog.getName() + "[" + this.info.PRODUCT_ID + "]", parentLog.getVerbosity());
-			// log.setFormat(parentLog.getFormat());
-			// log.setFormat(LOG_FORMAT);
-			// log.setDecoration(LOG_STYLE);
 			log.set(LOG_TASKS);
-			// log.setDecoration(parentLog.decoration);
 
-			Path logPath; // = CACHE_ROOT.resolve(paths.relativeLogPath);
-			if (log.textOutput.getFormat() == TextOutput.Format.HTML) {
-				// Is this sometimes confusing?
-				// Consider extension in uppercase: .LOG and  .HTML
-				logPath = CACHE_ROOT.resolve(paths.relativeOutputDir).resolve(paths.filename + "." + label + ".log.html");
-			}
-			else {
-				logPath = CACHE_ROOT.resolve(paths.relativeOutputDir).resolve(paths.filename + "." + label + ".log");
-			}
+			//paths = new ProductPathBundle(ProductServer.this, info, label, log.textOutput.getFormat().toString());
 
+			productPaths = getBundle(info);
+			productPathTmp = getTmpBundle(productPaths);
+			logPath = getLogBundle(productPaths, log.textOutput.getFormat());
+			graphPath = getSystemBundle(productPaths); // NOTE: filename still same
+			storagePath = getStorageBundle(info);
+			
 			try {
-				FileUtils.ensureWritableFile(logPath, GROUP_ID, filePerms, dirPerms);
-				log.setLogFile(logPath);
-			} catch (IOException e) {
+				FileUtils.ensureWritableFile(logPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
+				log.setLogFile(logPath.getAbsolutePath());
+			} 
+			catch (IOException e) {
 				e.printStackTrace(parentLog.getPrintStream());
-				parentLog.error(String.format("Could not open Task log: %s", logPath));
+				parentLog.error(String.format("Could not open Task log: %s", logPath.getAbsolutePath()));
 				System.err.println(String.format("Opening Log file failed: Log GID=%d, file=%s dir=%s",
 						GROUP_ID, filePerms, dirPerms));
 				System.err.println(String.format("Opening Log file failed: Error: %s", e));
-				System.err.println(String.format("Opening Log file failed: File: %s", logPath));
+				System.err.println(String.format("Opening Log file failed: File: %s", logPath.getAbsolutePath()));
 				//log.setLogFile(null); ?
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
@@ -281,11 +392,12 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			*/
 
 			// this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
-			Path systemPath = CACHE_ROOT.resolve(paths.relativeSystemDir);
+			// Path systemPath =  CACHE_ROOT.resolve(paths.relativeSystemDir);
+			System.err.println(graphPath.absolutePath);
 			try {
-				FileUtils.ensureWritableDir(systemPath, GROUP_ID, dirPerms);
+				FileUtils.ensureWritableDir(graphPath.absolutePath, GROUP_ID, dirPerms);
 			} catch (IOException e) {
-				log.error(String.format("Creating product aux dir failed: %s '%s'", systemPath , e));
+				log.error(String.format("Creating product aux dir failed: %s '%s'", graphPath.getAbsolutePath() , e));
 			}
 
 			//log.warn("Where am I?");
@@ -307,9 +419,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		@Override
 		public String toString() {
 			if (this.info.getDirectives().isEmpty())
-				return String.format("%s # %s", paths.filename, instructions);
+				return String.format("%s # %s", productPaths.getFileName(), instructions);
 			else
-				return String.format("%s?%s # %s", paths.filename, info.getDirectives(), instructions);
+				return String.format("%s?%s # %s", productPaths.getFileName(), info.getDirectives(), instructions);
 		}
 
 		public String getStatus() {
@@ -360,8 +472,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			// this.outputPath.getFileName());
 			if (instructions.involves(MediaType.FILE)) {
 				try {
-					pserver.delete(paths.outputPath, log);
-					pserver.delete(paths.outputPathTmp, log); // what about tmpdir?
+					pserver.delete(productPaths.getAbsolutePath(), log);
+					pserver.delete(productPathTmp.getAbsolutePath(), log); // what about tmpdir?
 				} catch (IOException e) {
 					log.warn(e.getMessage());
 					// e.printStackTrace();
@@ -410,7 +522,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			}
 
 			// This is a potential path, not committing to a physical file yet.
-			File fileFinal = paths.outputPath.toFile();
+			File fileFinal = productPaths.getAbsolutePath().toFile();
 
 			/// Main DELETE operation
 			if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)
@@ -430,17 +542,17 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 						try {
 							// Native log
-							pserver.delete(paths.outputPath, log);
+							pserver.delete(productPaths.getAbsolutePath(), log);
 						} catch (IOException e) {
 							log.log(HttpLog.HttpStatus.CONFLICT,
-									String.format("Failed in deleting file: %s, %s", paths.outputPath, e.getMessage()));
+									String.format("Failed in deleting file: %s, %s", productPaths.getAbsolutePath(), e.getMessage()));
 							if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)) {
 								return; // STATUS?
 							}
 						}
 					} else {
 						log.log(HttpLog.HttpStatus.CONTINUE,
-								String.format("File does not exist: %s", paths.outputPath));
+								String.format("File does not exist: %s", productPaths.getAbsolutePath()));
 						// result = new Boolean(true);
 					}
 				}
@@ -455,7 +567,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			 * this.result = new BufferedImage(); }
 			 */
 
-			final boolean STORED_FILE_EXISTS = paths.storagePath.toFile().exists();
+			final boolean STORED_FILE_EXISTS = storagePath.getAbsolutePath().toFile().exists();
 
 			/// "MAIN"
 			// Consider also semantics: CHECK > EXISTS also actively links stored file or
@@ -464,35 +576,35 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 				// if ((instructions.involves(MediaType.FILE)) &&
 				// !instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)) {
-				log.debug(String.format("Stored file exists? %s : %s", STORED_FILE_EXISTS, paths.storagePath));
+				log.debug(String.format("Stored file exists? %s : %s", STORED_FILE_EXISTS, storagePath.getAbsolutePath()));
 
 				if (!fileFinal.exists() && STORED_FILE_EXISTS) {
 					log.log(HttpLog.HttpStatus.OK,
-							String.format("Trying to use (link) stored file: %s", paths.storagePath));
+							String.format("Trying to use (link) stored file: %s", storagePath.getAbsolutePath()));
 
 					try {
-						FileUtils.ensureWritableDir(paths.outputDir, GROUP_ID, dirPerms);
+						FileUtils.ensureWritableDir(productPaths.getAbsolutePath().getParent(), GROUP_ID, dirPerms);
 						// ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					} catch (IOException e) {
 						log.warn(e.getMessage());
 						log.log(HttpLog.HttpStatus.FORBIDDEN,
-								String.format("Failed in creating dir (with permissions): %s", paths.outputDir));
+								String.format("Failed in creating dir (with permissions): %s", productPaths.getAbsoluteDir()));
 						// e.printStackTrace();
 					}
 
 					try {
-						pserver.link(paths.storagePath, paths.outputPath, false, log);
+						pserver.link(storagePath.getAbsolutePath(), productPaths.getAbsolutePath(), false, log);
 					} catch (IOException e) {
 						log.error(e.getMessage());
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("Failed in linking: %s <- %s", paths.outputPath, paths.storagePath));
+								String.format("Failed in linking: %s <- %s", productPaths.getAbsolutePath(), storagePath.getAbsolutePath()));
 						// e.printStackTrace();
 					}
 				} else if (queryFile(fileFinal, TIMEOUT, log) >= 0) {
-					result = paths.outputPath;
-					log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", paths.outputPath));
+					result = productPaths.getAbsolutePath();
+					log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", productPaths.getAbsolutePath()));
 				} else {
-					log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", paths.outputPath));
+					log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", productPaths.getAbsolutePath()));
 					instructions.ensureMakeLevel(Instructions.MakeLevel.GENERATE);
 				}
 			}
@@ -567,12 +679,12 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 				// Mark this task being processed (empty file)
 				try {
-					FileUtils.ensureWritableDir(p = paths.outputDirTmp, GROUP_ID, dirPerms);
-					log.info(String.format("Created tmp dir: %s", paths.outputDirTmp));
-					FileUtils.ensureWritableDir(p = paths.outputDir, GROUP_ID, dirPerms);
-					log.info(String.format("Created dir: %s", paths.outputDirTmp));
-					FileUtils.ensureWritableFile(p = paths.outputPath, GROUP_ID, filePerms, dirPerms);
-					log.debug(String.format("Created empty file: %s", paths.outputPath));
+					FileUtils.ensureWritableDir(p = productPathTmp.getAbsoluteDir(), GROUP_ID, dirPerms);
+					log.info(String.format("Created tmp dir: %s", productPathTmp.getAbsoluteDir()));
+					FileUtils.ensureWritableDir(p = productPaths.getAbsoluteDir(), GROUP_ID, dirPerms);
+					log.info(String.format("Created dir: %s", productPaths.getAbsoluteDir()));
+					FileUtils.ensureWritableFile(p = productPaths.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
+					log.debug(String.format("Created empty file: %s", productPaths.getAbsolutePath()));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
 					e.printStackTrace(log.getPrintStream());
@@ -655,7 +767,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 					// if (instructions.isSet(ActionType.GENERATE)){
 					log.note("Running Generator: " + info.PRODUCT_ID);
 
-					File fileTmp = paths.outputPathTmp.toFile();
+					File fileTmp = productPathTmp.getAbsolutePath().toFile();
 
 					try {
 						/*
@@ -673,7 +785,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 						try {
 							log.warn(String.format("Error index=%d, msg: %s", e.getIndex(), e.getMessage()));
-							pserver.delete(paths.outputPathTmp, log);
+							pserver.delete(productPathTmp.getAbsolutePath(), log);
 							// this.delete(fileFinal);
 						} catch (Exception e2) {
 							log.error(e2.getLocalizedMessage());
@@ -684,35 +796,35 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 						/// Override
 						log.setStatus(Log.Status.OK);
-						log.debug(String.format("OK, generator produced tmp file: %s", paths.outputPathTmp));
+						log.debug(String.format("OK, generator produced tmp file: %s", productPathTmp.getAbsolutePath()));
 						serverLog.success(String.format("generated: %s", info.getFilename()));
 
 						// Let's take this slowly...
 						try {
-							pserver.move(paths.outputPathTmp, paths.outputPath, log);
-							log.success(paths.outputPath.toString());
-							// this.copy(paths.outputPathTmp, paths.outputPath);
+							pserver.move(productPathTmp.getAbsolutePath(), productPaths.getAbsolutePath(), log);
+							log.success(productPaths.getAbsolutePath().toString());
+							// this.copy(productPaths.getAbsolutePath()Tmp, productPaths.getAbsolutePath());
 						} catch (IOException e) {
 							log.warn(e.toString());
 							// log.warn(String.format("filePerms: %s", filePerms));
 							log.log(HttpLog.HttpStatus.FORBIDDEN,
-									String.format("Failed in moving tmp file: %s", paths.outputPathTmp));
-							// log.error(String.format("Failed in moving tmp file: %s", paths.outputPath));
+									String.format("Failed in moving tmp file: %s", productPathTmp.getAbsolutePath()));
+							// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
 						}
 
-						if (!Files.isSymbolicLink(paths.outputPath)) {
+						if (!Files.isSymbolicLink(productPaths.getAbsolutePath())) {
 							try {
 								// Todo: skip this if already ok...
 								// Check: is needed? this.move contains copy_attributes
-								Files.setPosixFilePermissions(paths.outputPath, filePerms);
+								Files.setPosixFilePermissions(productPaths.getAbsolutePath(), filePerms);
 							} catch (IOException e) {
 								log.warn(e.toString());
 								log.warn(String.format("Failed in setting perms %s for file: %s", filePerms,
-										paths.outputPath));
+										productPaths.getAbsolutePath()));
 								// log.warn(String.format("filePerms: %s", filePerms));
 								// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms
-								// for file: %s", paths.outputPath));
-								// log.error(String.format("Failed in moving tmp file: %s", paths.outputPath));
+								// for file: %s", productPaths.getAbsolutePath()));
+								// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
 							}
 						}
 
@@ -724,7 +836,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						} else {
 							log.debug("Generator failed but returned no error code");
 							log.log(HttpLog.HttpStatus.CONFLICT,
-									String.format("Generator '' failed in producing the file: %s", paths.outputPath));
+									String.format("Generator '' failed in producing the file: %s", productPaths.getAbsolutePath()));
 						}
 
 						if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) {
@@ -732,13 +844,13 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							try {
 								log.info(String.format("Failed in generating: %s, removing result file(s)", info));
 
-								if (paths.outputPathTmp.toFile().exists())
-									pserver.delete(paths.outputPathTmp, log);
+								if (productPathTmp.getAbsolutePath().toFile().exists())
+									pserver.delete(productPathTmp.getAbsolutePath(), log);
 							} catch (Exception e) {
 								/// TODO: is it a fatal error if a product defines its input wrong?
 								log.error(e.getMessage()); // RETURN?
 								log.log(HttpLog.HttpStatus.FORBIDDEN,
-										String.format("Failed in deleting tmp file: %s", paths.outputPath));
+										String.format("Failed in deleting tmp file: %s", productPathTmp.getAbsolutePath()));
 							}
 						}
 					}
@@ -780,49 +892,49 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				} else if (this.instructions.makeLevelEquals(Instructions.MakeLevel.EXISTS)) {
 					if (!fileFinal.exists()) {
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("File does not exist: %s ", paths.outputPath));
+								String.format("File does not exist: %s ", productPaths.getAbsolutePath()));
 					} else if (fileFinal.length() == 0) {
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("File exists, but is empty: %s ", paths.outputPath));
+								String.format("File exists, but is empty: %s ", productPaths.getAbsolutePath()));
 					} else {
 						result = fileFinal;
-						log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s ", paths.outputPath));
+						log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s ", productPaths.getAbsolutePath()));
 					}
 				} else if (fileFinal.length() == 0) {
 
-					log.debug(String.format("Empty file or no file %s", paths.outputPath));
+					log.debug(String.format("Empty file or no file %s", productPaths.getAbsolutePath()));
 					// TODO: consider method for this:
 					if (log.indexedState.getIndex() >= 400) {
 						log.debug("Forwarding original error (at least HTTP 400)");
 					} else {
 						// log.debug("Generator failed but returned no error code");
 						// log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator '' failed in
-						// producing the file: %s", paths.outputPath));
+						// producing the file: %s", productPaths.getAbsolutePath()));
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("Yes, failed in generating: %s ", paths.outputPath));
+								String.format("Yes, failed in generating: %s ", productPaths.getAbsolutePath()));
 					}
 
 					try {
-						pserver.delete(paths.outputPath, log);
+						pserver.delete(productPaths.getAbsolutePath(), log);
 					} catch (IOException e) {
-						// log.error(String.format("Failed in deleting: %s ", paths.outputPath));
+						// log.error(String.format("Failed in deleting: %s ", productPaths.getAbsolutePath()));
 						log.log(HttpLog.HttpStatus.FORBIDDEN,
-								String.format("Failed in deleting: %s ", paths.outputPath));
+								String.format("Failed in deleting: %s ", productPaths.getAbsolutePath()));
 						log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 					}
 
 				} else {
 
-					this.result = paths.outputPath;
+					this.result = productPaths.getAbsolutePath();
 					log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length()));
 
 					if (this.instructions.isSet(PostProcessing.SHORTCUT)) {
 						if (this.info.isDynamic()) {
 							try {
 								// Path dir = ensureDir(cacheRoot, productDir);
-								Path dir = CACHE_ROOT.resolve(paths.productDir);
+								Path dir = CACHE_ROOT.resolve(getProductDir(info.getID()));
 								FileUtils.ensureWritableDir(dir, GROUP_ID, dirPerms);
-								pserver.link(paths.outputPath, dir, true, log);
+								pserver.link(productPaths.getAbsolutePath(), dir, true, log);
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 							}
@@ -833,10 +945,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 					if (this.instructions.isSet(PostProcessing.LATEST)) {
 						if (this.info.isDynamic()) {
 							try {
-								// Path dir = ensureDir(cacheRoot, productDir);
-								Path dir = CACHE_ROOT.resolve(paths.productDir);
+								Path dir = CACHE_ROOT.resolve(getProductDir(info.getID()));
 								FileUtils.ensureWritableDir(dir, GROUP_ID, dirPerms);
-								pserver.link(paths.outputPath, dir.resolve(this.info.getFilename("LATEST")), true, log);
+								pserver.link(productPaths.getAbsolutePath(), dir.resolve(this.info.getFilename("LATEST")), true, log);
 								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN,
@@ -848,7 +959,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 					if (this.instructions.isSet(PostProcessing.STORE)) {
 						// Todo: traverse storage paths.
-						Path storageDir = STORAGE_ROOT.resolve(paths.relativeOutputDir);
+						Path storageDir = STORAGE_ROOT.resolve(productPaths.getRelativeDir());
 						Path storedFile = storageDir.resolve(this.info.getFilename());
 						if (Files.exists(storedFile)) {
 							log.experimental(String.format("Store: file exists already: %s", storedFile));
@@ -856,7 +967,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							try {
 								// ensureDir(storageRoot, relativeOutputDir);
 								FileUtils.ensureWritableDir(storageDir, GROUP_ID, dirPerms);
-								pserver.copy(paths.outputPath, storedFile, log);
+								pserver.copy(productPaths.getAbsolutePath(), storedFile, log);
 								log.experimental(String.format("Stored in: %s", storedFile));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
@@ -874,7 +985,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							if (p.startsWith(CACHE_ROOT)) { // XXX
 								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 							}
-							pserver.copy(paths.outputPath, p, log); // Paths.get(path)
+							pserver.copy(productPaths.getAbsolutePath(), p, log); // Paths.get(path)
 							log.ok(String.format("Copied: %s", p));
 							// System.out.println("Copy "+path);
 						} catch (IOException e) {
@@ -891,7 +1002,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							if (p.startsWith(CACHE_ROOT)) {
 								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 							}
-							pserver.link(paths.outputPath, p, false, log); // Paths.get(path)
+							pserver.link(productPaths.getAbsolutePath(), p, false, log); // Paths.get(path)
 							log.ok(String.format("Linked: %s", p));
 						} catch (IOException e) {
 							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking failed: %s", p));
@@ -906,7 +1017,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							if (p.startsWith(CACHE_ROOT)) {
 								FileUtils.ensureWritablePath(this.instructions.move, GROUP_ID, dirPerms);
 							}
-							pserver.move(paths.outputPath, p, log);
+							pserver.move(productPaths.getAbsolutePath(), p, log);
 							this.result = this.instructions.move;
 							log.log(HttpLog.HttpStatus.OK, String.format("Moved: %s", p));
 						} catch (IOException e) {
@@ -916,12 +1027,17 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 					}
 
 					try {
-						File dir = paths.outputDirTmp.toFile();
+						Path p = productPathTmp.getAbsoluteDir();
+						File dir = p.toFile();
 						if (dir.exists()) {
-							log.debug(String.format("Remove tmp dir: %s", paths.outputDirTmp));
+							log.debug(String.format("Remove tmp dir: %s", p));
 							// NEW! Empty the dir
+							Files.walkFileTree(p,
+									new FileUtils.MoveDir(p, productPaths.getAbsoluteDir()));
+							/*
 							Files.walkFileTree(paths.outputDirTmp,
 									new FileUtils.MoveDir(paths.outputDirTmp, paths.outputDir));
+							*/
 							/*
 							 * for (File file: dir.listFiles()){ // if (file.isFile() || file.isDirectory())
 							 * if (file.isFile()){ this.move(file.toPath(), this.outputDir); } else if
@@ -941,7 +1057,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						e.printStackTrace(log.getPrintStream());
 						log.warn("Move failed: " + e.getMessage());
 						log.log(HttpLog.HttpStatus.SEE_OTHER,
-								String.format("Failed in removing tmp dir %s", paths.outputDirTmp));
+								String.format("Failed in removing tmp dir %s", productPathTmp.getAbsoluteDir()));
 					}
 
 				}
@@ -962,7 +1078,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				try {
 					// TODO: path to paths bundle
 					ShellExec.OutputReader reader = new ShellExec.OutputReader(log.getPrintStream());
-					ShellExec.exec("./run.sh", null, PRODUCT_ROOT.resolve(paths.productDir), reader);
+					ShellExec.exec("./run.sh", null, PRODUCT_ROOT.resolve(getProductDir(info.getID())), reader);
 				} catch (Exception e) {
 					log.error(String.format("Failed: %s", e));
 				}
@@ -1010,8 +1126,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			// Consider keeping Objects, and calling .toString() only upon
 			// ExternalGenerator?
-			env.put("OUTDIR", paths.outputPathTmp.getParent().toString()); // cacheRoot.resolve(this.relativeOutputDir));
-			env.put("OUTFILE", paths.outputPathTmp.getFileName().toString());
+			env.put("OUTDIR", productPathTmp.getAbsolutePath().getParent().toString()); // cacheRoot.resolve(this.relativeOutputDir));
+			env.put("OUTFILE", productPathTmp.getAbsolutePath().getFileName().toString());
 
 			if (!PATH.isEmpty()) {
 				env.put("PATH", PATH);
@@ -1023,7 +1139,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			if (!this.inputTasks.isEmpty()) {
 				int inputPrefixLength = 0;
-				int inputDirPrefixLength = 0;
+				// int inputDirPrefixLength = 0;
 				// env.put("INPUTKEYS", String.join(",", this.inputTasks.keySet().toArray(new
 				// String[0])));
 				// info.INPUT_KEYS = String.join(",", this.inputTasks.keySet().toArray(new
@@ -1036,12 +1152,12 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				for (Map.Entry<String, Task> entry : inputTasks.entrySet()) {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
-					if (inputTask.paths.outputPath != null) {
+					if (inputTask.productPaths.getAbsolutePath() != null) {
 
-						env.put(key, inputTask.paths.outputPath);
+						env.put(key, inputTask.productPaths.getAbsolutePath());
 						inputKeys.add(key);
 
-						Path dir = inputTask.paths.outputPath.getParent();
+						Path dir = inputTask.productPaths.getAbsolutePath().getParent();
 						if (dir == null) {
 							// At least one input is a plain filename -> skip whole thing.
 							this.info.INPUT_PREFIX = null;
@@ -1100,8 +1216,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 *
 		 */
 		public Path writeGraph() {
-			Path graphFile = CACHE_ROOT.resolve(paths.relativeGraphPath);
-			log.special(String.format("Writing graph to file: %s", graphFile));
+			// Path graphFile = CACHE_ROOT.resolve(paths.relativeGraphPath);
+			log.special(String.format("Writing graph to file: %s", graphPath.getAbsolutePath()));
 
 			// Graph graph = this.getGraph(null);
 			// Graph graph = this.getGraph();
@@ -1114,17 +1230,17 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			// graph.nodeProto.attributes.put("shape", "record");
 			graph.nodeProto.attributes.put("shape", "box");
 			try {
-				Path graphDir = graphFile.getParent();
-				FileUtils.ensureWritableDir(graphDir, GROUP_ID, dirPerms);
-				graph.dotToFile(graphFile.toString()); // svg
-				graph.dotToFile(graphFile.toString() + ".dot"); // debugging
-				Files.setPosixFilePermissions(graphFile, filePerms);
+				// Path graphDir = graphFile.getParent();
+				FileUtils.ensureWritableDir(graphPath.getAbsoluteDir(), GROUP_ID, dirPerms);
+				graph.dotToFile(graphPath.getAbsolutePath().toString()); // svg
+				graph.dotToFile(graphPath.getAbsolutePath().toString() + ".dot"); // debugging
+				Files.setPosixFilePermissions(graphPath.getAbsolutePath(), filePerms);
 			} catch (IOException | InterruptedException e) {
 				log.warn(e.getMessage());
 				graph.toStream(log.getPrintStream());
-				log.fail(String.format("Failed in writing graph to file: %s", graphFile));
+				log.fail(String.format("Failed in writing graph to file: %s", graphPath.getAbsolutePath()));
 			}
-			return graphFile;
+			return graphPath.getAbsolutePath();
 		}
 
 	} // Task
@@ -1326,7 +1442,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			} catch (InterruptedException e) {
 				log.warn(String.format("Interrupted task: %s(%s)[%d]", key, task.info.PRODUCT_ID, task.getTaskId()));
-				log.warn(String.format("Pending file? : %s", task.paths.outputPathTmp));
+				log.warn(String.format("Pending file? : %s", task.productPathTmp.getAbsolutePath()));
 			}
 
 			IndexedState state = task.log.indexedState;
@@ -1411,7 +1527,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			try {
 				log.note("Deleting file");
 				delete(file.toPath(), log);
-				// this.delete(paths.outputPath);
+				// this.delete(productPaths.getAbsolutePath());
 			} catch (IOException e) {
 				// TODO: redesign (check if delete needed at all)
 				log.log(HttpLog.HttpStatus.CONFLICT,
@@ -1927,9 +2043,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			TaskGraphNode.drawGraph(task, serverGraph);
 			// task.getGraphNode(serverGraph, entry.getKey()+'$');
 
-			if (task.paths.outputPath.toFile().exists()) {
-				log.ok(String.format("File exists:\t %s (%d bytes)", task.paths.outputPath.toString(),
-						task.paths.outputPath.toFile().length()));
+			if (task.productPaths.getAbsolutePath().toFile().exists()) {
+				log.ok(String.format("File exists:\t %s (%d bytes)", task.productPaths.getAbsolutePath().toString(),
+						task.productPaths.getAbsolutePath().toFile().length()));
 				// log.note(String.format("File exists:\t %s (%d bytes)",
 				// task.outputPath.toString(), task.outputPath.toFile().length()));
 			}

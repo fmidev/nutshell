@@ -97,9 +97,10 @@ Make sure that all the mentioned directories exist. Then restart the server:
 sudo systemctl start tomcat10
 ```
 
-Debugging: check for error messages in the log directory of TomCat, for example ``/var/log/tomcat10`` .
-There files like ``localhost.2025-08-07.log``.
+#### Debugging
 
+Check for error messages in the log directory of TomCat, for example
+``/var/log/tomcat10`` . There are files like ``localhost.2025-08-07.log``.
 
 
 

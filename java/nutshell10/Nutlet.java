@@ -51,7 +51,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		public Node getNode(Document basedoc) {
 			Element elem = basedoc.createElement(SimpleHtml.Tag.A.toString());
 			elem.setAttribute("href", String.format("%s/NutShell?product=%s&instructions=MAKE,STATUS",
-					productServer.HTTP_BASE, task.paths.filename)); // , task.instructions
+					productServer.HTTP_BASE, task.info.getFilename())); // , task.instructions
 			elem.setAttribute("target", "_new");
 			elem.setTextContent(task.toString());
 			return elem;
@@ -569,10 +569,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			if (task.log.getStatus() >= Log.Status.NOTE.level) {
 				if (task.instructions.isSet(OutputType.STREAM)) {
-					productServer.serverLog.warn("pserv.log: sendToStream: " + task.paths.filename);
-					task.log.debug("task.log: sendToStream: " + task.paths.filename);
+					productServer.serverLog.warn("pserv.log: sendToStream: " + task.productPaths.getFileName());
+					task.log.debug("task.log: sendToStream: " + task.productPaths.getFileName());
 					try {
-						sendToStream(task.paths.outputPath, httpResponse);
+						sendToStream(task.productPaths.getAbsolutePath(), httpResponse);
 						/*
 						taskMap.remove(task.getTaskId());
 						task.close();
@@ -590,11 +590,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					}
 					taskMap.remove(task.getTaskId());
 					task.close();
+					productServer.serverLog.warn(String.format("Task closed: %s", task));
 					return;
-				} else if (task.instructions.isSet(Instructions.REDIRECT)) {
+				} 
+				else if (task.instructions.isSet(Instructions.REDIRECT)) {
 					taskMap.remove(task.getTaskId());
 					task.close();
-					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.paths.relativeOutputPath);
+					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.productPaths.getRelativeDir());
 					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
 					httpResponse.sendRedirect(url);
 					// task.close();
@@ -668,16 +670,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
-			if (task.paths.relativeOutputDir != null) {
+			if (task.productPaths.getRelativePath() != null) {
 
-				Path relativePath = ProductServer.cachePrefix.resolve(task.paths.relativeOutputPath);
+				Path relativePath = ProductServer.cachePrefix.resolve(task.productPaths.getRelativePath());
 				//task.paths.relativeOutputDir.toString(), task.info.getFilename());
 				//elem = html.createAnchor(relativePath, relativePath.getFileName());
 				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
 				//elem = html.createAnchor(relativePath.getParent(), null);
 				if ((task.log.logFile!=null) && task.log.logFile.exists()){
-					Path relativeLogPath = ProductServer.cachePrefix.resolve(task.paths.relativeLogPath);
-					map.put("Log file", html.createAnchor(relativeLogPath, task.paths.relativeLogPath.getFileName()));
+					Path relativeLogPath = ProductServer.cachePrefix.resolve(task.logPath.getRelativePath());
+					map.put("Log file", html.createAnchor(relativeLogPath, task.logPath.getFileName()));
 				}
 
 				if (task.log.getStatus() <= Log.Status.ERROR.level){
@@ -687,7 +689,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					//html.appendTag(SimpleHtml.Tag.PRE, String.format("Success/error status: %d", task.log.getStatus()));
 				}
 
-				if ((task.paths.relativeGraphPath != null)){ //  && (task.graph != null)
+				if ((task.graphPath.getRelativePath() != null)){ //  && (task.graph != null)
 
 					task.log.debug("Writing graph to SVG file");
 					Path graphPath = task.writeGraph();
@@ -698,7 +700,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						try {
 							graphFileName = productServer.serverLog.logFile.getParent()+"/NutShell.svg";
 							// TODO logDir
-								ProductServer.serverGraph.dotToFile(graphFileName);
+							ProductServer.serverGraph.dotToFile(graphFileName);
 						}
 						//catch (InterruptedException e) { // 2025 // | IOException e)
 						catch (Exception e) {
@@ -717,7 +719,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						graphElem.setAttribute("type", "image/svg+xml");
 						graphElem.setAttribute("border", "1");
 						//graphElem.setAttribute("onclick", "alert('Not implemented')");
-						graphElem.setAttribute("title", task.paths.relativeGraphPath.getFileName().toString());
+						graphElem.setAttribute("title", task.graphPath.getFileName().toString());
 
 						// For some reason, this does not work. Or it was not clickable...
 						// graphElem.setAttribute("src", relativeGraphPath.toString());
@@ -740,7 +742,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 						//Element span =
 						html.appendTag(SimpleHtml.Tag.SPAN, "Failed in generating the process graph: ");
-						html.appendAnchor("cache/"+task.paths.relativeGraphPath, task.paths.relativeGraphPath.getFileName().toString());
+						html.appendAnchor("cache/"+task.graphPath.getRelativePath(), task.graphPath.getFileName().toString());
 						html.appendTag(SimpleHtml.Tag.PRE, e.getMessage()).setAttribute("class", "error");
 						// Comments! Consider tail?
 
@@ -768,8 +770,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						html.appendElement(graphElem);
 						*/
 					}
-					Path relativeGraphPath = ProductServer.cachePrefix.resolve(task.paths.relativeGraphPath);
-					map.put("Graph", html.createAnchor(relativeGraphPath, task.paths.relativeGraphPath.getFileName()));
+					Path relativeGraphPath = ProductServer.cachePrefix.resolve(task.graphPath.getRelativePath());
+					map.put("Graph", html.createAnchor(relativeGraphPath, task.graphPath.getFileName()));
 
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}
@@ -785,9 +787,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			// NOTE: these assume ExternalGenerator?
-			Path gen = Paths.get("products", task.paths.productDir.toString(), ExternalGenerator.scriptName);
-			map.put("Generator dir", html.createAnchor(gen.getParent(),null));
-			map.put("Generator file", html.createAnchor(gen, gen.getFileName()));
+			Path gen = Paths.get("products").resolve(task.productPaths.getRelativeDir()).resolve(ExternalGenerator.scriptName);
+			map.put("Generator dir (fix)", html.createAnchor(gen.getParent(),null));
+			map.put("Generator file (fix)", html.createAnchor(gen, gen.getFileName()));
 			// map.put("actions", batch.instructions);
 			// task.info.directives.put("TEST", "value");
 			map.put("instructions", batch.instructions);
@@ -829,7 +831,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// <embed type="text/html" src="snippet.html" width="500" height="200">
 			Element embed = html.appendTag(SimpleHtml.Tag.EMBED);
 			embed.setAttribute("type", "text/html");
-			embed.setAttribute("src", Paths.get("cache").resolve(task.paths.relativeLogPath).toString());
+			embed.setAttribute("src", Paths.get("cache").resolve(task.logPath.getRelativePath()).toString());
 			embed.setAttribute("width", "100%");
 			embed.setAttribute("height", "500");
 			embed.setAttribute("class", "code"); // Has no effect?
