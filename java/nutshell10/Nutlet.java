@@ -136,6 +136,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			
 			if (FileUtils.isEmpty(productServer.LOG_SERVER_PATH)) {
 				
+				// TODO: use "Bundle methods"
 				Path cacheNutShell = productServer.CACHE_ROOT.resolve("nutshell").resolve(productServer.USER);
 
 				System.err.println("productServer.LOG_SERVER_PATH(0) is NULL");
@@ -569,10 +570,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			if (task.log.getStatus() >= Log.Status.NOTE.level) {
 				if (task.instructions.isSet(OutputType.STREAM)) {
-					productServer.serverLog.warn("pserv.log: sendToStream: " + task.productPaths.getFileName());
-					task.log.debug("task.log: sendToStream: " + task.productPaths.getFileName());
+					productServer.serverLog.warn("pserv.log: sendToStream: " + task.productPath.getFileName());
+					task.log.debug("task.log: sendToStream: " + task.productPath.getFileName());
 					try {
-						sendToStream(task.productPaths.getAbsolutePath(), httpResponse);
+						sendToStream(task.productPath.getAbsolutePath(), httpResponse);
 						/*
 						taskMap.remove(task.getTaskId());
 						task.close();
@@ -596,7 +597,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				else if (task.instructions.isSet(Instructions.REDIRECT)) {
 					taskMap.remove(task.getTaskId());
 					task.close();
-					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.productPaths.getRelativeDir());
+					String url = String.format("%s/cache/%s?redirect=NO", httpRequest.getContextPath(), task.productPath.getRelativeDir());
 					//String url = request.getContextPath() + "/cache/" + task.relativeOutputDir + "/" + filename + "?redirect=NO";
 					httpResponse.sendRedirect(url);
 					// task.close();
@@ -670,9 +671,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 
 			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
-			if (task.productPaths.getRelativePath() != null) {
+			if (task.productPath.getRelativePath() != null) {
 
-				Path relativePath = ProductServer.cachePrefix.resolve(task.productPaths.getRelativePath());
+				Path relativePath = ProductServer.cachePrefix.resolve(task.productPath.getRelativePath());
 				//task.paths.relativeOutputDir.toString(), task.info.getFilename());
 				//elem = html.createAnchor(relativePath, relativePath.getFileName());
 				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
@@ -787,7 +788,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			// NOTE: these assume ExternalGenerator?
-			Path gen = Paths.get("products").resolve(task.productPaths.getRelativeDir()).resolve(ExternalGenerator.scriptName);
+			Path gen = Paths.get("products").resolve(task.productPath.getRelativeDir()).resolve(ExternalGenerator.scriptName);
 			map.put("Generator dir (fix)", html.createAnchor(gen.getParent(),null));
 			map.put("Generator file (fix)", html.createAnchor(gen, gen.getFileName()));
 			// map.put("actions", batch.instructions);
@@ -831,7 +832,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			// <embed type="text/html" src="snippet.html" width="500" height="200">
 			Element embed = html.appendTag(SimpleHtml.Tag.EMBED);
 			embed.setAttribute("type", "text/html");
-			embed.setAttribute("src", Paths.get("cache").resolve(task.logPath.getRelativePath()).toString());
+			// embed.setAttribute("src", Paths.get("cache").resolve(task.logPath.getRelativePath()).toString());
+			embed.setAttribute("src", task.logPath.getPrefixedRelativePath().toString());
 			embed.setAttribute("width", "100%");
 			embed.setAttribute("height", "500");
 			embed.setAttribute("class", "code"); // Has no effect?
