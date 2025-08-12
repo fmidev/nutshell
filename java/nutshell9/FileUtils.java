@@ -10,7 +10,9 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
 import java.text.ParseException;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +52,12 @@ public class FileUtils {
         int OTHERS = FileUtils.getBit();
         int OWNER = USER | GROUP | OTHERS;
     }
+    
+    static final Map<String, Predicate<Path>> tests = Map.of(
+    		"exists", Files::exists,
+    		"isReadable", Files::isReadable,
+    		"isWritable", Files::isWritable
+    		);
 
     /*  Future extension (explain)
     interface Permission {

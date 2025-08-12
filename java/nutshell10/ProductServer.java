@@ -42,6 +42,7 @@ import java.util.concurrent.TimeoutException;
  * valid time.
  *
  * Some version history 
+ * 4.6 Explicit directory permission tests
  * 4.5 Revised path bundle
  * 4.4.1 LOG_SERVER_PATH 
  * 4.4 TomCat 10+9 via util/downgrade-code.sh 
@@ -63,7 +64,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	// static
 	public String getVersion() {
-		return "4.5"; 
+		return "4.6"; 
 	}
 
 	ProductServer() {

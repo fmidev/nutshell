@@ -907,11 +907,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// DELEGATE here ... but failure should be caught etc.
 	}
 	
-	protected Element reportFileStatus(SimpleHtml html, String name, Path path, Predicate<Path> test) {
+	protected Element reportFileStatus(SimpleHtml html, String name, Path path, String fileTest) {
 
+		Predicate<Path> test = FileUtils.tests.get(fileTest);
+		
 		Element li = html.appendTag(Tag.LI);
 		
-		html.appendElement(li, Tag.TT, String.format("%s=%s: %s?", name, path, test.toString()));
+		html.appendElement(li, Tag.TT, String.format("%s=%s: %s?", name, path, fileTest));
 		if (test.test(path)) {
 			Element e = html.appendElement(li, Tag.B, ": YES");			
 		}
@@ -936,12 +938,12 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 		//	"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
 
-		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, Files::exists));
-		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, Files::isReadable));
-		html.appendElement(reportFileStatus(html, "CACHE_ROOT", productServer.CACHE_ROOT, Files::exists));
-		html.appendElement(reportFileStatus(html, "CACHE_ROOT", productServer.CACHE_ROOT, Files::isWritable));
-		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, Files::exists));
-		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, Files::isReadable));
+		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, "exists"));
+		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, "isReadable"));
+		html.appendElement(reportFileStatus(html, "CACHE_ROOT", productServer.CACHE_ROOT, "exists"));
+		html.appendElement(reportFileStatus(html, "CACHE_ROOT", productServer.CACHE_ROOT, "isWritable"));
+		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, "exists"));
+		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, "isReadable"));
 		
 		super.addServerStatus(html);
 
