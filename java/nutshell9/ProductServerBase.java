@@ -726,7 +726,7 @@ public class ProductServerBase extends Program {
 
         serverLog.note("Clearing cache completed");
         //Files.walk(this.cacheRoot).filter(Files::isDirectory).filter(Files::i).forEach(Files::delete);
-
+        //Files.walk(this.CACHE_ROOT).filte
     }
 
     public void releaseCache() throws IOException {

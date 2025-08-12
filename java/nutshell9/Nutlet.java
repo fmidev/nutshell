@@ -2,17 +2,20 @@ package nutshell9;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.text.ParseException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nutshell9.SimpleHtml.Tag;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -903,6 +906,23 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	public void doGetProduct(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ProductServer.Batch batch) throws IOException  {
 		// DELEGATE here ... but failure should be caught etc.
 	}
+	
+	protected Element reportFileStatus(SimpleHtml html, String name, Path path, Predicate<Path> test) {
+
+		Element li = html.appendTag(Tag.LI);
+		
+		html.appendElement(li, Tag.TT, String.format("%s=%s: %s?", name, path, test.toString()));
+		if (test.test(path)) {
+			Element e = html.appendElement(li, Tag.B, ": YES");			
+		}
+		else {
+			Element e = html.appendElement(li, Tag.B, ": NO");
+			e.setAttribute("class", "error");
+		}
+		
+		return li;
+	}
+	
 
 	@Override
 	protected void addServerStatus(SimpleHtml html) throws IOException{
@@ -913,9 +933,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		html.appendTable(productServer.setup, null);
 
-				//sendStatusPage(HttpServletResponse.SC_OK, "Status page",
-				//		"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
+		// sendStatusPage(HttpServletResponse.SC_OK, "Status page",
+		//	"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
 
+		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, Files::exists));
+		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, Files::isReadable));
+		html.appendElement(reportFileStatus(html, "CACHE_ROOT", productServer.CACHE_ROOT, Files::exists));
+		html.appendElement(reportFileStatus(html, "CACHE_ROOT", productServer.CACHE_ROOT, Files::isWritable));
+		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, Files::exists));
+		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, Files::isReadable));
+		
 		super.addServerStatus(html);
 
 	}
