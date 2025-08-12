@@ -217,7 +217,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			this.rootDir = rootDir;
 			this.relativePath = path;
 			this.absolutePath = rootDir.resolve(path);
-			System.out.println("PathEntry: " + this.toString());
+			// System.out.println("PathEntry: " + this.toString());
 		}	
 
 		/*
