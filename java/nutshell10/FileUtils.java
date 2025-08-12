@@ -167,38 +167,35 @@ public class FileUtils {
     public void ensureWritableDir(Path path, int groupId, Set<PosixFilePermission> permissions) throws IOException {
 
         if ((path == null) || (path.getNameCount()==0)){
-            return; // path; //experimentalResult;
+            return; 
         }
 
-        // Note: (desired) dir may exist, file not.
+        // Note: a directory may exist, but file not.
         if (!Files.exists(path)) {
             // Consider constructing error string (of GID and perms)
 
             // Ensure parents, recursively
             ensureWritableDir(path.getParent(), groupId, permissions);
-            //ensureWritableDir(path, groupId, permissions);
+            
+            Files.createDirectory(path); // throws IOException
 
-            Files.createDirectory(path); // potentially throws IOException
-
-
+            // Not strict.
             try {
                 Files.setAttribute(path, "unix:gid", groupId);
             } catch (Exception e) {
-                // Not strict...
                 // experimentalResult |= Owner.GROUP;
             }
         }
         else if (Files.isWritable(path)){
             // In this case, does not try to change file ownership / permissions.
-            return; // path; // experimentalResult;
+            return;
         }
 
+        // Not strict, at least not yet.
         try {
             Files.setPosixFilePermissions(path, permissions);
         }
         catch (Exception e){
-            // Not strict, yet...
-            //experimentalResult |= Permission.WRITE; // or "ALL" ?
         }
 
         /*
@@ -212,9 +209,7 @@ public class FileUtils {
         else {
          */
         if (!Files.isWritable(path)){
-            // experimentalResult |= Permission.WRITE;
-        	// Consider ...
-        	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by %s: %s",
+        	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by this user %s: %s",
                     path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         }
 
@@ -222,7 +217,9 @@ public class FileUtils {
 
 
     /** If a path exists, try to ensure it is writable. If needed, create paths recursively.
-         *
+         * 
+         * Does not create actual files, but parent directories as needed.
+         * 
          * @param path
          * @param groupId
          * @param dirPermissions
@@ -233,8 +230,7 @@ public class FileUtils {
         //int experimentalResult = 0;
 
         if ((path == null) || (path.isEmpty())){
-            // System.err.println("XX: Empty path");
-            return Paths.get(""); //experimentalResult;
+            return FileUtils.getEmptyPath();
         }
 
         Matcher filenameMatcher = qualifiedFilePathRe.matcher(path.toString());
