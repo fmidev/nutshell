@@ -678,14 +678,15 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//Path inputScript =  Paths.get("products", productTask.productDir.toString(), productServer.inputCmd);
 			if (task.productPath.getRelativePath() != null) {
 
-				Path relativePath = ProductServer.cachePrefix.resolve(task.productPath.getRelativePath());
-				//task.paths.relativeOutputDir.toString(), task.info.getFilename());
-				//elem = html.createAnchor(relativePath, relativePath.getFileName());
-				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
-				//elem = html.createAnchor(relativePath.getParent(), null);
+				//Path relativePath = ProductServer.cachePrefix.resolve(task.productPath.getRelativePath());
+				//map.put("Output file",  html.createAnchor(relativePath, relativePath.getFileName()));
+
+				map.put("Output file", html.createAnchor(task.productPath.getPrefixedRelativePath(), task.productPath.getFileName()));
+				
 				if ((task.log.logFile!=null) && task.log.logFile.exists()){
-					Path relativeLogPath = ProductServer.cachePrefix.resolve(task.logPath.getRelativePath());
-					map.put("Log file", html.createAnchor(relativeLogPath, task.logPath.getFileName()));
+					// Path relativeLogPath = ProductServer.cachePrefix.resolve(task.logPath.getRelativePath());
+					// map.put("Log file", html.createAnchor(relativeLogPath, task.logPath.getFileName()));
+					map.put("Log file2", html.createAnchor(task.logPath.getPrefixedRelativePath(), task.logPath.getFileName()));
 				}
 
 				if (task.log.getStatus() <= Log.Status.ERROR.level){
@@ -782,10 +783,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}
 
-				map.put("Output file", html.createAnchor(relativePath, relativePath.getFileName()));
-				map.put("Shell cmd request", html.createAnchor(relativePath.getParent().resolve(task.info.getBasename()+".sh"), "basename+'.sh'"));
+				map.put("Shell cmd request", html.createAnchor(task.productPath.getPrefixedRelativeDir().resolve(task.info.getBasename()+".sh"), "basename+'.sh'"));
 				//String basenName = relativePath.getFileName();
-				map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
+				// map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
+				map.put("Output dir", html.createAnchor(task.productPath.getPrefixedRelativeDir(), null));
 
 			}
 			else {
