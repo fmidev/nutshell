@@ -47,13 +47,7 @@
       <param-value>${NUTSHELL_CONF}</param-value>
     </init-param>
 
-    <!-- NEW -->
-    <init-param>
-      <param-name>HTTP_ROOT</param-name>
-      <param-value>${HTML_ROOT}</param-value>
-    </init-param>
-
-    <!-- OLD/NEW... -->
+    <!-- Current... -->
     <init-param>
       <param-name>HTML_ROOT</param-name>
       <param-value>${HTML_ROOT}</param-value>
@@ -93,6 +87,11 @@
   <servlet-mapping>
     <servlet-name>tomcat_default</servlet-name>
     <url-pattern>/cache/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>tomcat_default</servlet-name>
+    <url-pattern>/products/*</url-pattern>
   </servlet-mapping>
 
 
