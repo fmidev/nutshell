@@ -156,7 +156,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				productServer.LOG_SERVER_PATH = cacheNutShell.resolve(String.format("%s-%s.%d.%s", 
 						"nutshell", productServer.USER, productServer.GROUP_ID, filenameExtension));
 				
-				setup.put("LOG_SERVER_PATH", productServer.LOG_SERVER_PATH);
+				productServer.setup.put("LOG_SERVER_PATH", productServer.LOG_SERVER_PATH);
 			}
 			else {
 				System.err.println(String.format("productServer.LOG_SERVER_PATH init: %s", productServer.LOG_SERVER_PATH));
