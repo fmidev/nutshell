@@ -65,7 +65,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	// static
 	public String getVersion() {
-		return "4.6.1"; 
+		return "4.6.2"; 
 	}
 
 	ProductServer() {
