@@ -58,6 +58,7 @@ public class FileUtils {
     		"isReadable", Files::isReadable,
     		"isWritable", Files::isWritable
     		);
+    
 
     /*  Future extension (explain)
     interface Permission {
@@ -66,8 +67,43 @@ public class FileUtils {
         int EXEC  = getBit();
         //int PERMISSIONS = getBit();
     }
+     */
+    
+    public enum Permission {
+        READ,
+        WRITE,
+        EXEC,
+        SPECIAL;
+    }
+    	
+
+    public
+    static final Flags getPermissions(Path path){
+    	
+    	Flags result = new Flags(Permission.class);
+    	
+    	if (Files.exists(path)) {
+
+    		if (Files.isReadable(path)) {
+        		result.add(Permission.READ);    		
+        	}
+
+        	if (Files.isWritable(path)) {
+        		result.add(Permission.WRITE);    		
+        	}
+        	
+        	if (Files.isExecutable(path)) {
+        		result.add(Permission.EXEC);    		
+        	}
+    		
+    	}
+    	
+    	return result;
+    	
+    }
 
 
+    /*
     class Status implements Owner, Permission {
         // ..
     }

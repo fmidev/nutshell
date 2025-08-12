@@ -207,7 +207,12 @@ public class ProductServerBase extends Program {
 
         try {
         	// Also above LOG_SERVER may be rewritten here.
-            Manip.assignToObjectLenient(setup, this);
+            Manip.assignToObjectLenient(setup, this, true); // reassign!
+            /*
+            setup.put("CACHE_ROOT", this.CACHE_ROOT);
+            setup.put("PRODUCT_ROOT", this.PRODUCT_ROOT);
+            setup.put("STORAGE_ROOT", this.STORAGE_ROOT);
+            */
         }
         catch (RuntimeException e){
             serverLog.warn(e.getMessage());

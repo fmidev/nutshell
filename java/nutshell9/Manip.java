@@ -63,12 +63,26 @@ public class Manip {
      */
     static
     public void assignToObjectLenient(Map<String,Object> source, Object target)  {
+    	assignToObjectLenient(source, target, false);
+    }
+    
+    /** Assign values to object and
+     *
+     * @param source
+     * @param target
+     */
+    static
+    public void assignToObjectLenient(Map<String,Object> source, Object target, boolean reassign)  {
+
         Map<String,String> errorMap = new HashMap<>();
         for (Map.Entry<String,Object> entry: source.entrySet()) {
             String key   = entry.getKey();
             Object value = entry.getValue();
             try {
-                assignToObject(value, target, key);
+            	Object result = assignToObject(value, target, key);
+            	if (reassign) {
+            		source.put(key, result);
+            	}
             }
             catch (NoSuchFieldException e) {
                 //e.printStackTrace();
@@ -92,8 +106,8 @@ public class Manip {
     }
 
     static
-    public void assignToObject(Object value, Object target, String key) throws NoSuchFieldException, IllegalAccessException {
-        assignToObject(value, target, key, null);
+    public Object assignToObject(Object value, Object target, String key) throws NoSuchFieldException, IllegalAccessException {
+        return assignToObject(value, target, key, null);
     }
 
 
@@ -107,7 +121,7 @@ public class Manip {
      * @throws IllegalAccessException
      */
     static
-    public void assignToObject(Object value, Object target, String key, String index) throws NoSuchFieldException, IllegalAccessException {
+    public Object assignToObject(Object value, Object target, String key, String index) throws NoSuchFieldException, IllegalAccessException {
 
         Field field = target.getClass().getField(key);
         if (index != null){
@@ -115,14 +129,15 @@ public class Manip {
             if (target instanceof Map){
                 Map<String,Object> map = (Map)target;
                 map.put(index, value);
+                return value;
             }
             else {
                 throw new NoSuchFieldException(String.format("%s is not a Map", key));
             }
-            return;
+            // return null;
         }
 
-        assignToObject(value, target, field, field.getType());
+        return assignToObject(value, target, field, field.getType());
     }
 
     /** Assignment with explicit class definition
@@ -137,48 +152,51 @@ public class Manip {
      * @throws IllegalAccessException
      */
     static
-    public void assignToObject(Object value, Object target, Field field,  Class cls) throws IllegalAccessException {
+    public Object assignToObject(Object value, Object target, Field field,  Class cls) throws IllegalAccessException {
 
         if (value == null) {
             field.set(target, null);
-            return;
+            return null;
         }
 
+        // Of actual type
+        Object finalValue = null;
+        
         // System.err.printf(" Field=%s [%s] <- Value %s [%s] %n",
         //         field.getName(), cls.getName(), value.toString(), value.getClass().getName());
 
         String s = value.toString(); // value not null here
-
+        
         if (cls.isPrimitive() && s.isEmpty()){ // Don't assign "" to number/boolean. Basically, an exception?
-            return;
+            return null;
         }
 
         if (cls.equals(int.class) || (cls.equals(Integer.class))){
-            field.set(target, Integer.parseInt(s));
+            field.set(target,  finalValue = Integer.parseInt(s));
         }
         else if (cls.equals(long.class) || (cls.equals(Long.class))){
-            field.set(target, Integer.parseInt(s));
+            field.set(target,  finalValue = Integer.parseInt(s));
         }
         else if (cls.equals(float.class) || (cls.equals(Float.class))){
-            field.set(target, Float.parseFloat(s));
+            field.set(target,  finalValue = Float.parseFloat(s));
         }
         else if (cls.equals(double.class) || (cls.equals(Double.class))){
-            field.set(target, Double.parseDouble(s));
+            field.set(target,  finalValue = Double.parseDouble(s));
         }
         else if (cls.equals(char.class) || (cls.equals(Character.class))){
-            field.set(target, s.charAt(0));
+            field.set(target,  finalValue = s.charAt(0));
         }
         else if (cls.equals(byte.class) || (cls.equals(Byte.class))){
-            field.set(target, Byte.parseByte(s));
+            field.set(target,  finalValue = Byte.parseByte(s));
         }
         else if (cls.equals(boolean.class) || cls.equals(Boolean.class)){
-            field.set(target, Boolean.getBoolean(s));
+            field.set(target,  finalValue = Boolean.getBoolean(s));
         }
         else if (cls.equals(String.class)){
-            field.set(target, s);
+            field.set(target, finalValue = s);
         }
         else if (cls.equals(Path.class)){
-            field.set(target, Paths.get(s));
+            field.set(target,  finalValue = Paths.get(s));
         }
         else if (cls.isAssignableFrom(Flags.class)){
             Flags flags = (Flags) field.get(target);
@@ -187,20 +205,23 @@ public class Manip {
                 //if (v.isEmpty())
                 //    flags.set(
                 flags.set(value.toString()); // how should empty string be handled?
+                finalValue = flags;
             } catch (NoSuchFieldException e) {
                 throw new IllegalAccessException(e.getMessage()); // kludge
             }
         }
         else if (cls.isEnum()){
             //System.err.printf(" Enum [%s] '%s' %n", Enum.valueOf(cls, s), s);
-            field.set(target, Enum.valueOf(cls, s));
+            field.set(target,  finalValue = Enum.valueOf(cls, s));
         }
         else {
             if (cls.isPrimitive()){
                 throw new IllegalAccessException("Not yet implemented: " + cls.getName());
             }
             field.set(target, value); // obj
+            finalValue = value;
         }
+        return finalValue;
     }
 
     static public String toString(Object obj){

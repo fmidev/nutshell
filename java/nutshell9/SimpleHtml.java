@@ -12,6 +12,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -375,12 +376,33 @@ public class SimpleHtml extends SimpleXML{
 				tdVal.setTextContent("<null>");
 			else if (value instanceof String[])
 				tdVal.setTextContent(String.join(",", (String[])value));
+			else if (value instanceof Path) {
+				Path p = (Path)value;
+				if (Files.exists(p)) {
+					Flags flags = FileUtils.getPermissions(p);
+					tdVal.setTextContent(String.format("%s [%s]", p.toString(), flags));
+					/*
+					tdVal.setTextContent(String.format("%s [exec=%b,read=%b,write=%b]", 
+							p.toString(),
+							Files.isExecutable(p),
+							Files.isReadable(p),
+							Files.isWritable(p)));
+					*/					
+				}
+				else {
+					tdVal.setTextContent(String.format("%s [does not exist]", 
+							p.toString(),
+							Files.isReadable(p),
+							Files.isWritable(p)));
+				}
+			}
 			else if (value instanceof Node)
 				tdVal.appendChild((Node)value);
 			else if (value instanceof Nodifiable)
 				tdVal.appendChild(((Nodifiable)value).getNode(document));
 			else
 				tdVal.setTextContent(value.toString());
+				//tdVal.setTextContent(value.toString()+value.getClass().getSimpleName());
 		}
 
 		return table;
