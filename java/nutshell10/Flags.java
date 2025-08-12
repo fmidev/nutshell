@@ -444,9 +444,9 @@ public class Flags {
         EXEC,
         SPECIAL;
 
-        final int bit;
+        //final int bit;
         ExampleEnum(){
-            bit = 1 << ordinal();
+            //bit = 1 << ordinal();
         }
 
     }
@@ -463,16 +463,17 @@ public class Flags {
 
         Map<String,Flags> map = new HashMap<>();
 
-        map.put("Plain (unlabelled) Flags class, 8 bits", new Flags(0xff));
-        map.put("Flags class + Enum", new Flags(ExampleEnum.class));
-
         class ExampleClass extends Flags {
             static public final int READ  = 1;
             static public final int WRITE = 2;
             static public final int EXEC  = 4;
         }
         map.put("Inherited Class", new ExampleClass());
+        map.put("Plain (unlabelled) Flags class, 8 bits", new Flags(0xff));
+        map.put("Flags referring to Enum", new Flags(ExampleEnum.class));
 
+
+        int counter = 0;
 
         for (Map.Entry<String,Flags> entry: map.entrySet()){
 
@@ -480,7 +481,7 @@ public class Flags {
             flags.getDomain(); // DEBUG
 
             System.out.println();
-            System.out.printf("EXAMPLE: %s: ", entry.getKey());
+            System.out.printf("EXAMPLE %d: %s ", ++counter, entry.getKey());
             //System.out.printf("EXAMPLE: ");
             if (flags.getClass() == flags.getDomain()){
                 System.out.printf("%s", flags.getClass().getSimpleName());
@@ -515,7 +516,7 @@ public class Flags {
                     }
                 }
 
-                System.out.printf(" Value: %d == (%s)%n", flags.value, flags.toString());
+                System.out.printf("  Value: %d == (%s)%n", flags.value, flags.toString());
 
 
             }
