@@ -215,7 +215,7 @@ public class FileUtils {
             	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by this user %s: %s",
                         path, owner, System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
         	}
-        	catch (IOException e) {
+        	catch (Exception e) {
                	throw new IOException(String.format("Dir %s is NOT WRITABLE by this user %s: %s – and owner cannot be read",
                         path, System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
 				
