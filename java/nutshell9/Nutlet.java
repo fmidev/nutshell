@@ -939,13 +939,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 		// sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 		//	"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
-
+		/*
 		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, "exists"));
 		html.appendElement(reportFileStatus(html, "PRODUCT_ROOT", productServer.PRODUCT_ROOT, "isReadable"));
 		html.appendElement(reportFileStatus(html, "CACHE_ROOT",   productServer.CACHE_ROOT,   "exists"));
 		html.appendElement(reportFileStatus(html, "CACHE_ROOT",   productServer.CACHE_ROOT,   "isWritable"));
 		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, "exists"));
 		html.appendElement(reportFileStatus(html, "STORAGE_ROOT", productServer.STORAGE_ROOT, "isReadable"));
+		*/
 		
 		super.addServerStatus(html);
 
