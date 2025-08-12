@@ -66,7 +66,7 @@ public class ProductServerBase extends Program {
      */
     // final public Flags LOG_STYLE = serverLog.decoration;
 
-    public final Map<String,Object> setup = new HashMap<>();
+    public final Map<String,Object> setup = new TreeMap<>(); // = new HashMap<>();
 
     // The following HTTP setting are optional
 
@@ -89,7 +89,7 @@ public class ProductServerBase extends Program {
      */
     public List<Path> confFiles = new ArrayList<>();
 
-    public Path CACHE_ROOT = Paths.get(".");
+    public Path CACHE_ROOT = null; //Paths.get(".");
 
     // NEW
     public String CACHE_PATH = null;
@@ -99,14 +99,14 @@ public class ProductServerBase extends Program {
     public StringMapper storagePathSyntax = null;
 
     //public Path storageRoot   = Paths.get(".");
-    public Path PRODUCT_ROOT = Paths.get(".");
+    public Path PRODUCT_ROOT = null; //Paths.get(".");
     //protected Path storageRoot = Paths.get(".");
-    public Path STORAGE_ROOT = Paths.get(".");
+    public Path STORAGE_ROOT = null; //Paths.get(".");
 
     /// User name (alphabetical)
     public String USER = System.getProperty("user.name");;
 
-
+    public Path NUTSHELL_JAR_DIR = null;
 
     final
     public Map<String,String> MAP_URL = new HashMap<>();
@@ -114,7 +114,7 @@ public class ProductServerBase extends Program {
     // Consider
     //final protected List<StringMapper> storagePaths = new LinkedList<>();
 
-    // Not configurable at the moment...
+    // Deprecating, thanks to bundles
     static
     final public Path cachePrefix = Paths.get("cache");
 
@@ -149,13 +149,7 @@ public class ProductServerBase extends Program {
     public String PATH = "";
     public String PATH_EXT = "";
 
-    /** Read configuration file. This operation can be repeated (with --conf ).
-     *
-    protected void readConfig(){
-        readConfig(confFile);
-    }
-     */
-
+ 
     /** Read configuration file. This operation can be repeated (with --conf ).
      *
      * @param path
@@ -208,11 +202,6 @@ public class ProductServerBase extends Program {
         try {
         	// Also above LOG_SERVER may be rewritten here.
             Manip.assignToObjectLenient(setup, this, true); // reassign!
-            /*
-            setup.put("CACHE_ROOT", this.CACHE_ROOT);
-            setup.put("PRODUCT_ROOT", this.PRODUCT_ROOT);
-            setup.put("STORAGE_ROOT", this.STORAGE_ROOT);
-            */
         }
         catch (RuntimeException e){
             serverLog.warn(e.getMessage());

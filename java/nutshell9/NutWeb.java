@@ -63,7 +63,7 @@ public class NutWeb extends HttpServlet {
 	 *
 	 */
 	public NutWeb() {
-		setup = new HashMap<>();
+		setup = new TreeMap<>(); // = new HashMap<>();
 		GregorianCalendar startTime = new GregorianCalendar();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 		setup.put("startTime",   simpleDateFormat.format(startTime.getTime()));
