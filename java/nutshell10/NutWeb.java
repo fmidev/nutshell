@@ -30,7 +30,8 @@ public class NutWeb extends HttpServlet {
 	/**  System side directory for this HttpServlet
 	 *   Example:
 	 */
-	public String HTML_ROOT = null; //"";
+	//public String HTML_ROOT = null; //"";
+	public Path HTML_ROOT = null; //"";
 
 
 	/** Name of the HTML document in which the other HTML doc will be embedded.
@@ -311,7 +312,7 @@ public class NutWeb extends HttpServlet {
 		SimpleHtml html = null;
 		try {
 			//Path path = Paths.get(httpRoot,"template", "main.html");
-			Path path = Paths.get(HTML_ROOT, HTML_TEMPLATE);
+			Path path = HTML_ROOT.resolve(HTML_TEMPLATE); //Paths.get(HTML_ROOT, HTML_TEMPLATE);
 			html = new SimpleHtml(path);
 		}
 		catch (Exception e) { // throws IOException, SAXException, ParserConfigurationException {
@@ -367,10 +368,10 @@ public class NutWeb extends HttpServlet {
 	 * @param html
 	 * @param filename
 	 */
-	protected SimpleHtml includeHtml(@NotNull String  filename, @NotNull SimpleHtml html) {
+	protected SimpleHtml includeHtml(@NotNull String filename, @NotNull SimpleHtml html) {
 
 		// Consider data security?
-		Path path = Paths.get(HTML_ROOT, filename);
+		Path path = HTML_ROOT.resolve(filename); // Paths.get(HTML_ROOT, filename);
 
 		try {
 			Document doc = SimpleXML.readDocument(path);
