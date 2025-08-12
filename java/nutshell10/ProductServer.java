@@ -332,8 +332,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 * @param instr - definition how a product is retrieved and handled thereafter - @see #Actions
 		 * @param parentLog    - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
+		 * @throws IOException - if writing a log file fails
 		 */
-		public Task(String productStr, Instructions instr, HttpLog parentLog) throws ParseException {
+		public Task(String productStr, Instructions instr, HttpLog parentLog) throws ParseException, IOException {
 
 
 			id = getProcessId();
@@ -378,12 +379,14 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			} 
 			catch (IOException e) {
 				e.printStackTrace(parentLog.getPrintStream());
+				
 				parentLog.error(String.format("Could not open Task log: %s", logPath.getAbsolutePath()));
 				System.err.println(String.format("Opening Log file failed: Log GID=%d, file=%s dir=%s",
 						GROUP_ID, filePerms, dirPerms));
 				System.err.println(String.format("Opening Log file failed: Error: %s", e));
 				System.err.println(String.format("Opening Log file failed: File: %s", logPath.getAbsolutePath()));
 				//log.setLogFile(null); ?
+				throw e; // currently
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 			log.debug(String.format("Label: %s",  label)); // , labelArray
@@ -421,7 +424,14 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			this.result = null;
 		}
 
-		public Task(String productStr, Instructions instructions) throws ParseException {
+		/**
+		 * 
+		 * @param productStr
+		 * @param instructions
+		 * @throws ParseException - if productStr cannot be parsed
+		 * @throws IOException - if writing a log file fails
+		 */
+		public Task(String productStr, Instructions instructions) throws ParseException, IOException {
 			this(productStr, instructions, null);
 		}
 
@@ -1843,7 +1853,14 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							Task task = server.new Task(entry.getValue().toString(), batch.instructions, log);
 							System.out.println(String.format("instructions=%s&product=%s", batch.instructions,
 									task.info.getFilename()));
-						} catch (ParseException e) {
+						}
+						catch (ParseException e) {
+							// TODO: specify
+							log.warn(entry.getValue().toString());
+							log.error(e.getMessage());
+						}
+						catch (IOException e) {
+							// TODO: specify
 							log.warn(entry.getValue().toString());
 							log.error(e.getMessage());
 						}

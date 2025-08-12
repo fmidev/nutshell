@@ -157,30 +157,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	}
 	
-	/*
-	public Path getProductFilePath(ProductInfo product) {
-		return product.getTimeStampDir().resolve(getProductDir(product.PRODUCT_ID)).resolve(product.getFilename());
-	}
 
-	static public Path getTmpFilePath(Path productPath) {
-		return FileUtils.getEmptyPath().resolve(productPath.getParent()).resolve("tmp").resolve(productPath.getFileName());
-	}
-
-	static public Path getLogFilePath(Path productPath, TextOutput.Format logFormat) {
-		if (logFormat.equals(TextOutput.Format.HTML)) {
-			return FileUtils.getEmptyPath().resolve(productPath.getParent()).resolve(String.format("%s.html", productPath.getFileName()));			
-		}
-		else {
-			return FileUtils.getEmptyPath().resolve(productPath.getParent()).resolve(String.format("%s.log", productPath.getFileName()));
-		}
-	}
-
-	public Path getAbsolutePath(Path path) {
-		return CACHE_ROOT.resolve(path);
-	}
-	*/
-
-	public class PBundle {
+	public class PathEntry {
 		
 		public Path getFileName() {
 			return relativePath.getFileName();
@@ -194,6 +172,23 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			return relativePath.getParent();
 		}
 
+		/** Relative path prefixed with "cache/" or "storage/" 
+		 * 
+		 * @return 
+		 */
+		public Path getPrefixedRelativePath() {
+			return rootDir.getFileName().resolve(relativePath);
+		}
+
+		/** Relative directory prefixed with "cache/" or "storage/" 
+		 * 
+		 * @return 
+		 */
+		public Path getPrefixedRelativeDir() {
+			return rootDir.getFileName().resolve(relativePath.getParent());
+		}
+
+		
 		public Path getAbsolutePath() {
 			return absolutePath;
 		}
@@ -202,38 +197,57 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			return absolutePath.getParent();
 		}
 
+		public Path getRootDir() {
+			return rootDir;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%s//%s", getRootDir(), getRelativePath());
+		}
+
+
 		// --------------------------------------
 		
+		final private Path rootDir;
 		final private Path relativePath;
 		final private Path absolutePath;
 		
-		protected PBundle(Path rootDir, Path path){
+		protected PathEntry(Path rootDir, Path path){
+			this.rootDir = rootDir;
 			this.relativePath = path;
 			this.absolutePath = rootDir.resolve(path);
+			// System.out.println("PathEntry: " + this.toString());
 		}	
 
-		protected PBundle(Path path){
+		/*
+		protected PathEntry(Path path){
 			this(CACHE_ROOT, path);
-		}	
+		}
+		*/	
 	
 	
 	}
 
-	PBundle getStorageBundle(ProductInfo product){
-		return new PBundle(STORAGE_ROOT,
+	PathEntry getLongEntry(ProductInfo product){
+		return new PathEntry(CACHE_ROOT, 
 				product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
 	}
 
-	PBundle getBundle(ProductInfo product){
-		return new PBundle(product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
+	PathEntry getShortEntry(ProductInfo product){
+		return new PathEntry(CACHE_ROOT, 
+				getProductDir(product.getID()).resolve(product.getFilename()));
 	}
 
-	PBundle getTmpBundle(PBundle bundle){
-		return new PBundle(bundle.getRelativeDir().resolve("tmp").resolve(bundle.relativePath.getFileName()));
+
+	PathEntry getTmpEntry(PathEntry pathEntry){
+		return new PathEntry(CACHE_ROOT,
+				pathEntry.getRelativeDir().resolve("tmp").resolve(pathEntry.relativePath.getFileName()));
 	}
 
-	PBundle getSystemBundle(PBundle bundle){
-		return new PBundle(Paths.get("nutshell").resolve(bundle.getRelativeDir()).resolve(bundle.relativePath.getFileName()));
+	PathEntry getStorageEntry(ProductInfo product){
+		return new PathEntry(STORAGE_ROOT,
+				product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
 	}
 
 	/**
@@ -242,22 +256,22 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	 * @param suffix - file extension without period, for example "log" or "svg"
 	 * @return
 	 */
-	PBundle getSystemBundle(PBundle bundle, String suffix){
-		return new PBundle(bundle.getRelativeDir().resolve("nutshell").resolve(
+	PathEntry getSystemEntry(PathEntry bundle, String suffix){
+		return new PathEntry(CACHE_ROOT, bundle.getRelativeDir().resolve(".nutshell").resolve(
 				String.format("%s.%s", bundle.getFileName(), suffix)));
 	}
-
-	PBundle getLogBundle(PBundle bundle, TextOutput.Format logFormat){
+	
+	PathEntry getLogEntry(PathEntry bundle, TextOutput.Format logFormat){
 		if (logFormat.equals(TextOutput.Format.HTML)) {
-			return getSystemBundle(bundle, "html");				
+			return getSystemEntry(bundle, "html");				
 		} 
 		else {
-			return getSystemBundle(bundle, "log");			
+			return getSystemEntry(bundle, "log");			
 		}
 	}
 
-	PBundle getGraphBundle(PBundle bundle){
-		return getSystemBundle(bundle, "svg");			
+	PathEntry getGraphEntry(PathEntry bundle){
+		return getSystemEntry(bundle, "svg");			
 	}
 
 	/**
@@ -290,12 +304,12 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 		// final public ProductPathBundle paths;
 
-		final public PBundle productPaths;
-		final public PBundle productPathTmp;
-		final public PBundle logPath;
-		final public PBundle storagePath;
+		final public PathEntry productPath;
+		final public PathEntry productPathTmp;
+		final public PathEntry logPath;
+		final public PathEntry storagePath;
 
-		final public PBundle graphPath;
+		final public PathEntry graphPath;
 		
 		// final public ProductTask test = new ProductTask();
 
@@ -318,8 +332,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 * @param instr - definition how a product is retrieved and handled thereafter - @see #Actions
 		 * @param parentLog    - log of the parent task (or main process, a product server)
 		 * @throws ParseException - if parsing productStr fails
+		 * @throws IOException - if writing a log file fails
 		 */
-		public Task(String productStr, Instructions instr, HttpLog parentLog) throws ParseException {
+		public Task(String productStr, Instructions instr, HttpLog parentLog) throws ParseException, IOException {
 
 
 			id = getProcessId();
@@ -352,11 +367,11 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			//paths = new ProductPathBundle(ProductServer.this, info, label, log.textOutput.getFormat().toString());
 
-			productPaths = getBundle(info);
-			productPathTmp = getTmpBundle(productPaths);
-			logPath = getLogBundle(productPaths, log.textOutput.getFormat());
-			graphPath = getSystemBundle(productPaths); // NOTE: filename still same
-			storagePath = getStorageBundle(info);
+			productPath    = getLongEntry(info);
+			productPathTmp = getTmpEntry(productPath);
+			logPath     = getLogEntry(productPath, log.textOutput.getFormat());
+			graphPath   = getGraphEntry(productPath); // NOTE: filename still same
+			storagePath = getStorageEntry(info);
 			
 			try {
 				FileUtils.ensureWritableFile(logPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
@@ -364,12 +379,14 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			} 
 			catch (IOException e) {
 				e.printStackTrace(parentLog.getPrintStream());
+				
 				parentLog.error(String.format("Could not open Task log: %s", logPath.getAbsolutePath()));
 				System.err.println(String.format("Opening Log file failed: Log GID=%d, file=%s dir=%s",
 						GROUP_ID, filePerms, dirPerms));
 				System.err.println(String.format("Opening Log file failed: Error: %s", e));
 				System.err.println(String.format("Opening Log file failed: File: %s", logPath.getAbsolutePath()));
 				//log.setLogFile(null); ?
+				throw e; // currently
 			}
 			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
 			log.debug(String.format("Label: %s",  label)); // , labelArray
@@ -393,9 +410,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			// this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			// Path systemPath =  CACHE_ROOT.resolve(paths.relativeSystemDir);
-			System.err.println(graphPath.absolutePath);
+			// System.err.println(graphPath.absolutePath);
 			try {
-				FileUtils.ensureWritableDir(graphPath.absolutePath, GROUP_ID, dirPerms);
+				FileUtils.ensureWritableDir(graphPath.getAbsoluteDir(), GROUP_ID, dirPerms);
 			} catch (IOException e) {
 				log.error(String.format("Creating product aux dir failed: %s '%s'", graphPath.getAbsolutePath() , e));
 			}
@@ -407,7 +424,14 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			this.result = null;
 		}
 
-		public Task(String productStr, Instructions instructions) throws ParseException {
+		/**
+		 * 
+		 * @param productStr
+		 * @param instructions
+		 * @throws ParseException - if productStr cannot be parsed
+		 * @throws IOException - if writing a log file fails
+		 */
+		public Task(String productStr, Instructions instructions) throws ParseException, IOException {
 			this(productStr, instructions, null);
 		}
 
@@ -419,9 +443,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		@Override
 		public String toString() {
 			if (this.info.getDirectives().isEmpty())
-				return String.format("%s # %s", productPaths.getFileName(), instructions);
+				return String.format("%s # %s", productPath.getFileName(), instructions);
 			else
-				return String.format("%s?%s # %s", productPaths.getFileName(), info.getDirectives(), instructions);
+				return String.format("%s?%s # %s", productPath.getFileName(), info.getDirectives(), instructions);
 		}
 
 		public String getStatus() {
@@ -472,7 +496,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			// this.outputPath.getFileName());
 			if (instructions.involves(MediaType.FILE)) {
 				try {
-					pserver.delete(productPaths.getAbsolutePath(), log);
+					pserver.delete(productPath.getAbsolutePath(), log);
 					pserver.delete(productPathTmp.getAbsolutePath(), log); // what about tmpdir?
 				} catch (IOException e) {
 					log.warn(e.getMessage());
@@ -522,7 +546,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			}
 
 			// This is a potential path, not committing to a physical file yet.
-			File fileFinal = productPaths.getAbsolutePath().toFile();
+			File fileFinal = productPath.getAbsolutePath().toFile();
 
 			/// Main DELETE operation
 			if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)
@@ -542,17 +566,17 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 						try {
 							// Native log
-							pserver.delete(productPaths.getAbsolutePath(), log);
+							pserver.delete(productPath.getAbsolutePath(), log);
 						} catch (IOException e) {
 							log.log(HttpLog.HttpStatus.CONFLICT,
-									String.format("Failed in deleting file: %s, %s", productPaths.getAbsolutePath(), e.getMessage()));
+									String.format("Failed in deleting file: %s, %s", productPath.getAbsolutePath(), e.getMessage()));
 							if (instructions.makeLevelEquals(Instructions.MakeLevel.DELETE)) {
 								return; // STATUS?
 							}
 						}
 					} else {
 						log.log(HttpLog.HttpStatus.CONTINUE,
-								String.format("File does not exist: %s", productPaths.getAbsolutePath()));
+								String.format("File does not exist: %s", productPath.getAbsolutePath()));
 						// result = new Boolean(true);
 					}
 				}
@@ -583,28 +607,28 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							String.format("Trying to use (link) stored file: %s", storagePath.getAbsolutePath()));
 
 					try {
-						FileUtils.ensureWritableDir(productPaths.getAbsolutePath().getParent(), GROUP_ID, dirPerms);
+						FileUtils.ensureWritableDir(productPath.getAbsolutePath().getParent(), GROUP_ID, dirPerms);
 						// ensureDir(cacheRoot, relativeOutputDir); //, dirPerms);
 					} catch (IOException e) {
 						log.warn(e.getMessage());
 						log.log(HttpLog.HttpStatus.FORBIDDEN,
-								String.format("Failed in creating dir (with permissions): %s", productPaths.getAbsoluteDir()));
+								String.format("Failed in creating dir (with permissions): %s", productPath.getAbsoluteDir()));
 						// e.printStackTrace();
 					}
 
 					try {
-						pserver.link(storagePath.getAbsolutePath(), productPaths.getAbsolutePath(), false, log);
+						pserver.link(storagePath.getAbsolutePath(), productPath.getAbsolutePath(), false, log);
 					} catch (IOException e) {
 						log.error(e.getMessage());
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("Failed in linking: %s <- %s", productPaths.getAbsolutePath(), storagePath.getAbsolutePath()));
+								String.format("Failed in linking: %s <- %s", productPath.getAbsolutePath(), storagePath.getAbsolutePath()));
 						// e.printStackTrace();
 					}
 				} else if (queryFile(fileFinal, TIMEOUT, log) >= 0) {
-					result = productPaths.getAbsolutePath();
-					log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", productPaths.getAbsolutePath()));
+					result = productPath.getAbsolutePath();
+					log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s", productPath.getAbsolutePath()));
 				} else {
-					log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", productPaths.getAbsolutePath()));
+					log.log(HttpLog.HttpStatus.OK, String.format("File does not exist: %s", productPath.getAbsolutePath()));
 					instructions.ensureMakeLevel(Instructions.MakeLevel.GENERATE);
 				}
 			}
@@ -681,10 +705,10 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				try {
 					FileUtils.ensureWritableDir(p = productPathTmp.getAbsoluteDir(), GROUP_ID, dirPerms);
 					log.info(String.format("Created tmp dir: %s", productPathTmp.getAbsoluteDir()));
-					FileUtils.ensureWritableDir(p = productPaths.getAbsoluteDir(), GROUP_ID, dirPerms);
-					log.info(String.format("Created dir: %s", productPaths.getAbsoluteDir()));
-					FileUtils.ensureWritableFile(p = productPaths.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
-					log.debug(String.format("Created empty file: %s", productPaths.getAbsolutePath()));
+					FileUtils.ensureWritableDir(p = productPath.getAbsoluteDir(), GROUP_ID, dirPerms);
+					log.info(String.format("Created dir: %s", productPath.getAbsoluteDir()));
+					FileUtils.ensureWritableFile(p = productPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
+					log.debug(String.format("Created empty file: %s", productPath.getAbsolutePath()));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
 					e.printStackTrace(log.getPrintStream());
@@ -801,8 +825,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 						// Let's take this slowly...
 						try {
-							pserver.move(productPathTmp.getAbsolutePath(), productPaths.getAbsolutePath(), log);
-							log.success(productPaths.getAbsolutePath().toString());
+							pserver.move(productPathTmp.getAbsolutePath(), productPath.getAbsolutePath(), log);
+							log.success(productPath.getAbsolutePath().toString());
 							// this.copy(productPaths.getAbsolutePath()Tmp, productPaths.getAbsolutePath());
 						} catch (IOException e) {
 							log.warn(e.toString());
@@ -812,15 +836,15 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
 						}
 
-						if (!Files.isSymbolicLink(productPaths.getAbsolutePath())) {
+						if (!Files.isSymbolicLink(productPath.getAbsolutePath())) {
 							try {
 								// Todo: skip this if already ok...
 								// Check: is needed? this.move contains copy_attributes
-								Files.setPosixFilePermissions(productPaths.getAbsolutePath(), filePerms);
+								Files.setPosixFilePermissions(productPath.getAbsolutePath(), filePerms);
 							} catch (IOException e) {
 								log.warn(e.toString());
 								log.warn(String.format("Failed in setting perms %s for file: %s", filePerms,
-										productPaths.getAbsolutePath()));
+										productPath.getAbsolutePath()));
 								// log.warn(String.format("filePerms: %s", filePerms));
 								// log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Failed in setting perms
 								// for file: %s", productPaths.getAbsolutePath()));
@@ -836,7 +860,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						} else {
 							log.debug("Generator failed but returned no error code");
 							log.log(HttpLog.HttpStatus.CONFLICT,
-									String.format("Generator '' failed in producing the file: %s", productPaths.getAbsolutePath()));
+									String.format("Generator '' failed in producing the file: %s", productPath.getAbsolutePath()));
 						}
 
 						if (instructions.makeLevelAtLeast(Instructions.MakeLevel.GENERATE)) {
@@ -892,17 +916,17 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				} else if (this.instructions.makeLevelEquals(Instructions.MakeLevel.EXISTS)) {
 					if (!fileFinal.exists()) {
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("File does not exist: %s ", productPaths.getAbsolutePath()));
+								String.format("File does not exist: %s ", productPath.getAbsolutePath()));
 					} else if (fileFinal.length() == 0) {
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("File exists, but is empty: %s ", productPaths.getAbsolutePath()));
+								String.format("File exists, but is empty: %s ", productPath.getAbsolutePath()));
 					} else {
 						result = fileFinal;
-						log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s ", productPaths.getAbsolutePath()));
+						log.log(HttpLog.HttpStatus.OK, String.format("File exists: %s ", productPath.getAbsolutePath()));
 					}
 				} else if (fileFinal.length() == 0) {
 
-					log.debug(String.format("Empty file or no file %s", productPaths.getAbsolutePath()));
+					log.debug(String.format("Empty file or no file %s", productPath.getAbsolutePath()));
 					// TODO: consider method for this:
 					if (log.indexedState.getIndex() >= 400) {
 						log.debug("Forwarding original error (at least HTTP 400)");
@@ -911,21 +935,21 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						// log.log(HttpLog.HttpStatus.CONFLICT, String.format("Generator '' failed in
 						// producing the file: %s", productPaths.getAbsolutePath()));
 						log.log(HttpLog.HttpStatus.CONFLICT,
-								String.format("Yes, failed in generating: %s ", productPaths.getAbsolutePath()));
+								String.format("Yes, failed in generating: %s ", productPath.getAbsolutePath()));
 					}
 
 					try {
-						pserver.delete(productPaths.getAbsolutePath(), log);
+						pserver.delete(productPath.getAbsolutePath(), log);
 					} catch (IOException e) {
 						// log.error(String.format("Failed in deleting: %s ", productPaths.getAbsolutePath()));
 						log.log(HttpLog.HttpStatus.FORBIDDEN,
-								String.format("Failed in deleting: %s ", productPaths.getAbsolutePath()));
+								String.format("Failed in deleting: %s ", productPath.getAbsolutePath()));
 						log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 					}
 
 				} else {
 
-					this.result = productPaths.getAbsolutePath();
+					this.result = productPath.getAbsolutePath();
 					log.ok(String.format("Exists: %s (%d bytes)", this.result, fileFinal.length()));
 
 					if (this.instructions.isSet(PostProcessing.SHORTCUT)) {
@@ -934,7 +958,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 								// Path dir = ensureDir(cacheRoot, productDir);
 								Path dir = CACHE_ROOT.resolve(getProductDir(info.getID()));
 								FileUtils.ensureWritableDir(dir, GROUP_ID, dirPerms);
-								pserver.link(productPaths.getAbsolutePath(), dir, true, log);
+								pserver.link(productPath.getAbsolutePath(), dir, true, log);
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
 							}
@@ -947,7 +971,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							try {
 								Path dir = CACHE_ROOT.resolve(getProductDir(info.getID()));
 								FileUtils.ensureWritableDir(dir, GROUP_ID, dirPerms);
-								pserver.link(productPaths.getAbsolutePath(), dir.resolve(this.info.getFilename("LATEST")), true, log);
+								pserver.link(productPath.getAbsolutePath(), dir.resolve(this.info.getFilename("LATEST")), true, log);
 								log.ok(String.format("Linked as LATEST in dir: %s", dir));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN,
@@ -959,7 +983,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 					if (this.instructions.isSet(PostProcessing.STORE)) {
 						// Todo: traverse storage paths.
-						Path storageDir = STORAGE_ROOT.resolve(productPaths.getRelativeDir());
+						Path storageDir = STORAGE_ROOT.resolve(productPath.getRelativeDir());
 						Path storedFile = storageDir.resolve(this.info.getFilename());
 						if (Files.exists(storedFile)) {
 							log.experimental(String.format("Store: file exists already: %s", storedFile));
@@ -967,7 +991,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							try {
 								// ensureDir(storageRoot, relativeOutputDir);
 								FileUtils.ensureWritableDir(storageDir, GROUP_ID, dirPerms);
-								pserver.copy(productPaths.getAbsolutePath(), storedFile, log);
+								pserver.copy(productPath.getAbsolutePath(), storedFile, log);
 								log.experimental(String.format("Stored in: %s", storedFile));
 							} catch (IOException e) {
 								log.log(HttpLog.HttpStatus.FORBIDDEN, e.getMessage());
@@ -985,7 +1009,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							if (p.startsWith(CACHE_ROOT)) { // XXX
 								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 							}
-							pserver.copy(productPaths.getAbsolutePath(), p, log); // Paths.get(path)
+							pserver.copy(productPath.getAbsolutePath(), p, log); // Paths.get(path)
 							log.ok(String.format("Copied: %s", p));
 							// System.out.println("Copy "+path);
 						} catch (IOException e) {
@@ -1002,7 +1026,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							if (p.startsWith(CACHE_ROOT)) {
 								FileUtils.ensureWritablePath(path, GROUP_ID, dirPerms);
 							}
-							pserver.link(productPaths.getAbsolutePath(), p, false, log); // Paths.get(path)
+							pserver.link(productPath.getAbsolutePath(), p, false, log); // Paths.get(path)
 							log.ok(String.format("Linked: %s", p));
 						} catch (IOException e) {
 							log.log(HttpLog.HttpStatus.FORBIDDEN, String.format("Linking failed: %s", p));
@@ -1017,7 +1041,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							if (p.startsWith(CACHE_ROOT)) {
 								FileUtils.ensureWritablePath(this.instructions.move, GROUP_ID, dirPerms);
 							}
-							pserver.move(productPaths.getAbsolutePath(), p, log);
+							pserver.move(productPath.getAbsolutePath(), p, log);
 							this.result = this.instructions.move;
 							log.log(HttpLog.HttpStatus.OK, String.format("Moved: %s", p));
 						} catch (IOException e) {
@@ -1033,7 +1057,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							log.debug(String.format("Remove tmp dir: %s", p));
 							// NEW! Empty the dir
 							Files.walkFileTree(p,
-									new FileUtils.MoveDir(p, productPaths.getAbsoluteDir()));
+									new FileUtils.MoveDir(p, productPath.getAbsoluteDir()));
 							/*
 							Files.walkFileTree(paths.outputDirTmp,
 									new FileUtils.MoveDir(paths.outputDirTmp, paths.outputDir));
@@ -1152,12 +1176,12 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				for (Map.Entry<String, Task> entry : inputTasks.entrySet()) {
 					String key = entry.getKey();
 					Task inputTask = entry.getValue();
-					if (inputTask.productPaths.getAbsolutePath() != null) {
+					if (inputTask.productPath.getAbsolutePath() != null) {
 
-						env.put(key, inputTask.productPaths.getAbsolutePath());
+						env.put(key, inputTask.productPath.getAbsolutePath());
 						inputKeys.add(key);
 
-						Path dir = inputTask.productPaths.getAbsolutePath().getParent();
+						Path dir = inputTask.productPath.getAbsolutePath().getParent();
 						if (dir == null) {
 							// At least one input is a plain filename -> skip whole thing.
 							this.info.INPUT_PREFIX = null;
@@ -1829,7 +1853,14 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							Task task = server.new Task(entry.getValue().toString(), batch.instructions, log);
 							System.out.println(String.format("instructions=%s&product=%s", batch.instructions,
 									task.info.getFilename()));
-						} catch (ParseException e) {
+						}
+						catch (ParseException e) {
+							// TODO: specify
+							log.warn(entry.getValue().toString());
+							log.error(e.getMessage());
+						}
+						catch (IOException e) {
+							// TODO: specify
 							log.warn(entry.getValue().toString());
 							log.error(e.getMessage());
 						}
@@ -2043,9 +2074,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			TaskGraphNode.drawGraph(task, serverGraph);
 			// task.getGraphNode(serverGraph, entry.getKey()+'$');
 
-			if (task.productPaths.getAbsolutePath().toFile().exists()) {
-				log.ok(String.format("File exists:\t %s (%d bytes)", task.productPaths.getAbsolutePath().toString(),
-						task.productPaths.getAbsolutePath().toFile().length()));
+			if (task.productPath.getAbsolutePath().toFile().exists()) {
+				log.ok(String.format("File exists:\t %s (%d bytes)", task.productPath.getAbsolutePath().toString(),
+						task.productPath.getAbsolutePath().toFile().length()));
 				// log.note(String.format("File exists:\t %s (%d bytes)",
 				// task.outputPath.toString(), task.outputPath.toFile().length()));
 			}
