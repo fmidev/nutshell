@@ -28,7 +28,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	/**  Full system side path to configuration file. Given as servlet-parameter in web.xml
 	 *   Example:
 	 */
-	public String NUTSHELL_CONF = null;
+	//public String NUTSHELL_CONF = null;
+	public Path NUTSHELL_CONF = null;
 
 	protected SimpleHtml getHtmlPage(){
 		SimpleHtml html = super.getHtmlPage();
@@ -71,15 +72,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	 *  2.0 – TomCat 10.1 compatibility
 	 *   
 	 */
-	static final public String version = "2.0";
+	static final public String version = "2.1";
 
-	// String confDir = "";
-	// String NUTSHELL_CONF = "";
-
-
-	//final Map<String,Object> setup;
 	final ProductServer productServer;
-	//final GregorianCalendar startTime;
 
 	static
 	final public Map<Integer, Tasklet> taskMap = new HashMap<>();
@@ -96,8 +91,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		productServer.serverLog.note("Nutlet started with productServer");
 	}
 
-	//// String confDir = "";
-	//// String httpRoot = "";
 	ProgramRegistry registry = null;
 
 	@Override
@@ -128,7 +121,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// productServer.readConfig(Paths.get(confDir, "nutshell-tomcat.cnf")); // Read two times? Or NutLet?
 		// productServer.readConfig(Paths.get(NUTSHELL_CONF, "nutshell-tomcat.cnf")); // Read two times? Or NutLet?
 
-		productServer.readConfig(Paths.get(NUTSHELL_CONF)); // Read two times? Or NutLet?
+		//productServer.readConfig(Paths.get(NUTSHELL_CONF)); // Read two times? Or NutLet?
+		productServer.readConfig(NUTSHELL_CONF); // Read two times? Or NutLet?
 		
 		// TODO: "re-override" conf with configs ? E.g. LOG_FORMAT
 		if (productServer.LOG_SERVER_PATH == null) {
@@ -168,7 +162,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			//Path p = cacheNutShell.resolve(filename);
 			// productServer.setLogFile(p.toString());
 			productServer.setLogFile(productServer.LOG_SERVER_PATH);
-			productServer.serverLog.warn("Starts!!");
+			// productServer.serverLog.warn("Starts!!");
 		}
 		System.err.println(String.format("productServer.LOG_SERVER_PATH(2) = %s", productServer.serverLog.getName()));
 

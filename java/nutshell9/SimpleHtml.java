@@ -319,7 +319,7 @@ public class SimpleHtml extends SimpleXML{
 	}
 
 	public Element createAnchor(Object url) {
-		return createAnchor(url, url.toString())
+		return createAnchor(url, url.toString());
 	}
 
 	public Element appendAnchor(Object url, String text) {

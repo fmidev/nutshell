@@ -83,7 +83,7 @@ public class NutWeb extends HttpServlet {
 		 */
 		getTomcatParameters(setup);
 
-		Manip.assignToObjectLenient(setup, this);
+		Manip.assignToObjectLenient(setup, this, true);
 
 		if (HTML_ROOT == null) {
 			System.err.println(setup);
