@@ -407,7 +407,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			// this.relativeSystemDir = this.timeStampDir.resolve("nutshell").resolve(this.productDir);
 			// Path systemPath =  CACHE_ROOT.resolve(paths.relativeSystemDir);
-			System.err.println(graphPath.absolutePath);
+			// System.err.println(graphPath.absolutePath);
 			try {
 				FileUtils.ensureWritableDir(graphPath.getAbsoluteDir(), GROUP_ID, dirPerms);
 			} catch (IOException e) {
