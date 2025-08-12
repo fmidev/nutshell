@@ -376,6 +376,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			try {
 				FileUtils.ensureWritableFile(logPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath.getAbsolutePath());
+				log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+				log.debug(String.format("Label: %s",  label)); // , labelArray
 			} 
 			catch (IOException e) {
 				e.printStackTrace(parentLog.getPrintStream());
@@ -388,8 +390,6 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				//log.setLogFile(null); ?
 				throw e; // currently
 			}
-			log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
-			log.debug(String.format("Label: %s",  label)); // , labelArray
 
 			/*
 			// DEBUGGING!
