@@ -8,6 +8,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipal;
 import java.text.ParseException;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -209,8 +210,17 @@ public class FileUtils {
         else {
          */
         if (!Files.isWritable(path)){
-        	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by this user %s: %s",
-                    path, Files.getOwner(path), System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
+        	try {
+        		UserPrincipal owner = Files.getOwner(path); // System.getProperty("user.name");
+            	throw new IOException(String.format("Dir %s owned by %s is NOT WRITABLE by this user %s: %s",
+                        path, owner, System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
+        	}
+        	catch (IOException e) {
+               	throw new IOException(String.format("Dir %s is NOT WRITABLE by this user %s: %s – and owner cannot be read",
+                        path, System.getProperty("user.name"), Files.getPosixFilePermissions(path)));
+				
+			}
+        	
         }
 
     }
