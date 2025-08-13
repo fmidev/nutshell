@@ -774,7 +774,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					// Path relativeGraphPath = ProductServer.cachePrefix.resolve(task.graphPath.getRelativePath());
 					// map.put("Graph", html.createAnchor(relativeGraphPath, task.graphPath.getFileName()));
 
-					map.put("Graph", html.createAnchor(task.graphPath.getPrefixedRelativeDir(), task.graphPath.getFileName()));
+					map.put("Graph", html.createAnchor(task.graphPath.getPrefixedRelativePath(), task.graphPath.getFileName()));
 					
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}

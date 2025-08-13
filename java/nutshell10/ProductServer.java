@@ -1264,7 +1264,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			// Graph graph = this.getGraph(null);
 			// Graph graph = this.getGraph();
 			Graph graph = new Graph(this.info.PRODUCT_ID);
-			graph.attributes.put("label", String.format("NutShell request: %s", this));
+			//graph.attributes.put("label", String.format("NutShell request: %s", this));
+			graph.attributes.put("label", String.format("%s", this));
 
 			TaskGraphNode.drawGraph(this, graph);
 
