@@ -115,8 +115,8 @@ public class ProductServerBase extends Program {
     //final protected List<StringMapper> storagePaths = new LinkedList<>();
 
     // Deprecating, thanks to bundles
-    static
-    final public Path cachePrefix = Paths.get("cache");
+    //static
+    //final public Path cachePrefix = Paths.get("cache");
 
     /// System side setting.// TODO: conf
     //public String inputCmd = "./input.sh";  // -> ExternalGenerator NOTE: executed in CWD

@@ -231,6 +231,21 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	
 	}
 
+	PathEntry getGeneratorEntry(ProductInfo product){
+		
+		Path productDir = getProductDir(product.getID());
+		
+		Path generatorDirAbsolute = PRODUCT_ROOT.resolve(productDir);
+
+		//Path generatorScriptRelative = null;
+
+		if (Files.exists(generatorDirAbsolute.resolve(ExternalGenerator.scriptName))) {
+			return new PathEntry(PRODUCT_ROOT, productDir.resolve(ExternalGenerator.scriptName));			
+		}
+
+		return new PathEntry(PRODUCT_ROOT, productDir.resolve("generator.py"));
+	}
+
 	PathEntry getLongEntry(ProductInfo product){
 		return new PathEntry(CACHE_ROOT, 
 				product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
@@ -304,8 +319,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 		final public Instructions instructions; // = new Instructions();
 
-		// final public ProductPathBundle paths;
-
+		final public PathEntry generatorPath; // conditional (not used for Java Classes?)
 		final public PathEntry productPath;
 		final public PathEntry productPathTmp;
 		final public PathEntry logPath;
@@ -369,6 +383,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			//paths = new ProductPathBundle(ProductServer.this, info, label, log.textOutput.getFormat().toString());
 
+			generatorPath  = getGeneratorEntry(info);
 			productPath    = getLongEntry(info);
 			productPathTmp = getTmpEntry(productPath);
 			logPath     = getLogEntry(productPath, log.textOutput.getFormat());
