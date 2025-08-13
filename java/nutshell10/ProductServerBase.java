@@ -117,7 +117,6 @@ public class ProductServerBase extends Program {
      */
     public Path TEST_VAR_LIB_TOMCAT_WEBAPPS_NUTSHELL = Paths.get("/var/lib/tomcat/webapps/nutshell");
     public Path TEST_TMP = Paths.get("/tmp");
-
     public Path TEST_WORKSPACE_ = Paths.get("/workspace/");
     public Path TEST_WORKSPACE_RADARDEV = Paths.get("/workspace/radardev");
     public Path TEST_WORKSPACE_RADARPROD = Paths.get("/workspace/radarprod");
@@ -128,9 +127,10 @@ public class ProductServerBase extends Program {
     public Path TEST_RES_DATA = Paths.get("/res/data");
     public Path TEST_VAR_WWW_HTML = Paths.get("/var/www/html");
     public Path TEST_DATA_USERS_RADADM = Paths.get("/data/users/radadm");
-    public Path TEST_TUTKA_DATA_DEV_CACHE = Paths.get("/tutka/data/dev/cache");
+    public Path TEST_TUTKA = Paths.get("/tutka");
     public Path TEST_TUTKA_DATA_PROD_CACHE = Paths.get("/tutka/data/prod/cache");
-
+    public Path TEST_TUTKA_DATA_DEV_CACHE = Paths.get("/tutka/data/dev/cache");
+    
     final
     public Map<String,String> MAP_URL = new HashMap<>();
 
