@@ -115,6 +115,19 @@ public class ProductServerBase extends Program {
      *  echo "public Path $name = Paths.get(\"$i\");";  
      *  done
      */
+    public Path TEST_WORKSPACE_ = Paths.get("/workspace/");
+    public Path TEST_WORKSPACE_RADARDEV = Paths.get("/workspace/radardev");
+    public Path TEST_WORKSPACE_RADARPROD = Paths.get("/workspace/radarprod");
+    public Path TEST_WORKSPACE_RADARPROD_DATA_CACHE = Paths.get("/workspace/radarprod/data/cache");
+    public Path TEST_ARCH_RADAR_ = Paths.get("/arch/radar/");
+    public Path TEST_CEPHFS = Paths.get("/cephfs");
+    public Path TEST_OPT_CODE = Paths.get("/opt/code");
+    public Path TEST_RES_DATA = Paths.get("/res/data");
+    public Path TEST_VAR_WWW_HTML = Paths.get("/var/www/html");
+    public Path TEST_DATA_USERS_RADADM = Paths.get("/data/users/radadm");
+    public Path TEST_TUTKA_DATA_DEV_CACHE = Paths.get("/tutka/data/dev/cache");
+    public Path TEST_TUTKA_DATA_PROD_CACHE = Paths.get("/tutka/data/prod/cache");
+
     public Path _WORKSPACE_ = Paths.get("/workspace/");
     public Path _WORKSPACE_RADARDEV = Paths.get("/workspace/radardev");
     public Path _WORKSPACE_RADARPROD = Paths.get("/workspace/radarprod");
