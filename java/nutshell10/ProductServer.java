@@ -243,6 +243,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			return new PathEntry(PRODUCT_ROOT, productDir.resolve(ExternalGenerator.scriptName));			
 		}
 
+		// Future extension
 		return new PathEntry(PRODUCT_ROOT, productDir.resolve("generator.py"));
 	}
 

@@ -771,9 +771,11 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						html.appendElement(graphElem);
 						*/
 					}
-					Path relativeGraphPath = ProductServer.cachePrefix.resolve(task.graphPath.getRelativePath());
-					map.put("Graph", html.createAnchor(relativeGraphPath, task.graphPath.getFileName()));
+					// Path relativeGraphPath = ProductServer.cachePrefix.resolve(task.graphPath.getRelativePath());
+					// map.put("Graph", html.createAnchor(relativeGraphPath, task.graphPath.getFileName()));
 
+					map.put("Graph", html.createAnchor(task.graphPath.getPrefixedRelativeDir(), task.graphPath.getFileName()));
+					
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}
 
@@ -788,9 +790,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			}
 
 			// NOTE: these assume ExternalGenerator?
-			Path gen = Paths.get("products").resolve(task.productPath.getRelativeDir()).resolve(ExternalGenerator.scriptName);
-			map.put("Generator dir (fix)", html.createAnchor(gen.getParent(),null));
-			map.put("Generator file (fix)", html.createAnchor(gen, gen.getFileName()));
+			// Path gen = Paths.get("products").resolve(task.productPath.getRelativeDir()).resolve(ExternalGenerator.scriptName);
+			// Path gen = task.productPath.getPrefixedRelativeDir().resolve(ExternalGenerator.scriptName);
+			map.put("Generator dir",  html.createAnchor(task.generatorPath.getPrefixedRelativeDir()));
+			map.put("Generator file", html.createAnchor(task.generatorPath.getPrefixedRelativePath(), task.generatorPath.getFileName()));
 			// map.put("actions", batch.instructions);
 			// task.info.directives.put("TEST", "value");
 			map.put("instructions", batch.instructions);
