@@ -398,14 +398,15 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				log.debug(String.format("Label: %s",  label)); // , labelArray
 			} 
 			catch (IOException e) {
+				parentLog.warn("stackTrace follows");
 				e.printStackTrace(parentLog.getPrintStream());
-				
 				parentLog.error(String.format("Could not open Task log: %s", logPath.getAbsolutePath()));
 				System.err.println(String.format("Opening Log file failed: Log GID=%d, file=%s dir=%s",
 						GROUP_ID, filePerms, dirPerms));
 				System.err.println(String.format("Opening Log file failed: Error: %s", e));
 				System.err.println(String.format("Opening Log file failed: File: %s", logPath.getAbsolutePath()));
 				//log.setLogFile(null); ?
+				log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
 				throw e; // currently
 			}
 
