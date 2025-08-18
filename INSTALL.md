@@ -105,10 +105,10 @@ Check for error messages in the log directory of TomCat, for example
 
 #### Developer's notes
 
-Downgrading `nutshell10` -> `nutshell9' :
+Downgrading `nutshell10` -> `nutshell9` :
 
 * Ensure nutshell10 works
-* Run `make convert10to9`, that is, `cd ./java && ./downgrade-code.sh nutshell10/*.java`
-* Refresh `nutshell9' in IDE
-* Compile jar(s): make -B java/Nutlet{10,9}.jar
+* Run `make convert10to9` which essentially runs `cd ./java && ./downgrade-code.sh nutshell10/*.java`
+* Refresh `nutshell9` package in the IDE
+* Compile jar(s): `make -B java/Nutlet{10,9}.jar`
 * Commit changes in version control
