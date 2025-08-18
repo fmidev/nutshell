@@ -779,9 +779,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					/* <embed id="viewMain" src="" type="image/svg+xml"></embed> */
 				}
 
-				map.put("Shell cmd request", html.createAnchor(task.productPath.getPrefixedRelativeDir().resolve(task.info.getBasename()+".sh"), "basename+'.sh'"));
-				//String basenName = relativePath.getFileName();
-				// map.put("Output dir", html.createAnchor(relativePath.getParent(), null));
+				// map.put("Shell cmd request", html.createAnchor(task.productPath.getPrefixedRelativeDir().resolve(task.info.getBasename()+".sh"), "basename+'.sh'"));
+				String scriptFile = String.format("%s.sh", task.info.getBasename());
+				map.put("Commands (request)", html.createAnchor(task.productPath.getPrefixedRelativeDir().resolve(scriptFile), scriptFile)); 
 				map.put("Output dir", html.createAnchor(task.productPath.getPrefixedRelativeDir(), null));
 
 			}

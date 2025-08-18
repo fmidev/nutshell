@@ -28,7 +28,7 @@ for i in $*; do
     done
     # cp file.tmp $DIR_DST/${FILE}
     #    replace.py --regexp jakarta --format javax --source nutshell --target nutshell9   -i $i -o $DIR_DST/${FILE}
-    diff $i $DIR_DST/${FILE}
-    
+    diff $i $DIR_DST/${FILE} | fgrep '>' 
+    echo 
 done
 

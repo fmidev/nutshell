@@ -115,6 +115,8 @@ public class ProductServerBase extends Program {
      *  echo "public Path $name = Paths.get(\"$i\");";  
      *  done
      */
+    
+    
     public Path TEST_VAR_LIB_TOMCAT_WEBAPPS_NUTSHELL = Paths.get("/var/lib/tomcat/webapps/nutshell");
     public Path TEST_TMP = Paths.get("/tmp");
     public Path TEST_WORKSPACE_ = Paths.get("/workspace/");
@@ -273,12 +275,14 @@ public class ProductServerBase extends Program {
                 this.GROUP_ID = Integer.parseInt(gid);
             }
             catch (IOException e) {
+            	this.GROUP_ID = 0;
                 serverLog.fail(String.format("Could not retrieve Group id (gid) from '%s'" , CACHE_ROOT));
                 serverLog.error(e.getMessage());
             }
             catch (NumberFormatException e) {
-                serverLog.warn(String.format("Consider: getent group '%s'", gid));
-                serverLog.fail(String.format("Group id (gid) = '%' should have a numeric value", gid));
+            	this.GROUP_ID = 0;
+                serverLog.warn(String.format("Debug with: getent group '%s'", gid));
+                serverLog.fail(String.format("Group id (gid) = '%s' should have a numeric value", gid));
                 // e.printStackTrace();
                 serverLog.error(e.getMessage());
             }
