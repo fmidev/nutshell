@@ -268,6 +268,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				product.getTimeStampDir().resolve(getProductDir(product.getID())).resolve(product.getFilename()));
 	}
 
+	
+	/// Given a product file entry, returns a respective tmp/aux directory for saving logs etc
 	/**
 	 * 
 	 * @param bundle
@@ -275,8 +277,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	 * @return
 	 */
 	PathEntry getSystemEntry(PathEntry bundle, String suffix){
-		return new PathEntry(CACHE_ROOT, bundle.getRelativeDir().resolve(".nutshell").resolve(
-				String.format("%s.%s", bundle.getFileName(), suffix)));
+		return new PathEntry(CACHE_ROOT, bundle.getRelativeDir().
+				resolve(String.format(".nutshell-%s", System.getProperty("user.name"))).
+				resolve(String.format("%s.%s", bundle.getFileName(), suffix)));
 	}
 	
 	PathEntry getLogEntry(PathEntry bundle, TextOutput.Format logFormat){
