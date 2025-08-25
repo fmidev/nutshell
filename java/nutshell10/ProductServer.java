@@ -1767,19 +1767,18 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	static public void populate(Batch batch, ProgramRegistry registry) {
 
 		// registry.add(new InstructionParameter(batch.instructions));
+
+		// Adds "instructions" command
 		registry.add(batch.instructions.getProgramParameter());
 
+		// Adds "flags", commands that are simple variables: GENERATE etc.
 		for (String instr : ClassUtils.getConstantKeys(Instructions.class)) { // consider instant .getClass()
 			registry.add(batch.instructions.getProgramParameter(instr));
-			// registry.add(instr.toLowerCase(), new
-			// InstructionParameter(batch.instructions, instr));
 		}
 
+		// Adds "flags", commands that are simple variables: MAKE, GENERATE etc.
 		for (Instructions.MakeLevel level : Instructions.MakeLevel.values()) { // consider instant .getClass()
 			registry.add(batch.instructions.getProgramParameter(level));
-			// registry.add(level.name().toLowerCase(), new
-			// InstructionParameter(batch.instructions, level));
-			// .toLowerCase()
 		}
 
 		registry.add(new Parameter.Simple<String>("product", "Set product filename (repeatable)", "") {
@@ -1794,28 +1793,6 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 																						// [%s=user].",
 				batch.instructions, "label"));
 
-		/*
-		 * registry.add(new Parameter<Instructions>("regenerate",
-		 * "Deprecating, use --depth instead.", batch.instructions, "regenerateDepth"));
-		 */
-
-		// deprecating
-		/*
-		 * registry.add(new Parameter<Instructions>("depth",
-		 * "Cache clearance depth (0=EXISTS, 0=MAKE, 1=GENERATE, N...: remake inputs)",
-		 * batch.instructions, "makeLevel"));
-		 * 
-		 * 
-		 * registry.add(new Parameter.Single("regenerate",
-		 * "Deprecating, use --depth instead.",
-		 * //"Cache clearance depth (0=MAKE, 1=GENERATE, N...: remake inputs)",
-		 * "depth"){
-		 * 
-		 * public int depth;
-		 * 
-		 * @Override public void exec() { serverLog.deprecated("Use --depth instead.");
-		 * batch.instructions.makeLevel = depth; } });
-		 */
 
 		registry.add(
 				new Parameter.Simple<String>("directives", "Set application (env) variables separated with '|'", "") {
@@ -1825,6 +1802,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						MapUtils.addEntries(value, "\\|", "true", batch.directives);
 					}
 				});
+		
+
 
 	}
 
@@ -1846,7 +1825,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		server.populate(registry);
 
 		Batch batch = new Batch();
-		server.populate(batch, registry);
+		ProductServer.populate(batch, registry);
 
 		registry.add(new ProgramUtils.Version<>(server));
 
@@ -1926,6 +1905,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				});
 
 		/// Command line only
+		
 		registry.add(new Parameter("clear_cache", // .Simple<String>
 				"Clear cache (and exit.)" // reconsider exit
 		) {
@@ -1941,8 +1921,10 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				}
 			}
 		});
+		
 
-		registry.add(new Parameter.Simple<String>("catalog", "List products found under productRoot", "") {
+		registry.add(new Parameter.Simple<String>("catalog", 
+				"List products found under PRODUCT_ROOT/<value>", "") {
 
 			public void exec() {
 
