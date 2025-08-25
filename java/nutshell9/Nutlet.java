@@ -71,9 +71,9 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	/// Version history below.
 	/**
 	 *  2.0 – TomCat 10.1 compatibility
-	 *   
+	 *  2.2 – Support clear cache
 	 */
-	static final public String version = "2.1";
+	static final public String version = "2.2";
 
 	final ProductServer productServer;
 
