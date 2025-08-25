@@ -15,6 +15,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nutshell9.Program.Parameter;
 import nutshell9.SimpleHtml.Tag;
 
 import org.w3c.dom.Document;
@@ -91,7 +92,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		productServer.serverLog.note("Nutlet started with productServer");
 	}
 
-	ProgramRegistry registry = null;
+	/// Unversal, "static" (task-independent) commands.
+	ProgramRegistry sharedRegistry = null;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -183,7 +185,26 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		HttpLog.urlMap.put(Paths.get("/tutka/code/dev/run"), "http://dev.tutka.fmi.fi/nutshell/products");
 		 */
 		// Here, for future extension dependent on ServletConfig config
-		registry = new ProgramRegistry();
+		sharedRegistry = new ProgramRegistry();
+		
+		// Dangerous?
+		sharedRegistry.add(new Parameter("clear_cache", // .Simple<String>
+				"Clear cache (and exit.)" // reconsider exit
+		) {
+			@Override
+			public void exec() {
+				System.err.println("CLEARing CACHE!");
+				productServer.serverLog.warn("Clearing cache");
+				try {
+					productServer.clearCache(false);
+					//System.exit(0); // NO EXIT for tomcat...
+				} catch (IOException e) {
+					productServer.serverLog.log(HttpLog.HttpStatus.CONFLICT, "Clearing cache failed");
+					// System.exit(4);
+				}
+			}
+		});
+
 
 		// These general commands not needed, or even allowed!
 		// Exception: default timeout (or would it be)
@@ -228,8 +249,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			final String value = String.join(",", values);
 
 			// Global (server level) settings
-			if (registry.has(key)){
-				Program.Parameter parameter = registry.get(key);
+			if (sharedRegistry.has(key)){
+				Program.Parameter parameter = sharedRegistry.get(key);
 				System.err.printf(" Still found: %s -> %s  %n", key, parameter);
 
 				if (parameter.hasParams()){
@@ -239,6 +260,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					} catch (NoSuchFieldException | IllegalAccessException e) {
 						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
 					}
+				}
+				else {
+					try {
+						parameter.exec(); // Remember! And TODO: update()
+					} catch (Exception e) {
+						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
+					}					
 				}
 			}
 			else if (taskRegistry.has(key)){
@@ -265,11 +293,6 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				// System.err.printf(" completed: %s -> %s  %n", key, parameter);
 			}
 			/*
-			else if (key.equals("productX")){
-				//product = value;
-				batch.products.put("product1", value);
-			}
-			 */
 			else if (key.equals("request") || key.equals("output")){ // Old alias for instructions
 				try {
 					//batchConfig.instructions.set(values);
@@ -279,18 +302,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					sendStatusPage(HttpServletResponse.SC_CONFLICT, "Unsupported instruction(s): ", e.getMessage(), httpResponse);
 					return;
 				}
-			}
-			/* else if (key.equals("depth")){
-				batch.instructions.makeLevel = Integer.parseInt(value);
 			} */
 			else if (key.equals("page")){
 				page = value;
 			}
 			// Interpret some "idioms"  || key.equals("help")
 			else if (key.equals("catalog")  || key.equals("status") || key.endsWith(".html")){
+				// Todo: redesign catalog and status as products?
 				page = key;
 			}
-			else if (key.equals("demo")){
+			else if (key.equals("demo")){ // join this with catalog
 				File jsonFile = productServer.CACHE_ROOT.resolve(value).toFile();
                 if (jsonFile.exists()){
                 	//JSONParser parser = new JSONParser(jsonFile);
@@ -308,15 +329,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		}
 
 		/*
-		if (page.equals("help")){
-			SimpleHtml html = getHtmlPage();
-
-			html.appendTable(registry.map, "Commands");
-			//html.appendTag(SimpleHtml.Tag.PRE, tracker.generators.toString());
-			httpResponse.setStatus(HttpServletResponse.SC_OK); // tes
-			sendToStream(html.document, httpResponse);
-
-			return;
+		if (batch.instructions.makeLevelEquals(Instructions.)) {
+			
 		}
 		*/
 
@@ -338,6 +352,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			return;
 
 		}
+
 
 
 			//if (page.value.equals("catalog")){
@@ -390,6 +405,16 @@ public class Nutlet extends NutWeb { //HttpServlet {
 			else {
 				html.appendTable(taskMap, "Tasks");
 			}
+			
+			html.appendTag(SimpleHtml.Tag.H2, "Instruction set");
+
+			html.appendTag(SimpleHtml.Tag.H3, "Shared commands");
+
+			html.appendTable(sharedRegistry.map, null);
+			
+			html.appendTag(SimpleHtml.Tag.H3, "Task (batch) commands");
+			
+			html.appendTable(taskRegistry.map, null);
 
 			sendToStream(html.document, httpResponse);
 
@@ -934,6 +959,10 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		html.appendTag(SimpleHtml.Tag.P, "NutShell Server is running since " + setup.get("startTime"));
 
 		html.appendTable(productServer.setup, null);
+
+		
+		
+		html.appendTable(sharedRegistry.map, null);
 
 		// sendStatusPage(HttpServletResponse.SC_OK, "Status page",
 		//	"NutShell server is running since " + setup.get("startTime"), httpRequest, httpResponse);
