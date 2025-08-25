@@ -1911,7 +1911,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		) {
 			@Override
 			public void exec() {
-				log.warn("Clearing cache");
+				log.warn("Clearing cache! ...");
 				try {
 					server.clearCache(true);
 					System.exit(0); // reconsider exit

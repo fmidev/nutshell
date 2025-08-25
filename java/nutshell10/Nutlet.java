@@ -193,13 +193,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		) {
 			@Override
 			public void exec() {
+				System.err.println("CLEARing CACHE!");
 				productServer.serverLog.warn("Clearing cache");
 				try {
-					productServer.clearCache(true);
-					System.exit(0); // reconsider exit
+					productServer.clearCache(false);
+					//System.exit(0); // NO EXIT for tomcat...
 				} catch (IOException e) {
 					productServer.serverLog.log(HttpLog.HttpStatus.CONFLICT, "Clearing cache failed");
-					System.exit(4);
+					// System.exit(4);
 				}
 			}
 		});
@@ -259,6 +260,13 @@ public class Nutlet extends NutWeb { //HttpServlet {
 					} catch (NoSuchFieldException | IllegalAccessException e) {
 						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
 					}
+				}
+				else {
+					try {
+						parameter.exec(); // Remember! And TODO: update()
+					} catch (Exception e) {
+						productServer.serverLog.fail(entry.toString() + " " + e.getMessage());
+					}					
 				}
 			}
 			else if (taskRegistry.has(key)){
