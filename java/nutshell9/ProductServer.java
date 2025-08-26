@@ -160,6 +160,13 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	}
 	
 
+	/** A container for a path, separating a root and a relative directory with and without prefix.
+	 * 
+	 *  The prefix is practically
+	 *  - products
+	 *  - cache
+	 *  - storage
+	 */
 	public class PathEntry {
 		
 		public Path getFileName() {
@@ -244,7 +251,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		}
 
 		// Future extension
-		return new PathEntry(PRODUCT_ROOT, productDir.resolve("generator.py"));
+		// return new PathEntry(PRODUCT_ROOT, productDir.resolve("generator.py"));
+		return new PathEntry(PRODUCT_ROOT, productDir.resolve("generator.sh"));
 	}
 
 	PathEntry getLongEntry(ProductInfo product){
@@ -397,7 +405,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			try {
 				FileUtils.ensureWritableFile(logPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath.getAbsolutePath());
-				log.debug(String.format("Log format: %s (%s)",  this.log.getFormat(), log.decoration));
+				log.debug(String.format("Log format: %s (%s)",  log.getFormat(), log.decoration));
 				log.debug(String.format("Label: %s",  label)); // , labelArray
 			} 
 			catch (IOException e) {

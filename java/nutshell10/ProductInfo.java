@@ -87,6 +87,7 @@ class ProductInfo extends ProductParameters {
 	 *
 	 */
 	public Path getTimeStampDir(){
+		// todo: move this to ProductServer
 		try {
 			TimeResolution tr = getTimeResolution(TIMESTAMP);
 			String path;

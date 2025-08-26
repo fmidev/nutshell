@@ -228,6 +228,9 @@ public class FileUtils {
             try {
                 Files.setAttribute(path, "unix:gid", groupId);
             } catch (Exception e) {
+            	
+            	e.printStackTrace(System.err);
+            	System.err.println(String.format("Could not set group id %s for %s ", groupId, path));
                 // experimentalResult |= Owner.GROUP;
             }
         }
@@ -241,6 +244,9 @@ public class FileUtils {
             Files.setPosixFilePermissions(path, permissions);
         }
         catch (Exception e){
+        	// Debugging, for now...
+        	e.printStackTrace(System.err);
+        	System.err.println(String.format("Could not set %s permissions to %s ", path, permissions));
         }
 
         /*
@@ -319,7 +325,7 @@ public class FileUtils {
     synchronized static
     public void ensureWritableFile(Path path, int groupId, Set<PosixFilePermission> filePerms, Set<PosixFilePermission> dirPerms) throws IOException {
 
-        if (!exists(path)) {
+        if (!Files.exists(path)) {
             if (dirPerms == null){
                 // FIX: this may add execution rights unintentionally?
                 dirPerms = filePerms;
