@@ -402,6 +402,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			graphPath   = getGraphEntry(productPath); // NOTE: filename still same
 			storagePath = getStorageEntry(info);
 			
+			Path test = CACHE_ROOT.resolve(String.format("nutshell-test-%d", counter)).resolve("a").resolve("b").resolve("file.foo");
+			FileUtils.ensureWritableFile(test, GROUP_ID, filePerms, dirPerms);
+			
 			try {
 				FileUtils.ensureWritableFile(logPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
 				log.setLogFile(logPath.getAbsolutePath());
