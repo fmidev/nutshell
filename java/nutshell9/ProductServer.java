@@ -1716,8 +1716,10 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		});
 
 		registry.add(new Parameter.Simple<String>("log",
-				String.format("Set log properties: verbosity %s, format %s, decoration %s ", Log.statusCodes.values(), // Arrays.toString(Log.Status.values()),
-						Arrays.toString(TextOutput.Format.values()), Arrays.toString(TextOutput.Options.values())),
+				String.format("Set log properties: verbosity %s, format %s, decoration %s ", 
+						Log.statusCodes.values(), // Arrays.toString(Log.Status.values()),
+						Arrays.toString(TextOutput.Format.values()), 
+						Arrays.toString(TextOutput.Options.values())),
 				"INFO,TEXT") {
 
 			@Override
@@ -1969,7 +1971,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 					if (arg.equals("-h")) {
 						arg = "--help";
-					} else if (arg.charAt(1) != '-') {
+					} 
+					else if (arg.charAt(1) != '-') {
 						throw new IllegalArgumentException("Short options (-x) not supported in this version (Java)");
 					}
 

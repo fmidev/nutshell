@@ -594,7 +594,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			if (task.log.getStatus() >= Log.Status.NOTE.level) {
 				if (task.instructions.isSet(OutputType.STREAM)) {
-					productServer.serverLog.warn("pserv.log: sendToStream: " + task.productPath.getFileName());
+					productServer.serverLog.warn("sendToStream: " + task.productPath.getFileName());
 					task.log.debug("task.log: sendToStream: " + task.productPath.getFileName());
 					try {
 						sendToStream(task.productPath.getAbsolutePath(), httpResponse);

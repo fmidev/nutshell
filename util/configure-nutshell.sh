@@ -77,7 +77,12 @@ PKG_ROOT=`pwd -P`
 # Directory for nutshell.cnf, default dir for cache, storage, products"
 
 
-if [ "$NUTSHELL_VERSION" != 'docker-java' ]; then
+if [ "$NUTSHELL_VERSION" == 'docker-java' ]; then
+
+    echo "Conf for '$NUTSHELL_VERSION' missing? (Not in package?)"
+    exit -1
+    
+else
 
     ask_variable PRODUCT_ROOT "/opt/products" "Root directory for product generators"
     check_dir_syntax PRODUCT_ROOT

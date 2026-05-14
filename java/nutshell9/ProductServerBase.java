@@ -13,6 +13,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import nutshell9.TextOutput.Format;
+
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.deleteIfExists;
 
@@ -235,9 +237,14 @@ public class ProductServerBase extends Program {
         // Set params (format and verbosity).
         serverLog.set(LOG_SERVER);
 
+        // New: init always as text.
+        /*
         if (!LOG_SERVER_OVERRIDE.isEmpty()){
             serverLog.set(LOG_SERVER_OVERRIDE);
         }
+         * 
+         */
+        serverLog.setFormat(Format.TEXT);
 
         serverLog.note(String.format("This is NutShell (%s) server log", getVersion()));
         serverLog.note("Configuration files: ");
@@ -245,6 +252,10 @@ public class ProductServerBase extends Program {
             serverLog.note(p.toString());
         }
 
+        // NEW
+        if (!LOG_SERVER_OVERRIDE.isEmpty()){
+            serverLog.set(LOG_SERVER_OVERRIDE);
+        }
 
 
         if (CACHE_PATH != null){ // deprecating?

@@ -61,7 +61,7 @@ java/Nutlet%.jar: # META-INF  #build%/classes/nutshell%
 	@echo 'Main-Class: nutshell'${*}'.Nutlet' >  META-INF/MANIFEST.MF
 	@cat META-INF/MANIFEST.MF
 	jar cvfm $@ META-INF/*.* -C build${*}/classes nutshell${*}/
-	@java -cp $@  nutshell${*}.ProductServer --log WARNING  --version
+	java -cp $@  nutshell${*}.ProductServer --log WARNING  --version
 	@rm -v META-INF/MANIFEST.MF
 
 java/NutXXXXlet10.jar: META-INF  ${JAVA_CLASS_DIR}/nutshell

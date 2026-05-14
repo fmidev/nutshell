@@ -14,7 +14,20 @@ source util/utils.sh
 
 # vt100echo green "Main options"
 # ask_variable NUTSHELL_VERSION  "tomcat" "NUTSHELL_VERSION (python|java|tomcat) "
+
+show_variable NUTSHELL_VERSION
+
 CONF_FILE="nutshell-${NUTSHELL_VERSION}-${HOSTNAME}.cnf"
+
+if [ ${NUTSHELL_VERSION} == 'docker-java' ]; then
+    if [ ! -f $CONF_FILE ]; then
+	# "Initialize"
+	cp -v docker/nutshell-java-docker.cnf $CONF_FILE
+	#cp -v nutshell-docker-java.cnf $CONF_FILE
+    fi
+fi
+
+
 show_variable CONF_FILE
 
 if [ -f $CONF_FILE ]; then
