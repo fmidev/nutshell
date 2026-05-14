@@ -142,6 +142,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				
 				String filenameExtension;
 				
+				// logFile is unset, but format can be set...
 				if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
 					filenameExtension = "html";
 				}
