@@ -8,6 +8,9 @@ import sun.misc.Signal;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -149,25 +152,27 @@ public class ShellExec {
 		int exitValue;
 
 		Process process;
+		ExecutorService outputExecutor = Executors.newSingleThreadExecutor();
 		try {
 			// System.err.println(String.format("Starting %s ...", cmd));
 			final File d = (dir==null) ? null : dir.toFile();
 
 			//final Process
 			process = Runtime.getRuntime().exec(cmd, env, d);
+			Future<Integer> outputReader = outputExecutor.submit(() -> ShellUtils.read(process, reader));
 
 			boolean success = process.waitFor(TIMEOUT_SEC, TimeUnit.SECONDS);
 			if (!success) {
 				// timeout - kill the process.
 				// process.destroy(); // consider using destroyForcibly instead
 				process.destroyForcibly();
-				// process.waitFor();
+				process.waitFor();
+				outputReader.get();
 				//throw new InterruptedException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
 				//throw new TimeoutException(String.format("ShellExec timeout (%d s) elapsed", TIMEOUT_SEC));
 				throw new TimeoutException(String.format("ShellExec timeout (%d) elapsed", TIMEOUT_SEC) );
 			}
-			//System.err.println(String.format("reading output, process alive? %b", process.isAlive()));
-			exitValue = ShellUtils.read(process, reader);
+			exitValue = outputReader.get();
 			//System.err.println(String.format("read exitValue=%d, process alive? %b", exitValue, process.isAlive()));
 		}
 		catch (InterruptedException e) {
@@ -223,6 +228,9 @@ public class ShellExec {
 			reader.handleStdErr(String.format("%s %s (unexpected error from ShellExec)", HttpLog.HttpStatus.CONFLICT, e.getLocalizedMessage()));
 			exitValue = +2;
 			//errorLog.println(e.getLocalizedMessage());
+		}
+		finally {
+			outputExecutor.shutdownNow();
 		}
 
 		return exitValue;

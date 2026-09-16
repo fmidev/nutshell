@@ -276,7 +276,7 @@ public class Program {
 
 			public T value;
 
-			final private Class cls;
+			final private Class<?> cls;
 
 			@Override
 			public void setParam(String key, Object value) throws NoSuchFieldException, IllegalAccessException {

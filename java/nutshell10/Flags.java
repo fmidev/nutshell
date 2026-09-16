@@ -95,7 +95,7 @@ public class Flags {
 
         int result = 0;
 
-        Class c = (obj instanceof Class) ? (Class)obj : obj.getClass();
+        Class<?> c = (obj instanceof Class) ? (Class<?>)obj : obj.getClass();
 
         for (String s : flags) {
             // If s contains comma-separated values.
@@ -189,7 +189,7 @@ public class Flags {
      * @param
      */
     static
-    private String[] getFlags(Class c, int value) throws IllegalAccessException{
+    private String[] getFlags(Class<?> c, int value) throws IllegalAccessException{
 
         Set<String> result = new HashSet<>();
 
@@ -269,7 +269,7 @@ public class Flags {
      *
      * @param c
      */
-    public void setAllowedBits(Class c){
+    public void setAllowedBits(Class<?> c){
         int m = 0;
         for (Field field : c.getFields()) {
             if (isIncluded(field)) {

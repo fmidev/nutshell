@@ -1,4 +1,5 @@
 # ![NutShell cover](./img/nutshell-logo-small.png) NutShell
+
 ## Service for generating image and data products
 
 ### Makefile-like concept
@@ -17,6 +18,12 @@ NutShell delegates making the files to independent _product generators_
 ### Interfaces
 
 ## Java version
+
+The package is primarily developed for Tomcat 10, under name `nutshell10`.
+For now, an older version for Tomcat 9 is shipped as well, named `nutshell9`.
+Essentially, the lower version is obtained by converting `jakarta` to `javax` .
+
+# Usage:
 
 * Command line:
 `java -cp Nutlet.jar nutshell.ProductServer --config nutshell/nutshell.cnf --request MAKE --product 201708121600_my.product_SIZE=800x800.png`
@@ -38,3 +45,4 @@ NutShell delegates making the files to independent _product generators_
 ### Documentation
 
 * Online [documentation](https://fmidev.github.io/nutshell/)
+

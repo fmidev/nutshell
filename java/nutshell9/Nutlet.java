@@ -142,6 +142,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				
 				String filenameExtension;
 				
+				// logFile is unset, but format can be set...
 				if (productServer.serverLog.getFormat() == TextOutput.Format.HTML){
 					filenameExtension = "html";
 				}
@@ -250,7 +251,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			// Global (server level) settings
 			if (sharedRegistry.has(key)){
-				Program.Parameter parameter = sharedRegistry.get(key);
+				Program.Parameter parameter = sharedRegistry.get(key); // Fix later
 				System.err.printf(" Still found: %s -> %s  %n", key, parameter);
 
 				if (parameter.hasParams()){

@@ -65,7 +65,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	// static
 	public String getVersion() {
-		return "4.6.2"; 
+		return "4.6.3"; 
 	}
 
 	ProductServer() {
@@ -1847,7 +1847,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 * parameters for an URL.
 		 * 
 		 */
-		registry.add(new Parameter("http_params", "Debugging/testing: compose HTTP GET params.") {
+		registry.add(new Parameter<Object>("http_params", "Debugging/testing: compose HTTP GET params.") {
 
 			@Override
 			public void exec() {
@@ -1863,7 +1863,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						log.warn("Several products defined, using last");
 					}
 
-					for (Map.Entry entry : batch.products.entrySet()) {
+					for (Map.Entry<String, String> entry : batch.products.entrySet()) {
 						try {
 							Task task = server.new Task(entry.getValue().toString(), batch.instructions, log);
 							System.out.println(String.format("instructions=%s&product=%s", batch.instructions,

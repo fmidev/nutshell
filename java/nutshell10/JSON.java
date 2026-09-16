@@ -196,12 +196,12 @@ public class JSON { //extends HashMap<String,JSON> {
         }
         else if (value instanceof Map<?,?>) {
             buffer.append('{');
-            Map<?,?> nodes = (Map) value;
+            Map<?,?> nodes = (Map<?,?>) value;
             if (!nodes.isEmpty()) {
                 //buffer.append('\n');
                 String indentNext = indent+"  "; // getIndent(indent);
                 boolean CONTINUES = false;
-                for (Map.Entry entry : nodes.entrySet()) {
+                for (Map.Entry<?,?> entry : nodes.entrySet()) {
                     if (CONTINUES){
                         buffer.append(',');
                     }
@@ -262,7 +262,7 @@ public class JSON { //extends HashMap<String,JSON> {
     static
     public StringBuffer writeArray(Object value, StringBuffer buffer, String indent) {
 
-        Class cls = value.getClass();
+        Class<?> cls = value.getClass();
         if (cls.getComponentType().isPrimitive()){
             // write(buffer, indent+"  ");
             if (cls.equals(short[].class)){

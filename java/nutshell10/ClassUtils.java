@@ -14,7 +14,7 @@ public class ClassUtils {
      * @param <E>
      * @return - a map of names and values.
      */
-    static public <E> Map<String, E> getConstants(Class c) {
+    static public <E> Map<String, E> getConstants(Class<?> c) {
 
         Map<String, E> map = new HashMap<>();
 
@@ -38,7 +38,7 @@ public class ClassUtils {
         return map;
     }
 
-    static public Set<String> getConstantKeys(Class c) {
+    static public Set<String> getConstantKeys(Class<?> c) {
         return getConstants(c).keySet();
     }
 

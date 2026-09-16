@@ -132,11 +132,12 @@ public class StringMapper extends LinkedList<Object> {
 		return debug();
 	}
 
-	public String toString(Map map){
+	public String toString(Map<?,?> map){
 		StringBuffer buffer = new StringBuffer();
 		for (Object item: this){
 			if (item instanceof StringLet){
-				buffer.append(map.getOrDefault(item.toString(), "")); // .toString()
+				String key = item.toString();
+				buffer.append(map.containsKey(key) ? map.get(key) : ""); // .toString()
 			}
 			else
 				buffer.append(item.toString());

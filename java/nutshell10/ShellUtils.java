@@ -104,85 +104,33 @@ public class ShellUtils {
 	 * @throws InterruptedException 
 	 */
 	static public int read(Process process, ProcessReader reader) throws InterruptedException{
-		
-		// Consider two separate processed, if timing is not issue.
-		InputStream inputStream = process.getInputStream();
-		InputStream errorStream = process.getErrorStream();
+		Thread stdoutReader = new Thread(() -> readStream(process.getInputStream(), reader, true),
+				"nutshell-stdout-reader");
+		Thread stderrReader = new Thread(() -> readStream(process.getErrorStream(), reader, false),
+				"nutshell-stderr-reader");
+		stdoutReader.start();
+		stderrReader.start();
 
-		/*  NOTE
+		process.waitFor();
+		stdoutReader.join();
+		stderrReader.join();
+		return process.exitValue();
 
-			Now this works better – ie input streams do not block – but still cuts some input, at least stderr.
+	}
 
-		 */
-		Log l = new Log();
-		//l.decoration.set(Log.OutputFormat.COLOUR);
-
-		try {
-
-			BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream));
-			BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-
-			String inputLine = "";
-			String errorLine = "";
-
-			// System.out.println(String.format("START read of: ", process.toString()));
-
-			while ((inputLine!=null) || (errorLine!=null)) {
-
-				///if (inputReader.ready()){  EI AUTTANUT!
-				if (inputLine != null) {
-					if ((inputLine = inputReader.readLine()) != null) { // Jumittuu tähän...
-						// Debug
-						// System.out.println(String.format("std[%b]: %s \t...", inputReader.ready(), inputLine));
-						reader.handleStdOut(inputLine); // oma
-					}
-				}
-
-				//if (errorReader.ready()){ EI AUTTANUT!
-				if (errorLine != null) {
-					if ((errorLine = errorReader.readLine()) != null) { // .. tai jumittuu tähän
-						// Debug
-						// System.out.println(String.format("err[%b]: %s \t...", errorReader.ready(), errorLine));
-						reader.handleStdErr(errorLine); // oma
-					}
-				}
-
-				/*
-				if (inputLine == null)
-					l.fail("NULL!");
+	private static void readStream(InputStream stream, ProcessReader reader, boolean stdout){
+		try (BufferedReader input = new BufferedReader(new InputStreamReader(stream))) {
+			String line;
+			while ((line = input.readLine()) != null) {
+				if (stdout)
+					reader.handleStdOut(line);
 				else
-					l.success(inputLine);
-
-				if (!inputReader.ready())
-					l.fail("Not Ready");
-
-
-				if (errorLine == null)
-					l.warn("NULL!");
-				else
-					l.ok(errorLine);
-
-				if (!errorReader.ready())
-					l.warn("Not Ready");
-				*/
+					reader.handleStdErr(line);
 			}
-			inputReader.close();
-			errorReader.close();
-			//l.experimental("Loppui");
-
 		}
 		catch (IOException e) {
-			// l.fatal("Reijo Kämänen");
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			reader.handleStdErr(String.format("Shell output read failed: %s", e.getLocalizedMessage()));
 		}
-		
-		
-		//check child.waitFor();
-		process.waitFor();
-		
-		return process.exitValue();
-		
 	}
 	
 	

@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -78,7 +79,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 	final ProductServer productServer;
 
 	static
-	final public Map<Integer, Tasklet> taskMap = new HashMap<>();
+	final public Map<Integer, Tasklet> taskMap = new ConcurrentHashMap<>();
 
 	/**
 	 * param arg Input
@@ -251,7 +252,7 @@ public class Nutlet extends NutWeb { //HttpServlet {
 
 			// Global (server level) settings
 			if (sharedRegistry.has(key)){
-				Program.Parameter parameter = sharedRegistry.get(key);
+				Program.Parameter parameter = sharedRegistry.get(key); // Fix later
 				System.err.printf(" Still found: %s -> %s  %n", key, parameter);
 
 				if (parameter.hasParams()){
