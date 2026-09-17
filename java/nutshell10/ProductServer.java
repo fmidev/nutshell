@@ -41,7 +41,8 @@ import java.util.concurrent.TimeoutException;
  * meteorological products may have several timestamps, like computing time and
  * valid time.
  *
- * Some version history 
+ * Some version history
+ * 4.6.4 File lock, not only empty file. 
  * 4.6.1 Manip map reassign, dir perms visualised
  * 4.6 Explicit directory permission tests
  * 4.5 Revised path bundle
@@ -65,7 +66,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	// static
 	public String getVersion() {
-		return "4.6.3"; 
+		return "4.6.4"; 
 	}
 
 	ProductServer() {
@@ -732,16 +733,22 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				log.resetState(); // Forget old sins
 
 				// Debugging
-				Path p = null;
+				Path p = productPath.getAbsolutePath(); // p = null;
 
+				final Path lockPath = getLockFile(p).toPath();
+				
 				// Mark this task being processed (empty file)
 				try {
 					FileUtils.ensureWritableDir(p = productPathTmp.getAbsoluteDir(), GROUP_ID, dirPerms);
 					log.info(String.format("Created tmp dir: %s", productPathTmp.getAbsoluteDir()));
 					FileUtils.ensureWritableDir(p = productPath.getAbsoluteDir(), GROUP_ID, dirPerms);
 					log.info(String.format("Created dir: %s", productPath.getAbsoluteDir()));
-					FileUtils.ensureWritableFile(p = productPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
+					
+					FileUtils.ensureWritableFile(productPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
 					log.debug(String.format("Created empty file: %s", productPath.getAbsolutePath()));
+					// File lockFile = getLockFile(p); // abs path
+					FileUtils.ensureWritableFile(lockPath, GROUP_ID, filePerms, dirPerms);
+					log.debug(String.format("Created LOCK  file: %s", lockPath));
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
 					e.printStackTrace(log.getPrintStream());
@@ -861,13 +868,28 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							pserver.move(productPathTmp.getAbsolutePath(), productPath.getAbsolutePath(), log);
 							log.success(productPath.getAbsolutePath().toString());
 							// this.copy(productPaths.getAbsolutePath()Tmp, productPaths.getAbsolutePath());
-						} catch (IOException e) {
+						} 
+						catch (IOException e) {
 							log.warn(e.toString());
 							// log.warn(String.format("filePerms: %s", filePerms));
 							log.log(HttpLog.HttpStatus.FORBIDDEN,
 									String.format("Failed in moving tmp file: %s", productPathTmp.getAbsolutePath()));
 							// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
 						}
+						
+						try {
+							// 
+							// File lockFile = getLockFile(p);
+							pserver.delete(lockPath, log);
+						}
+						catch (IOException e) {
+							log.warn(e.toString());
+							// log.warn(String.format("filePerms: %s", filePerms));
+							log.log(HttpLog.HttpStatus.FORBIDDEN,
+									String.format("Failed in deleting LOCK file: %s", lockPath));
+							// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
+						}
+							
 
 						if (!Files.isSymbolicLink(productPath.getAbsolutePath())) {
 							try {
@@ -1525,8 +1547,19 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		return tasks;
 	}
 
+	/*
+	public File getLockFile(File file) {
+		// File lockFile = new File(file.getParent(), file.getName()+".lock");
+		return lockFile;
+	}
+	*/
+
+	public File getLockFile(Path p) {
+		return p.getParent().resolve(p.getFileName().toString()+".lock").toFile();
+	}
+
 	/// Checks if a file exists in cache or storage, wait for completion if needed.
-	/// Delete if outdated.
+	/// Delete if out dated.
 	/**
 	 *
 	 * return immediately if non-empty or nonexistent, else wait for an empty file
@@ -1535,37 +1568,50 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	 * @param file
 	 * @param maxEmptySec maximum age of empty file in seconds
 	 * @param log         - stream to write success of the process
-	 * @return - consider -1 not exists, 0 = exists cold, 1.. hot waited for seconds
+	 * @return seconds remaining till timeout (consider -1 not exists, 0 = exists cold, 1.. hot waited for seconds)
 	 * @throws InterruptedException
 	 */
 	public int queryFile(File file, int maxEmptySec, HttpLog log) throws InterruptedException {
 
-		if (!file.exists()) {
+		final File lockFile = getLockFile(file.toPath());
+		
+		if (lockFile.exists()) {
+			// The product is being computed.
+			log.log(HttpLog.HttpStatus.CONTINUE, String.format("File does not exist, but a lock file detected: %s", lockFile));
+		}
+		else if (!file.exists()) {
 			log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("File does not exist: %s", file));
 			return -1;
 		}
 
 		int remainingSec = this.TIMEOUT;
 
-		final long fileLength = file.length();
+		final long fileLength = file.length(); // 0L, if file does not exist.
 
 		if (fileLength > 0) {
-			// log.note("File found");
+			if (lockFile.exists()) {
+				log.warn(String.format("A lock file detected: %s", lockFile));
+			}
 			log.log(HttpLog.HttpStatus.OK, String.format("File found: %s (%d bytes)", file.getName(), fileLength));
 			return 0;
-		} else { // empty file
-					// long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) /
-					// 1000;
-			long ageSec = FileUtils.fileModificationAge(file);
+		} 
+		else { 
+			// empty file
+			// long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
+			
+			long ageSec = file.exists() ? FileUtils.fileModificationAge(file) : FileUtils.fileModificationAge(lockFile);
+			
+			
 			if (ageSec > maxEmptySec) {
 				log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Time %d", java.lang.System.currentTimeMillis()));
 				log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("File %d", file.lastModified()));
 				log.log(HttpLog.HttpStatus.NOT_MODIFIED,
-						String.format("Outdated empty file, age=%d min, (max %d s)", (ageSec / 60), maxEmptySec));
-			} else {
-				log.log(HttpLog.HttpStatus.SEE_OTHER, "Empty fresh file exists, waiting for it to complete...");
+						String.format("Outdated empty file or lock file, age=%d min, (max %d s)", (ageSec / 60), maxEmptySec));
+			} 
+			else {
+				log.log(HttpLog.HttpStatus.SEE_OTHER, "Empty new file exists, waiting for it to complete...");
 				for (int i = 1; i < 10; i++) {
-					// int waitSec = i*i; 1, 4, 9, 16, 25, // 1 5 13 29 54
+
 					int waitSec = 2 << (i - 1);// 1, 2, 4, 16, 32, // 1 3 7 31 63
 					// log.warn(String.format("Waiting for %d s...", waitSec));
 					log.log(HttpLog.HttpStatus.CONTINUE, String.format("Waiting for %d s...", waitSec));
@@ -1582,15 +1628,33 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 						String.format("Timeout - file did not appear (grow) in %d s", maxEmptySec));
 			}
 
-			try {
-				log.note("Deleting file");
-				delete(file.toPath(), log);
-				// this.delete(productPaths.getAbsolutePath());
-			} catch (IOException e) {
-				// TODO: redesign (check if delete needed at all)
-				log.log(HttpLog.HttpStatus.CONFLICT,
-						String.format("Failed in deleting file: %s, %s", file.toPath(), e.getMessage()));
+			if (file.exists()) {
+				try {
+					// log.note("Deleting file");
+					log.note(String.format("Deleting file: %s", lockFile));
+					delete(file.toPath(), log);					
+					// this.delete(productPaths.getAbsolutePath());
+				} 
+				catch (IOException e) {
+					// TODO: redesign (check if delete needed at all)
+					log.log(HttpLog.HttpStatus.CONFLICT,
+							String.format("Failed in deleting file(s): %s, %s", file.toPath(), e.getMessage()));
+				}
 			}
+			
+
+			if (lockFile.exists()) {
+				try {
+					log.note(String.format("Deleting lock file: %s", lockFile));
+					delete(lockFile.toPath(), log);
+				} 
+				catch (IOException e) {
+					// TODO: redesign (check if delete needed at all)
+					log.log(HttpLog.HttpStatus.CONFLICT,
+							String.format("Failed in deleting file(s): %s, %s", file.toPath(), e.getMessage()));
+				}
+			}
+			
 
 			return -1;
 		}
