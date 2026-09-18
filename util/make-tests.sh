@@ -27,10 +27,11 @@ Most tests involve both command line and http queries.
 
 EOF
 
-#CONF_FILE=${1:-"nutshell-tomcat-$USER@$HOSTNAME.cnf"}
-CONF_FILE=${1:-"nutshell-tomcat-$HOSTNAME.cnf"}
+# CONF_FILE=${1:-"nutshell-tomcat-$USER@$HOSTNAME.cnf"}
+# nutshell-tomcat10-peurm23lk.cnf
+CONF_FILE=${1:-"nutshell-tomcat10-$HOSTNAME.cnf"}
 if [ -f $CONF_FILE ]; then
-    echo "Reading conf file"
+    echo "Reading conf file $CONF_FILE"
     export CACHE_ROOT
     source $CONF_FILE
 else
@@ -46,7 +47,7 @@ fi
 
 HTTP_GET='wget --proxy=off --spider'
 #NUTSHELL_SERVER=${NUTSHELL_SERVER='http://localhost:8080'}
-NUTSHELL_SERVER=${NUTSHELL_SERVER:-$HTTP_HOST${HTTP_PORT+":$HTTP_PORT"}}
+NUTSHELL_SERVER=${NUTSHELL_SERVER:-"$HTTP_HOST${HTTP_PORT+":$HTTP_PORT"}"}
 echo "NUTSHELL_SERVER=${NUTSHELL_SERVER}"
 
 # NUTSHELL_URL='http://localhost:8080/nutshell/NutShell'
@@ -145,6 +146,10 @@ function run_java(){
     run_cmdline java $*
 }
 
+function run_tomcat10(){
+    run_cmdline tomcat10 $*
+}
+
 function run_python(){
     run_cmdline python $*
 }
@@ -166,7 +171,12 @@ function run_cmdline(){
     cmd="NUTSHELL_VERSION='$nutshell_version' $cmd"
     echo "$cmd" > $LOG.cmd
     eval "$cmd"  &> $LOG
-    
+    result=$?
+    if [ $result != 0 ]; then
+	echo -e "# failed: $cmd"
+	echo -e "# see:    $LOG"
+    fi
+    return $result
 }
 
 function run_http(){
@@ -175,8 +185,14 @@ function run_http(){
     # global, yes!
     LOG=`printf 'log/nutshell-%02d-http.log' $counter `
 
+    if [ "$NUTSHELL_SERVER" == '' ]; then
+	echo "NUTSHELL_SERVER unset"
+	return 1
+    fi
+    
     #echo_warn params...
-    local params=`NUTSHELL_VERSION=java nutshell --log WARNING $* --http_params 2> /dev/null`
+    #local params=`NUTSHELL_VERSION=java nutshell --log WARNING $* --http_params 2> /dev/null`
+    local params=`nutshell --log WARNING $* --http_params 2> /dev/null`
     #echo_warn ...end
     echo "# Params: $params"
     local cmd="${HTTP_GET} -o $LOG '${NUTSHELL_URL}?${params}'"
@@ -196,7 +212,8 @@ function run_http(){
 
 function parse(){
     local FILE=$1
-    NUTSHELL_VERSION=java nutshell --parse $FILE &> /dev/null  > nutshell.inf 
+    #NUTSHELL_VERSION=java
+    nutshell --parse $FILE &> /dev/null  > nutshell.inf 
     export PRODUCT_ID TIMESTAMP='' YEAR='' MONTH='' DAY=''
     source nutshell.inf
     OUTDIR=$CACHE_ROOT/$YEAR/$MONTH/$DAY/${PRODUCT_ID//.//}
@@ -292,10 +309,11 @@ for i in ${LOOP//,/ } ; do
     cmd=run_$i
     
     secho title3 "Help command"
+    # echo $cmd
     $cmd --help 
     check 0 
     
-    secho title3 "Unknown command"
+    secho title3 "Trying unknown command"
     $cmd --foo
     check 1 
     
@@ -375,6 +393,7 @@ for i in ${LOOP//,/ } ; do
 
     $cmd --generate $FILE
     check 0 ! -f $OUTDIR/$FILE
+    check 0   -f $OUTDIR/demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png
 
     #secho title3 "Product error messages"
     set_file demo.image.pattern_HEIGHT=200_PATTERN=OCTAGONS_WIDTH=300.png

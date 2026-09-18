@@ -63,6 +63,11 @@ class ProductInfo extends ProductParameters {
 	private final Map<String,String> directives = new HashMap<>();
 
 	public Map<String, String> getDirectives() {
+		/// Check that directives contain no dangerous keys, like PATH, etc.
+		for (String key: directives.keySet()){
+			ProductParameters.checkVariable(key);
+		}
+
 		return directives;
 	}
 
@@ -172,35 +177,32 @@ class ProductInfo extends ProductParameters {
 
 			//BASENAME = m.group(1);
 
-			TIMESTAMP = m.group(2) == null ? "" : m.group(2);
+			TIMESTAMP  = m.group(2) == null ? "" : m.group(2);
 
 			TIMESTAMP2 = m.group(4) == null ? "" : m.group(4);
 
 			time  = getTime(TIMESTAMP);
 			time2 = getTime(TIMESTAMP2);
 
-			// INPUT_TIMESTAMP = null;
-
-
-			//PRODUCT_ID = m.group(3).replace('-', '.');
 			PRODUCT_ID = m.group(5).replace('-', '.');
-			Map<String, Object> paramLink = INPUT_PARAMETERS;
-			//String param = m.group(5);
+			
 			String param = m.group(7);
-			// int index=0; // ordered params?
-
+			
 			if (param != null){
-			String p[] = param.split("_");
+				Map<String, Object> paramGroup = INPUT_PARAMETERS;
+				final String p[] = param.split("_");
 				for (int i = 0; i < p.length; i++) {
 					String entry[] = p[i].split("=", 2);
 					if (entry.length == 2) /// Specific parameters
-						paramLink.put(entry[0], entry[1]);
+						paramGroup.put(entry[0], entry[1]);
 					else if (entry[0].isEmpty()) {
-						paramLink = PARAMETERS;
+						// If a double underscore is found, the remaining parameters are stored in PARAMETERS 
+						// Future option: a stack of parameters (instead of current two-level: 0:INPUT_PARAMETERS, 1:PARAMETERS) 
+						paramGroup = PARAMETERS; //?
 						//System.out.println(" entry=" + p[0]);
 					} else {
 						/// Ordered parameters
-						paramLink.put("P" + i, entry[0]);
+						paramGroup.put("P" + i, entry[0]);
 					}
 				}
 			}

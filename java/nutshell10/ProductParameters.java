@@ -111,6 +111,11 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
     final TreeMap<String,Object> PARAMETERS = PARAMETER_CONTAINER.append();
 
     /// Product-specific parameters that are also forwarded to (automated) input product request
+    /**
+     *  In the future, this may be multiple (array of parameter maps).
+     *
+     * @see #PARAMETERS
+     */
     final TreeMap<String,Object> INPUT_PARAMETERS = PARAMETER_CONTAINER.append();
 
     // unused
@@ -181,9 +186,23 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
            return getTime(timestamp, getTimeResolution(timestamp));
     }
 
-        /** Product parameters as a map.
-         *
-         */
+    static
+    protected 
+    String reservedVariables[] = new String[]{"PATH", "JAVA_HOME", "CLASSPATH", "LD_LIBRARY_PATH"};
+
+    static 
+    protected
+    void checkVariable(String key) throws RuntimeException {
+        for (String reserved: reservedVariables){
+            if (key.equals(reserved)){
+                throw new RuntimeException(String.format("%s is a reserved system variable", key));
+            }
+        }
+    }
+
+    /** Product parameters as a map.
+     *
+     */
     public Map<String,Object> getParamEnv(Map<String,Object> map) {
 
         if (map == null)
@@ -192,14 +211,18 @@ public class ProductParameters { // consider derived classes, like DynamicProduc
         /// STANDARD PARAMETERS (YEAR, MONTH,...)
         Field[] fields = getClass().getFields();
         for (Field field : fields) {
+            
             try {
                 String key = field.getName();
                 if (key.toUpperCase().equals(key)){
+                    //checkVariable(key);
                     map.put(key,field.get(this));
                 }
-            } catch (Exception e) {
+            } 
+            catch (IllegalAccessException e) {
                 //System.err.println("Koe " + e.getMessage());
-            }
+            } 
+            
         }
 
         /// Product specific parameters

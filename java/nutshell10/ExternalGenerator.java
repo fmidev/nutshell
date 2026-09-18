@@ -75,12 +75,10 @@ public class ExternalGenerator extends ShellExec implements ProductServer.Genera
 	@Override
 	public void generate(ProductServer.Task task) throws IndexedState {
 
-		// System.err.println("STOPPED... " + this.getClass().getSimpleName());
-		// System.exit(-2);
-
 		task.log.textOutput.startVerbatim(task.log.buffer);  // ugly'
 		task.log.debug(String.format("cd %s; %s %s", dir, String.join(" ", MapUtils.getEntries(task.getParamEnv())), cmd.getName()));
-		task.log.warn("Generating file with generateFile");
+		task.log.debug("Generating product with generateFile()");
+		task.log.note(String.format("Invoking: %s", this.cmd));
 		generateFile(MapUtils.toArray(task.getParamEnv()), task.log.getPrintStream());
 		task.log.textOutput.endVerbatim(task.log.buffer);  // ugly
 	}

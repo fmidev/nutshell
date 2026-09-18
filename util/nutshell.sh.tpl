@@ -13,6 +13,9 @@ NUTSHELL=${NUTSHELL_VERSION:-$NUTSHELL_VERSION}
 # NUTSHELL_CONF=${NUTSHELL_CONF:-''}
 # GROUP_ID=$GROUP_ID
 
+# Java/Tomcat version number (delete letters)
+VERSION=${NUTSHELL//[a-z]/}
+
 case $NUTSHELL in
     python)
 	export PYTHONPATH=$PYTHONPATH:$NUTSHELL_ROOT
@@ -22,11 +25,11 @@ case $NUTSHELL in
 	;;
     java|docker-java)
 	# Modify this to use a JAR file separate from Tomcat
-	NUTSHELL_JAR=${NUTSHELL_JAR:-$NUTSHELL_JAR_DIR/Nutlet.jar}
+	NUTSHELL_JAR=${NUTSHELL_JAR:-"$NUTSHELL_JAR_DIR/Nutlet${VERSION}.jar"}
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell.ProductServer"
 	;;
     tomcat*)
-	VERSION=${NUTSHELL/tomcat/}
+	#VERSION=${NUTSHELL/tomcat/}
 	NUTSHELL_JAR=${NUTSHELL_JAR:-"$HTML_ROOT/WEB-INF/lib/Nutlet${VERSION}.jar"}
 	NUTSHELL="java -cp $NUTSHELL_JAR nutshell${VERSION}.ProductServer"
 	;;

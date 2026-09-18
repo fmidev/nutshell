@@ -62,19 +62,16 @@ install-nutweb:
 	util/install-nutweb.sh
 
 
-#install-%:
-#	util/install.sh $*
-
-#configure-%:
-#	util/configure.sh $*
-
-
+# LOOP='java,python,http'
 tests-java:
 	LOOP=java util/make-tests.sh
 
+tests-tomcat10:
+	LOOP=tomcat10 util/make-tests.sh
+
 .PHONY: help compile-java10 compile-java9 clean-java
 
-NutSo%.jar:
+Test-%.jar:
 	echo $? ${*} $*
 	echo $@
 	echo $%

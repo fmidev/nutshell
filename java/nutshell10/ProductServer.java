@@ -42,6 +42,7 @@ import java.util.concurrent.TimeoutException;
  * valid time.
  *
  * Some version history
+ * 4.6.5 File lock (empty file policy removed). 
  * 4.6.4 File lock, not only empty file. 
  * 4.6.1 Manip map reassign, dir perms visualised
  * 4.6 Explicit directory permission tests
@@ -66,7 +67,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 	// static
 	public String getVersion() {
-		return "4.6.4"; 
+		return "4.6.5";
 	}
 
 	ProductServer() {
@@ -335,6 +336,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		final public PathEntry generatorPath; // conditional (not used for Java Classes?)
 		final public PathEntry productPath;
 		final public PathEntry productPathTmp;
+		final public Path lockPath;
 		final public PathEntry logPath;
 		final public PathEntry storagePath;
 
@@ -347,6 +349,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 		// TODO rename inputTasks
 		public final Map<String, Task> inputTasks = new HashMap<>();
+
+		private boolean lockOwned;
 
 		// Consider get node
 
@@ -399,12 +403,13 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			generatorPath  = getGeneratorEntry(info);
 			productPath    = getLongEntry(info);
 			productPathTmp = getTmpEntry(productPath);
+			lockPath       = getLockFile(productPath.getAbsolutePath().toAbsolutePath()).toPath();
 			logPath     = getLogEntry(productPath, log.textOutput.getFormat());
 			graphPath   = getGraphEntry(productPath); // NOTE: filename still same
 			storagePath = getStorageEntry(info);
 			
-			Path test = CACHE_ROOT.resolve(String.format("nutshell-test-%d", counter)).resolve("a").resolve("b").resolve("file.foo");
-			FileUtils.ensureWritableFile(test, GROUP_ID, filePerms, dirPerms);
+			// Path test = CACHE_ROOT.resolve(String.format("nutshell-test-%d", counter)).resolve("a").resolve("b").resolve("file.foo");
+			// FileUtils.ensureWritableFile(test, GROUP_ID, filePerms, dirPerms);
 			
 			try {
 				FileUtils.ensureWritableFile(logPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
@@ -526,6 +531,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 */
 		private void handleInterrupt(Signal signal) {
 			log.warn("Interrupted (by Ctrl+C?) : " + this.toString());
+			removeLockFile();
 			// System.out.println("Interrupted by Ctrl+C: " +
 			// this.outputPath.getFileName());
 			if (instructions.involves(MediaType.FILE)) {
@@ -545,6 +551,17 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 */
 		public Object result;
 
+		private void removeLockFile() {
+			if (!lockOwned)
+				return;
+			try {
+				Files.deleteIfExists(lockPath);
+				lockOwned = false;
+			} catch (IOException e) {
+				log.warn(String.format("Failed in deleting LOCK file: %s (%s)", lockPath, e.getMessage()));
+			}
+		}
+
 		/**
 		 * Execute this task on a single product: delete, load, generate a product, for
 		 * example.
@@ -563,6 +580,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			long startTime = java.lang.System.currentTimeMillis();
 
 			Generator generator = null;
+
+			try {
 
 			log.log(HttpLog.HttpStatus.OK, String.format("Preparing %s", this));
 
@@ -733,28 +752,31 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				log.resetState(); // Forget old sins
 
 				// Debugging
-				Path p = productPath.getAbsolutePath(); // p = null;
+				Path p = productPath.getAbsolutePath();
 
 				final Path lockPath = getLockFile(p).toPath();
-				
-				// Mark this task being processed (empty file)
+
+				// The old empty-product marker is disabled. The lock file is the
+				// sole marker for work in progress.
 				try {
 					FileUtils.ensureWritableDir(p = productPathTmp.getAbsoluteDir(), GROUP_ID, dirPerms);
 					log.info(String.format("Created tmp dir: %s", productPathTmp.getAbsoluteDir()));
 					FileUtils.ensureWritableDir(p = productPath.getAbsoluteDir(), GROUP_ID, dirPerms);
 					log.info(String.format("Created dir: %s", productPath.getAbsoluteDir()));
-					
-					FileUtils.ensureWritableFile(productPath.getAbsolutePath(), GROUP_ID, filePerms, dirPerms);
-					log.debug(String.format("Created empty file: %s", productPath.getAbsolutePath()));
-					// File lockFile = getLockFile(p); // abs path
+					Files.createFile(lockPath);
+					lockOwned = true;
 					FileUtils.ensureWritableFile(lockPath, GROUP_ID, filePerms, dirPerms);
-					log.debug(String.format("Created LOCK  file: %s", lockPath));
+					log.debug(String.format("Created LOCK file: %s", lockPath));
+				} catch (FileAlreadyExistsException e) {
+					log.log(HttpLog.HttpStatus.CONFLICT,
+							String.format("Product is already being generated: %s", lockPath));
+					return;
 				} catch (IOException e) {
 					log.log(HttpLog.HttpStatus.CONFLICT, e.toString());
 					e.printStackTrace(log.getPrintStream());
 					log.log(HttpLog.HttpStatus.INTERNAL_SERVER_ERROR,
 							String.format("Failed in creating:: %s, %s", p, e.getMessage()));
-					// return;
+					return;
 				}
 
 				log.debug("Ok, generate...");
@@ -868,28 +890,13 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 							pserver.move(productPathTmp.getAbsolutePath(), productPath.getAbsolutePath(), log);
 							log.success(productPath.getAbsolutePath().toString());
 							// this.copy(productPaths.getAbsolutePath()Tmp, productPaths.getAbsolutePath());
-						} 
-						catch (IOException e) {
+						} catch (IOException e) {
 							log.warn(e.toString());
 							// log.warn(String.format("filePerms: %s", filePerms));
 							log.log(HttpLog.HttpStatus.FORBIDDEN,
 									String.format("Failed in moving tmp file: %s", productPathTmp.getAbsolutePath()));
 							// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
 						}
-						
-						try {
-							// 
-							// File lockFile = getLockFile(p);
-							pserver.delete(lockPath, log);
-						}
-						catch (IOException e) {
-							log.warn(e.toString());
-							// log.warn(String.format("filePerms: %s", filePerms));
-							log.log(HttpLog.HttpStatus.FORBIDDEN,
-									String.format("Failed in deleting LOCK file: %s", lockPath));
-							// log.error(String.format("Failed in moving tmp file: %s", productPaths.getAbsolutePath()));
-						}
-							
 
 						if (!Files.isSymbolicLink(productPath.getAbsolutePath())) {
 							try {
@@ -1169,6 +1176,9 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 
 			// }
 
+			} finally {
+				removeLockFile();
+			}
 		}
 
 		/**
@@ -1178,20 +1188,18 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		 */
 		public Map<String, Object> getParamEnv() {
 
-			// BASE
 			Map<String, Object> env = new TreeMap<String, Object>();
-			// OLD this.info.getParamEnv(env); (see INPUT_PREFIX_BELOW)
 
 			// EXTENDED this could be in ServerBase? or bundle
-			if (this.info.TIMESTAMP != null) {
+			if ((this.info.TIMESTAMP != null) && (this.info.TIMESTAMP != "LATEST")) {
 				switch (this.info.TIMESTAMP.length()) {
 				case 12:
 					env.put("MINUTE", this.info.TIMESTAMP.substring(10, 12));
-				case 10: // future option
+				case 10:
 					env.put("HOUR", this.info.TIMESTAMP.substring(8, 10));
-				case 8: // future option
+				case 8:
 					env.put("DAY", this.info.TIMESTAMP.substring(6, 8));
-				case 6: // future option
+				case 6:
 					env.put("MONTH", this.info.TIMESTAMP.substring(4, 6));
 					env.put("YEAR", this.info.TIMESTAMP.substring(0, 4));
 					break;
@@ -1547,19 +1555,12 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 		return tasks;
 	}
 
-	/*
-	public File getLockFile(File file) {
-		// File lockFile = new File(file.getParent(), file.getName()+".lock");
-		return lockFile;
-	}
-	*/
-
 	public File getLockFile(Path p) {
-		return p.getParent().resolve(p.getFileName().toString()+".lock").toFile();
+		return p.getParent().resolve(p.getFileName().toString() + ".lock").toFile();
 	}
 
 	/// Checks if a file exists in cache or storage, wait for completion if needed.
-	/// Delete if out dated.
+	/// Delete if outdated.
 	/**
 	 *
 	 * return immediately if non-empty or nonexistent, else wait for an empty file
@@ -1568,25 +1569,22 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 	 * @param file
 	 * @param maxEmptySec maximum age of empty file in seconds
 	 * @param log         - stream to write success of the process
-	 * @return seconds remaining till timeout (consider -1 not exists, 0 = exists cold, 1.. hot waited for seconds)
+	 * @return - consider -1 not exists, 0 = exists cold, 1.. hot waited for seconds
 	 * @throws InterruptedException
 	 */
 	public int queryFile(File file, int maxEmptySec, HttpLog log) throws InterruptedException {
 
 		final File lockFile = getLockFile(file.toPath());
-		
+
 		if (lockFile.exists()) {
-			// The product is being computed.
-			log.log(HttpLog.HttpStatus.CONTINUE, String.format("File does not exist, but a lock file detected: %s", lockFile));
-		}
-		else if (!file.exists()) {
+			log.log(HttpLog.HttpStatus.CONTINUE,
+					String.format("File does not exist, but a lock file detected: %s", lockFile));
+		} else if (!file.exists()) {
 			log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("File does not exist: %s", file));
 			return -1;
 		}
 
-		int remainingSec = this.TIMEOUT;
-
-		final long fileLength = file.length(); // 0L, if file does not exist.
+		final long fileLength = file.length();
 
 		if (fileLength > 0) {
 			if (lockFile.exists()) {
@@ -1594,70 +1592,52 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			}
 			log.log(HttpLog.HttpStatus.OK, String.format("File found: %s (%d bytes)", file.getName(), fileLength));
 			return 0;
-		} 
-		else { 
-			// empty file
-			// long ageSec = (java.lang.System.currentTimeMillis() - file.lastModified()) / 1000;
-			
-			long ageSec = file.exists() ? FileUtils.fileModificationAge(file) : FileUtils.fileModificationAge(lockFile);
-			
-			
-			if (ageSec > maxEmptySec) {
-				log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Time %d", java.lang.System.currentTimeMillis()));
-				log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("File %d", file.lastModified()));
-				log.log(HttpLog.HttpStatus.NOT_MODIFIED,
-						String.format("Outdated empty file or lock file, age=%d min, (max %d s)", (ageSec / 60), maxEmptySec));
-			} 
-			else {
-				log.log(HttpLog.HttpStatus.SEE_OTHER, "Empty new file exists, waiting for it to complete...");
-				for (int i = 1; i < 10; i++) {
+		}
 
-					int waitSec = 2 << (i - 1);// 1, 2, 4, 16, 32, // 1 3 7 31 63
-					// log.warn(String.format("Waiting for %d s...", waitSec));
-					log.log(HttpLog.HttpStatus.CONTINUE, String.format("Waiting for %d s...", waitSec));
-					TimeUnit.SECONDS.sleep(waitSec);
-					if (file.length() > 0) {
-						log.log(HttpLog.HttpStatus.CREATED, "File appeared");
-						return (this.TIMEOUT - remainingSec);
-					}
-					remainingSec = remainingSec - waitSec;
-					if (remainingSec <= 0)
-						break;
-				}
-				log.log(HttpLog.HttpStatus.NOT_MODIFIED,
-						String.format("Timeout - file did not appear (grow) in %d s", maxEmptySec));
+		if (!lockFile.exists()) {
+			// Empty product files are no longer computation markers. Remove a
+			// leftover marker from the old policy before retrying generation.
+			log.log(HttpLog.HttpStatus.SEE_OTHER, String.format("Empty product file ignored: %s", file));
+			try {
+				Files.deleteIfExists(file.toPath());
+			} catch (IOException e) {
+				log.warn(String.format("Failed in deleting legacy empty product file: %s", e.getMessage()));
 			}
-
-			if (file.exists()) {
-				try {
-					// log.note("Deleting file");
-					log.note(String.format("Deleting file: %s", lockFile));
-					delete(file.toPath(), log);					
-					// this.delete(productPaths.getAbsolutePath());
-				} 
-				catch (IOException e) {
-					// TODO: redesign (check if delete needed at all)
-					log.log(HttpLog.HttpStatus.CONFLICT,
-							String.format("Failed in deleting file(s): %s, %s", file.toPath(), e.getMessage()));
-				}
-			}
-			
-
-			if (lockFile.exists()) {
-				try {
-					log.note(String.format("Deleting lock file: %s", lockFile));
-					delete(lockFile.toPath(), log);
-				} 
-				catch (IOException e) {
-					// TODO: redesign (check if delete needed at all)
-					log.log(HttpLog.HttpStatus.CONFLICT,
-							String.format("Failed in deleting file(s): %s, %s", file.toPath(), e.getMessage()));
-				}
-			}
-			
-
 			return -1;
 		}
+
+		final long ageSec = FileUtils.fileModificationAge(lockFile);
+		if (ageSec > maxEmptySec) {
+			log.log(HttpLog.HttpStatus.NOT_MODIFIED,
+					String.format("Outdated lock file, age=%d min, (max %d s)", ageSec / 60, maxEmptySec));
+			try {
+				Files.deleteIfExists(lockFile.toPath());
+			} catch (IOException e) {
+				log.warn(String.format("Failed in deleting stale lock file: %s", e.getMessage()));
+			}
+			return -1;
+		}
+
+		log.log(HttpLog.HttpStatus.SEE_OTHER, "Lock file exists, waiting for generation to complete...");
+		int waitedSec = 0;
+		for (int i = 1; i < 10; i++) {
+			int waitSec = 2 << (i - 1);
+			log.log(HttpLog.HttpStatus.CONTINUE, String.format("Waiting for %d s...", waitSec));
+			TimeUnit.SECONDS.sleep(waitSec);
+			waitedSec += waitSec;
+			if (file.length() > 0) {
+				log.log(HttpLog.HttpStatus.CREATED, "File appeared");
+				return waitedSec;
+			}
+			if (!lockFile.exists()) {
+				log.log(HttpLog.HttpStatus.NOT_MODIFIED, "Generation ended without a product");
+				return -1;
+			}
+		}
+
+		log.log(HttpLog.HttpStatus.NOT_MODIFIED,
+				String.format("Timeout - lock file remains after %d s", maxEmptySec));
+		return -1;
 	}
 
 	/// System side setting.
@@ -1819,8 +1799,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 			@Override
 			public void exec() {
 				try {
-					Task product = // server.
-							new Task(filename, new Instructions(), serverLog);
+					Task product = new Task(filename, new Instructions(), serverLog);
 					Map<String, Object> map = product.getParamEnv();
 					String[] array = MapUtils.toArray(map);
 					for (String s : array) {
@@ -1982,7 +1961,8 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				});
 
 		/// Command line only
-		
+
+		/*
 		registry.add(new Parameter("clear_cache", // .Simple<String>
 				"Clear cache (and exit.)" // reconsider exit
 		) {
@@ -1998,6 +1978,7 @@ public class ProductServer extends ProductServerBase { // extends Cache {
 				}
 			}
 		});
+		*/
 		
 
 		registry.add(new Parameter.Simple<String>("catalog", 

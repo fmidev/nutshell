@@ -189,7 +189,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 		// Here, for future extension dependent on ServletConfig config
 		sharedRegistry = new ProgramRegistry();
 		
-		// Dangerous?
+		/* 
+		// Dangerous
 		sharedRegistry.add(new Parameter("clear_cache", // .Simple<String>
 				"Clear cache (and exit.)" // reconsider exit
 		) {
@@ -200,12 +201,14 @@ public class Nutlet extends NutWeb { //HttpServlet {
 				try {
 					productServer.clearCache(false);
 					//System.exit(0); // NO EXIT for tomcat...
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					productServer.serverLog.log(HttpLog.HttpStatus.CONFLICT, "Clearing cache failed");
 					// System.exit(4);
 				}
 			}
 		});
+		*/
 
 
 		// These general commands not needed, or even allowed!
@@ -605,7 +608,8 @@ public class Nutlet extends NutWeb { //HttpServlet {
 						task.close();
 						return;
 						 */
-					} catch (Exception e) {
+					} 
+					catch (Exception e) {
 						task.log.warn("sendToStream failed for " + task);
 						task.log.warn("exception " + e.getMessage());
 						productServer.serverLog.warn("sendToStream failed for " + task);
